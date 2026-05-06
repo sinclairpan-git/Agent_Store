@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 
-const root = path.dirname(url.fileURLToPath(import.meta.url));
+export const root = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)));
 const port = Number(process.env.PORT || 4173);
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -12,22 +12,38 @@ const contentTypes = {
   ".json": "application/json; charset=utf-8"
 };
 
-function resolveRequestPath(requestUrl) {
-  const parsed = new URL(requestUrl, `http://127.0.0.1:${port}`);
-  const pathname = decodeURIComponent(parsed.pathname);
-  if (pathname === "/") {
-    return path.join(root, "index.html");
-  }
-  return path.join(root, pathname);
+function isInsideRoot(filePath) {
+  const relativePath = path.relative(root, filePath);
+  return relativePath === "" || (!relativePath.startsWith("..") && !path.isAbsolute(relativePath));
 }
 
-const server = http.createServer((req, res) => {
-  const filePath = resolveRequestPath(req.url || "/");
-  if (!filePath.startsWith(root)) {
-    res.writeHead(403);
-    res.end("forbidden");
+export function resolveRequestPath(requestUrl) {
+  let pathname;
+  try {
+    const parsed = new URL(requestUrl, `http://127.0.0.1:${port}`);
+    pathname = decodeURIComponent(parsed.pathname);
+  } catch {
+    return { status: 400, message: "bad request" };
+  }
+
+  const requestPath = pathname === "/" ? "/index.html" : pathname;
+  const filePath = path.resolve(root, `.${requestPath}`);
+  if (!isInsideRoot(filePath)) {
+    return { status: 403, message: "forbidden" };
+  }
+
+  return { status: 200, filePath };
+}
+
+function handleRequest(req, res) {
+  const resolved = resolveRequestPath(req.url || "/");
+  if (resolved.status !== 200) {
+    res.writeHead(resolved.status);
+    res.end(resolved.message);
     return;
   }
+
+  const { filePath } = resolved;
   fs.readFile(filePath, (err, data) => {
     if (err) {
       res.writeHead(404);
@@ -38,8 +54,12 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, { "content-type": contentTypes[ext] || "text/plain" });
     res.end(data);
   });
-});
+}
 
-server.listen(port, "127.0.0.1", () => {
-  console.log(`Agent Store frontend: http://127.0.0.1:${port}`);
-});
+const server = http.createServer(handleRequest);
+
+if (process.argv[1] === url.fileURLToPath(import.meta.url)) {
+  server.listen(port, "127.0.0.1", () => {
+    console.log(`Agent Store frontend: http://127.0.0.1:${port}`);
+  });
+}

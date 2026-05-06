@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 
+import { resolveRequestPath, root as serverRoot } from "../server.mjs";
+
 const root = path.dirname(path.dirname(url.fileURLToPath(import.meta.url)));
 
 function read(relativePath) {
@@ -51,4 +53,15 @@ for (const requiredField of [
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
 assert(app.includes("new window.Vue"), "app must instantiate Vue2");
+
+const indexPath = resolveRequestPath("/");
+assert(indexPath.status === 200, "server must resolve root route");
+assert(indexPath.filePath === path.join(serverRoot, "index.html"), "root route must map to index");
+
+const traversalPath = resolveRequestPath("/..%2ffrontend-neighbor/secret.txt");
+assert(traversalPath.status === 403, "server must reject directory traversal");
+
+const malformedPath = resolveRequestPath("/%E0%A4%A");
+assert(malformedPath.status === 400, "server must reject malformed percent-encoding");
+
 console.log("frontend verification passed");
