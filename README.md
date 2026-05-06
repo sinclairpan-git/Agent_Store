@@ -26,7 +26,8 @@ python -m ai_sdlc run --dry-run
 The protected branch gate is `Compatibility Gate Result`. It aggregates:
 
 - Linux, macOS, and Windows repository contract validation
-- Python 3.11 and 3.12 AI-SDLC adapter/dry-run smoke
+- Python 3.11 and 3.12 AI-SDLC adapter/dry-run smoke from the public
+  `Ai_AutoSDLC` `v0.7.7` tag
 - Windows `pwsh` and `cmd` command compatibility
 - Cross-platform Agent Store bundle build and extraction smoke
 

@@ -55,10 +55,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
@@ -108,7 +108,7 @@ jobs:
           python (Join-Path $bundleDir.FullName ".github\scripts\verify_repository.py") --root $bundleDir.FullName
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: agent-store-${{ matrix.asset_os }}-${{ matrix.archive }}
           path: dist-agent-store/agent-store-*-${{ matrix.asset_os }}-*.${{ matrix.archive }}
