@@ -197,6 +197,13 @@ def validate_standalone_boundary(view_response: dict[str, object], *, trace_id: 
         return None
     standalone = view.get("standalone")
     enterprise_context = view.get("enterprise_context")
+    integration_mode = (
+        enterprise_context.get("integration_mode")
+        if isinstance(enterprise_context, dict)
+        else None
+    )
+    if integration_mode != "standalone":
+        return None
     requires_installation = isinstance(standalone, dict) and standalone.get(
         "requires_installation_id"
     )

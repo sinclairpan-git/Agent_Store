@@ -169,3 +169,26 @@ def test_hash_mismatch_returns_stable_error() -> None:
     assert exc_info.value.status_code == 409
     assert exc_info.value.response.error_code == "PACKAGE_HASH_MISMATCH"
     assert exc_info.value.response.recommended_action_id == "regenerate_activation_command"
+
+
+def test_unknown_agent_version_is_rejected_before_installation() -> None:
+    service = _service()
+    auth = _auth()
+
+    with pytest.raises(BootstrapError) as exc_info:
+        service.create_installation(
+            agent_id="framework.ai-autosdlc",
+            agent_version="9.9.9",
+            artifact_hash="sha256:first",
+            device_os="macOS",
+            device_public_key_thumbprint="thumb-1",
+            auth_context=auth,
+            permission_decision=_decision(auth),
+            trace_id="trace-1",
+            idempotency_key="idem-1",
+        )
+
+    assert exc_info.value.status_code == 404
+    assert exc_info.value.response.error_code == "PACKAGE_HASH_MISMATCH"
+    assert exc_info.value.response.message_key == "errors.agentVersionUnknown"
+    assert exc_info.value.response.details["reason"] == "version_not_registered"

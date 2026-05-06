@@ -88,6 +88,26 @@ def test_create_installation_api_returns_hash_mismatch_error() -> None:
     assert body["error_code"] == "PACKAGE_HASH_MISMATCH"
 
 
+def test_create_installation_api_rejects_unknown_agent_version() -> None:
+    api = _api()
+    auth = _auth()
+    payload = _payload()
+    payload["agent_version"] = "9.9.9"
+
+    status, body = api.create_installation(
+        payload,
+        headers={"Idempotency-Key": "idem-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+
+    assert status == 404
+    assert body["schema_version"]
+    assert body["trace_id"]
+    assert body["error_code"] == "PACKAGE_HASH_MISMATCH"
+    assert body["message_key"] == "errors.agentVersionUnknown"
+
+
 def test_create_installation_api_rejects_denied_permission_decision() -> None:
     api = _api()
     auth = _auth()

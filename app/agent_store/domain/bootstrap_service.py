@@ -136,7 +136,24 @@ class BootstrapService:
             )
 
         expected_version = self._versions.get((agent_id, agent_version))
-        if expected_version is not None and expected_version.artifact_hash != artifact_hash:
+        if expected_version is None:
+            raise BootstrapError(
+                ErrorResponse(
+                    error_code="PACKAGE_HASH_MISMATCH",
+                    message_key="errors.agentVersionUnknown",
+                    severity="blocked",
+                    retryable=False,
+                    recommended_action_id="select_verified_agent_version",
+                    trace_id=trace_id,
+                    details={
+                        "agent_id": agent_id,
+                        "agent_version": agent_version,
+                        "reason": "version_not_registered",
+                    },
+                ),
+                status_code=404,
+            )
+        if expected_version.artifact_hash != artifact_hash:
             raise BootstrapError(
                 ErrorResponse(
                     error_code="PACKAGE_HASH_MISMATCH",

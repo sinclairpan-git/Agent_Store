@@ -54,3 +54,23 @@ def test_overcoupled_standalone_view_returns_stable_error() -> None:
 
     assert error is not None
     assert error.error_code == "STANDALONE_OVERCOUPLED"
+
+
+def test_enterprise_managed_installation_id_is_not_standalone_overcoupled() -> None:
+    response = build_official_app_view(
+        agent=_agent(),
+        version=_version(),
+        trace_id="trace-1",
+        enterprise_context=EnterpriseContext(
+            integration_mode="enterprise_managed",
+            enterprise_state="active",
+            source="tenant_policy",
+            can_ignore=False,
+            affected_actions=("actual_l5_display",),
+            requires_enterprise=True,
+            installation_id="inst-1",
+        ),
+    )
+
+    assert validate_standalone_boundary(response, trace_id="trace-1") is None
+    assert response["view"]["enterprise_context"]["installation_id"] == "inst-1"
