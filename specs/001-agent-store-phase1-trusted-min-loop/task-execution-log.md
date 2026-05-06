@@ -1,7 +1,7 @@
 # 任务执行日志：Agent Store 阶段 1 可信最小闭环
 
 **功能编号**：`001-agent-store-phase1-trusted-min-loop`  
-**状态**：docs 分支已形成 formal truth，尚未执行产品代码任务
+**状态**：execute 阶段进行中；Phase 0 与 Phase 1 已完成产品代码批次
 
 ## 归档规则
 
@@ -113,3 +113,51 @@
 
 - Phase 0 基础任务已完成，全量测试 12 项通过。
 - execute 阶段可继续进入 Registry 草案与官方页 governed view model。
+
+### Batch 2026-05-06-004 | execute phase 1 registry and official view
+
+#### 批次范围
+
+- 覆盖阶段：execute / Phase 1 Agent Registry 草案与官方页 governed view model
+- 覆盖任务：Task 2.1、Task 2.2、Task 2.3、Task 2.4、Task 2.5、Task 2.6
+- 前端约束：后端 view model 为 Vue2 + SDLC 内置企业 Vue2 组件库页面提供稳定 action/message_key 契约，未引入其他前端主栈。
+
+#### 代码与文档产物
+
+- 新增 Agent / AgentVersion / OsCompatibility 领域模型与 immutable version catalog：`app/agent_store/domain/models.py`
+- 新增 Agent Registry repository 与稳定错误响应：`app/agent_store/domain/repositories.py`
+- 新增 Agent Registry API handler：`app/agent_store/api/agent_registry.py`
+- 新增 PackageTrustSummary 与 EnterpriseContext：`app/agent_store/domain/package_trust.py`、`app/agent_store/domain/enterprise_context.py`
+- 新增官方页 governed view model：`app/agent_store/ui/official_app_view.py`
+- 新增角色视图密度与可访问性契约测试：`tests/unit/test_official_app_view_snapshots.py`、`tests/unit/test_official_app_accessibility_contract.py`
+
+#### 验证命令
+
+- `uv run pytest tests/unit/test_agent_models.py -q`
+- `uv run pytest tests/unit/test_agent_registry_repository.py -q`
+- `uv run pytest tests/contract/test_agent_registry_api.py -q`
+- `uv run pytest tests/unit/test_official_app_view.py tests/unit/test_package_trust_enterprise_context.py -q`
+- `uv run pytest tests/unit/test_official_app_view_snapshots.py tests/unit/test_official_app_accessibility_contract.py -q`
+- `uv run pytest -q`
+- `uv run ruff check`
+- `ai-sdlc run --dry-run`
+
+#### 代码审查
+
+- 本批次重点检查：同版本 artifact_hash 不可覆盖、缺 Owner 返回稳定错误码、API response envelope 完整、standalone 不要求 installation_id、未完成 bootstrap 不展示 actual L5。
+
+#### 任务/计划同步状态
+
+- Task 2.1 至 Task 2.6 已在 `tasks.md` 标注完成批次。
+- `ai-sdlc run --dry-run` 仍显示 close RETRY：`development-summary.md not found` 与 `Final tests did not pass` 属于 execute 尚未全部完成前的预期 open gate。
+- `ai-sdlc verify constraints` 存在既有 release docs consistency 与 branch lifecycle blockers，非本批代码引入。
+
+#### 分支与工作树处置
+
+- 当前批次 branch disposition 状态：retained（继续在 `feature/001-agent-store-phase1-trusted-min-loop-dev` 推进后续 Phase 2）
+- 当前批次 worktree disposition 状态：retained
+
+#### 批次结论
+
+- Phase 1 Registry 与官方页 view model 已完成，全量测试 33 项通过，ruff 通过。
+- 下一批次进入 Phase 2：Installation / Device Binding / Bootstrap。

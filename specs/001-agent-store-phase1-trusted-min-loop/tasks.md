@@ -77,6 +77,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-001、FR-002、SC-001
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/domain/models.py`、`tests/unit/test_agent_models.py`
 - **可并行**：是
@@ -89,6 +90,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-001、AS-CT-001
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.1
 - **文件**：`app/agent_store/domain/repositories.py`、`tests/unit/test_agent_registry_repository.py`
 - **可并行**：否
@@ -102,6 +104,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-001、FR-013、AS-CT-001
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.2
 - **文件**：`app/agent_store/api/agent_registry.py`、`tests/contract/test_agent_registry_api.py`
 - **可并行**：否
@@ -114,6 +117,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-002、FR-003、FR-004、SC-001、AS-CT-006
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.1、Task 1.3、Task 1.4
 - **文件**：`app/agent_store/ui/official_app_view.py`、`tests/unit/test_official_app_view.py`
 - **可并行**：是
@@ -127,6 +131,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-016、FR-017、FR-025、AS-CT-006
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.1、Task 1.4
 - **文件**：`app/agent_store/domain/package_trust.py`、`app/agent_store/domain/enterprise_context.py`、`tests/unit/test_package_trust_enterprise_context.py`
 - **可并行**：是
@@ -140,6 +145,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-016、FR-027、SC-010、SC-012
 - **优先级**：P1
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.4、Task 2.5
 - **文件**：`tests/unit/test_official_app_view_snapshots.py`、`tests/unit/test_official_app_accessibility_contract.py`
 - **可并行**：否
