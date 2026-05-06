@@ -29,7 +29,9 @@ def test_official_app_view_exposes_accessibility_action_contract() -> None:
 
     assert view["primary_action"]["action_id"] in reachable
     assert view["primary_action"]["message_key"]
-    assert accessibility["focus_return_action_id"] == view["primary_action"]["action_id"]
+    assert (
+        accessibility["focus_return_action_id"] == view["primary_action"]["action_id"]
+    )
     assert accessibility["copy_feedback"]["action_id"] == "copy_diagnostic_ref"
     assert accessibility["copy_feedback"]["message_key"]
     assert accessibility["status_live_update"]["enabled"] is True

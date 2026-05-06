@@ -48,9 +48,13 @@ class BootstrapStatus:
             "audit_id": self.audit_id,
             "return_path": self.return_path,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         if self.secondary_actions:
-            data["secondary_actions"] = [action.to_dict() for action in self.secondary_actions]
+            data["secondary_actions"] = [
+                action.to_dict() for action in self.secondary_actions
+            ]
         return data
 
 

@@ -30,8 +30,13 @@ class QualityEvidenceSummary:
         if not 0 <= self.confidence <= 1:
             raise ValueError("confidence must be between 0 and 1")
         if self.summary_validity_state not in SUMMARY_VALIDITY_STATES:
-            raise ValueError(f"unsupported summary_validity_state: {self.summary_validity_state}")
-        if self.identity_confidence is not None and not 0 <= self.identity_confidence <= 1:
+            raise ValueError(
+                f"unsupported summary_validity_state: {self.summary_validity_state}"
+            )
+        if (
+            self.identity_confidence is not None
+            and not 0 <= self.identity_confidence <= 1
+        ):
             raise ValueError("identity_confidence must be between 0 and 1")
 
     def is_expired(self, now: datetime | None = None) -> bool:
@@ -128,7 +133,9 @@ class GovernanceLoadSummary:
             "degraded_reason": self.degraded_reason,
             "unsupported_reason": self.unsupported_reason,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return data
 
 
@@ -168,7 +175,9 @@ class ApprovalSummary:
             "permission_state": self.permission_state,
             "request_access_url": self.request_access_url,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return data
 
 
@@ -234,7 +243,9 @@ class CrossSystemLink:
             "permission_state": self.permission_state,
             "redaction_reason": self.redaction_reason,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return data
 
 
@@ -282,7 +293,9 @@ class AgentOpsSummaryBundle:
             "request_access_url": self.request_access_url,
             "return_url": self.return_url,
         }
-        body.update({key: value for key, value in optional.items() if value is not None})
+        body.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return body
 
 

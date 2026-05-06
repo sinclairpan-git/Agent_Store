@@ -1,7 +1,9 @@
 from agent_store.api.agentops_summary import AgentOpsSummaryAPI
 
 
-def test_agentops_summary_returns_cross_system_navigation_fields_when_redacted() -> None:
+def test_agentops_summary_returns_cross_system_navigation_fields_when_redacted() -> (
+    None
+):
     _, body = AgentOpsSummaryAPI().get_agentops_summary(
         "framework.ai-autosdlc",
         version="1.0.0",

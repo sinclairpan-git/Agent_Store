@@ -30,7 +30,9 @@ class AuthContext:
         if not 0 <= self.identity_confidence <= 1:
             raise ValueError("identity_confidence must be between 0 and 1")
         if self.identity_source == "client_user_id":
-            raise UntrustedIdentityError("client supplied user_id is not a trusted identity source")
+            raise UntrustedIdentityError(
+                "client supplied user_id is not a trusted identity source"
+            )
 
 
 @dataclass(frozen=True)

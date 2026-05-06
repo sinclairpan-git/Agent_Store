@@ -111,7 +111,9 @@ def test_idempotent_retry_allows_fresh_permission_decision_id() -> None:
     assert second is first
 
 
-def test_idempotency_key_reuse_requires_same_request_identity_within_caller_scope() -> None:
+def test_idempotency_key_reuse_requires_same_request_identity_within_caller_scope() -> (
+    None
+):
     service = _service()
     auth = _auth()
     decision = _decision(auth)
@@ -271,7 +273,9 @@ def test_hash_mismatch_returns_stable_error() -> None:
 
     assert exc_info.value.status_code == 409
     assert exc_info.value.response.error_code == "PACKAGE_HASH_MISMATCH"
-    assert exc_info.value.response.recommended_action_id == "regenerate_activation_command"
+    assert (
+        exc_info.value.response.recommended_action_id == "regenerate_activation_command"
+    )
 
 
 def test_unknown_agent_version_is_rejected_before_installation() -> None:

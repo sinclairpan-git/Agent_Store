@@ -64,7 +64,10 @@ def test_agentops_unavailable_returns_pending_sync_degraded_summary() -> None:
     ).to_response()
 
     assert response["quality_evidence"]["summary_validity_state"] == "expired"
-    assert response["runtime_policy"]["degraded_reason"] == "enterprise_evidence_pending_sync"
+    assert (
+        response["runtime_policy"]["degraded_reason"]
+        == "enterprise_evidence_pending_sync"
+    )
     assert response["credential_bootstrap"]["enterprise_state"] == "degraded"
 
 

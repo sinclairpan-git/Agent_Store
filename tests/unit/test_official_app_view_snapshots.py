@@ -71,8 +71,12 @@ def test_role_view_field_density_increases_for_operational_roles() -> None:
         role="security_iam",
     )["view"]
 
-    assert len(user_view["role_visible_sections"]) < len(owner_view["role_visible_sections"])
-    assert len(owner_view["role_visible_sections"]) < len(admin_view["role_visible_sections"])
+    assert len(user_view["role_visible_sections"]) < len(
+        owner_view["role_visible_sections"]
+    )
+    assert len(owner_view["role_visible_sections"]) < len(
+        admin_view["role_visible_sections"]
+    )
     assert len(admin_view["role_visible_sections"]) < len(
         security_view["role_visible_sections"]
     )

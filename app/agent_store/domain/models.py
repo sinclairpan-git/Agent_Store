@@ -149,7 +149,10 @@ class AgentVersion:
         return self.package_id or f"{self.agent_id}@{self.version}"
 
     def assert_same_artifact(self, other: "AgentVersion") -> None:
-        if self.identity_key == other.identity_key and self.artifact_hash != other.artifact_hash:
+        if (
+            self.identity_key == other.identity_key
+            and self.artifact_hash != other.artifact_hash
+        ):
             raise VersionArtifactConflict(
                 f"{self.agent_id}@{self.version} already exists with a different artifact_hash"
             )
@@ -175,7 +178,9 @@ class AgentVersion:
             "sbom_ref": self.sbom_ref,
             "scan_report_ref": self.scan_report_ref,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return data
 
 

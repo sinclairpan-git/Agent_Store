@@ -87,5 +87,7 @@ class EnterpriseContext:
             "custom_sink_support_status": self.custom_sink_support_status,
             "installation_id": self.installation_id,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return data

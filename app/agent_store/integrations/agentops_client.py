@@ -161,7 +161,9 @@ class AgentOpsSummaryClient:
         )
 
     @staticmethod
-    def _with_trace(summary: AgentOpsSummaryBundle, trace_id: str) -> AgentOpsSummaryBundle:
+    def _with_trace(
+        summary: AgentOpsSummaryBundle, trace_id: str
+    ) -> AgentOpsSummaryBundle:
         return replace(
             summary,
             trace_id=trace_id,

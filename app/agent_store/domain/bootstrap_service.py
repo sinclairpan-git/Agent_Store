@@ -64,7 +64,9 @@ class BootstrapRequestIdentity:
 
 
 class BootstrapService:
-    def __init__(self, versions: dict[tuple[str, str], AgentVersion] | None = None) -> None:
+    def __init__(
+        self, versions: dict[tuple[str, str], AgentVersion] | None = None
+    ) -> None:
         self._versions = versions or {}
         self._records: dict[
             tuple[str, str, str | None, str | None, str | None, str | None],
@@ -101,7 +103,9 @@ class BootstrapService:
             repo_ref=auth_context.repo_ref,
             permission_decision=permission_decision.decision,
         )
-        scoped_idempotency_key = self._scoped_idempotency_key(idempotency_key, auth_context)
+        scoped_idempotency_key = self._scoped_idempotency_key(
+            idempotency_key, auth_context
+        )
         if scoped_idempotency_key in self._records:
             existing_identity, record = self._records[scoped_idempotency_key]
             if existing_identity == request_identity:

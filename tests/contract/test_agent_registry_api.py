@@ -17,7 +17,9 @@ def _payload() -> dict[str, object]:
     }
 
 
-def test_create_agent_draft_response_contains_required_envelope_and_idempotency() -> None:
+def test_create_agent_draft_response_contains_required_envelope_and_idempotency() -> (
+    None
+):
     api = AgentRegistryAPI()
 
     status, body = api.create_agent_draft(

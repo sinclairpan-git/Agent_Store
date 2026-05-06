@@ -25,7 +25,9 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
 
 
 def test_create_installation_contract_documents_error_responses() -> None:
-    contract = load_openapi_contract(default_contracts_dir() / "installation-bootstrap.openapi.yaml")
+    contract = load_openapi_contract(
+        default_contracts_dir() / "installation-bootstrap.openapi.yaml"
+    )
     operation = contract["paths"]["/api/v1/installations"]["post"]
     responses = operation["responses"]
 
@@ -36,10 +38,14 @@ def test_create_installation_contract_documents_error_responses() -> None:
 
 
 def test_create_agent_draft_contract_documents_conflict_errors() -> None:
-    contract = load_openapi_contract(default_contracts_dir() / "agent-registry.openapi.yaml")
+    contract = load_openapi_contract(
+        default_contracts_dir() / "agent-registry.openapi.yaml"
+    )
     operation = contract["paths"]["/api/v1/agents/drafts"]["post"]
     responses = operation["responses"]
-    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"]["error_code"]["enum"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
 
     assert {"201", "400", "409"}.issubset(responses.keys())
     assert responses["409"]["content"]["application/json"]["schema"] == {
@@ -49,8 +55,12 @@ def test_create_agent_draft_contract_documents_conflict_errors() -> None:
 
 
 def test_installation_assertion_contract_documents_error_responses() -> None:
-    contract = load_openapi_contract(default_contracts_dir() / "installation-bootstrap.openapi.yaml")
-    operation = contract["paths"]["/api/v1/installations/{installation_id}/assertion"]["post"]
+    contract = load_openapi_contract(
+        default_contracts_dir() / "installation-bootstrap.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/installations/{installation_id}/assertion"][
+        "post"
+    ]
     responses = operation["responses"]
 
     assert {"200", "400", "403", "404", "409"}.issubset(responses.keys())
@@ -59,7 +69,9 @@ def test_installation_assertion_contract_documents_error_responses() -> None:
         assert schema == {"$ref": "#/components/schemas/ErrorResponse"}
 
 
-def test_contract_validation_rejects_response_without_trace_fields(tmp_path: Path) -> None:
+def test_contract_validation_rejects_response_without_trace_fields(
+    tmp_path: Path,
+) -> None:
     contract = tmp_path / "broken.openapi.yaml"
     contract.write_text(
         """
