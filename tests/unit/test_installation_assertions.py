@@ -10,6 +10,8 @@ from agent_store.domain.bootstrap_service import BootstrapService
 from agent_store.domain.models import AgentVersion, utc_now
 from agent_store.domain.permissions import AuthContext, PermissionDecision
 
+TEST_ASSERTION_SECRET = b"test-assertion-secret"
+
 
 def _installation():
     auth = AuthContext(
@@ -48,7 +50,7 @@ def _installation():
 
 
 def test_assertion_contains_required_phase1_and_security_fields() -> None:
-    assertion = InstallationAssertionService().issue(
+    assertion = InstallationAssertionService(secret=TEST_ASSERTION_SECRET).issue(
         _installation(),
         device_public_key_thumbprint="thumb-1",
         nonce="nonce-1",
@@ -70,7 +72,7 @@ def test_assertion_contains_required_phase1_and_security_fields() -> None:
 
 
 def test_expired_assertion_returns_stable_error() -> None:
-    service = InstallationAssertionService()
+    service = InstallationAssertionService(secret=TEST_ASSERTION_SECRET)
     now = utc_now()
     assertion = service.issue(
         _installation(),
@@ -90,3 +92,8 @@ def test_expired_assertion_returns_stable_error() -> None:
         )
 
     assert exc_info.value.response.error_code == "INSTALLATION_ASSERTION_EXPIRED"
+
+
+def test_assertion_service_requires_external_signing_secret() -> None:
+    with pytest.raises(ValueError, match="assertion signing secret"):
+        InstallationAssertionService(secret=b"")

@@ -6,6 +6,8 @@ from agent_store.domain.bootstrap_service import BootstrapService
 from agent_store.domain.models import AgentVersion, utc_now
 from agent_store.domain.permissions import AuthContext, PermissionDecision
 
+TEST_ASSERTION_SECRET = b"test-assertion-secret"
+
 
 def _auth() -> AuthContext:
     return AuthContext(
@@ -39,6 +41,7 @@ def _api(assertion_service: InstallationAssertionService | None = None) -> Insta
     return InstallationBootstrapAPI(
         bootstrap_service=bootstrap,
         assertion_service=assertion_service,
+        assertion_signing_secret=None if assertion_service else TEST_ASSERTION_SECRET,
     )
 
 
@@ -356,7 +359,7 @@ def test_issue_assertion_api_returns_expired_error() -> None:
                 **kwargs,
             )
 
-    api = _api(ExpiredAssertionService())
+    api = _api(ExpiredAssertionService(secret=TEST_ASSERTION_SECRET))
     auth = _auth()
     _, installation_body = api.create_installation(
         _payload(),

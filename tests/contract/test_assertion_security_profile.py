@@ -10,6 +10,8 @@ from agent_store.domain.bootstrap_service import BootstrapService
 from agent_store.domain.models import AgentVersion
 from agent_store.domain.permissions import AuthContext, PermissionDecision
 
+TEST_ASSERTION_SECRET = b"test-assertion-secret"
+
 
 def _assertion():
     auth = AuthContext(
@@ -45,7 +47,7 @@ def _assertion():
         trace_id="trace-1",
         idempotency_key="install-1",
     ).installation
-    service = InstallationAssertionService()
+    service = InstallationAssertionService(secret=TEST_ASSERTION_SECRET)
     return service, service.issue(
         installation,
         device_public_key_thumbprint="thumb-1",
@@ -147,7 +149,7 @@ def test_replay_window_allows_nonce_reuse_after_window_expires() -> None:
 
 
 def test_same_nonce_is_allowed_for_different_installation_contexts() -> None:
-    service = InstallationAssertionService()
+    service = InstallationAssertionService(secret=TEST_ASSERTION_SECRET)
     first = service.issue(
         _installation("install-1"),
         device_public_key_thumbprint="thumb-1",

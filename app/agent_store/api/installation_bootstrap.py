@@ -39,9 +39,17 @@ class InstallationBootstrapAPI:
         *,
         bootstrap_service: BootstrapService | None = None,
         assertion_service: InstallationAssertionService | None = None,
+        assertion_signing_secret: bytes | None = None,
     ) -> None:
         self.bootstrap_service = bootstrap_service or BootstrapService()
-        self.assertion_service = assertion_service or InstallationAssertionService()
+        if assertion_service is not None:
+            self.assertion_service = assertion_service
+        elif assertion_signing_secret is not None:
+            self.assertion_service = InstallationAssertionService(
+                secret=assertion_signing_secret,
+            )
+        else:
+            raise ValueError("assertion_service or assertion_signing_secret is required")
         self._assertion_idempotency: dict[
             tuple[str, str, str, str | None, str | None, str | None, str | None],
             tuple[AssertionRequestIdentity, dict[str, object]],

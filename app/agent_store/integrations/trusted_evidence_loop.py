@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import hmac
 from collections.abc import Mapping
 
 from agent_store import SCHEMA_VERSION
@@ -7,6 +9,11 @@ from agent_store.domain.errors import ErrorResponse
 
 
 class TrustedEvidenceLoopVerifier:
+    def __init__(self, *, trusted_reporter_keys: Mapping[str, bytes]) -> None:
+        if not trusted_reporter_keys:
+            raise ValueError("trusted reporter keys are required")
+        self._trusted_reporter_keys = dict(trusted_reporter_keys)
+
     def assert_loop(self, payload: Mapping[str, object]) -> tuple[int, dict[str, object]]:
         trace_id = str(payload.get("trace_id") or "trace-missing")
         run_id = str(payload.get("run_id") or "")
@@ -64,7 +71,12 @@ class TrustedEvidenceLoopVerifier:
 
         event_hash = str(reporter_event.get("event_hash") or "")
         signature = str(reporter_event.get("signature") or "")
-        if not event_hash or signature != f"sig:{event_hash}":
+        key_id = str(reporter_event.get("key_id") or "")
+        if not event_hash or not self._verify_reporter_signature(
+            key_id=key_id,
+            event_hash=event_hash,
+            signature=signature,
+        ):
             return self._failure(
                 "REPORTER_SIGNATURE_INVALID",
                 "errors.reporterSignatureInvalid",
@@ -106,6 +118,19 @@ class TrustedEvidenceLoopVerifier:
     def _has_required_string(source: Mapping[str, object], field: str) -> bool:
         value = source.get(field)
         return isinstance(value, str) and bool(value.strip())
+
+    def _verify_reporter_signature(
+        self,
+        *,
+        key_id: str,
+        event_hash: str,
+        signature: str,
+    ) -> bool:
+        key = self._trusted_reporter_keys.get(key_id)
+        if key is None or not signature:
+            return False
+        expected = hmac.new(key, event_hash.encode("utf-8"), hashlib.sha256).hexdigest()
+        return hmac.compare_digest(expected, signature)
 
     @staticmethod
     def _failure(error_code: str, message_key: str, trace_id: str) -> tuple[int, dict[str, object]]:

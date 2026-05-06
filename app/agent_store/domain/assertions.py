@@ -67,10 +67,12 @@ class InstallationAssertionService:
     def __init__(
         self,
         *,
+        secret: bytes,
         issuer: str = "Agent Store",
         key_id: str = "agent-store-phase1-key",
-        secret: bytes = b"agent-store-phase1-secret",
     ) -> None:
+        if not secret:
+            raise ValueError("assertion signing secret is required")
         self.issuer = issuer
         self.key_id = key_id
         self._secret = secret

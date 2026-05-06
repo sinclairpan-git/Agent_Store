@@ -1,4 +1,18 @@
+import hashlib
+import hmac
+
 from agent_store.integrations.trusted_evidence_loop import TrustedEvidenceLoopVerifier
+
+REPORTER_SECRET = b"test-reporter-secret"
+TRUSTED_REPORTER_KEYS = {"key-1": REPORTER_SECRET}
+
+
+def _signature(event_hash: str, secret: bytes = REPORTER_SECRET) -> str:
+    return hmac.new(secret, event_hash.encode("utf-8"), hashlib.sha256).hexdigest()
+
+
+def _verifier() -> TrustedEvidenceLoopVerifier:
+    return TrustedEvidenceLoopVerifier(trusted_reporter_keys=TRUSTED_REPORTER_KEYS)
 
 
 def _payload() -> dict[str, object]:
@@ -17,7 +31,7 @@ def _payload() -> dict[str, object]:
             "sequence_no": 1,
             "idempotency_key": "event-idem-1",
             "event_hash": "hash-1",
-            "signature": "sig:hash-1",
+            "signature": _signature("hash-1"),
             "key_id": "key-1",
             "signed_at": "2026-05-06T00:00:00Z",
         },
@@ -28,7 +42,7 @@ def _payload() -> dict[str, object]:
 
 
 def test_trusted_evidence_loop_accepts_shared_trace_run_session_chain() -> None:
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(_payload())
+    status, body = _verifier().assert_loop(_payload())
 
     assert status == 200
     assert body["error_code"] == "OK"
@@ -41,7 +55,7 @@ def test_trusted_evidence_loop_rejects_missing_run_id() -> None:
     payload = _payload()
     payload["run_id"] = ""
 
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "RUN_ID_REQUIRED"
@@ -51,7 +65,7 @@ def test_trusted_evidence_loop_rejects_missing_session_id() -> None:
     payload = _payload()
     payload["session_id"] = ""
 
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "SESSION_ID_REQUIRED"
@@ -61,7 +75,7 @@ def test_trusted_evidence_loop_rejects_bad_reporter_signature() -> None:
     payload = _payload()
     payload["reporter_event"]["signature"] = "bad"
 
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "REPORTER_SIGNATURE_INVALID"
@@ -72,7 +86,7 @@ def test_trusted_evidence_loop_rejects_empty_reporter_hash() -> None:
     payload["reporter_event"]["event_hash"] = ""
     payload["reporter_event"]["signature"] = "sig:"
 
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "REPORTER_SIGNATURE_INVALID"
@@ -82,14 +96,14 @@ def test_trusted_evidence_loop_rejects_incomplete_l5_gate_and_scan() -> None:
     payload = _payload()
     payload["l5_gate_result"] = "pending"
 
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "L5_GATE_INCOMPLETE"
 
     payload = _payload()
     payload["violation_scan_completed"] = False
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
     assert status == 409
     assert body["error_code"] == "VIOLATION_SCAN_INCOMPLETE"
 
@@ -98,49 +112,68 @@ def test_trusted_evidence_loop_rejects_missing_reference_fields() -> None:
     payload = _payload()
     del payload["artifact_hash"]
 
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
     del payload["device_id"]
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
     del payload["agent_id"]
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
     del payload["trace_id"]
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
     del payload["reporter_event"]["event_id"]
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
     del payload["reporter_event"]["key_id"]
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
     payload["reporter_event"]["sequence_no"] = None
-    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+    status, body = _verifier().assert_loop(payload)
 
     assert status == 409
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+
+def test_trusted_evidence_loop_rejects_unregistered_reporter_key() -> None:
+    payload = _payload()
+    payload["reporter_event"]["key_id"] = "unknown-key"
+
+    status, body = _verifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "REPORTER_SIGNATURE_INVALID"
+
+
+def test_trusted_evidence_loop_requires_trusted_reporter_keys() -> None:
+    try:
+        TrustedEvidenceLoopVerifier(trusted_reporter_keys={})
+    except ValueError as exc:
+        assert "trusted reporter keys" in str(exc)
+    else:
+        raise AssertionError("empty trusted reporter keys should be rejected")
