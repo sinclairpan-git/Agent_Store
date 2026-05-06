@@ -168,11 +168,13 @@ def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
         installation_id,
         {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
     retry_status, retry_body = api.issue_installation_assertion(
         installation_id,
         {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
 
     assert status == 200
@@ -198,10 +200,37 @@ def test_issue_assertion_api_rejects_device_thumbprint_mismatch() -> None:
         installation_body["installation"]["installation_id"],
         {"device_public_key_thumbprint": "thumb-2", "nonce": "nonce-1", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
 
     assert status == 409
     assert body["error_code"] == "DEVICE_KEY_MISMATCH"
+
+
+def test_issue_assertion_api_rejects_mismatched_auth_context() -> None:
+    api = _api()
+    auth = _auth()
+    _, installation_body = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+    other_auth = AuthContext(
+        auth_context_id="auth-2",
+        subject_user_id="user-2",
+        identity_confidence=0.99,
+    )
+
+    status, body = api.issue_installation_assertion(
+        installation_body["installation"]["installation_id"],
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-1"},
+        auth_context=other_auth,
+    )
+
+    assert status == 403
+    assert body["error_code"] == "PERMISSION_DENIED"
 
 
 def test_issue_assertion_api_rejects_null_required_input() -> None:
@@ -218,6 +247,7 @@ def test_issue_assertion_api_rejects_null_required_input() -> None:
         installation_body["installation"]["installation_id"],
         {"device_public_key_thumbprint": "thumb-1", "nonce": None, "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
 
     assert status == 400
@@ -239,12 +269,14 @@ def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
         installation_id,
         {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
 
     status, body = api.issue_installation_assertion(
         installation_id,
         {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-2", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
 
     assert status == 409
@@ -273,6 +305,7 @@ def test_issue_assertion_api_returns_expired_error() -> None:
         installation_body["installation"]["installation_id"],
         {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
     )
 
     assert status == 409

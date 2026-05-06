@@ -149,6 +149,40 @@ def test_non_allow_permission_decision_blocks_installation(decision: str) -> Non
     assert exc_info.value.response.error_code == "PERMISSION_DENIED"
 
 
+def test_permission_decision_must_match_auth_context() -> None:
+    service = _service()
+    auth = _auth()
+    other_auth = AuthContext(
+        auth_context_id="auth-2",
+        subject_user_id="iam-user-2",
+        identity_confidence=0.99,
+    )
+    stale_decision = PermissionDecision.from_auth_context(
+        auth_context=other_auth,
+        decision="allow",
+        permission_decision_id="perm-2",
+        audit_id="audit-2",
+        trace_id="trace-2",
+    )
+
+    with pytest.raises(BootstrapError) as exc_info:
+        service.create_installation(
+            agent_id="framework.ai-autosdlc",
+            agent_version="1.0.0",
+            artifact_hash="sha256:first",
+            device_os="macOS",
+            device_public_key_thumbprint="thumb-1",
+            auth_context=auth,
+            permission_decision=stale_decision,
+            trace_id="trace-1",
+            idempotency_key="idem-1",
+        )
+
+    assert exc_info.value.status_code == 403
+    assert exc_info.value.response.error_code == "PERMISSION_DENIED"
+    assert exc_info.value.response.message_key == "errors.permissionContextMismatch"
+
+
 def test_hash_mismatch_returns_stable_error() -> None:
     service = _service()
     auth = _auth()

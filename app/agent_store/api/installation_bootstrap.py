@@ -87,6 +87,7 @@ class InstallationBootstrapAPI:
         payload: Mapping[str, object],
         *,
         headers: Mapping[str, str],
+        auth_context: AuthContext,
     ) -> tuple[int, dict[str, object]]:
         trace_id = str(payload.get("trace_id") or new_trace_id())
         idempotency_key = headers.get("Idempotency-Key")
@@ -96,6 +97,19 @@ class InstallationBootstrapAPI:
         record = self.bootstrap_service.get_record(installation_id)
         if record is None:
             return 404, self._validation_error("errors.installationNotFound", trace_id)
+        if record.installation.auth_context != auth_context:
+            return 403, ErrorResponse(
+                error_code="PERMISSION_DENIED",
+                message_key="errors.permissionDenied",
+                severity="blocked",
+                retryable=False,
+                recommended_action_id="request_access",
+                trace_id=trace_id,
+                details={
+                    "installation_id": installation_id,
+                    "auth_context_id": auth_context.auth_context_id,
+                },
+            ).to_dict()
         try:
             requested_thumbprint = required_string(payload, "device_public_key_thumbprint")
             nonce = required_string(payload, "nonce")

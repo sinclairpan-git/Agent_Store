@@ -117,6 +117,25 @@ class BootstrapService:
                 status_code=409,
             )
 
+        if permission_decision.auth_context != auth_context:
+            raise BootstrapError(
+                ErrorResponse(
+                    error_code="PERMISSION_DENIED",
+                    message_key="errors.permissionContextMismatch",
+                    severity="blocked",
+                    retryable=False,
+                    recommended_action_id="refresh_permission_decision",
+                    trace_id=trace_id,
+                    details={
+                        "auth_context_id": auth_context.auth_context_id,
+                        "permission_auth_context_id": (
+                            permission_decision.auth_context.auth_context_id
+                        ),
+                    },
+                ),
+                status_code=403,
+            )
+
         if permission_decision.decision != "allow":
             raise BootstrapError(
                 ErrorResponse(
