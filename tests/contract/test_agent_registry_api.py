@@ -70,3 +70,19 @@ def test_create_agent_draft_missing_required_field_returns_validation_error() ->
     assert status == 400
     assert response_envelope_ok(body)
     assert body["error_code"] == "VALIDATION_ERROR"
+
+
+def test_create_agent_draft_rejects_null_required_field() -> None:
+    api = AgentRegistryAPI()
+    payload = _payload()
+    payload["artifact_hash"] = None
+
+    status, body = api.create_agent_draft(
+        payload,
+        headers={"Idempotency-Key": "idem-1"},
+    )
+
+    assert status == 400
+    assert response_envelope_ok(body)
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert "artifact_hash" in body["details"]["reason"]

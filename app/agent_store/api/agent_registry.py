@@ -17,6 +17,13 @@ def new_trace_id() -> str:
     return f"trace-{uuid4().hex}"
 
 
+def required_string(payload: Mapping[str, object], field: str) -> str:
+    value = payload[field]
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+    return value
+
+
 class AgentRegistryAPI:
     def __init__(self, repository: InMemoryAgentRegistryRepository | None = None) -> None:
         self.repository = repository or InMemoryAgentRegistryRepository()
@@ -92,17 +99,17 @@ class AgentRegistryAPI:
         if isinstance(supported_os_raw, list):
             supported_os = tuple(
                 OsCompatibility(
-                    os=str(item["os"]),
-                    compatibility_status=str(item["compatibility_status"]),
+                    os=required_string(item, "os"),
+                    compatibility_status=required_string(item, "compatibility_status"),
                     min_version=item.get("min_version"),
                 )
                 for item in supported_os_raw
                 if isinstance(item, Mapping)
             )
         return Agent(
-            agent_id=str(payload["agent_id"]),
-            display_name=str(payload["display_name"]),
-            type=str(payload["type"]),
+            agent_id=required_string(payload, "agent_id"),
+            display_name=required_string(payload, "display_name"),
+            type=required_string(payload, "type"),
             category=str(payload.get("category") or "sdlc_framework"),
             owner_team=str(payload.get("owner_team") or ""),
             owner_user=str(payload.get("owner_user") or ""),
@@ -116,17 +123,21 @@ class AgentRegistryAPI:
     @staticmethod
     def _version_from_payload(payload: Mapping[str, object]) -> AgentVersion:
         return AgentVersion(
-            agent_id=str(payload["agent_id"]),
-            version=str(payload["version"]),
-            artifact_hash=str(payload["artifact_hash"]),
-            signature=str(payload["signature"]),
-            issuer=str(payload["issuer"]),
+            agent_id=required_string(payload, "agent_id"),
+            version=required_string(payload, "version"),
+            artifact_hash=required_string(payload, "artifact_hash"),
+            signature=required_string(payload, "signature"),
+            issuer=required_string(payload, "issuer"),
             release_status=str(payload.get("release_status") or "official_draft"),
             package_signature=(
-                str(payload["package_signature"]) if payload.get("package_signature") else None
+                required_string(payload, "package_signature")
+                if payload.get("package_signature")
+                else None
             ),
-            package_id=str(payload["package_id"]) if payload.get("package_id") else None,
-            key_id=str(payload["key_id"]) if payload.get("key_id") else None,
+            package_id=required_string(payload, "package_id")
+            if payload.get("package_id")
+            else None,
+            key_id=required_string(payload, "key_id") if payload.get("key_id") else None,
         )
 
 

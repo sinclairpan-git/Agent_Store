@@ -18,6 +18,13 @@ def new_trace_id() -> str:
     return f"trace-{uuid4().hex}"
 
 
+def required_string(payload: Mapping[str, object], field: str) -> str:
+    value = payload[field]
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field} must be a non-empty string")
+    return value
+
+
 @dataclass(frozen=True)
 class AssertionRequestIdentity:
     installation_id: str
@@ -55,11 +62,14 @@ class InstallationBootstrapAPI:
 
         try:
             record = self.bootstrap_service.create_installation(
-                agent_id=str(payload["agent_id"]),
-                agent_version=str(payload["agent_version"]),
-                artifact_hash=str(payload["artifact_hash"]),
-                device_os=str(payload["device_os"]),
-                device_public_key_thumbprint=str(payload["device_public_key_thumbprint"]),
+                agent_id=required_string(payload, "agent_id"),
+                agent_version=required_string(payload, "agent_version"),
+                artifact_hash=required_string(payload, "artifact_hash"),
+                device_os=required_string(payload, "device_os"),
+                device_public_key_thumbprint=required_string(
+                    payload,
+                    "device_public_key_thumbprint",
+                ),
                 auth_context=auth_context,
                 permission_decision=permission_decision,
                 trace_id=trace_id,
@@ -87,9 +97,9 @@ class InstallationBootstrapAPI:
         if record is None:
             return 404, self._validation_error("errors.installationNotFound", trace_id)
         try:
-            requested_thumbprint = str(payload["device_public_key_thumbprint"])
-            nonce = str(payload["nonce"])
-            audience = str(payload["audience"])
+            requested_thumbprint = required_string(payload, "device_public_key_thumbprint")
+            nonce = required_string(payload, "nonce")
+            audience = required_string(payload, "audience")
             request_identity = AssertionRequestIdentity(
                 installation_id=installation_id,
                 device_public_key_thumbprint=requested_thumbprint,

@@ -108,6 +108,26 @@ def test_create_installation_api_rejects_unknown_agent_version() -> None:
     assert body["message_key"] == "errors.agentVersionUnknown"
 
 
+def test_create_installation_api_rejects_null_required_input() -> None:
+    api = _api()
+    auth = _auth()
+    payload = _payload()
+    payload["device_public_key_thumbprint"] = None
+
+    status, body = api.create_installation(
+        payload,
+        headers={"Idempotency-Key": "idem-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+
+    assert status == 400
+    assert body["schema_version"]
+    assert body["trace_id"]
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert "device_public_key_thumbprint" in body["details"]["reason"]
+
+
 def test_create_installation_api_rejects_denied_permission_decision() -> None:
     api = _api()
     auth = _auth()
@@ -182,6 +202,27 @@ def test_issue_assertion_api_rejects_device_thumbprint_mismatch() -> None:
 
     assert status == 409
     assert body["error_code"] == "DEVICE_KEY_MISMATCH"
+
+
+def test_issue_assertion_api_rejects_null_required_input() -> None:
+    api = _api()
+    auth = _auth()
+    _, installation_body = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+
+    status, body = api.issue_installation_assertion(
+        installation_body["installation"]["installation_id"],
+        {"device_public_key_thumbprint": "thumb-1", "nonce": None, "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-1"},
+    )
+
+    assert status == 400
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert "nonce" in body["details"]["reason"]
 
 
 def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
