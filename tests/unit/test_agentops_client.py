@@ -95,3 +95,26 @@ def test_store_client_does_not_calculate_quality_score() -> None:
 
     assert "quality_score" not in response["quality_evidence"]
     assert response["quality_evidence"]["confidence"] == 0.88
+
+
+def test_cached_summary_uses_current_request_trace() -> None:
+    client = AgentOpsSummaryClient({("framework.ai-autosdlc", "1.0.0"): _summary()})
+
+    response = client.get_summary(
+        "framework.ai-autosdlc",
+        "1.0.0",
+        trace_id="trace-current",
+    ).to_response()
+    redacted = client.get_summary(
+        "framework.ai-autosdlc",
+        "1.0.0",
+        trace_id="trace-redacted",
+        raw_evidence_allowed=False,
+    ).to_response()
+
+    assert response["trace_id"] == "trace-current"
+    assert response["run_evidence"]["trace_id"] == "trace-current"
+    assert response["links"][0]["trace_id"] == "trace-current"
+    assert redacted["trace_id"] == "trace-redacted"
+    assert redacted["run_evidence"]["trace_id"] == "trace-redacted"
+    assert redacted["links"][0]["trace_id"] == "trace-redacted"

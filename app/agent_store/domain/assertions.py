@@ -75,7 +75,7 @@ class InstallationAssertionService:
         self.key_id = key_id
         self._secret = secret
         self._issued_by_installation: dict[str, SignedInstallationAssertion] = {}
-        self._seen_nonces: set[str] = set()
+        self._seen_nonces: set[tuple[str, str, str, str]] = set()
 
     def issue(
         self,
@@ -181,7 +181,8 @@ class InstallationAssertionService:
                     trace_id,
                 )
             )
-        if assertion.nonce in self._seen_nonces:
+        replay_key = self._replay_key(assertion)
+        if replay_key in self._seen_nonces:
             raise AssertionValidationError(
                 self._error(
                     "ASSERTION_REPLAY_DETECTED",
@@ -191,7 +192,7 @@ class InstallationAssertionService:
                 )
             )
         if mark_nonce_seen:
-            self._seen_nonces.add(assertion.nonce)
+            self._seen_nonces.add(replay_key)
 
     def _validate_integrity(
         self,
@@ -236,6 +237,15 @@ class InstallationAssertionService:
     @staticmethod
     def _canonical_payload(**fields: str) -> str:
         return "\n".join(f"{key}={fields[key]}" for key in sorted(fields))
+
+    @staticmethod
+    def _replay_key(assertion: SignedInstallationAssertion) -> tuple[str, str, str, str]:
+        return (
+            assertion.installation_id,
+            assertion.device_id,
+            assertion.audience,
+            assertion.nonce,
+        )
 
     @staticmethod
     def _error(

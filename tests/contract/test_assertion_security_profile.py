@@ -52,6 +52,42 @@ def _assertion():
     )
 
 
+def _installation(idempotency_key: str = "install-1"):
+    auth = AuthContext(
+        auth_context_id=f"auth-{idempotency_key}",
+        subject_user_id="user-1",
+        identity_confidence=0.99,
+    )
+    decision = PermissionDecision.from_auth_context(
+        auth_context=auth,
+        decision="allow",
+        permission_decision_id=f"perm-{idempotency_key}",
+        audit_id=f"audit-{idempotency_key}",
+        trace_id="trace-1",
+    )
+    bootstrap = BootstrapService()
+    bootstrap.register_version(
+        AgentVersion(
+            agent_id="framework.ai-autosdlc",
+            version="1.0.0",
+            artifact_hash="sha256:first",
+            signature="sig-1",
+            issuer="Agent Store",
+        )
+    )
+    return bootstrap.create_installation(
+        agent_id="framework.ai-autosdlc",
+        agent_version="1.0.0",
+        artifact_hash="sha256:first",
+        device_os="macOS",
+        device_public_key_thumbprint="thumb-1",
+        auth_context=auth,
+        permission_decision=decision,
+        trace_id="trace-1",
+        idempotency_key=idempotency_key,
+    ).installation
+
+
 def test_assertion_response_contains_security_profile_fields() -> None:
     _, assertion = _assertion()
     data = assertion.to_dict()
@@ -85,6 +121,35 @@ def test_replay_is_rejected() -> None:
         )
 
     assert exc_info.value.response.error_code == "ASSERTION_REPLAY_DETECTED"
+
+
+def test_same_nonce_is_allowed_for_different_installation_contexts() -> None:
+    service = InstallationAssertionService()
+    first = service.issue(
+        _installation("install-1"),
+        device_public_key_thumbprint="thumb-1",
+        nonce="nonce-shared",
+        audience="agentops",
+    )
+    second = service.issue(
+        _installation("install-2"),
+        device_public_key_thumbprint="thumb-1",
+        nonce="nonce-shared",
+        audience="agentops",
+    )
+
+    service.validate(
+        first,
+        expected_audience="agentops",
+        expected_device_public_key_thumbprint="thumb-1",
+        trace_id="trace-1",
+    )
+    service.validate(
+        second,
+        expected_audience="agentops",
+        expected_device_public_key_thumbprint="thumb-1",
+        trace_id="trace-2",
+    )
 
 
 def test_revoked_assertion_is_rejected() -> None:

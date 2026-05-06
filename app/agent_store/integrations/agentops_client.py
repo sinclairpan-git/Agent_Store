@@ -49,10 +49,14 @@ class AgentOpsSummaryClient:
     ) -> AgentOpsSummaryBundle:
         if self.unavailable:
             return self._degraded_summary(trace_id)
-        summary = self._summaries.get((agent_id, version)) or self._default_summary(trace_id)
+        summary = self._summaries.get((agent_id, version))
+        if summary is not None:
+            summary = self._with_trace(summary, trace_id)
+        else:
+            summary = self._default_summary(trace_id)
         if raw_evidence_allowed:
             return summary
-        return self._redacted_summary(summary)
+        return self._redacted_summary(summary, trace_id=trace_id)
 
     @staticmethod
     def _degraded_summary(trace_id: str) -> AgentOpsSummaryBundle:
@@ -157,7 +161,20 @@ class AgentOpsSummaryClient:
         )
 
     @staticmethod
-    def _redacted_summary(summary: AgentOpsSummaryBundle) -> AgentOpsSummaryBundle:
+    def _with_trace(summary: AgentOpsSummaryBundle, trace_id: str) -> AgentOpsSummaryBundle:
+        return replace(
+            summary,
+            trace_id=trace_id,
+            run_evidence=replace(summary.run_evidence, trace_id=trace_id),
+            links=tuple(replace(link, trace_id=trace_id) for link in summary.links),
+        )
+
+    @staticmethod
+    def _redacted_summary(
+        summary: AgentOpsSummaryBundle,
+        *,
+        trace_id: str,
+    ) -> AgentOpsSummaryBundle:
         redacted_quality = replace(
             summary.quality_evidence,
             redacted=True,
@@ -168,7 +185,7 @@ class AgentOpsSummaryClient:
             rel="evidence_request_access",
             target_system="evidence_vault",
             href=access_url,
-            trace_id=summary.trace_id,
+            trace_id=trace_id,
             audit_id=summary.approval.audit_id,
             permission_state="denied",
             redaction_reason="raw_evidence_access_denied",
