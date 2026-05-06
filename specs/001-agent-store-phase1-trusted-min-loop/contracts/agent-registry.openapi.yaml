@@ -1,0 +1,139 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Agent Registry API
+  version: 0.1.0
+paths:
+  /api/v1/agents/drafts:
+    post:
+      operationId: createAgentDraft
+      summary: Create an Agent Registry draft
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentDraftRequest"
+      responses:
+        "201":
+          description: Draft created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDraftResponse"
+        "400":
+          description: Invalid draft
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/agents/{agent_id}:
+    get:
+      operationId: getAgentDetail
+      summary: Get Agent detail for official readonly page
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agent detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentDraftResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    CreateAgentDraftRequest:
+      type: object
+      required:
+        - agent_id
+        - display_name
+        - type
+        - owner_team
+        - owner_user
+        - version
+        - artifact_hash
+        - signature
+        - issuer
+      properties:
+        agent_id:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9.-]+$"
+        display_name:
+          type: string
+        type:
+          type: string
+          enum: [agent, skill, framework_capability]
+        owner_team:
+          type: string
+        owner_user:
+          type: string
+        version:
+          type: string
+        artifact_hash:
+          type: string
+        signature:
+          type: string
+        issuer:
+          type: string
+        release_status:
+          type: string
+          enum: [official_draft, official_readonly, manual_installable-preview]
+    AgentDraftResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, agent]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        agent:
+          type: object
+          required: [agent_id, display_name, type, owner_team, owner_user, version, artifact_hash, release_status]
+          properties:
+            agent_id:
+              type: string
+            display_name:
+              type: string
+            type:
+              type: string
+            owner_team:
+              type: string
+            owner_user:
+              type: string
+            version:
+              type: string
+            artifact_hash:
+              type: string
+            release_status:
+              type: string
+    ErrorResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, message]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [AGENT_OWNER_REQUIRED, AGENT_NOT_FOUND, VERSION_ALREADY_EXISTS, VALIDATION_ERROR]
+        message:
+          type: string

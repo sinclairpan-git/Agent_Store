@@ -1,0 +1,142 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Installation Bootstrap API
+  version: 0.1.0
+paths:
+  /api/v1/installations:
+    post:
+      operationId: createInstallation
+      summary: Create installation and device binding
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInstallationRequest"
+      responses:
+        "201":
+          description: Installation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationResponse"
+        "409":
+          description: Package hash mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/installations/{installation_id}/assertion:
+    post:
+      operationId: issueInstallationAssertion
+      summary: Issue signed installation assertion
+      parameters:
+        - name: installation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Assertion issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationAssertionResponse"
+components:
+  schemas:
+    CreateInstallationRequest:
+      type: object
+      required: [agent_id, agent_version, user_id, device_os, artifact_hash]
+      properties:
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        user_id:
+          type: string
+        device_os:
+          type: string
+          enum: [macOS, Windows, Linux]
+        artifact_hash:
+          type: string
+    InstallationResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, installation]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        installation:
+          type: object
+          required: [installation_id, device_id, agent_id, agent_version, artifact_hash, status, enterprise_state]
+          properties:
+            installation_id:
+              type: string
+            device_id:
+              type: string
+            agent_id:
+              type: string
+            agent_version:
+              type: string
+            artifact_hash:
+              type: string
+            status:
+              type: string
+              enum: [activation_required, reporter_pending, failed, revoked]
+            enterprise_state:
+              type: string
+              enum: [detected_optional, required_unactivated, activating, active, degraded, disabled]
+    InstallationAssertionResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, assertion]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        assertion:
+          type: object
+          required: [installation_id, device_id, artifact_hash, issuer, expires_at, key_id, signature]
+          properties:
+            installation_id:
+              type: string
+            device_id:
+              type: string
+            artifact_hash:
+              type: string
+            issuer:
+              type: string
+            expires_at:
+              type: string
+              format: date-time
+            key_id:
+              type: string
+            signature:
+              type: string
+    ErrorResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, message]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [PACKAGE_HASH_MISMATCH, INSTALLATION_ASSERTION_EXPIRED, VALIDATION_ERROR]
+        message:
+          type: string

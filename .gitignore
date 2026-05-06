@@ -1,2 +1,6 @@
 ai-sdlc-offline-*/
 ai-sdlc-offline-*.tar.gz
+.ai-sdlc/state/*.bak
+.ai-sdlc/local/telemetry/indexes/
+.ai-sdlc/local/telemetry/sessions/
+.ai-sdlc/work-items/

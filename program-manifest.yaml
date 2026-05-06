@@ -1,0 +1,112 @@
+schema_version: '2'
+prd_path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
+program:
+  goal: Agent Store 阶段 1 可信最小闭环
+source_registry:
+- path: docs/framework-defect-backlog.zh-CN.md
+  source_type: defect_backlog
+  truth_layer: defect
+specs:
+- id: 001-agent-store-phase1-trusted-min-loop
+  path: specs/001-agent-store-phase1-trusted-min-loop
+  depends_on: []
+truth_snapshot:
+  generated_at: '2026-05-06T06:51:59Z'
+  generated_by: ai-sdlc program truth sync
+  generator_version: program_truth_snapshot_v1
+  repo_revision: d12f311
+  authoring_hash: 6eb20846c63a76a45e860cd38a5d905f87823ddd9350872cdbfab165fb090c5d
+  source_hashes: {}
+  snapshot_hash: c3195a1ae9f4a7ac251c274d5a749e736b2c8583b517b9c6046e32913427d453
+  computed_capabilities: []
+  source_inventory:
+    state: complete
+    total_sources: 7
+    mapped_sources: 7
+    unmapped_sources: 0
+    missing_sources: 1
+    phase_signal_count: 10
+    deferred_signal_count: 21
+    non_goal_signal_count: 3
+    layer_totals:
+      blueprint: 1
+      spec: 1
+      plan: 1
+      tasks: 1
+      execution: 1
+      close: 1
+      defect: 1
+    layer_materialized:
+      blueprint: 1
+      spec: 1
+      plan: 1
+      tasks: 1
+      execution: 1
+      close: 0
+      defect: 1
+    entries:
+    - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
+      source_type: prd
+      truth_layer: blueprint
+      mapped: true
+      exists: true
+      mapping_ref: prd_path
+      phase_signal_count: 0
+      deferred_signal_count: 2
+      non_goal_signal_count: 2
+    - path: specs/001-agent-store-phase1-trusted-min-loop/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 001-agent-store-phase1-trusted-min-loop
+      phase_signal_count: 1
+      deferred_signal_count: 6
+      non_goal_signal_count: 1
+    - path: specs/001-agent-store-phase1-trusted-min-loop/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 001-agent-store-phase1-trusted-min-loop
+      phase_signal_count: 2
+      deferred_signal_count: 3
+      non_goal_signal_count: 0
+    - path: specs/001-agent-store-phase1-trusted-min-loop/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 001-agent-store-phase1-trusted-min-loop
+      phase_signal_count: 7
+      deferred_signal_count: 8
+      non_goal_signal_count: 0
+    - path: specs/001-agent-store-phase1-trusted-min-loop/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 001-agent-store-phase1-trusted-min-loop
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/001-agent-store-phase1-trusted-min-loop/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: false
+      mapping_ref: 001-agent-store-phase1-trusted-min-loop
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: docs/framework-defect-backlog.zh-CN.md
+      source_type: defect_backlog
+      truth_layer: defect
+      mapped: true
+      exists: true
+      mapping_ref: docs/framework-defect-backlog.zh-CN.md
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    unmapped_paths: []
+  state: ready

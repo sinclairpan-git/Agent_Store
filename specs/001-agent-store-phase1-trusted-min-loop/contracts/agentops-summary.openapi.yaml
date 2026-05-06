@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Agent Store AgentOps Summary API
+  version: 0.1.0
+paths:
+  /api/v1/agents/{agent_id}/agentops-summary:
+    get:
+      operationId: getAgentOpsSummary
+      summary: Get AgentOps summaries for Agent Store display
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: version
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Summary bundle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentOpsSummaryResponse"
+components:
+  schemas:
+    AgentOpsSummaryResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, quality_evidence, approval, runtime_policy]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        quality_evidence:
+          $ref: "#/components/schemas/QualityEvidenceSummary"
+        approval:
+          $ref: "#/components/schemas/ApprovalSummary"
+        runtime_policy:
+          $ref: "#/components/schemas/RuntimePolicySummary"
+        credential_bootstrap:
+          $ref: "#/components/schemas/CredentialBootstrapSummary"
+    QualityEvidenceSummary:
+      type: object
+      required: [evidence_level, confidence, missing_evidence, score_template_id, calculated_at, valid_until]
+      properties:
+        evidence_level:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        missing_evidence:
+          type: array
+          items:
+            type: string
+        score_template_id:
+          type: string
+        calculated_at:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+    ApprovalSummary:
+      type: object
+      required: [approval_id, status, audit_id]
+      properties:
+        approval_id:
+          type: string
+        status:
+          type: string
+          enum: [not_required, pending, approved, rejected, expired, revoked]
+        sla:
+          type: string
+        decision:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
+        audit_id:
+          type: string
+    RuntimePolicySummary:
+      type: object
+      required: [policy_ref, fallback_action, runtime_risk_level, enforcement_mode]
+      properties:
+        policy_ref:
+          type: string
+        fallback_action:
+          type: string
+          enum: [allow, warn, require_online, block]
+        runtime_risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        enforcement_mode:
+          type: string
+          enum: [observe, warn, enforce]
+        degraded_reason:
+          type: string
+    CredentialBootstrapSummary:
+      type: object
+      required: [bootstrap_status, credential_status, reporter_status, enterprise_state]
+      properties:
+        bootstrap_status:
+          type: string
+          enum: [not_started, assertion_issued, device_bound, credential_issued, signature_verified, expired, failed]
+        credential_status:
+          type: string
+          enum: [active, rotating, expired, revoked]
+        reporter_status:
+          type: string
+          enum: [disabled, local_only, pending_upload, sent, degraded, failed]
+        enterprise_state:
+          type: string
+          enum: [not_detected, detected_optional, required_unactivated, activating, active, degraded, disabled]
