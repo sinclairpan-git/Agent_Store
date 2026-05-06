@@ -2,3 +2,10 @@ backend:
   name: python
   version: '3.11+'
   source: bootstrap-default
+frontend:
+  name: vue
+  version: '2.x'
+  component_library:
+    name: sdlc-enterprise-vue2
+    display_name: "SDLC 内置组件库企业 Vue2 组件库"
+  source: user-decision-2026-05-06

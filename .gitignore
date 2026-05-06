@@ -1,6 +1,13 @@
 ai-sdlc-offline-*/
 ai-sdlc-offline-*.tar.gz
 dist-agent-store/
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*.egg-info/
+node_modules/
+.npm/
 .ai-sdlc/state/*.bak
 .ai-sdlc/local/telemetry/indexes/
 .ai-sdlc/local/telemetry/sessions/

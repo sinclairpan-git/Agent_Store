@@ -3,3 +3,11 @@ decisions:
     question: default_execution_mode
     choice: auto
     rationale: bootstrap default
+  - id: FRONTEND-001
+    question: phase1_frontend_stack
+    choice: vue2
+    rationale: 用户指定阶段 1 前端技术栈选择 Vue2。
+  - id: FRONTEND-002
+    question: phase1_frontend_component_library
+    choice: sdlc-enterprise-vue2
+    rationale: 用户指定组件库选择 SDLC 内置组件库企业 Vue2 组件库。

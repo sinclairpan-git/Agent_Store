@@ -14,12 +14,15 @@ Phase 3: AgentOps summary、Trusted Evidence Loop 与 standalone 边界
 Phase 4: 验证、归档与交付检查
 ```
 
+前端落地约束：阶段 1 官方页前端实现统一采用 Vue2，并使用 SDLC 内置组件库企业 Vue2 组件库。后端 view model 与 action/message_key 契约必须保持组件库无关，但页面实现不得引入其他前端主栈或组件库。
+
 ## Phase 0：项目骨架与契约测试基础
 
 ### Task 1.1 初始化 Python 服务骨架
 
 - **覆盖规格**：FR-001、FR-013
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：无
 - **文件**：`pyproject.toml`、`app/agent_store/__init__.py`、`app/agent_store/api/__init__.py`、`app/agent_store/domain/__init__.py`、`tests/__init__.py`
 - **可并行**：否
@@ -32,6 +35,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：AS-CT-001、AS-CT-003、AS-CT-004、AS-CT-005、AS-CT-006、AS-CT-007
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/contracts/loader.py`、`tests/contract/test_contract_files_parse.py`
 - **可并行**：否
@@ -44,6 +48,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-014、FR-015
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/domain/status_registry.py`、`tests/unit/test_status_registry.py`
 - **可并行**：是
@@ -56,6 +61,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-019、FR-023、FR-024、AS-CT-010、AS-CT-012
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：Task 1.1、Task 1.3
 - **文件**：`app/agent_store/domain/actions.py`、`app/agent_store/domain/errors.py`、`app/agent_store/domain/permissions.py`、`tests/unit/test_governed_actions_errors_permissions.py`
 - **可并行**：是
@@ -71,6 +77,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-001、FR-002、SC-001
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/domain/models.py`、`tests/unit/test_agent_models.py`
 - **可并行**：是
@@ -83,6 +90,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-001、AS-CT-001
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.1
 - **文件**：`app/agent_store/domain/repositories.py`、`tests/unit/test_agent_registry_repository.py`
 - **可并行**：否
@@ -96,6 +104,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-001、FR-013、AS-CT-001
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.2
 - **文件**：`app/agent_store/api/agent_registry.py`、`tests/contract/test_agent_registry_api.py`
 - **可并行**：否
@@ -108,6 +117,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-002、FR-003、FR-004、SC-001、AS-CT-006
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.1、Task 1.3、Task 1.4
 - **文件**：`app/agent_store/ui/official_app_view.py`、`tests/unit/test_official_app_view.py`
 - **可并行**：是
@@ -121,6 +131,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-016、FR-017、FR-025、AS-CT-006
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.1、Task 1.4
 - **文件**：`app/agent_store/domain/package_trust.py`、`app/agent_store/domain/enterprise_context.py`、`tests/unit/test_package_trust_enterprise_context.py`
 - **可并行**：是
@@ -134,6 +145,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-016、FR-027、SC-010、SC-012
 - **优先级**：P1
+- **执行状态**：已完成（Batch 2026-05-06-004）
 - **依赖**：Task 2.4、Task 2.5
 - **文件**：`tests/unit/test_official_app_view_snapshots.py`、`tests/unit/test_official_app_accessibility_contract.py`
 - **可并行**：否
@@ -148,6 +160,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-006、SC-002
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 2.1
 - **文件**：`app/agent_store/domain/installation.py`、`tests/unit/test_installation_models.py`
 - **可并行**：是
@@ -160,6 +173,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-006、FR-013、AS-CT-003
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.1、Task 2.2
 - **文件**：`app/agent_store/domain/bootstrap_service.py`、`tests/unit/test_bootstrap_service.py`
 - **可并行**：否
@@ -172,6 +186,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-007、SC-003、AS-CT-007
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.2
 - **文件**：`app/agent_store/domain/assertions.py`、`tests/unit/test_installation_assertions.py`
 - **可并行**：否
@@ -184,6 +199,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-005、FR-006、FR-007、FR-013、AS-CT-003、AS-CT-007
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.2、Task 3.3
 - **文件**：`app/agent_store/api/installation_bootstrap.py`、`tests/contract/test_installation_bootstrap_api.py`
 - **可并行**：否
@@ -196,6 +212,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-018、FR-024、AS-CT-011、SC-011
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.4、Task 1.4
 - **文件**：`app/agent_store/api/bootstrap_status.py`、`app/agent_store/domain/bootstrap_status.py`、`tests/contract/test_bootstrap_status_recovery.py`
 - **可并行**：否
@@ -209,6 +226,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-020、AS-CT-009、SC-009
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.3
 - **文件**：`tests/contract/test_assertion_security_profile.py`
 - **可并行**：是
@@ -223,6 +241,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-008、FR-009、FR-010、FR-011、SC-004
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/domain/agentops_summary.py`、`tests/unit/test_agentops_summary_models.py`
 - **可并行**：是
@@ -235,6 +254,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-008、FR-009、FR-010、FR-011、FR-012、AS-CT-004、AS-CT-005
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.1、Task 1.3、Task 1.4
 - **文件**：`app/agent_store/integrations/agentops_client.py`、`tests/unit/test_agentops_client.py`
 - **可并行**：否
@@ -248,6 +268,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-009、FR-010、FR-011、FR-013、AS-CT-004、AS-CT-005
 - **优先级**：P1
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.2
 - **文件**：`app/agent_store/api/agentops_summary.py`、`tests/contract/test_agentops_summary_api.py`
 - **可并行**：否
@@ -260,6 +281,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-004、SC-005、AS-CT-006
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 2.4、Task 3.4
 - **文件**：`tests/contract/test_standalone_boundary.py`
 - **可并行**：否
@@ -272,6 +294,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-021、FR-022、FR-026、AS-CT-008、SC-008
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.2、Task 3.4
 - **文件**：`app/agent_store/integrations/trusted_evidence_loop.py`、`tests/contract/test_trusted_evidence_loop.py`
 - **可并行**：否
@@ -284,6 +307,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-027、AS-CT-013
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 1.3、Task 4.1
 - **文件**：`app/agent_store/domain/state_source_guard.py`、`tests/unit/test_state_source_guard.py`
 - **可并行**：是
@@ -296,6 +320,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-023、AS-CT-012
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.3、Task 1.4
 - **文件**：`tests/contract/test_cross_system_navigation_permission.py`
 - **可并行**：否
@@ -303,6 +328,21 @@ Phase 4: 验证、归档与交付检查
   1. AgentOps summary 返回 links、permission_state、request_access_url、return_url、redaction_reason、audit_id、trace_id。
   2. 无权限用户只能看到脱敏摘要和申请入口。
 - **验证**：`python -m pytest tests/contract/test_cross_system_navigation_permission.py -q`
+
+### Task 4.8 实现 Vue2 官方详情页前端壳
+
+- **覆盖规格**：FR-016、FR-017、FR-018、FR-021、FR-023、FR-027、SC-001、SC-011、SC-012
+- **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-007）
+- **依赖**：Task 2.4、Task 3.5、Task 4.3、Task 4.5、Task 4.6、Task 4.7
+- **文件**：`frontend/package.json`、`frontend/index.html`、`frontend/src/sdlc-enterprise-vue2.js`、`frontend/src/mock-data.js`、`frontend/src/app.js`、`frontend/src/styles.css`、`frontend/scripts/verify-frontend.mjs`
+- **可并行**：否
+- **验收标准**：
+  1. 前端技术栈使用 Vue2。
+  2. 页面组件只通过 SDLC 内置企业 Vue2 组件适配层渲染基础 section、status、action、metric 控件。
+  3. 官方页展示 Registry、PackageTrust、EnterpriseContext、BootstrapStatus、AgentOps summary、Trusted Evidence Loop、状态冲突降级和跨系统权限失败入口。
+  4. 页面可作为本地静态工作台运行，且验证脚本覆盖 Vue2/组件库/关键字段契约。
+- **验证**：`npm --prefix frontend run verify`
 
 ## Phase 4：验证、归档与交付检查
 

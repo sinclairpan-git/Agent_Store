@@ -37,7 +37,7 @@ components:
           type: string
         error_code:
           type: string
-          enum: [OK]
+          enum: [OK, APPROVAL_EXPIRED]
         quality_evidence:
           $ref: "#/components/schemas/QualityEvidenceSummary"
         run_evidence:

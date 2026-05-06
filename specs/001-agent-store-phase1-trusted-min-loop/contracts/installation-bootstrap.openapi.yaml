@@ -28,8 +28,26 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InstallationResponse"
+        "400":
+          description: Invalid installation request or missing idempotency key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Caller lacks permission to create installation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Agent version not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
-          description: Package hash mismatch
+          description: Package hash mismatch or idempotency conflict
           content:
             application/json:
               schema:
@@ -62,6 +80,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InstallationAssertionResponse"
+        "400":
+          description: Invalid assertion request or missing idempotency key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Caller auth context cannot access installation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Installation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Assertion replay, device mismatch, expired assertion, or idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/installations/{installation_id}/bootstrap-status:
     get:
       operationId: getBootstrapStatus
@@ -79,6 +121,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BootstrapStatusResponse"
+        "403":
+          description: Caller auth context cannot access installation bootstrap status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -332,7 +380,7 @@ components:
           type: string
         error_code:
           type: string
-          enum: [PACKAGE_HASH_MISMATCH, INSTALLATION_ASSERTION_EXPIRED, ASSERTION_REPLAY_DETECTED, ASSERTION_REVOKED, AUDIENCE_MISMATCH, DEVICE_KEY_MISMATCH, PERMISSION_DENIED, VALIDATION_ERROR]
+          enum: [PACKAGE_HASH_MISMATCH, INSTALLATION_ASSERTION_EXPIRED, ASSERTION_REPLAY_DETECTED, ASSERTION_REVOKED, ASSERTION_SIGNATURE_INVALID, AUDIENCE_MISMATCH, DEVICE_KEY_MISMATCH, PERMISSION_DENIED, VALIDATION_ERROR]
         message:
           type: string
           deprecated: true

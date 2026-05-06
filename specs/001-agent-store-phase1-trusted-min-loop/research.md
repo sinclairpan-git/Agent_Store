@@ -33,6 +33,8 @@
 | assertion 安全语义 | 纳入 contract，不停留在 signature 字段 | 防止验签退化为字符串存在性检查 | FR-020、AS-CT-009 |
 | 用户恢复路径 | status / action contract 化 | bootstrap 失败需要可审计、可重试、可恢复 | FR-018、AS-CT-011 |
 | UX 与证据分层 | action_id/message_key 入 contract，具体文案留给 UI | 避免把页面文案写死进核心证据契约 | FR-016、FR-024 |
+| 前端技术栈 | Vue2 | execute 阶段用户明确指定，阶段 1 官方页前端实现遵循该约束 | FR-016、SC-001 |
+| 前端组件库 | SDLC 内置组件库企业 Vue2 组件库 | 保持企业内部 Agent Store UI 与 SDLC 组件资产一致 | FR-016、FR-027 |
 
 ## 3. 接口风格
 

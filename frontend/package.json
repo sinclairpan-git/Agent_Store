@@ -1,0 +1,13 @@
+{
+  "name": "agent-store-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vue2 official app workspace for Agent Store phase 1",
+  "scripts": {
+    "dev": "node server.mjs",
+    "verify": "node scripts/verify-frontend.mjs"
+  },
+  "dependencies": {
+    "vue": "2.7.16"
+  }
+}
