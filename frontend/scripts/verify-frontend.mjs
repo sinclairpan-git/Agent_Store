@@ -17,6 +17,7 @@ function assert(condition, message) {
 }
 
 const pkg = JSON.parse(read("package.json"));
+const lock = JSON.parse(read("package-lock.json"));
 const indexHtml = read("index.html");
 const componentLibrary = read("src/sdlc-enterprise-vue2.js");
 const app = read("src/app.js");
@@ -42,6 +43,22 @@ for (const vendorFile of [
   "../vendor/enterprise-vue2/sxf-sf-theme-0.2.5.tgz"
 ]) {
   assert(fs.existsSync(path.join(root, vendorFile)), `${vendorFile} must be vendored`);
+}
+for (const [packagePath, packageMeta] of Object.entries(lock.packages || {})) {
+  if (!packageMeta || !packageMeta.resolved) {
+    continue;
+  }
+  assert(
+    !/^https?:/.test(packageMeta.resolved),
+    `${packagePath} must not resolve from a public registry`
+  );
+  if (packageMeta.resolved.startsWith("file:../vendor/enterprise-vue2/")) {
+    const tarballPath = packageMeta.resolved.slice("file:".length);
+    assert(
+      fs.existsSync(path.join(root, tarballPath)),
+      `${packagePath} vendor tarball must exist`
+    );
+  }
 }
 assert(indexHtml.includes("node_modules/vue/dist/vue.js"), "index must load Vue2 runtime");
 assert(
@@ -97,9 +114,14 @@ assert(indexPath.filePath === path.join(serverRoot, "index.html"), "root route m
 
 const themePath = resolveRequestPath("/node_modules/@sxf/sf-theme/dist/brand.css");
 assert(themePath.status === 200, "server must resolve enterprise theme CSS");
+assert(fs.existsSync(themePath.filePath), "enterprise theme CSS file must exist");
 
 const componentsCssPath = resolveRequestPath("/node_modules/@sxf/er-components/default.css");
 assert(componentsCssPath.status === 200, "server must resolve enterprise component CSS");
+assert(
+  fs.existsSync(componentsCssPath.filePath),
+  "enterprise component CSS file must exist"
+);
 
 const traversalPath = resolveRequestPath("/..%2ffrontend-neighbor/secret.txt");
 assert(traversalPath.status === 403, "server must reject directory traversal");
