@@ -124,11 +124,15 @@ class InstallationBootstrapAPI:
                 existing_identity, response = self._assertion_idempotency[idempotency_key]
                 if existing_identity == request_identity:
                     return 200, response
-                return 409, self._validation_error(
-                    "errors.idempotencyKeyConflict",
-                    trace_id,
-                    idempotency_key,
-                )
+                return 409, ErrorResponse(
+                    error_code="VALIDATION_ERROR",
+                    message_key="errors.idempotencyKeyConflict",
+                    severity="error",
+                    retryable=False,
+                    recommended_action_id="use_new_idempotency_key",
+                    trace_id=trace_id,
+                    details={"idempotency_key": idempotency_key},
+                ).to_dict()
 
             bound_thumbprint = record.device_binding.device_public_key_thumbprint
             if requested_thumbprint != bound_thumbprint:

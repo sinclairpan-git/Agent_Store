@@ -281,6 +281,8 @@ def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
 
     assert status == 409
     assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["retryable"] is False
+    assert body["recommended_action_id"] == "use_new_idempotency_key"
 
 
 def test_issue_assertion_api_rejects_nonce_replay_with_new_idempotency_key() -> None:

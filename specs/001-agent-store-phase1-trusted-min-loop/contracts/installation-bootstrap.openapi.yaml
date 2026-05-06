@@ -62,6 +62,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InstallationAssertionResponse"
+        "400":
+          description: Invalid assertion request or missing idempotency key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Caller auth context cannot access installation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Installation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Assertion replay, device mismatch, expired assertion, or idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/installations/{installation_id}/bootstrap-status:
     get:
       operationId: getBootstrapStatus

@@ -6,6 +6,7 @@ from agent_store.contracts.loader import (
     ContractValidationError,
     default_contracts_dir,
     iter_contract_files,
+    load_openapi_contract,
     validate_all_contracts,
     validate_contract_file,
 )
@@ -21,6 +22,17 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "trusted-evidence-loop.openapi.yaml",
     }
     validate_all_contracts(default_contracts_dir())
+
+
+def test_installation_assertion_contract_documents_error_responses() -> None:
+    contract = load_openapi_contract(default_contracts_dir() / "installation-bootstrap.openapi.yaml")
+    operation = contract["paths"]["/api/v1/installations/{installation_id}/assertion"]["post"]
+    responses = operation["responses"]
+
+    assert {"200", "400", "403", "404", "409"}.issubset(responses.keys())
+    for status_code in ("400", "403", "404", "409"):
+        schema = responses[status_code]["content"]["application/json"]["schema"]
+        assert schema == {"$ref": "#/components/schemas/ErrorResponse"}
 
 
 def test_contract_validation_rejects_response_without_trace_fields(tmp_path: Path) -> None:
