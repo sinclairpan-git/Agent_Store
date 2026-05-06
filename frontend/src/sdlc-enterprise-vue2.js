@@ -1,4 +1,44 @@
 (function registerSdlcEnterpriseVue2(Vue) {
+  var ENTERPRISE_VUE2_PROVIDER = {
+    name: "sdlc-enterprise-vue2",
+    packageName: "@sxf/er-components",
+    installedVersion: "1.27.5",
+    sourcePath: "vendor/enterprise-vue2/sxf-er-components-1.27.5.tgz",
+    themePackageName: "@sxf/sf-theme",
+    themeInstalledVersion: "0.2.5",
+    themeSourcePath: "vendor/enterprise-vue2/sxf-sf-theme-0.2.5.tgz",
+    frameworkBaseline: "/Users/sinclairpan/project/Ai_AutoSDLC/specs/016-frontend-enterprise-vue2-provider-baseline/spec.md",
+    allowFullVueUse: false,
+    allowedCapabilities: [
+      "UiButton",
+      "UiCard",
+      "UiTag",
+      "UiTabs",
+      "UiDrawer",
+      "UiMenu",
+      "UiToolbar",
+      "UiPagination",
+      "UiGrid"
+    ]
+  };
+
+  window.SDLC_ENTERPRISE_VUE2_PROVIDER = ENTERPRISE_VUE2_PROVIDER;
+
+  Vue.component("sdlc-enterprise-provider-meta", {
+    template: [
+      '<div class="provider-meta" data-provider="sdlc-enterprise-vue2">',
+      '  <span>{{ provider.packageName }}</span>',
+      '  <span>{{ provider.installedVersion }}</span>',
+      '  <span>{{ provider.themePackageName }}</span>',
+      '</div>'
+    ].join(""),
+    data: function data() {
+      return {
+        provider: ENTERPRISE_VUE2_PROVIDER
+      };
+    }
+  });
+
   Vue.component("sdlc-status-chip", {
     props: ["label", "tone"],
     template: '<span class="status-chip" :class="toneClass">{{ label }}</span>',
@@ -65,7 +105,7 @@
   Vue.component("sdlc-section", {
     props: ["title"],
     template: [
-      '<section class="workspace-section">',
+      '<section class="workspace-section er-card">',
       '  <h2>{{ title }}</h2>',
       '  <slot></slot>',
       '</section>'
@@ -76,6 +116,7 @@
     props: ["view", "agentops", "bootstrap", "trustedLoop", "stateDecision"],
     template: [
       '<main class="workspace">',
+      '  <sdlc-enterprise-provider-meta></sdlc-enterprise-provider-meta>',
       '  <header class="topbar">',
       '    <div>',
       '      <div class="product-mark">Agent Store</div>',

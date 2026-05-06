@@ -302,3 +302,45 @@
 
 - Vue2 官方详情页前端壳已完成，前端验证通过，后端全量测试 74 项通过，ruff 通过。
 - 下一批次进入 Phase 4：端到端 contract test、traceability、development summary 与 close。
+
+### Batch 2026-05-06-008 | execute frontend enterprise vue2 vendor intake
+
+#### 批次范围
+
+- 覆盖阶段：execute / 前端组件库来源收敛
+- 覆盖任务：Task 4.8 follow-up
+- 技术约束：Vue2；SDLC 内置企业 Vue2 组件库必须来自 AgentOps 已落地的企业 Vue2 vendor 包。
+
+#### 代码与文档产物
+
+- 新增 AgentOps 企业 Vue2 离线包 vendor：`vendor/enterprise-vue2/*.tgz`
+- 更新前端依赖：`frontend/package.json`、`frontend/package-lock.json` 改为使用 `file:../vendor/enterprise-vue2/*.tgz`
+- 更新官方页入口：`frontend/index.html` 加载 `@sxf/sf-theme` 与 `@sxf/er-components` 样式资产。
+- 更新 SDLC 企业 Vue2 adapter：`frontend/src/sdlc-enterprise-vue2.js` 暴露真实 provider metadata。
+- 更新前端验证脚本：`frontend/scripts/verify-frontend.mjs` 校验 vendor 包、真实 provider metadata 与企业组件样式入口。
+
+#### 验证命令
+
+- `ai-sdlc run --dry-run`
+- `npm --prefix frontend install --ignore-scripts --legacy-peer-deps --cache .npm-cache`
+- `npm --prefix frontend run verify`
+- `uv run pytest -q`
+- `uv run ruff check app tests`
+
+#### 代码审查
+
+- 本批次重点检查：Agent Store 已拿到 AgentOps 的 `vendor/enterprise-vue2` 离线包；Vue2、`@sxf/er-components`、`@sxf/sf-theme` 均由本地 tgz 解析；页面保持业务 adapter 稳定，不直接暴露组件库内部 API 给后端 view model。
+
+#### 任务/计划同步状态
+
+- `ai-sdlc run --dry-run` 仍显示 close RETRY：`development-summary.md not found` 与 `Final tests did not pass` 为既有 open gate。
+- npm audit 仍提示 1 个 low severity vulnerability；当前由 Vue2/企业组件依赖树带来，未执行破坏性 `npm audit fix --force`。
+
+#### 分支与工作树处置
+
+- 当前批次 branch disposition 状态：retained（准备提交 PR）
+- 当前批次 worktree disposition 状态：retained
+
+#### 批次结论
+
+- Agent Store 已从 AgentOps 拿到并接入 SDLC 内置企业 Vue2 vendor 包；前端验证、后端全量测试与 ruff 均通过。
