@@ -27,9 +27,14 @@ gh api repos/OWNER/REPO/rulesets \
 
 `Compatibility Gate` is the protected aggregate check. It verifies repository
 contracts on Linux, macOS, and Windows with Python 3.11 and 3.12, runs the
-AI-SDLC adapter status and dry-run entry, checks Windows `pwsh` and `cmd`
-execution, builds Agent Store bundles, and smoke-tests extracted artifacts on
-all supported operating systems.
+AI-SDLC adapter status and dry-run entry from the required compatibility
+baseline, checks Windows `pwsh` and `cmd` execution, builds Agent Store bundles,
+and smoke-tests extracted artifacts on all supported operating systems.
+
+The workflow also runs a non-blocking AI-SDLC forward-compatibility job against
+the configured forward ref. That job is intended to warn about upcoming
+AI-SDLC changes without making Agent Store pull requests fail for unrelated
+upstream movement.
 
 `PR Checks` is a fast Ubuntu-only contract and bundle smoke for pull requests.
 

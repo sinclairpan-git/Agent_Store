@@ -16,7 +16,9 @@ env:
   COLUMNS: "200"
   PYTHONUTF8: "1"
   PYTHONIOENCODING: utf-8
-  AI_SDLC_CLI_SPEC: "ai-sdlc @ git+https://github.com/sinclairpan-git/Ai_AutoSDLC.git@v0.7.7"
+  AI_SDLC_REPOSITORY: "https://github.com/sinclairpan-git/Ai_AutoSDLC.git"
+  AI_SDLC_REQUIRED_REF: "v0.7.7"
+  AI_SDLC_FORWARD_REF: "main"
 
 concurrency:
   group: compatibility-gate-${{ github.event.pull_request.number || github.ref }}
@@ -52,7 +54,38 @@ jobs:
         run: python .github/scripts/verify_repository.py
 
       - name: Install AI-SDLC CLI
-        run: python -m pip install "${{ env.AI_SDLC_CLI_SPEC }}"
+        run: >-
+          python -m pip install
+          "ai-sdlc @ git+${{ env.AI_SDLC_REPOSITORY }}@${{ env.AI_SDLC_REQUIRED_REF }}"
+
+      - name: AI-SDLC adapter status
+        run: python -m ai_sdlc adapter status
+
+      - name: AI-SDLC dry-run
+        run: python -m ai_sdlc run --dry-run
+
+  ai-sdlc-forward-compatibility:
+    name: AI-SDLC Forward Compatibility (main)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Verify repository contract
+        run: python .github/scripts/verify_repository.py
+
+      - name: Install AI-SDLC CLI from forward ref
+        run: >-
+          python -m pip install
+          "ai-sdlc @ git+${{ env.AI_SDLC_REPOSITORY }}@${{ env.AI_SDLC_FORWARD_REF }}"
 
       - name: AI-SDLC adapter status
         run: python -m ai_sdlc adapter status
@@ -172,7 +205,7 @@ jobs:
         shell: pwsh
         run: |
           python .github/scripts/verify_repository.py
-          python -m pip install "${{ env.AI_SDLC_CLI_SPEC }}"
+          python -m pip install "ai-sdlc @ git+${{ env.AI_SDLC_REPOSITORY }}@${{ env.AI_SDLC_REQUIRED_REF }}"
           python -m ai_sdlc adapter status
 
       - name: Repository smoke (cmd)
@@ -180,7 +213,7 @@ jobs:
         shell: cmd
         run: |
           python .github\scripts\verify_repository.py || exit /b 1
-          python -m pip install "${{ env.AI_SDLC_CLI_SPEC }}" || exit /b 1
+          python -m pip install "ai-sdlc @ git+${{ env.AI_SDLC_REPOSITORY }}@${{ env.AI_SDLC_REQUIRED_REF }}" || exit /b 1
           python -m ai_sdlc adapter status || exit /b 1
 
   compatibility-gate-result:
