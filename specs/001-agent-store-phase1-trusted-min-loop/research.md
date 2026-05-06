@@ -16,6 +16,8 @@
 - Installation / Device Binding / Signed Installation Assertion。
 - AgentOps 摘要回显。
 - standalone 与 enterprise managed 的边界保护。
+- Trusted Evidence Loop：Reporter signed event -> AgentOps ingestion -> Evidence summary -> Agent Store 回显。
+- 官方页治理视图模型、bootstrap 恢复路径、跨系统导航和可访问错误响应。
 
 ## 2. 方案决策
 
@@ -27,6 +29,10 @@
 | 质量/证据处理 | 只消费 AgentOps summary | 顶层基线规定 AgentOps 是运行事实与质量面 | FR-009、FR-012 |
 | bootstrap 归属 | Store 写 installation / device，AgentOps 写 credential | 符合项目 PRD 的 Producer-Consumer 契约矩阵 | FR-006、FR-007、FR-008 |
 | standalone 保护 | 作为 contract test 固化 | 防止企业接入把 Ai_AutoSDLC 个人/外部使用变成硬依赖 | AS-CT-006 |
+| 可信证据闭环 | 增加 consumer-driven contract | 阶段 1 必须能证明 run/session/event/evidence/display 同源 | FR-021、AS-CT-008 |
+| assertion 安全语义 | 纳入 contract，不停留在 signature 字段 | 防止验签退化为字符串存在性检查 | FR-020、AS-CT-009 |
+| 用户恢复路径 | status / action contract 化 | bootstrap 失败需要可审计、可重试、可恢复 | FR-018、AS-CT-011 |
+| UX 与证据分层 | action_id/message_key 入 contract，具体文案留给 UI | 避免把页面文案写死进核心证据契约 | FR-016、FR-024 |
 
 ## 3. 接口风格
 
@@ -38,6 +44,7 @@
 - 写操作支持 `idempotency_key`。
 - 所有跨系统跳转或摘要展示携带 `trace_id` 或 `audit_id`。
 - 枚举值使用 machine value，页面展示名通过状态注册表映射。
+- 普通用户视图使用 `action_id`、`message_key`、`trust_state`、`availability_state`，管理员诊断视图才展示 hash、key、nonce、signature 等原始字段。
 
 ## 4. 数据持久化策略
 
@@ -47,6 +54,8 @@
 - Agent Store 不持久化 Evidence Vault 原文。
 - Agent Store 不持久化 AgentOps 评分计算过程，只缓存 summary 响应时必须保留 `valid_until` 并按过期降级展示。
 - AgentOps summary 可通过同步 API 拉取或异步回写，页面只按 summary contract 渲染。
+- run/session 级 Evidence summary 必须保留来源引用：`source_event_ids`、`evidence_summary_id`、`l5_gate_result`、`violation_scan_completed`、`summary_validity_state`。
+- AuthContext 和 PermissionDecision 必须由统一认证/IAM 或 AgentOps policy 派生，不接受客户端裸 `user_id` 作为可信事实。
 
 ## 5. 安全与降级策略
 

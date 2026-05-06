@@ -29,7 +29,7 @@ components:
   schemas:
     AgentOpsSummaryResponse:
       type: object
-      required: [schema_version, trace_id, error_code, quality_evidence, approval, runtime_policy]
+      required: [schema_version, trace_id, error_code, quality_evidence, approval, runtime_policy, run_evidence, links]
       properties:
         schema_version:
           type: string
@@ -40,15 +40,34 @@ components:
           enum: [OK]
         quality_evidence:
           $ref: "#/components/schemas/QualityEvidenceSummary"
+        run_evidence:
+          $ref: "#/components/schemas/RunEvidenceSummary"
+        l5_gate:
+          $ref: "#/components/schemas/L5GateSummary"
+        governance_load:
+          $ref: "#/components/schemas/GovernanceLoadSummary"
         approval:
           $ref: "#/components/schemas/ApprovalSummary"
         runtime_policy:
           $ref: "#/components/schemas/RuntimePolicySummary"
         credential_bootstrap:
           $ref: "#/components/schemas/CredentialBootstrapSummary"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/CrossSystemLink"
+        permission_state:
+          type: string
+          enum: [allowed, denied, approval_required, redacted]
+        redaction_reason:
+          type: string
+        request_access_url:
+          type: string
+        return_url:
+          type: string
     QualityEvidenceSummary:
       type: object
-      required: [evidence_level, confidence, missing_evidence, score_template_id, calculated_at, valid_until]
+      required: [evidence_level, confidence, missing_evidence, score_template_id, calculated_at, valid_until, summary_validity_state]
       properties:
         evidence_level:
           type: string
@@ -68,6 +87,69 @@ components:
         valid_until:
           type: string
           format: date-time
+        summary_validity_state:
+          type: string
+          enum: [fresh, stale, expired, degraded]
+        identity_confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        degraded_reason:
+          type: string
+    RunEvidenceSummary:
+      type: object
+      required: [run_id, session_id, evidence_summary_id, source_event_ids, trace_id]
+      properties:
+        run_id:
+          type: string
+        session_id:
+          type: string
+        evidence_summary_id:
+          type: string
+        source_event_ids:
+          type: array
+          items:
+            type: string
+        source_event_count:
+          type: integer
+        trace_id:
+          type: string
+        last_verified_at:
+          type: string
+          format: date-time
+    L5GateSummary:
+      type: object
+      required: [l5_gate_result, violation_scan_completed, actual_l5_display_allowed]
+      properties:
+        l5_gate_result:
+          type: string
+          enum: [passed, failed, pending, not_applicable]
+        violation_scan_completed:
+          type: boolean
+        actual_l5_display_allowed:
+          type: boolean
+        missing_requirements:
+          type: array
+          items:
+            type: string
+    GovernanceLoadSummary:
+      type: object
+      required: [adapter_state, load_verification_method]
+      properties:
+        adapter_state:
+          type: string
+          enum: [verified_loaded, materialized, degraded, unsupported, unknown]
+        load_verification_method:
+          type: string
+        verified_at:
+          type: string
+          format: date-time
+        evidence_hash:
+          type: string
+        degraded_reason:
+          type: string
+        unsupported_reason:
+          type: string
     ApprovalSummary:
       type: object
       required: [approval_id, status, audit_id]
@@ -85,6 +167,11 @@ components:
           type: string
           format: date-time
         audit_id:
+          type: string
+        permission_state:
+          type: string
+          enum: [allowed, denied, approval_required, redacted]
+        request_access_url:
           type: string
     RuntimePolicySummary:
       type: object
@@ -119,3 +206,24 @@ components:
         enterprise_state:
           type: string
           enum: [not_detected, detected_optional, required_unactivated, activating, active, degraded, disabled]
+    CrossSystemLink:
+      type: object
+      required: [rel, target_system, href, trace_id]
+      properties:
+        rel:
+          type: string
+          enum: [evidence_summary, evidence_request_access, quality_detail, approval_center, risk_triage, return_to_store]
+        target_system:
+          type: string
+          enum: [agentops, evidence_vault, agent_store]
+        href:
+          type: string
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        permission_state:
+          type: string
+          enum: [allowed, denied, approval_required, redacted]
+        redaction_reason:
+          type: string

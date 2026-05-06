@@ -2,6 +2,8 @@ openapi: 3.1.0
 info:
   title: Agent Store Installation Bootstrap API
   version: 0.1.0
+security:
+  - bearerAuth: []
 paths:
   /api/v1/installations:
     post:
@@ -42,6 +44,17 @@ paths:
           required: true
           schema:
             type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueAssertionRequest"
       responses:
         "200":
           description: Assertion issued
@@ -49,11 +62,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/InstallationAssertionResponse"
+  /api/v1/installations/{installation_id}/bootstrap-status:
+    get:
+      operationId: getBootstrapStatus
+      summary: Get manual activation bootstrap progress and recovery actions
+      parameters:
+        - name: installation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Bootstrap status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BootstrapStatusResponse"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     CreateInstallationRequest:
       type: object
-      required: [agent_id, agent_version, user_id, device_os, artifact_hash]
+      required: [agent_id, agent_version, device_os, artifact_hash, device_public_key_thumbprint]
       properties:
         agent_id:
           type: string
@@ -61,10 +96,14 @@ components:
           type: string
         user_id:
           type: string
+          deprecated: true
+          description: Derived from bearer token; clients must not use this as trusted identity input.
         device_os:
           type: string
           enum: [macOS, Windows, Linux]
         artifact_hash:
+          type: string
+        device_public_key_thumbprint:
           type: string
     InstallationResponse:
       type: object
@@ -78,25 +117,78 @@ components:
           type: string
           enum: [OK]
         installation:
-          type: object
-          required: [installation_id, device_id, agent_id, agent_version, artifact_hash, status, enterprise_state]
-          properties:
-            installation_id:
-              type: string
-            device_id:
-              type: string
-            agent_id:
-              type: string
-            agent_version:
-              type: string
-            artifact_hash:
-              type: string
-            status:
-              type: string
-              enum: [activation_required, reporter_pending, failed, revoked]
-            enterprise_state:
-              type: string
-              enum: [detected_optional, required_unactivated, activating, active, degraded, disabled]
+          $ref: "#/components/schemas/Installation"
+        auth_context:
+          $ref: "#/components/schemas/AuthContext"
+        permission_decision:
+          $ref: "#/components/schemas/PermissionDecision"
+    Installation:
+      type: object
+      required: [installation_id, device_id, agent_id, agent_version, artifact_hash, status, enterprise_state]
+      properties:
+        installation_id:
+          type: string
+        device_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        artifact_hash:
+          type: string
+        status:
+          type: string
+          enum: [activation_required, reporter_pending, failed, revoked]
+        enterprise_state:
+          type: string
+          enum: [detected_optional, required_unactivated, activating, active, degraded, disabled]
+    AuthContext:
+      type: object
+      required: [auth_context_id, subject_user_id, identity_confidence]
+      properties:
+        auth_context_id:
+          type: string
+        subject_user_id:
+          type: string
+        tenant_id:
+          type: string
+        org_id:
+          type: string
+        project_id:
+          type: string
+        repo_ref:
+          type: string
+        identity_confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+    PermissionDecision:
+      type: object
+      required: [permission_decision_id, decision, audit_id]
+      properties:
+        permission_decision_id:
+          type: string
+        decision:
+          type: string
+          enum: [allow, deny, approval_required]
+        denied_scope:
+          type: string
+        request_access_url:
+          type: string
+        audit_id:
+          type: string
+        trace_id:
+          type: string
+    IssueAssertionRequest:
+      type: object
+      required: [device_public_key_thumbprint, nonce, audience]
+      properties:
+        device_public_key_thumbprint:
+          type: string
+        nonce:
+          type: string
+        audience:
+          type: string
     InstallationAssertionResponse:
       type: object
       required: [schema_version, trace_id, error_code, assertion]
@@ -110,8 +202,28 @@ components:
           enum: [OK]
         assertion:
           type: object
-          required: [installation_id, device_id, artifact_hash, issuer, expires_at, key_id, signature]
+          required:
+            - assertion_version
+            - installation_id
+            - device_id
+            - artifact_hash
+            - issuer
+            - issued_at
+            - expires_at
+            - key_id
+            - alg
+            - canonicalization
+            - audience
+            - subject_user_id
+            - nonce
+            - replay_window_seconds
+            - device_public_key_thumbprint
+            - assertion_hash
+            - revocation_status
+            - signature
           properties:
+            assertion_version:
+              type: string
             installation_id:
               type: string
             device_id:
@@ -120,16 +232,38 @@ components:
               type: string
             issuer:
               type: string
+            issued_at:
+              type: string
+              format: date-time
             expires_at:
               type: string
               format: date-time
             key_id:
               type: string
+            alg:
+              type: string
+            canonicalization:
+              type: string
+            audience:
+              type: string
+            subject_user_id:
+              type: string
+            nonce:
+              type: string
+            replay_window_seconds:
+              type: integer
+            device_public_key_thumbprint:
+              type: string
+            assertion_hash:
+              type: string
+            revocation_status:
+              type: string
+              enum: [not_revoked, revoked, unknown]
             signature:
               type: string
-    ErrorResponse:
+    BootstrapStatusResponse:
       type: object
-      required: [schema_version, trace_id, error_code, message]
+      required: [schema_version, trace_id, error_code, status]
       properties:
         schema_version:
           type: string
@@ -137,6 +271,81 @@ components:
           type: string
         error_code:
           type: string
-          enum: [PACKAGE_HASH_MISMATCH, INSTALLATION_ASSERTION_EXPIRED, VALIDATION_ERROR]
+          enum: [OK]
+        status:
+          type: object
+          required: [installation_id, bootstrap_status, current_step, step_status, primary_action]
+          properties:
+            installation_id:
+              type: string
+            bootstrap_status:
+              type: string
+              enum: [not_started, assertion_issued, device_bound, credential_issued, signature_verified, expired, failed]
+            current_step:
+              type: string
+              enum: [issue_assertion, bind_device, issue_credential, signature_test, complete]
+            step_status:
+              type: string
+              enum: [not_started, running, succeeded, failed, blocked]
+            next_poll_after:
+              type: integer
+            retryable:
+              type: boolean
+            retry_after:
+              type: integer
+            regenerate_command_url:
+              type: string
+            diagnostic_ref:
+              type: string
+            last_error_code:
+              type: string
+            safe_to_rerun:
+              type: boolean
+            primary_action:
+              $ref: "#/components/schemas/ActionDescriptor"
+            secondary_actions:
+              type: array
+              items:
+                $ref: "#/components/schemas/ActionDescriptor"
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agentops, ai_autosdlc_cli, evidence_vault]
+        enabled:
+          type: boolean
+        href:
+          type: string
+        audit_required:
+          type: boolean
+    ErrorResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, message_key, severity, retryable, recommended_action_id]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [PACKAGE_HASH_MISMATCH, INSTALLATION_ASSERTION_EXPIRED, ASSERTION_REPLAY_DETECTED, ASSERTION_REVOKED, AUDIENCE_MISMATCH, DEVICE_KEY_MISMATCH, PERMISSION_DENIED, VALIDATION_ERROR]
         message:
+          type: string
+          deprecated: true
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
           type: string

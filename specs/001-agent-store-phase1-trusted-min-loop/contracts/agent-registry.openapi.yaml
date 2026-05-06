@@ -55,6 +55,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/official-apps/{agent_id}/view:
+    get:
+      operationId: getOfficialAppView
+      summary: Get governed official app view model
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: role
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [user, owner, agentops_admin, security_iam]
+      responses:
+        "200":
+          description: Official app view model
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OfficialAppViewResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     CreateAgentDraftRequest:
@@ -93,6 +122,8 @@ components:
         release_status:
           type: string
           enum: [official_draft, official_readonly, manual_installable-preview]
+        package_trust_summary:
+          $ref: "#/components/schemas/PackageTrustSummary"
     AgentDraftResponse:
       type: object
       required: [schema_version, trace_id, error_code, agent]
@@ -124,9 +155,166 @@ components:
               type: string
             release_status:
               type: string
+            package_trust_summary:
+              $ref: "#/components/schemas/PackageTrustSummary"
+    OfficialAppViewResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, view]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        view:
+          $ref: "#/components/schemas/OfficialAppView"
+    OfficialAppView:
+      type: object
+      required:
+        - agent_id
+        - display_name
+        - summary
+        - use_cases
+        - current_user_installability
+        - supported_os
+        - package_trust_summary
+        - standalone_action
+        - enterprise_activation_action
+        - primary_action
+        - secondary_actions
+        - enterprise_context
+      properties:
+        agent_id:
+          type: string
+        display_name:
+          type: string
+        summary:
+          type: string
+        use_cases:
+          type: array
+          items:
+            type: string
+        current_user_installability:
+          type: string
+          enum: [installable, approval_required, activation_required, blocked, standalone_only]
+        supported_os:
+          type: array
+          items:
+            $ref: "#/components/schemas/OsCompatibility"
+        package_trust_summary:
+          $ref: "#/components/schemas/PackageTrustSummary"
+        standalone_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+        enterprise_activation_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+        primary_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+        secondary_actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActionDescriptor"
+        enterprise_context:
+          $ref: "#/components/schemas/EnterpriseContext"
+    OsCompatibility:
+      type: object
+      required: [os, compatibility_status]
+      properties:
+        os:
+          type: string
+          enum: [macOS, Windows, Linux]
+        min_version:
+          type: string
+        compatibility_status:
+          type: string
+          enum: [unknown, static_passed, smoke_passed, install_verified, unsupported]
+    PackageTrustSummary:
+      type: object
+      required: [package_id, trust_state, signature_state, hash_match_state, issuer_display]
+      properties:
+        package_id:
+          type: string
+        hash_algorithm:
+          type: string
+        package_signature_alg:
+          type: string
+        key_id:
+          type: string
+        source_repo:
+          type: string
+        source_commit:
+          type: string
+        sbom_ref:
+          type: string
+        scan_report_ref:
+          type: string
+        trust_state:
+          type: string
+          enum: [trusted, warning, blocked, unknown]
+        signature_state:
+          type: string
+          enum: [verified, expired, mismatch, missing]
+        hash_match_state:
+          type: string
+          enum: [matched, mismatched, unknown]
+        issuer_display:
+          type: string
+        diagnostic_ref:
+          type: string
+    EnterpriseContext:
+      type: object
+      required: [integration_mode, enterprise_state, source, can_ignore, affected_actions, requires_enterprise]
+      properties:
+        integration_mode:
+          type: string
+          enum: [standalone, enterprise_managed, custom_sink]
+        enterprise_state:
+          type: string
+          enum: [not_detected, detected_optional, required_unactivated, activating, active, degraded, disabled]
+        required_by:
+          type: string
+        source:
+          type: string
+        issuer:
+          type: string
+        policy_owner:
+          type: string
+        policy_version:
+          type: string
+        can_ignore:
+          type: boolean
+        affected_actions:
+          type: array
+          items:
+            type: string
+        requires_enterprise:
+          type: boolean
+        custom_sink_support_status:
+          type: string
+          enum: [custom_unconfigured, custom_incomplete, custom_connected, custom_degraded]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agentops, evidence_vault, ai_autosdlc_cli, external]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
     ErrorResponse:
       type: object
-      required: [schema_version, trace_id, error_code, message]
+      required: [schema_version, trace_id, error_code, message_key, severity, retryable, recommended_action_id]
       properties:
         schema_version:
           type: string
@@ -136,4 +324,18 @@ components:
           type: string
           enum: [AGENT_OWNER_REQUIRED, AGENT_NOT_FOUND, VERSION_ALREADY_EXISTS, VALIDATION_ERROR]
         message:
+          type: string
+          deprecated: true
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
           type: string

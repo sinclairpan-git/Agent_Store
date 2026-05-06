@@ -11,13 +11,13 @@ specs:
   path: specs/001-agent-store-phase1-trusted-min-loop
   depends_on: []
 truth_snapshot:
-  generated_at: '2026-05-06T06:51:59Z'
+  generated_at: '2026-05-06T07:09:12Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: d12f311
+  repo_revision: 73b1ba4
   authoring_hash: 6eb20846c63a76a45e860cd38a5d905f87823ddd9350872cdbfab165fb090c5d
   source_hashes: {}
-  snapshot_hash: c3195a1ae9f4a7ac251c274d5a749e736b2c8583b517b9c6046e32913427d453
+  snapshot_hash: d245f94da3f700dbfd0b9919a1529dcc09f677fb04cc0ccf8a9e979762b5591b
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -25,8 +25,8 @@ truth_snapshot:
     mapped_sources: 7
     unmapped_sources: 0
     missing_sources: 1
-    phase_signal_count: 10
-    deferred_signal_count: 21
+    phase_signal_count: 12
+    deferred_signal_count: 24
     non_goal_signal_count: 3
     layer_totals:
       blueprint: 1
@@ -78,8 +78,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 001-agent-store-phase1-trusted-min-loop
-      phase_signal_count: 7
-      deferred_signal_count: 8
+      phase_signal_count: 8
+      deferred_signal_count: 9
       non_goal_signal_count: 0
     - path: specs/001-agent-store-phase1-trusted-min-loop/task-execution-log.md
       source_type: execution_log
@@ -87,8 +87,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 001-agent-store-phase1-trusted-min-loop
-      phase_signal_count: 0
-      deferred_signal_count: 1
+      phase_signal_count: 1
+      deferred_signal_count: 3
       non_goal_signal_count: 0
     - path: specs/001-agent-store-phase1-trusted-min-loop/development-summary.md
       source_type: development_summary
