@@ -161,3 +161,52 @@
 
 - Phase 1 Registry 与官方页 view model 已完成，全量测试 33 项通过，ruff 通过。
 - 下一批次进入 Phase 2：Installation / Device Binding / Bootstrap。
+
+### Batch 2026-05-06-005 | execute phase 2 bootstrap and assertion
+
+#### 批次范围
+
+- 覆盖阶段：execute / Phase 2 manual_installable-preview 与 bootstrap
+- 覆盖任务：Task 3.1、Task 3.2、Task 3.3、Task 3.4、Task 3.5、Task 3.6
+- 关键边界：安装身份来自 AuthContext / PermissionDecision；客户端裸 `user_id` 不进入安装事实源。
+
+#### 代码与文档产物
+
+- 新增 Installation / DeviceBinding 领域模型：`app/agent_store/domain/installation.py`
+- 新增安装创建与幂等绑定服务：`app/agent_store/domain/bootstrap_service.py`
+- 新增 signed installation assertion 与安全校验：`app/agent_store/domain/assertions.py`
+- 新增 bootstrap status 恢复模型与 API handler：`app/agent_store/domain/bootstrap_status.py`、`app/agent_store/api/bootstrap_status.py`
+- 新增 Installation Bootstrap API handler：`app/agent_store/api/installation_bootstrap.py`
+- 新增 assertion security profile contract tests：`tests/contract/test_assertion_security_profile.py`
+
+#### 验证命令
+
+- `uv run pytest tests/unit/test_installation_models.py -q`
+- `uv run pytest tests/unit/test_bootstrap_service.py -q`
+- `uv run pytest tests/unit/test_installation_assertions.py -q`
+- `uv run pytest tests/contract/test_installation_bootstrap_api.py -q`
+- `uv run pytest tests/contract/test_bootstrap_status_recovery.py -q`
+- `uv run pytest tests/contract/test_assertion_security_profile.py -q`
+- `uv run pytest -q`
+- `uv run ruff check`
+- `ai-sdlc run --dry-run`
+
+#### 代码审查
+
+- 本批次重点检查：安装创建幂等、artifact hash mismatch 阻断、assertion 过期阻断、replay/revoked/audience/device key 负向拒绝、bootstrap 过期命令恢复动作、权限不足 access request/return_path 回显。
+
+#### 任务/计划同步状态
+
+- Task 3.1 至 Task 3.6 已在 `tasks.md` 标注完成批次。
+- `ai-sdlc run --dry-run` 仍显示 close RETRY：`development-summary.md not found` 与 `Final tests did not pass` 属于 execute 尚未全部完成前的预期 open gate。
+- `ai-sdlc verify constraints` 存在既有 release docs consistency blockers，非本批代码引入。
+
+#### 分支与工作树处置
+
+- 当前批次 branch disposition 状态：retained（继续在 `feature/001-agent-store-phase1-trusted-min-loop-dev` 推进后续 Phase 3）
+- 当前批次 worktree disposition 状态：retained
+
+#### 批次结论
+
+- Phase 2 bootstrap 与 assertion security 已完成，全量测试 53 项通过，ruff 通过。
+- 下一批次进入 Phase 3：AgentOps summary、Trusted Evidence Loop 与 standalone 边界。

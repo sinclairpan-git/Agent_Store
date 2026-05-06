@@ -160,6 +160,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-006、SC-002
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 2.1
 - **文件**：`app/agent_store/domain/installation.py`、`tests/unit/test_installation_models.py`
 - **可并行**：是
@@ -172,6 +173,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-006、FR-013、AS-CT-003
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.1、Task 2.2
 - **文件**：`app/agent_store/domain/bootstrap_service.py`、`tests/unit/test_bootstrap_service.py`
 - **可并行**：否
@@ -184,6 +186,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-007、SC-003、AS-CT-007
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.2
 - **文件**：`app/agent_store/domain/assertions.py`、`tests/unit/test_installation_assertions.py`
 - **可并行**：否
@@ -196,6 +199,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-005、FR-006、FR-007、FR-013、AS-CT-003、AS-CT-007
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.2、Task 3.3
 - **文件**：`app/agent_store/api/installation_bootstrap.py`、`tests/contract/test_installation_bootstrap_api.py`
 - **可并行**：否
@@ -208,6 +212,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-018、FR-024、AS-CT-011、SC-011
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.4、Task 1.4
 - **文件**：`app/agent_store/api/bootstrap_status.py`、`app/agent_store/domain/bootstrap_status.py`、`tests/contract/test_bootstrap_status_recovery.py`
 - **可并行**：否
@@ -221,6 +226,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-020、AS-CT-009、SC-009
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-005）
 - **依赖**：Task 3.3
 - **文件**：`tests/contract/test_assertion_security_profile.py`
 - **可并行**：是
