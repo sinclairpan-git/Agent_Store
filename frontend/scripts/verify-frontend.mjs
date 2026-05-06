@@ -76,6 +76,13 @@ assert(
     && componentLibrary.includes("window.SDLC_ENTERPRISE_VUE2_PROVIDER"),
   "component adapter must expose the real SDLC enterprise Vue2 provider metadata"
 );
+assert(
+  componentLibrary.includes(
+    'frameworkBaseline: "Ai_AutoSDLC/specs/016-frontend-enterprise-vue2-provider-baseline/spec.md"'
+  )
+    && !componentLibrary.includes("/Users/"),
+  "provider metadata must use portable baseline references"
+);
 for (const componentName of [
   "sdlc-shell",
   "sdlc-section",

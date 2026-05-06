@@ -7,7 +7,7 @@
     themePackageName: "@sxf/sf-theme",
     themeInstalledVersion: "0.2.5",
     themeSourcePath: "vendor/enterprise-vue2/sxf-sf-theme-0.2.5.tgz",
-    frameworkBaseline: "/Users/sinclairpan/project/Ai_AutoSDLC/specs/016-frontend-enterprise-vue2-provider-baseline/spec.md",
+    frameworkBaseline: "Ai_AutoSDLC/specs/016-frontend-enterprise-vue2-provider-baseline/spec.md",
     allowFullVueUse: false,
     allowedCapabilities: [
       "UiButton",
