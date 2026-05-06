@@ -35,6 +35,19 @@ def test_create_installation_contract_documents_error_responses() -> None:
         assert schema == {"$ref": "#/components/schemas/ErrorResponse"}
 
 
+def test_create_agent_draft_contract_documents_conflict_errors() -> None:
+    contract = load_openapi_contract(default_contracts_dir() / "agent-registry.openapi.yaml")
+    operation = contract["paths"]["/api/v1/agents/drafts"]["post"]
+    responses = operation["responses"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"]["error_code"]["enum"]
+
+    assert {"201", "400", "409"}.issubset(responses.keys())
+    assert responses["409"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ErrorResponse"
+    }
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
 def test_installation_assertion_contract_documents_error_responses() -> None:
     contract = load_openapi_contract(default_contracts_dir() / "installation-bootstrap.openapi.yaml")
     operation = contract["paths"]["/api/v1/installations/{installation_id}/assertion"]["post"]

@@ -32,6 +32,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Draft conflicts with an existing version or idempotency key identity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/agents/{agent_id}:
     get:
       operationId: getAgentDetail
@@ -322,7 +328,7 @@ components:
           type: string
         error_code:
           type: string
-          enum: [AGENT_OWNER_REQUIRED, AGENT_NOT_FOUND, VERSION_ALREADY_EXISTS, VALIDATION_ERROR]
+          enum: [AGENT_OWNER_REQUIRED, AGENT_NOT_FOUND, VERSION_ALREADY_EXISTS, VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
         message:
           type: string
           deprecated: true
