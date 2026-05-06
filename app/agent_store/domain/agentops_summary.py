@@ -78,7 +78,11 @@ class RunEvidenceSummary:
             "evidence_summary_id": self.evidence_summary_id,
             "source_event_ids": list(self.source_event_ids),
             "trace_id": self.trace_id,
-            "source_event_count": self.source_event_count or len(self.source_event_ids),
+            "source_event_count": (
+                self.source_event_count
+                if self.source_event_count is not None
+                else len(self.source_event_ids)
+            ),
         }
         if self.last_verified_at is not None:
             data["last_verified_at"] = self.last_verified_at.isoformat()

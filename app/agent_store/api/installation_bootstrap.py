@@ -152,7 +152,6 @@ class InstallationBootstrapAPI:
                 expected_audience=audience,
                 expected_device_public_key_thumbprint=bound_thumbprint,
                 trace_id=trace_id,
-                mark_nonce_seen=False,
             )
         except AssertionValidationError as exc:
             return 409, exc.response.to_dict()

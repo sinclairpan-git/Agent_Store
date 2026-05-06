@@ -5,6 +5,7 @@ from agent_store.domain.agentops_summary import (
     CredentialBootstrapSummary,
     L5GateSummary,
     QualityEvidenceSummary,
+    RunEvidenceSummary,
     RuntimePolicySummary,
 )
 from agent_store.domain.models import utc_now
@@ -68,3 +69,16 @@ def test_l5_gate_requires_violation_scan_before_actual_l5_display() -> None:
         l5_gate_result="passed",
         violation_scan_completed=True,
     ).actual_l5_display_allowed
+
+
+def test_run_evidence_summary_preserves_explicit_zero_source_event_count() -> None:
+    summary = RunEvidenceSummary(
+        run_id="run-1",
+        session_id="session-1",
+        evidence_summary_id="evidence-1",
+        source_event_ids=("event-1",),
+        trace_id="trace-1",
+        source_event_count=0,
+    )
+
+    assert summary.to_dict()["source_event_count"] == 0

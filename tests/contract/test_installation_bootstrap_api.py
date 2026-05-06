@@ -283,6 +283,34 @@ def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
     assert body["error_code"] == "VALIDATION_ERROR"
 
 
+def test_issue_assertion_api_rejects_nonce_replay_with_new_idempotency_key() -> None:
+    api = _api()
+    auth = _auth()
+    _, installation_body = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+    installation_id = installation_body["installation"]["installation_id"]
+    api.issue_installation_assertion(
+        installation_id,
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-1"},
+        auth_context=auth,
+    )
+
+    status, body = api.issue_installation_assertion(
+        installation_id,
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-2"},
+        auth_context=auth,
+    )
+
+    assert status == 409
+    assert body["error_code"] == "ASSERTION_REPLAY_DETECTED"
+
+
 def test_issue_assertion_api_returns_expired_error() -> None:
     class ExpiredAssertionService(InstallationAssertionService):
         def issue(self, installation, **kwargs):  # type: ignore[no-untyped-def]
