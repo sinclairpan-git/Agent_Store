@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Agent Store - Ai_AutoSDLC</title>
+    <link rel="stylesheet" href="./src/styles.css">
+  </head>
+  <body>
+    <div id="app" class="app-root">
+      <sdlc-shell
+        :view="view"
+        :agentops="agentops"
+        :bootstrap="bootstrap"
+        :trusted-loop="trustedLoop"
+        :state-decision="stateDecision"
+      ></sdlc-shell>
+    </div>
+    <script src="./node_modules/vue/dist/vue.js"></script>
+    <script src="./src/sdlc-enterprise-vue2.js"></script>
+    <script src="./src/mock-data.js"></script>
+    <script src="./src/app.js"></script>
+  </body>
+</html>

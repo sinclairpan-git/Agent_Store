@@ -329,6 +329,21 @@ Phase 4: 验证、归档与交付检查
   2. 无权限用户只能看到脱敏摘要和申请入口。
 - **验证**：`python -m pytest tests/contract/test_cross_system_navigation_permission.py -q`
 
+### Task 4.8 实现 Vue2 官方详情页前端壳
+
+- **覆盖规格**：FR-016、FR-017、FR-018、FR-021、FR-023、FR-027、SC-001、SC-011、SC-012
+- **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-007）
+- **依赖**：Task 2.4、Task 3.5、Task 4.3、Task 4.5、Task 4.6、Task 4.7
+- **文件**：`frontend/package.json`、`frontend/index.html`、`frontend/src/sdlc-enterprise-vue2.js`、`frontend/src/mock-data.js`、`frontend/src/app.js`、`frontend/src/styles.css`、`frontend/scripts/verify-frontend.mjs`
+- **可并行**：否
+- **验收标准**：
+  1. 前端技术栈使用 Vue2。
+  2. 页面组件只通过 SDLC 内置企业 Vue2 组件适配层渲染基础 section、status、action、metric 控件。
+  3. 官方页展示 Registry、PackageTrust、EnterpriseContext、BootstrapStatus、AgentOps summary、Trusted Evidence Loop、状态冲突降级和跨系统权限失败入口。
+  4. 页面可作为本地静态工作台运行，且验证脚本覆盖 Vue2/组件库/关键字段契约。
+- **验证**：`npm --prefix frontend run verify`
+
 ## Phase 4：验证、归档与交付检查
 
 ### Task 5.1 补齐端到端 contract test 套件

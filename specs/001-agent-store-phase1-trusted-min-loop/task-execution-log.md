@@ -258,3 +258,47 @@
 
 - Phase 3 AgentOps summary、Trusted Evidence Loop 与 standalone 边界已完成，全量测试 74 项通过，ruff 通过。
 - 下一批次可以开始 Vue2 + SDLC 企业 Vue2 组件库官方页界面落地。
+
+### Batch 2026-05-06-007 | execute frontend vue2 official page shell
+
+#### 批次范围
+
+- 覆盖阶段：execute / 前端界面落地
+- 覆盖任务：Task 4.8
+- 技术约束：Vue2；SDLC 内置企业 Vue2 组件库适配层。
+
+#### 代码与文档产物
+
+- 新增 Vue2 前端工作台：`frontend/index.html`、`frontend/src/app.js`、`frontend/src/mock-data.js`
+- 新增本地 SDLC 企业 Vue2 组件适配层：`frontend/src/sdlc-enterprise-vue2.js`
+- 新增企业工作台样式：`frontend/src/styles.css`
+- 新增本地静态 dev server：`frontend/server.mjs`
+- 新增前端验证脚本：`frontend/scripts/verify-frontend.mjs`
+- 新增前端依赖与锁文件：`frontend/package.json`、`frontend/package-lock.json`
+
+#### 验证命令
+
+- `npm --prefix frontend install`
+- `npm --prefix frontend run verify`
+- `uv run pytest -q`
+- `uv run ruff check`
+
+#### 代码审查
+
+- 本批次重点检查：页面使用 Vue2；基础 UI 控件通过 `sdlc-enterprise-vue2` 适配层注册；界面展示 Registry、PackageTrust、EnterpriseContext、BootstrapStatus、AgentOps summary、Trusted Evidence Loop、状态冲突降级和跨系统权限失败入口；静态验证脚本覆盖关键字段契约。
+
+#### 任务/计划同步状态
+
+- 新增 Task 4.8 并在 `tasks.md` 标注完成批次。
+- `npm install` 首次在沙箱内因网络权限失败，已通过受控升级权限完成 Vue2 依赖安装。
+- npm audit 提示 1 个 low severity vulnerability；当前由 Vue2 技术选型与依赖树带来，未执行破坏性 `npm audit fix --force`。
+
+#### 分支与工作树处置
+
+- 当前批次 branch disposition 状态：retained（下一步进入 Phase 4 close / 端到端合同）
+- 当前批次 worktree disposition 状态：retained
+
+#### 批次结论
+
+- Vue2 官方详情页前端壳已完成，前端验证通过，后端全量测试 74 项通过，ruff 通过。
+- 下一批次进入 Phase 4：端到端 contract test、traceability、development summary 与 close。
