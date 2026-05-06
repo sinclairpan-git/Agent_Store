@@ -66,7 +66,10 @@ class BootstrapRequestIdentity:
 class BootstrapService:
     def __init__(self, versions: dict[tuple[str, str], AgentVersion] | None = None) -> None:
         self._versions = versions or {}
-        self._records: dict[str, tuple[BootstrapRequestIdentity, BootstrapRecord]] = {}
+        self._records: dict[
+            tuple[str, str, str | None, str | None, str | None, str | None],
+            tuple[BootstrapRequestIdentity, BootstrapRecord],
+        ] = {}
         self._by_installation_id: dict[str, BootstrapRecord] = {}
 
     def register_version(self, version: AgentVersion) -> None:
@@ -98,8 +101,9 @@ class BootstrapService:
             repo_ref=auth_context.repo_ref,
             permission_decision=permission_decision.decision,
         )
-        if idempotency_key in self._records:
-            existing_identity, record = self._records[idempotency_key]
+        scoped_idempotency_key = self._scoped_idempotency_key(idempotency_key, auth_context)
+        if scoped_idempotency_key in self._records:
+            existing_identity, record = self._records[scoped_idempotency_key]
             if existing_identity == request_identity:
                 return record
             raise BootstrapError(
@@ -212,9 +216,23 @@ class BootstrapService:
             device_public_key_thumbprint=device_public_key_thumbprint,
         )
         record = BootstrapRecord(installation=installation, device_binding=binding)
-        self._records[idempotency_key] = (request_identity, record)
+        self._records[scoped_idempotency_key] = (request_identity, record)
         self._by_installation_id[installation_id] = record
         return record
 
     def get_record(self, installation_id: str) -> BootstrapRecord | None:
         return self._by_installation_id.get(installation_id)
+
+    @staticmethod
+    def _scoped_idempotency_key(
+        idempotency_key: str,
+        auth_context: AuthContext,
+    ) -> tuple[str, str, str | None, str | None, str | None, str | None]:
+        return (
+            idempotency_key,
+            auth_context.subject_user_id,
+            auth_context.tenant_id,
+            auth_context.org_id,
+            auth_context.project_id,
+            auth_context.repo_ref,
+        )

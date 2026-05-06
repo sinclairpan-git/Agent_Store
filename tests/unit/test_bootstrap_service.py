@@ -111,7 +111,7 @@ def test_idempotent_retry_allows_fresh_permission_decision_id() -> None:
     assert second is first
 
 
-def test_idempotency_key_reuse_requires_same_request_identity() -> None:
+def test_idempotency_key_reuse_requires_same_request_identity_within_caller_scope() -> None:
     service = _service()
     auth = _auth()
     decision = _decision(auth)
@@ -123,6 +123,38 @@ def test_idempotency_key_reuse_requires_same_request_identity() -> None:
         device_public_key_thumbprint="thumb-1",
         auth_context=auth,
         permission_decision=decision,
+        trace_id="trace-1",
+        idempotency_key="idem-1",
+    )
+
+    with pytest.raises(BootstrapError) as exc_info:
+        service.create_installation(
+            agent_id="framework.ai-autosdlc",
+            agent_version="1.0.0",
+            artifact_hash="sha256:first",
+            device_os="macOS",
+            device_public_key_thumbprint="thumb-2",
+            auth_context=auth,
+            permission_decision=decision,
+            trace_id="trace-2",
+            idempotency_key="idem-1",
+        )
+
+    assert exc_info.value.status_code == 409
+    assert exc_info.value.response.error_code == "VALIDATION_ERROR"
+
+
+def test_idempotency_key_reuse_is_scoped_by_caller_context() -> None:
+    service = _service()
+    auth = _auth()
+    first = service.create_installation(
+        agent_id="framework.ai-autosdlc",
+        agent_version="1.0.0",
+        artifact_hash="sha256:first",
+        device_os="macOS",
+        device_public_key_thumbprint="thumb-1",
+        auth_context=auth,
+        permission_decision=_decision(auth),
         trace_id="trace-1",
         idempotency_key="idem-1",
     )
@@ -139,21 +171,20 @@ def test_idempotency_key_reuse_requires_same_request_identity() -> None:
         trace_id="trace-2",
     )
 
-    with pytest.raises(BootstrapError) as exc_info:
-        service.create_installation(
-            agent_id="framework.ai-autosdlc",
-            agent_version="1.0.0",
-            artifact_hash="sha256:first",
-            device_os="macOS",
-            device_public_key_thumbprint="thumb-1",
-            auth_context=other_auth,
-            permission_decision=other_decision,
-            trace_id="trace-2",
-            idempotency_key="idem-1",
-        )
+    second = service.create_installation(
+        agent_id="framework.ai-autosdlc",
+        agent_version="1.0.0",
+        artifact_hash="sha256:first",
+        device_os="macOS",
+        device_public_key_thumbprint="thumb-1",
+        auth_context=other_auth,
+        permission_decision=other_decision,
+        trace_id="trace-2",
+        idempotency_key="idem-1",
+    )
 
-    assert exc_info.value.status_code == 409
-    assert exc_info.value.response.error_code == "VALIDATION_ERROR"
+    assert second is not first
+    assert second.installation.installation_id != first.installation.installation_id
 
 
 @pytest.mark.parametrize("decision", ["deny", "approval_required"])

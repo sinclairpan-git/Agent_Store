@@ -43,7 +43,7 @@ class InstallationBootstrapAPI:
         self.bootstrap_service = bootstrap_service or BootstrapService()
         self.assertion_service = assertion_service or InstallationAssertionService()
         self._assertion_idempotency: dict[
-            str,
+            tuple[str, str, str, str | None, str | None, str | None, str | None],
             tuple[AssertionRequestIdentity, dict[str, object]],
         ] = {}
 
@@ -120,8 +120,15 @@ class InstallationBootstrapAPI:
                 nonce=nonce,
                 audience=audience,
             )
-            if idempotency_key in self._assertion_idempotency:
-                existing_identity, response = self._assertion_idempotency[idempotency_key]
+            scoped_idempotency_key = self._scoped_assertion_idempotency_key(
+                idempotency_key,
+                installation_id,
+                auth_context,
+            )
+            if scoped_idempotency_key in self._assertion_idempotency:
+                existing_identity, response = self._assertion_idempotency[
+                    scoped_idempotency_key
+                ]
                 if existing_identity == request_identity:
                     return 200, response
                 return 409, ErrorResponse(
@@ -168,7 +175,7 @@ class InstallationBootstrapAPI:
             "error_code": "OK",
             "assertion": assertion.to_dict(),
         }
-        self._assertion_idempotency[idempotency_key] = (request_identity, response)
+        self._assertion_idempotency[scoped_idempotency_key] = (request_identity, response)
         return 200, response
 
     @staticmethod
@@ -186,3 +193,19 @@ class InstallationBootstrapAPI:
             trace_id=trace_id,
             details={"reason": reason} if reason else {},
         ).to_dict()
+
+    @staticmethod
+    def _scoped_assertion_idempotency_key(
+        idempotency_key: str,
+        installation_id: str,
+        auth_context: AuthContext,
+    ) -> tuple[str, str, str, str | None, str | None, str | None, str | None]:
+        return (
+            idempotency_key,
+            installation_id,
+            auth_context.subject_user_id,
+            auth_context.tenant_id,
+            auth_context.org_id,
+            auth_context.project_id,
+            auth_context.repo_ref,
+        )

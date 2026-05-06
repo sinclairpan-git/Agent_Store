@@ -285,6 +285,40 @@ def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
     assert body["recommended_action_id"] == "use_new_idempotency_key"
 
 
+def test_issue_assertion_api_scopes_idempotency_to_installation_context() -> None:
+    api = _api()
+    auth = _auth()
+    _, first_installation = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+    _, second_installation = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-2"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+
+    first_status, first_body = api.issue_installation_assertion(
+        first_installation["installation"]["installation_id"],
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-shared"},
+        auth_context=auth,
+    )
+    second_status, second_body = api.issue_installation_assertion(
+        second_installation["installation"]["installation_id"],
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-shared"},
+        auth_context=auth,
+    )
+
+    assert first_status == 200
+    assert second_status == 200
+    assert first_body["assertion"]["installation_id"] != second_body["assertion"]["installation_id"]
+
+
 def test_issue_assertion_api_rejects_nonce_replay_with_new_idempotency_key() -> None:
     api = _api()
     auth = _auth()
