@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from agent_store import SCHEMA_VERSION
 from agent_store.domain.actions import ActionDescriptor
+from agent_store.domain.errors import ErrorResponse
 from agent_store.domain.enterprise_context import EnterpriseContext
 from agent_store.domain.models import Agent, AgentVersion
 from agent_store.domain.package_trust import PackageTrustSummary
@@ -188,3 +189,27 @@ def build_official_app_view(
         violation_scan_completed=violation_scan_completed,
     )
     return model.to_response()
+
+
+def validate_standalone_boundary(view_response: dict[str, object], *, trace_id: str) -> ErrorResponse | None:
+    view = view_response.get("view")
+    if not isinstance(view, dict):
+        return None
+    standalone = view.get("standalone")
+    enterprise_context = view.get("enterprise_context")
+    requires_installation = isinstance(standalone, dict) and standalone.get(
+        "requires_installation_id"
+    )
+    has_installation_id = isinstance(enterprise_context, dict) and bool(
+        enterprise_context.get("installation_id")
+    )
+    if requires_installation or has_installation_id:
+        return ErrorResponse(
+            error_code="STANDALONE_OVERCOUPLED",
+            message_key="errors.standaloneOvercoupled",
+            severity="blocked",
+            retryable=False,
+            recommended_action_id="show_standalone_path",
+            trace_id=trace_id,
+        )
+    return None

@@ -210,3 +210,51 @@
 
 - Phase 2 bootstrap 与 assertion security 已完成，全量测试 53 项通过，ruff 通过。
 - 下一批次进入 Phase 3：AgentOps summary、Trusted Evidence Loop 与 standalone 边界。
+
+### Batch 2026-05-06-006 | execute phase 3 agentops and evidence loop
+
+#### 批次范围
+
+- 覆盖阶段：execute / Phase 3 AgentOps summary 回显与 standalone 边界
+- 覆盖任务：Task 4.1、Task 4.2、Task 4.3、Task 4.4、Task 4.5、Task 4.6、Task 4.7
+- 前端就绪信号：官方页动态状态所需的 AgentOps summary、redaction、trusted loop、状态冲突降级字段已具备稳定后端契约。
+
+#### 代码与文档产物
+
+- 新增 AgentOps summary 数据结构：`app/agent_store/domain/agentops_summary.py`
+- 新增 AgentOps summary client 与 API handler：`app/agent_store/integrations/agentops_client.py`、`app/agent_store/api/agentops_summary.py`
+- 新增 standalone 边界校验：`app/agent_store/ui/official_app_view.py`
+- 新增 Trusted Evidence Loop verifier：`app/agent_store/integrations/trusted_evidence_loop.py`
+- 新增状态事实源守卫：`app/agent_store/domain/state_source_guard.py`
+- 更新 AgentOps OpenAPI 契约，允许 summary 过期时回显 `APPROVAL_EXPIRED`。
+
+#### 验证命令
+
+- `uv run pytest tests/unit/test_agentops_summary_models.py tests/unit/test_agentops_client.py -q`
+- `uv run pytest tests/contract/test_agentops_summary_api.py tests/contract/test_cross_system_navigation_permission.py -q`
+- `uv run pytest tests/contract/test_standalone_boundary.py tests/contract/test_trusted_evidence_loop.py -q`
+- `uv run pytest tests/unit/test_state_source_guard.py -q`
+- `uv run pytest tests/contract/test_contract_files_parse.py -q`
+- `uv run pytest -q`
+- `uv run ruff check`
+- `ai-sdlc run --dry-run`
+
+#### 代码审查
+
+- 本批次重点检查：Store 不计算 quality score；AgentOps 不可用时降级为企业证据待同步；无证据原文权限时只回显脱敏摘要与 Evidence Vault 申请入口；Trusted Evidence Loop 缺 run/session、签名不一致或 violation scan 未完成时不允许 actual L5；Store/Ops/CLI 状态冲突时降级展示。
+
+#### 任务/计划同步状态
+
+- Task 4.1 至 Task 4.7 已在 `tasks.md` 标注完成批次。
+- `ai-sdlc run --dry-run` 仍显示 close RETRY：`development-summary.md not found` 与 `Final tests did not pass` 属于 execute 尚未全部完成前的预期 open gate。
+- `ai-sdlc verify constraints` 存在既有 release docs consistency blockers，非本批代码引入。
+
+#### 分支与工作树处置
+
+- 当前批次 branch disposition 状态：retained（下一步进入 Vue2 前端界面落地，随后补 Phase 4 close）
+- 当前批次 worktree disposition 状态：retained
+
+#### 批次结论
+
+- Phase 3 AgentOps summary、Trusted Evidence Loop 与 standalone 边界已完成，全量测试 74 项通过，ruff 通过。
+- 下一批次可以开始 Vue2 + SDLC 企业 Vue2 组件库官方页界面落地。

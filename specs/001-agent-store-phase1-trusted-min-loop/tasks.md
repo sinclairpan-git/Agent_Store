@@ -241,6 +241,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-008、FR-009、FR-010、FR-011、SC-004
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/domain/agentops_summary.py`、`tests/unit/test_agentops_summary_models.py`
 - **可并行**：是
@@ -253,6 +254,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-008、FR-009、FR-010、FR-011、FR-012、AS-CT-004、AS-CT-005
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.1、Task 1.3、Task 1.4
 - **文件**：`app/agent_store/integrations/agentops_client.py`、`tests/unit/test_agentops_client.py`
 - **可并行**：否
@@ -266,6 +268,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-009、FR-010、FR-011、FR-013、AS-CT-004、AS-CT-005
 - **优先级**：P1
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.2
 - **文件**：`app/agent_store/api/agentops_summary.py`、`tests/contract/test_agentops_summary_api.py`
 - **可并行**：否
@@ -278,6 +281,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-004、SC-005、AS-CT-006
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 2.4、Task 3.4
 - **文件**：`tests/contract/test_standalone_boundary.py`
 - **可并行**：否
@@ -290,6 +294,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-021、FR-022、FR-026、AS-CT-008、SC-008
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.2、Task 3.4
 - **文件**：`app/agent_store/integrations/trusted_evidence_loop.py`、`tests/contract/test_trusted_evidence_loop.py`
 - **可并行**：否
@@ -302,6 +307,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-027、AS-CT-013
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 1.3、Task 4.1
 - **文件**：`app/agent_store/domain/state_source_guard.py`、`tests/unit/test_state_source_guard.py`
 - **可并行**：是
@@ -314,6 +320,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-023、AS-CT-012
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-006）
 - **依赖**：Task 4.3、Task 1.4
 - **文件**：`tests/contract/test_cross_system_navigation_permission.py`
 - **可并行**：否
