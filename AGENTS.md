@@ -17,6 +17,18 @@
 
 （自动安装；不覆盖已有同名自定义文件。）
 
+## GitHub PR / Codex Review 守护规则
+
+当用户要求“push 到远端 / 提 PR / @codex review / 守护到可合入”或表达等价意图时，按以下闭环执行：
+
+- 推送前先确认工作区状态、变更范围与必要本地验证结果；不得回滚用户未授权的既有改动。
+- 将当前工作分支 push 到远端，并基于目标分支创建 PR；除非用户明确要求 ready 状态，否则优先创建 draft PR。
+- PR 创建后评论 `@codex review` 触发 Codex Review。
+- 为当前线程创建每 5 分钟一次的 heartbeat 守护任务，检查 PR review 结果与 GitHub checks 状态。
+- 若 review 或 checks 发现可执行问题，立即定位、修复、运行相关验证、提交并 push，再次评论 `@codex review`，继续守护。
+- 只有当 Codex Review 无可执行问题且 GitHub required checks 全部通过时，才可认定“同意合入”。
+- 不得在用户未明确授权时自动 merge；达到可合入状态后，向用户报告 PR、review 与 checks 的最终状态。
+
 <!-- AI-SDLC managed shell guidance -->
 Project preferred shell: zsh.
 Use zsh POSIX shell syntax for commands and environment variables. Do not start with PowerShell or cmd.exe syntax.
