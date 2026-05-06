@@ -37,10 +37,16 @@ assert(
     === "file:../vendor/enterprise-vue2/sxf-sf-theme-0.2.5.tgz",
   "SDLC enterprise Vue2 theme must resolve from AgentOps vendor"
 );
+assert(
+  pkg.dependencies.graphql
+    === "file:../vendor/enterprise-vue2/transitive/graphql-16.14.0.tgz",
+  "GraphQL peer dependency must resolve from AgentOps transitive vendor"
+);
 for (const vendorFile of [
   "../vendor/enterprise-vue2/vue-2.7.16.tgz",
   "../vendor/enterprise-vue2/sxf-er-components-1.27.5.tgz",
-  "../vendor/enterprise-vue2/sxf-sf-theme-0.2.5.tgz"
+  "../vendor/enterprise-vue2/sxf-sf-theme-0.2.5.tgz",
+  "../vendor/enterprise-vue2/transitive/graphql-16.14.0.tgz"
 ]) {
   assert(fs.existsSync(path.join(root, vendorFile)), `${vendorFile} must be vendored`);
 }

@@ -8,8 +8,8 @@
     "verify": "node scripts/verify-frontend.mjs"
   },
   "dependencies": {
-    "@sxf/er-config": "file:../vendor/enterprise-vue2/sxf-er-config-1.4.0.tgz",
     "@sxf/er-components": "file:../vendor/enterprise-vue2/sxf-er-components-1.27.5.tgz",
+    "@sxf/er-config": "file:../vendor/enterprise-vue2/sxf-er-config-1.4.0.tgz",
     "@sxf/er-feature": "file:../vendor/enterprise-vue2/sxf-er-feature-0.1.0.tgz",
     "@sxf/er-lib": "file:../vendor/enterprise-vue2/sxf-er-lib-1.0.0.tgz",
     "@sxf/er-style": "file:../vendor/enterprise-vue2/sxf-er-style-1.2.1.tgz",
@@ -22,6 +22,7 @@
     "@sxf/vtv-icon": "file:../vendor/enterprise-vue2/sxf-vtv-icon-1.0.272.tgz",
     "@sxf/vue-intl": "file:../vendor/enterprise-vue2/sxf-vue-intl-1.11.4.tgz",
     "@uedc/sf-layout": "file:../vendor/enterprise-vue2/uedc-sf-layout-1.15.0.tgz",
+    "graphql": "file:../vendor/enterprise-vue2/transitive/graphql-16.14.0.tgz",
     "jquery": "file:../vendor/enterprise-vue2/sxf-jquery-1.0.6.tgz",
     "lodash-es": "file:../vendor/enterprise-vue2/lodash-es-4.18.1.tgz",
     "v-viewer": "file:../vendor/enterprise-vue2/v-viewer-1.7.4.tgz",
