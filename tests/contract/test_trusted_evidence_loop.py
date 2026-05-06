@@ -11,12 +11,35 @@ def _signature(event_hash: str, secret: bytes = REPORTER_SECRET) -> str:
     return hmac.new(secret, event_hash.encode("utf-8"), hashlib.sha256).hexdigest()
 
 
+def _event_hash(payload: dict[str, object]) -> str:
+    reporter_event = payload["reporter_event"]
+    checked_refs = [
+        str(payload["installation_id"]),
+        str(payload["device_id"]),
+        str(payload["agent_id"]),
+        str(payload["agent_version"]),
+        str(payload["artifact_hash"]),
+        str(payload["run_id"]),
+        str(payload["session_id"]),
+        str(payload["evidence_summary_id"]),
+        str(reporter_event["event_id"]),
+    ]
+    return hashlib.sha256("\n".join(checked_refs).encode("utf-8")).hexdigest()
+
+
+def _sign_payload(payload: dict[str, object]) -> dict[str, object]:
+    event_hash = _event_hash(payload)
+    payload["reporter_event"]["event_hash"] = event_hash
+    payload["reporter_event"]["signature"] = _signature(event_hash)
+    return payload
+
+
 def _verifier() -> TrustedEvidenceLoopVerifier:
     return TrustedEvidenceLoopVerifier(trusted_reporter_keys=TRUSTED_REPORTER_KEYS)
 
 
 def _payload() -> dict[str, object]:
-    return {
+    payload = {
         "installation_id": "inst-1",
         "device_id": "dev-1",
         "agent_id": "framework.ai-autosdlc",
@@ -30,8 +53,8 @@ def _payload() -> dict[str, object]:
             "event_type": "verification_completed",
             "sequence_no": 1,
             "idempotency_key": "event-idem-1",
-            "event_hash": "hash-1",
-            "signature": _signature("hash-1"),
+            "event_hash": "",
+            "signature": "",
             "key_id": "key-1",
             "signed_at": "2026-05-06T00:00:00Z",
         },
@@ -39,6 +62,7 @@ def _payload() -> dict[str, object]:
         "l5_gate_result": "passed",
         "violation_scan_completed": True,
     }
+    return _sign_payload(payload)
 
 
 def test_trusted_evidence_loop_accepts_shared_trace_run_session_chain() -> None:
@@ -90,6 +114,16 @@ def test_trusted_evidence_loop_rejects_empty_reporter_hash() -> None:
 
     assert status == 409
     assert body["error_code"] == "REPORTER_SIGNATURE_INVALID"
+
+
+def test_trusted_evidence_loop_rejects_replayed_signature_for_different_chain() -> None:
+    payload = _payload()
+    payload["session_id"] = "session-replayed"
+
+    status, body = _verifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
 
 def test_trusted_evidence_loop_rejects_incomplete_l5_gate_and_scan() -> None:

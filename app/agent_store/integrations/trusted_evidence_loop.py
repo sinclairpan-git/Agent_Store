@@ -69,10 +69,24 @@ class TrustedEvidenceLoopVerifier:
                 trace_id,
             )
 
+        checked_refs = self._checked_refs(payload, reporter_event, run_id, session_id)
         event_hash = str(reporter_event.get("event_hash") or "")
+        if not event_hash:
+            return self._failure(
+                "REPORTER_SIGNATURE_INVALID",
+                "errors.reporterSignatureInvalid",
+                trace_id,
+            )
+        expected_event_hash = self._event_hash(checked_refs)
+        if not hmac.compare_digest(event_hash, expected_event_hash):
+            return self._failure(
+                "EVIDENCE_TRACE_MISMATCH",
+                "errors.evidenceTraceMismatch",
+                trace_id,
+            )
         signature = str(reporter_event.get("signature") or "")
         key_id = str(reporter_event.get("key_id") or "")
-        if not event_hash or not self._verify_reporter_signature(
+        if not self._verify_reporter_signature(
             key_id=key_id,
             event_hash=event_hash,
             signature=signature,
@@ -92,17 +106,6 @@ class TrustedEvidenceLoopVerifier:
                 trace_id,
             )
 
-        checked_refs = [
-            str(payload["installation_id"]),
-            str(payload["device_id"]),
-            str(payload["agent_id"]),
-            str(payload["agent_version"]),
-            str(payload["artifact_hash"]),
-            run_id,
-            session_id,
-            str(payload["evidence_summary_id"]),
-            str(reporter_event["event_id"]),
-        ]
         return 200, {
             "schema_version": SCHEMA_VERSION,
             "trace_id": trace_id,
@@ -118,6 +121,29 @@ class TrustedEvidenceLoopVerifier:
     def _has_required_string(source: Mapping[str, object], field: str) -> bool:
         value = source.get(field)
         return isinstance(value, str) and bool(value.strip())
+
+    @staticmethod
+    def _checked_refs(
+        payload: Mapping[str, object],
+        reporter_event: Mapping[str, object],
+        run_id: str,
+        session_id: str,
+    ) -> list[str]:
+        return [
+            str(payload["installation_id"]),
+            str(payload["device_id"]),
+            str(payload["agent_id"]),
+            str(payload["agent_version"]),
+            str(payload["artifact_hash"]),
+            run_id,
+            session_id,
+            str(payload["evidence_summary_id"]),
+            str(reporter_event["event_id"]),
+        ]
+
+    @staticmethod
+    def _event_hash(checked_refs: list[str]) -> str:
+        return hashlib.sha256("\n".join(checked_refs).encode("utf-8")).hexdigest()
 
     def _verify_reporter_signature(
         self,
