@@ -11,22 +11,22 @@ specs:
   path: specs/001-agent-store-phase1-trusted-min-loop
   depends_on: []
 truth_snapshot:
-  generated_at: '2026-05-06T07:09:12Z'
+  generated_at: '2026-05-06T14:46:38Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 73b1ba4
+  repo_revision: 1a5e1a0
   authoring_hash: 6eb20846c63a76a45e860cd38a5d905f87823ddd9350872cdbfab165fb090c5d
   source_hashes: {}
-  snapshot_hash: d245f94da3f700dbfd0b9919a1529dcc09f677fb04cc0ccf8a9e979762b5591b
+  snapshot_hash: 0a05d450c3472a9c93d63bfa770f3fa619e8c958bef2e3dc0aea48eae3eb0995
   computed_capabilities: []
   source_inventory:
     state: complete
     total_sources: 7
     mapped_sources: 7
     unmapped_sources: 0
-    missing_sources: 1
-    phase_signal_count: 12
-    deferred_signal_count: 24
+    missing_sources: 0
+    phase_signal_count: 22
+    deferred_signal_count: 36
     non_goal_signal_count: 3
     layer_totals:
       blueprint: 1
@@ -42,7 +42,7 @@ truth_snapshot:
       plan: 1
       tasks: 1
       execution: 1
-      close: 0
+      close: 1
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -87,14 +87,14 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 001-agent-store-phase1-trusted-min-loop
-      phase_signal_count: 1
-      deferred_signal_count: 3
+      phase_signal_count: 11
+      deferred_signal_count: 15
       non_goal_signal_count: 0
     - path: specs/001-agent-store-phase1-trusted-min-loop/development-summary.md
       source_type: development_summary
       truth_layer: close
       mapped: true
-      exists: false
+      exists: true
       mapping_ref: 001-agent-store-phase1-trusted-min-loop
       phase_signal_count: 0
       deferred_signal_count: 0

@@ -66,9 +66,8 @@ def resolve_state(observations: tuple[StateObservation, ...]) -> StateSourceDeci
 
     return StateSourceDecision(
         state="degraded",
-        degraded_reason="state_source_conflict:" + ",".join(
-            f"{item.source_of_truth}={item.state}" for item in observations
-        ),
+        degraded_reason="state_source_conflict:"
+        + ",".join(f"{item.source_of_truth}={item.state}" for item in observations),
         source_of_truth="conflict_guard",
         entry_evidence=evidence,
         affected_actions=affected_actions or ("actual_l5_display",),

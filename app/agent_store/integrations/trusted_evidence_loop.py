@@ -14,14 +14,18 @@ class TrustedEvidenceLoopVerifier:
             raise ValueError("trusted reporter keys are required")
         self._trusted_reporter_keys = dict(trusted_reporter_keys)
 
-    def assert_loop(self, payload: Mapping[str, object]) -> tuple[int, dict[str, object]]:
+    def assert_loop(
+        self, payload: Mapping[str, object]
+    ) -> tuple[int, dict[str, object]]:
         trace_id = str(payload.get("trace_id") or "trace-missing")
         run_id = str(payload.get("run_id") or "")
         session_id = str(payload.get("session_id") or "")
         if not run_id:
             return self._failure("RUN_ID_REQUIRED", "errors.runIdRequired", trace_id)
         if not session_id:
-            return self._failure("SESSION_ID_REQUIRED", "errors.sessionIdRequired", trace_id)
+            return self._failure(
+                "SESSION_ID_REQUIRED", "errors.sessionIdRequired", trace_id
+            )
 
         reporter_event = payload.get("reporter_event")
         if not isinstance(reporter_event, Mapping):
@@ -98,7 +102,9 @@ class TrustedEvidenceLoopVerifier:
             )
 
         if payload.get("l5_gate_result") != "passed":
-            return self._failure("L5_GATE_INCOMPLETE", "errors.l5GateIncomplete", trace_id)
+            return self._failure(
+                "L5_GATE_INCOMPLETE", "errors.l5GateIncomplete", trace_id
+            )
         if payload.get("violation_scan_completed") is not True:
             return self._failure(
                 "VIOLATION_SCAN_INCOMPLETE",
@@ -160,7 +166,9 @@ class TrustedEvidenceLoopVerifier:
         return hmac.compare_digest(expected, signature)
 
     @staticmethod
-    def _failure(error_code: str, message_key: str, trace_id: str) -> tuple[int, dict[str, object]]:
+    def _failure(
+        error_code: str, message_key: str, trace_id: str
+    ) -> tuple[int, dict[str, object]]:
         return 409, ErrorResponse(
             error_code=error_code,
             message_key=message_key,

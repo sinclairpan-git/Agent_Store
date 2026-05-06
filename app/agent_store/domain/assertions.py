@@ -174,7 +174,10 @@ class InstallationAssertionService:
                     trace_id,
                 )
             )
-        if assertion.device_public_key_thumbprint != expected_device_public_key_thumbprint:
+        if (
+            assertion.device_public_key_thumbprint
+            != expected_device_public_key_thumbprint
+        ):
             raise AssertionValidationError(
                 self._error(
                     "DEVICE_KEY_MISMATCH",
@@ -247,14 +250,19 @@ class InstallationAssertionService:
     def _expire_seen_nonces(self, current_time: datetime) -> None:
         expired = [
             replay_key
-            for replay_key, (seen_at, replay_window_seconds) in self._seen_nonces.items()
+            for replay_key, (
+                seen_at,
+                replay_window_seconds,
+            ) in self._seen_nonces.items()
             if current_time - seen_at >= timedelta(seconds=replay_window_seconds)
         ]
         for replay_key in expired:
             del self._seen_nonces[replay_key]
 
     @staticmethod
-    def _replay_key(assertion: SignedInstallationAssertion) -> tuple[str, str, str, str]:
+    def _replay_key(
+        assertion: SignedInstallationAssertion,
+    ) -> tuple[str, str, str, str]:
         return (
             assertion.installation_id,
             assertion.device_id,

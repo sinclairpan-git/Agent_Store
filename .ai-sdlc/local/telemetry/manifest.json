@@ -1,6 +1,10 @@
 {
   "runs": {},
-  "sessions": {},
+  "sessions": {
+    "gs_6b3677ba2f1d4cb8": {
+      "path": "sessions/gs_6b3677ba2f1d4cb8"
+    }
+  },
   "steps": {},
   "version": 1
 }

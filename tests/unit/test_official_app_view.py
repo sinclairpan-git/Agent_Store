@@ -63,7 +63,9 @@ def test_official_view_displays_framework_and_maintenance_facts() -> None:
     assert view["enterprise_context"]["required_by"] == "security-baseline"
 
 
-def test_official_view_does_not_display_actual_l5_before_bootstrap_is_complete() -> None:
+def test_official_view_does_not_display_actual_l5_before_bootstrap_is_complete() -> (
+    None
+):
     response = build_official_app_view(
         agent=_agent(),
         version=_version(),

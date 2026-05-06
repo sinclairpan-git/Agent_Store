@@ -3,7 +3,11 @@ import pytest
 from agent_store import SCHEMA_VERSION
 from agent_store.domain.actions import ActionDescriptor
 from agent_store.domain.errors import ErrorResponse
-from agent_store.domain.permissions import AuthContext, PermissionDecision, UntrustedIdentityError
+from agent_store.domain.permissions import (
+    AuthContext,
+    PermissionDecision,
+    UntrustedIdentityError,
+)
 
 
 def test_action_descriptor_contains_target_permission_and_audit_fields() -> None:

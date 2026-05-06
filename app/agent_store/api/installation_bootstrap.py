@@ -49,7 +49,9 @@ class InstallationBootstrapAPI:
                 secret=assertion_signing_secret,
             )
         else:
-            raise ValueError("assertion_service or assertion_signing_secret is required")
+            raise ValueError(
+                "assertion_service or assertion_signing_secret is required"
+            )
         self._assertion_idempotency: dict[
             tuple[str, str, str, str | None, str | None, str | None, str | None],
             tuple[AssertionRequestIdentity, dict[str, object]],
@@ -66,7 +68,9 @@ class InstallationBootstrapAPI:
         trace_id = str(payload.get("trace_id") or new_trace_id())
         idempotency_key = headers.get("Idempotency-Key")
         if not idempotency_key:
-            return 400, self._validation_error("errors.idempotencyKeyRequired", trace_id)
+            return 400, self._validation_error(
+                "errors.idempotencyKeyRequired", trace_id
+            )
 
         try:
             record = self.bootstrap_service.create_installation(
@@ -86,7 +90,9 @@ class InstallationBootstrapAPI:
         except BootstrapError as exc:
             return exc.status_code, exc.response.to_dict()
         except (KeyError, TypeError, ValueError) as exc:
-            return 400, self._validation_error("errors.validationError", trace_id, str(exc))
+            return 400, self._validation_error(
+                "errors.validationError", trace_id, str(exc)
+            )
         return 201, record.to_response()
 
     def issue_installation_assertion(
@@ -100,7 +106,9 @@ class InstallationBootstrapAPI:
         trace_id = str(payload.get("trace_id") or new_trace_id())
         idempotency_key = headers.get("Idempotency-Key")
         if not idempotency_key:
-            return 400, self._validation_error("errors.idempotencyKeyRequired", trace_id)
+            return 400, self._validation_error(
+                "errors.idempotencyKeyRequired", trace_id
+            )
 
         record = self.bootstrap_service.get_record(installation_id)
         if record is None:
@@ -119,7 +127,9 @@ class InstallationBootstrapAPI:
                 },
             ).to_dict()
         try:
-            requested_thumbprint = required_string(payload, "device_public_key_thumbprint")
+            requested_thumbprint = required_string(
+                payload, "device_public_key_thumbprint"
+            )
             nonce = required_string(payload, "nonce")
             audience = required_string(payload, "audience")
             request_identity = AssertionRequestIdentity(
@@ -175,7 +185,9 @@ class InstallationBootstrapAPI:
         except AssertionValidationError as exc:
             return 409, exc.response.to_dict()
         except (KeyError, TypeError, ValueError) as exc:
-            return 400, self._validation_error("errors.validationError", trace_id, str(exc))
+            return 400, self._validation_error(
+                "errors.validationError", trace_id, str(exc)
+            )
 
         response = {
             "schema_version": SCHEMA_VERSION,
@@ -183,7 +195,10 @@ class InstallationBootstrapAPI:
             "error_code": "OK",
             "assertion": assertion.to_dict(),
         }
-        self._assertion_idempotency[scoped_idempotency_key] = (request_identity, response)
+        self._assertion_idempotency[scoped_idempotency_key] = (
+            request_identity,
+            response,
+        )
         return 200, response
 
     @staticmethod

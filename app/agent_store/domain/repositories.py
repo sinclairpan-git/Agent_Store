@@ -61,7 +61,9 @@ class _DraftRequestIdentity:
     compatibility_status: str
 
     @classmethod
-    def from_request(cls, *, agent: Agent, version: AgentVersion) -> "_DraftRequestIdentity":
+    def from_request(
+        cls, *, agent: Agent, version: AgentVersion
+    ) -> "_DraftRequestIdentity":
         return cls(
             agent_id=agent.agent_id,
             display_name=agent.display_name,
@@ -108,7 +110,9 @@ class InMemoryAgentRegistryRepository:
         self._agents: dict[str, Agent] = {}
         self._versions = AgentVersionCatalog()
         self._records: dict[tuple[str, str], AgentDraftRecord] = {}
-        self._idempotency: dict[str, tuple[_DraftRequestIdentity, AgentDraftRecord]] = {}
+        self._idempotency: dict[
+            str, tuple[_DraftRequestIdentity, AgentDraftRecord]
+        ] = {}
 
     def create_draft(
         self,
@@ -118,7 +122,9 @@ class InMemoryAgentRegistryRepository:
         trace_id: str,
         idempotency_key: str | None = None,
     ) -> AgentDraftRecord:
-        request_identity = _DraftRequestIdentity.from_request(agent=agent, version=version)
+        request_identity = _DraftRequestIdentity.from_request(
+            agent=agent, version=version
+        )
         if idempotency_key and idempotency_key in self._idempotency:
             stored_identity, stored_record = self._idempotency[idempotency_key]
             if stored_identity != request_identity:
@@ -168,14 +174,20 @@ class InMemoryAgentRegistryRepository:
         record_key = stored_version.identity_key
         record = self._records.get(record_key)
         if record is None:
-            record = AgentDraftRecord(agent=agent, version=stored_version, trace_id=trace_id)
+            record = AgentDraftRecord(
+                agent=agent, version=stored_version, trace_id=trace_id
+            )
             self._records[record_key] = record
         if idempotency_key:
             self._idempotency[idempotency_key] = (request_identity, record)
         return record
 
     def get_agent_detail(self, agent_id: str) -> AgentDraftRecord:
-        candidates = [record for record in self._records.values() if record.agent.agent_id == agent_id]
+        candidates = [
+            record
+            for record in self._records.values()
+            if record.agent.agent_id == agent_id
+        ]
         if not candidates:
             raise AgentRegistryError(
                 ErrorResponse(

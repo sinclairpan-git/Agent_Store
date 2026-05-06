@@ -46,7 +46,9 @@ class OfficialAppViewModel:
             "supported_os": [item.to_dict() for item in self.agent.supported_os],
             "official_flag": self.agent.official_flag,
             "framework_capability": self.agent.is_framework_capability,
-            "capability_type": "SDLC Framework" if self.agent.is_framework_capability else None,
+            "capability_type": "SDLC Framework"
+            if self.agent.is_framework_capability
+            else None,
             "maintenance": {
                 "owner_team": self.agent.owner_team,
                 "owner_user": self.agent.owner_user,
@@ -83,7 +85,10 @@ class OfficialAppViewModel:
     def _installability(self) -> str:
         if self.enterprise_context.integration_mode == "standalone":
             return "standalone_only"
-        if self.enterprise_context.enterprise_state in {"required_unactivated", "activating"}:
+        if self.enterprise_context.enterprise_state in {
+            "required_unactivated",
+            "activating",
+        }:
             return "activation_required"
         if self.enterprise_context.enterprise_state == "disabled":
             return "blocked"
@@ -150,8 +155,14 @@ class OfficialAppViewModel:
         return sections
 
     def _accessibility_contract(self) -> dict[str, object]:
-        actions = [self._primary_action(), self._standalone_action(), self._docs_action()]
-        if self._enterprise_action().action_id not in {action.action_id for action in actions}:
+        actions = [
+            self._primary_action(),
+            self._standalone_action(),
+            self._docs_action(),
+        ]
+        if self._enterprise_action().action_id not in {
+            action.action_id for action in actions
+        }:
             actions.append(self._enterprise_action())
         return {
             "keyboard_reachable_action_ids": [action.action_id for action in actions],
@@ -194,7 +205,9 @@ def build_official_app_view(
     return model.to_response()
 
 
-def validate_standalone_boundary(view_response: dict[str, object], *, trace_id: str) -> ErrorResponse | None:
+def validate_standalone_boundary(
+    view_response: dict[str, object], *, trace_id: str
+) -> ErrorResponse | None:
     view = view_response.get("view")
     if not isinstance(view, dict):
         return None

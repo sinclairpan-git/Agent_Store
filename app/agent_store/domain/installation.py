@@ -11,7 +11,14 @@ INSTALLATION_STATUSES = frozenset(
     {"not_installed", "activation_required", "reporter_pending", "failed", "revoked"}
 )
 ENTERPRISE_STATES = frozenset(
-    {"detected_optional", "required_unactivated", "activating", "active", "degraded", "disabled"}
+    {
+        "detected_optional",
+        "required_unactivated",
+        "activating",
+        "active",
+        "degraded",
+        "disabled",
+    }
 )
 DEVICE_BINDING_STATUSES = frozenset({"active", "expired", "revoked"})
 DEVICE_OS_VALUES = frozenset({"macOS", "Windows", "Linux"})

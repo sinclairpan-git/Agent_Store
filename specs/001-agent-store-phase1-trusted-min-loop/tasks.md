@@ -350,6 +350,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：SC-006、SC-007、SC-008、SC-009、SC-011
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-009）
 - **依赖**：Task 2.3、Task 3.4、Task 3.5、Task 3.6、Task 4.3、Task 4.4、Task 4.5、Task 4.6、Task 4.7
 - **文件**：`tests/contract/test_phase1_trusted_loop.py`
 - **可并行**：否
@@ -362,6 +363,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：宪章原则 3、SC-001 至 SC-007
 - **优先级**：P1
+- **执行状态**：已完成（Batch 2026-05-06-009）
 - **依赖**：Task 5.1
 - **文件**：`specs/001-agent-store-phase1-trusted-min-loop/traceability.md`
 - **可并行**：是
@@ -374,8 +376,9 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：宪章原则 1
 - **优先级**：P1
+- **执行状态**：已完成（Batch 2026-05-06-009）
 - **依赖**：Task 5.2
-- **文件**：`specs/001-agent-store-phase1-trusted-min-loop/task-execution-log.md`
+- **文件**：`specs/001-agent-store-phase1-trusted-min-loop/task-execution-log.md`、`specs/001-agent-store-phase1-trusted-min-loop/development-summary.md`
 - **可并行**：否
 - **验收标准**：
   1. 执行日志包含批次记录模板。

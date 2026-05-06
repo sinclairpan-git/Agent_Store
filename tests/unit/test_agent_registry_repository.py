@@ -7,7 +7,9 @@ from agent_store.domain.repositories import (
 )
 
 
-def _agent(owner_team: str = "SDLC Platform", owner_user: str = "owner@example.com") -> Agent:
+def _agent(
+    owner_team: str = "SDLC Platform", owner_user: str = "owner@example.com"
+) -> Agent:
     return Agent(
         agent_id="framework.ai-autosdlc",
         display_name="Ai_AutoSDLC",

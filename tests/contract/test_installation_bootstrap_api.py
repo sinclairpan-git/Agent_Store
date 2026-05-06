@@ -27,7 +27,9 @@ def _decision(auth: AuthContext) -> PermissionDecision:
     )
 
 
-def _api(assertion_service: InstallationAssertionService | None = None) -> InstallationBootstrapAPI:
+def _api(
+    assertion_service: InstallationAssertionService | None = None,
+) -> InstallationBootstrapAPI:
     bootstrap = BootstrapService()
     bootstrap.register_version(
         AgentVersion(
@@ -169,13 +171,21 @@ def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
 
     status, body = api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
     retry_status, retry_body = api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
@@ -201,7 +211,11 @@ def test_issue_assertion_api_rejects_device_thumbprint_mismatch() -> None:
 
     status, body = api.issue_installation_assertion(
         installation_body["installation"]["installation_id"],
-        {"device_public_key_thumbprint": "thumb-2", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-2",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
@@ -227,7 +241,11 @@ def test_issue_assertion_api_rejects_mismatched_auth_context() -> None:
 
     status, body = api.issue_installation_assertion(
         installation_body["installation"]["installation_id"],
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=other_auth,
     )
@@ -248,7 +266,11 @@ def test_issue_assertion_api_rejects_null_required_input() -> None:
 
     status, body = api.issue_installation_assertion(
         installation_body["installation"]["installation_id"],
-        {"device_public_key_thumbprint": "thumb-1", "nonce": None, "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": None,
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
@@ -270,14 +292,22 @@ def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
     installation_id = installation_body["installation"]["installation_id"]
     api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
 
     status, body = api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-2", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-2",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
@@ -306,20 +336,31 @@ def test_issue_assertion_api_scopes_idempotency_to_installation_context() -> Non
 
     first_status, first_body = api.issue_installation_assertion(
         first_installation["installation"]["installation_id"],
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-shared"},
         auth_context=auth,
     )
     second_status, second_body = api.issue_installation_assertion(
         second_installation["installation"]["installation_id"],
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-shared"},
         auth_context=auth,
     )
 
     assert first_status == 200
     assert second_status == 200
-    assert first_body["assertion"]["installation_id"] != second_body["assertion"]["installation_id"]
+    assert (
+        first_body["assertion"]["installation_id"]
+        != second_body["assertion"]["installation_id"]
+    )
 
 
 def test_issue_assertion_api_rejects_nonce_replay_with_new_idempotency_key() -> None:
@@ -334,14 +375,22 @@ def test_issue_assertion_api_rejects_nonce_replay_with_new_idempotency_key() -> 
     installation_id = installation_body["installation"]["installation_id"]
     api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )
 
     status, body = api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-2"},
         auth_context=auth,
     )
@@ -370,7 +419,11 @@ def test_issue_assertion_api_returns_expired_error() -> None:
 
     status, body = api.issue_installation_assertion(
         installation_body["installation"]["installation_id"],
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
         headers={"Idempotency-Key": "assert-1"},
         auth_context=auth,
     )

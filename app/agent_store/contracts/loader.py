@@ -43,7 +43,9 @@ def load_openapi_contract(path: Path) -> Mapping[str, Any]:
     return document
 
 
-def resolve_local_ref(document: Mapping[str, Any], ref: str) -> tuple[str, Mapping[str, Any]]:
+def resolve_local_ref(
+    document: Mapping[str, Any], ref: str
+) -> tuple[str, Mapping[str, Any]]:
     if not ref.startswith("#/"):
         raise ContractValidationError(f"only local OpenAPI refs are supported: {ref}")
 
@@ -54,11 +56,15 @@ def resolve_local_ref(document: Mapping[str, Any], ref: str) -> tuple[str, Mappi
         current = current[segment]
 
     if not isinstance(current, Mapping):
-        raise ContractValidationError(f"OpenAPI ref does not resolve to a schema: {ref}")
+        raise ContractValidationError(
+            f"OpenAPI ref does not resolve to a schema: {ref}"
+        )
     return ref.rsplit("/", maxsplit=1)[-1], current
 
 
-def resolve_schema(document: Mapping[str, Any], schema: Mapping[str, Any]) -> tuple[str, Mapping[str, Any]]:
+def resolve_schema(
+    document: Mapping[str, Any], schema: Mapping[str, Any]
+) -> tuple[str, Mapping[str, Any]]:
     ref = schema.get("$ref")
     if isinstance(ref, str):
         return resolve_local_ref(document, ref)
@@ -95,7 +101,9 @@ def iter_response_schemas(path: Path) -> Iterable[ResponseEnvelopeCheck]:
             operation_id = str(operation.get("operationId", f"{method} <unknown>"))
             responses = operation.get("responses", {})
             if not isinstance(responses, Mapping):
-                raise ContractValidationError(f"{path}:{operation_id} has no responses mapping")
+                raise ContractValidationError(
+                    f"{path}:{operation_id} has no responses mapping"
+                )
             for status_code, response in responses.items():
                 if not isinstance(response, Mapping):
                     continue

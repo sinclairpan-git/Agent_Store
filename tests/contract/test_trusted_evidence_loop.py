@@ -127,7 +127,9 @@ def test_trusted_evidence_loop_rejects_replayed_signature_for_different_chain() 
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
 
-def test_trusted_evidence_loop_rejects_replayed_signature_for_different_trace_id() -> None:
+def test_trusted_evidence_loop_rejects_replayed_signature_for_different_trace_id() -> (
+    None
+):
     payload = _payload()
     payload["trace_id"] = "trace-replayed"
 

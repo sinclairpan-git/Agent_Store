@@ -85,5 +85,7 @@ class PackageTrustSummary:
             "scan_report_ref": self.scan_report_ref,
             "compatibility_status": self.compatibility_status,
         }
-        data.update({key: value for key, value in optional.items() if value is not None})
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         return data

@@ -344,3 +344,81 @@
 #### 批次结论
 
 - Agent Store 已从 AgentOps 拿到并接入 SDLC 内置企业 Vue2 vendor 包；前端验证、后端全量测试与 ruff 均通过。
+
+### Batch 2026-05-06-009 | close phase4 verification archive
+
+#### 批次范围
+
+- 覆盖阶段：close / 验证、归档与交付检查
+- 覆盖任务：Task 5.1、Task 5.2、Task 5.3
+- 技术约束：契约优先验证；docs/code traceability 必须可对账。
+
+#### 代码与文档产物
+
+- 新增 Phase 4 端到端 contract test：`tests/contract/test_phase1_trusted_loop.py`
+- 新增追踪矩阵：`specs/001-agent-store-phase1-trusted-min-loop/traceability.md`
+- 新增开发总结：`specs/001-agent-store-phase1-trusted-min-loop/development-summary.md`
+- 更新任务状态：`specs/001-agent-store-phase1-trusted-min-loop/tasks.md`
+
+#### 验证命令
+
+- `uv run pytest tests/contract/test_phase1_trusted_loop.py -q`
+- `uv run pytest -q`
+- `uv run ruff check app tests`
+- `uv run ruff format --check app tests`
+- `npm --prefix frontend run verify`
+- `rg -n "FR-|SC-|AS-CT-" specs/001-agent-store-phase1-trusted-min-loop/traceability.md`
+- `uv run ai-sdlc verify constraints`
+- `ai-sdlc program truth sync --execute --yes`
+- `ai-sdlc run --dry-run`
+
+#### 统一验证命令
+
+- **验证画像**：code-change
+- **改动范围**：`tests/contract/test_phase1_trusted_loop.py`、`specs/001-agent-store-phase1-trusted-min-loop/traceability.md`、`specs/001-agent-store-phase1-trusted-min-loop/development-summary.md`、`specs/001-agent-store-phase1-trusted-min-loop/tasks.md`、`specs/001-agent-store-phase1-trusted-min-loop/task-execution-log.md`
+- `uv run pytest tests/contract/test_phase1_trusted_loop.py -q`
+- `uv run pytest -q`
+- `uv run ruff check app tests`
+- `uv run ruff format --check app tests`
+- `npm --prefix frontend run verify`
+- `rg -n "FR-|SC-|AS-CT-" specs/001-agent-store-phase1-trusted-min-loop/traceability.md`
+- `uv run ai-sdlc verify constraints`
+- `ai-sdlc program truth sync --execute --yes`
+- `ai-sdlc workitem close-check --wi specs/001-agent-store-phase1-trusted-min-loop --json`
+- `ai-sdlc gate close`
+- `ai-sdlc run --dry-run`
+
+#### 验证结果
+
+- Phase 4 contract test：2 passed。
+- 全量 Python tests：114 passed。
+- Ruff check：All checks passed。
+- Ruff format check：53 files already formatted。
+- 前端 verify：frontend verification passed。
+- Traceability grep：FR / SC / AS-CT 标记均可检索。
+- `uv run ai-sdlc verify constraints`：命中既有 release docs consistency blockers，要求 Ai_AutoSDLC v0.7.9 发布文档、USER_GUIDE、offline packaging docs 与 README current-flow markers；该检查针对框架发布文档一致性，不属于 Agent Store 阶段 1 可信最小闭环实现范围，本批不伪造无关 release docs。
+
+#### 代码审查
+
+- 本批次重点检查：Agent Registry、bootstrap、signed assertion、AgentOps summary、Trusted Evidence Loop、official view、standalone 边界、状态冲突降级和关键稳定错误码均在 Phase 4 contract test 中串联或对账。
+
+#### 任务/计划同步状态
+
+- Task 5.1 至 Task 5.3 已在 `tasks.md` 标注完成批次。
+- `development-summary.md` 已补齐，供 AI-SDLC close gate 识别。
+
+#### 分支与工作树处置
+
+- 当前批次 branch disposition 状态：retained（准备更新 PR）
+- 当前批次 worktree disposition 状态：retained
+
+#### Git close-out
+
+- **已完成 git 提交**：是，本批 close-out 变更将在当前 PR 分支最终提交中一并纳管。
+- **提交哈希**：见本批最终 Git 提交。
+- 当前批次 branch disposition 状态：`feature/002-use-agentops-enterprise-vue2-vendor` 为当前交付分支，计划提交后更新 PR #4，等待 GitHub checks 与 `@codex review` 通过后再由用户授权合入 `main`。
+- 当前批次 worktree disposition 状态：实现文件与 close 归档文件待提交；未发现需保留的临时产物。
+
+#### 批次结论
+
+- Phase 4 验证、归档与交付检查已完成；端到端 contract test、traceability 和 development summary 已落库。

@@ -25,7 +25,9 @@ def required_string(payload: Mapping[str, object], field: str) -> str:
 
 
 class AgentRegistryAPI:
-    def __init__(self, repository: InMemoryAgentRegistryRepository | None = None) -> None:
+    def __init__(
+        self, repository: InMemoryAgentRegistryRepository | None = None
+    ) -> None:
         self.repository = repository or InMemoryAgentRegistryRepository()
 
     def create_agent_draft(
@@ -73,9 +75,9 @@ class AgentRegistryAPI:
         if isinstance(trust, Mapping):
             response["agent"]["package_trust_summary"] = dict(trust)  # type: ignore[index]
         else:
-            response["agent"]["package_trust_summary"] = PackageTrustSummary.from_version(
-                record.version
-            ).to_dict()
+            response["agent"]["package_trust_summary"] = (
+                PackageTrustSummary.from_version(record.version).to_dict()
+            )
         return 201, response
 
     def get_agent_detail(self, agent_id: str) -> tuple[int, dict[str, object]]:
@@ -137,11 +139,15 @@ class AgentRegistryAPI:
             package_id=required_string(payload, "package_id")
             if payload.get("package_id")
             else None,
-            key_id=required_string(payload, "key_id") if payload.get("key_id") else None,
+            key_id=required_string(payload, "key_id")
+            if payload.get("key_id")
+            else None,
         )
 
 
 def response_envelope_ok(body: Mapping[str, object]) -> bool:
-    return all(body.get(field) for field in ("schema_version", "trace_id")) and (
-        body.get("error_code") is not None
-    ) and body.get("schema_version") == SCHEMA_VERSION
+    return (
+        all(body.get(field) for field in ("schema_version", "trace_id"))
+        and (body.get("error_code") is not None)
+        and body.get("schema_version") == SCHEMA_VERSION
+    )
