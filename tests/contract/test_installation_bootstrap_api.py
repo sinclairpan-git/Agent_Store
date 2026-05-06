@@ -131,7 +131,7 @@ def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
     )
     retry_status, retry_body = api.issue_installation_assertion(
         installation_id,
-        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-ignored", "audience": "agentops"},
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
         headers={"Idempotency-Key": "assert-1"},
     )
 
@@ -142,6 +142,52 @@ def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
     assert body["error_code"] == "OK"
     assert body["assertion"]["installation_id"] == installation_id
     assert body["assertion"]["signature"]
+
+
+def test_issue_assertion_api_rejects_device_thumbprint_mismatch() -> None:
+    api = _api()
+    auth = _auth()
+    _, installation_body = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+
+    status, body = api.issue_installation_assertion(
+        installation_body["installation"]["installation_id"],
+        {"device_public_key_thumbprint": "thumb-2", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-1"},
+    )
+
+    assert status == 409
+    assert body["error_code"] == "DEVICE_KEY_MISMATCH"
+
+
+def test_issue_assertion_api_scopes_idempotency_to_request_identity() -> None:
+    api = _api()
+    auth = _auth()
+    _, installation_body = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+    installation_id = installation_body["installation"]["installation_id"]
+    api.issue_installation_assertion(
+        installation_id,
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-1", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-1"},
+    )
+
+    status, body = api.issue_installation_assertion(
+        installation_id,
+        {"device_public_key_thumbprint": "thumb-1", "nonce": "nonce-2", "audience": "agentops"},
+        headers={"Idempotency-Key": "assert-1"},
+    )
+
+    assert status == 409
+    assert body["error_code"] == "VALIDATION_ERROR"
 
 
 def test_issue_assertion_api_returns_expired_error() -> None:

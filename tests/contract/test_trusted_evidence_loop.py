@@ -67,6 +67,17 @@ def test_trusted_evidence_loop_rejects_bad_reporter_signature() -> None:
     assert body["error_code"] == "REPORTER_SIGNATURE_INVALID"
 
 
+def test_trusted_evidence_loop_rejects_empty_reporter_hash() -> None:
+    payload = _payload()
+    payload["reporter_event"]["event_hash"] = ""
+    payload["reporter_event"]["signature"] = "sig:"
+
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "REPORTER_SIGNATURE_INVALID"
+
+
 def test_trusted_evidence_loop_rejects_incomplete_l5_gate_and_scan() -> None:
     payload = _payload()
     payload["l5_gate_result"] = "pending"

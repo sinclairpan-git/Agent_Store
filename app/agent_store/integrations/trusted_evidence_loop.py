@@ -25,7 +25,7 @@ class TrustedEvidenceLoopVerifier:
             )
         event_hash = str(reporter_event.get("event_hash") or "")
         signature = str(reporter_event.get("signature") or "")
-        if signature != f"sig:{event_hash}":
+        if not event_hash or signature != f"sig:{event_hash}":
             return self._failure(
                 "REPORTER_SIGNATURE_INVALID",
                 "errors.reporterSignatureInvalid",

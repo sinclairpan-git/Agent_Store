@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
 from uuid import uuid4
 
 from agent_store import SCHEMA_VERSION
@@ -17,6 +18,14 @@ def new_trace_id() -> str:
     return f"trace-{uuid4().hex}"
 
 
+@dataclass(frozen=True)
+class AssertionRequestIdentity:
+    installation_id: str
+    device_public_key_thumbprint: str
+    nonce: str
+    audience: str
+
+
 class InstallationBootstrapAPI:
     def __init__(
         self,
@@ -26,7 +35,10 @@ class InstallationBootstrapAPI:
     ) -> None:
         self.bootstrap_service = bootstrap_service or BootstrapService()
         self.assertion_service = assertion_service or InstallationAssertionService()
-        self._assertion_idempotency: dict[str, dict[str, object]] = {}
+        self._assertion_idempotency: dict[
+            str,
+            tuple[AssertionRequestIdentity, dict[str, object]],
+        ] = {}
 
     def create_installation(
         self,
@@ -70,25 +82,51 @@ class InstallationBootstrapAPI:
         idempotency_key = headers.get("Idempotency-Key")
         if not idempotency_key:
             return 400, self._validation_error("errors.idempotencyKeyRequired", trace_id)
-        if idempotency_key in self._assertion_idempotency:
-            return 200, self._assertion_idempotency[idempotency_key]
 
         record = self.bootstrap_service.get_record(installation_id)
         if record is None:
             return 404, self._validation_error("errors.installationNotFound", trace_id)
         try:
+            requested_thumbprint = str(payload["device_public_key_thumbprint"])
+            nonce = str(payload["nonce"])
+            audience = str(payload["audience"])
+            request_identity = AssertionRequestIdentity(
+                installation_id=installation_id,
+                device_public_key_thumbprint=requested_thumbprint,
+                nonce=nonce,
+                audience=audience,
+            )
+            if idempotency_key in self._assertion_idempotency:
+                existing_identity, response = self._assertion_idempotency[idempotency_key]
+                if existing_identity == request_identity:
+                    return 200, response
+                return 409, self._validation_error(
+                    "errors.idempotencyKeyConflict",
+                    trace_id,
+                    idempotency_key,
+                )
+
+            bound_thumbprint = record.device_binding.device_public_key_thumbprint
+            if requested_thumbprint != bound_thumbprint:
+                return 409, ErrorResponse(
+                    error_code="DEVICE_KEY_MISMATCH",
+                    message_key="errors.deviceKeyMismatch",
+                    severity="blocked",
+                    retryable=False,
+                    recommended_action_id="restart_activation",
+                    trace_id=trace_id,
+                ).to_dict()
+
             assertion = self.assertion_service.issue(
                 record.installation,
-                device_public_key_thumbprint=str(payload["device_public_key_thumbprint"]),
-                nonce=str(payload["nonce"]),
-                audience=str(payload["audience"]),
+                device_public_key_thumbprint=bound_thumbprint,
+                nonce=nonce,
+                audience=audience,
             )
             self.assertion_service.validate(
                 assertion,
-                expected_audience=str(payload["audience"]),
-                expected_device_public_key_thumbprint=str(
-                    payload["device_public_key_thumbprint"]
-                ),
+                expected_audience=audience,
+                expected_device_public_key_thumbprint=bound_thumbprint,
                 trace_id=trace_id,
                 mark_nonce_seen=False,
             )
@@ -103,7 +141,7 @@ class InstallationBootstrapAPI:
             "error_code": "OK",
             "assertion": assertion.to_dict(),
         }
-        self._assertion_idempotency[idempotency_key] = response
+        self._assertion_idempotency[idempotency_key] = (request_identity, response)
         return 200, response
 
     @staticmethod
