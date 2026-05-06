@@ -81,3 +81,20 @@ def test_trusted_evidence_loop_rejects_incomplete_l5_gate_and_scan() -> None:
     status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
     assert status == 409
     assert body["error_code"] == "VIOLATION_SCAN_INCOMPLETE"
+
+
+def test_trusted_evidence_loop_rejects_missing_reference_fields() -> None:
+    payload = _payload()
+    del payload["artifact_hash"]
+
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+    payload = _payload()
+    del payload["reporter_event"]["event_id"]
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"

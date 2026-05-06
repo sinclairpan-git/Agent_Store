@@ -41,6 +41,20 @@ class TrustedEvidenceLoopVerifier:
                 trace_id,
             )
 
+        required_refs = (
+            ("installation_id", payload),
+            ("artifact_hash", payload),
+            ("evidence_summary_id", payload),
+            ("event_id", reporter_event),
+        )
+        for field, source in required_refs:
+            if not source.get(field):
+                return self._failure(
+                    "EVIDENCE_TRACE_MISMATCH",
+                    "errors.evidenceTraceMismatch",
+                    trace_id,
+                )
+
         checked_refs = [
             str(payload["installation_id"]),
             str(payload["artifact_hash"]),

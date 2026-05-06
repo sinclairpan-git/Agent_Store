@@ -55,3 +55,18 @@ def test_create_agent_draft_requires_idempotency_key() -> None:
     assert status == 400
     assert response_envelope_ok(body)
     assert body["error_code"] == "VALIDATION_ERROR"
+
+
+def test_create_agent_draft_missing_required_field_returns_validation_error() -> None:
+    api = AgentRegistryAPI()
+    payload = _payload()
+    del payload["agent_id"]
+
+    status, body = api.create_agent_draft(
+        payload,
+        headers={"Idempotency-Key": "idem-1"},
+    )
+
+    assert status == 400
+    assert response_envelope_ok(body)
+    assert body["error_code"] == "VALIDATION_ERROR"

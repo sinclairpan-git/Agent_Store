@@ -127,3 +127,17 @@ def test_device_key_mismatch_is_rejected() -> None:
         )
 
     assert exc_info.value.response.error_code == "DEVICE_KEY_MISMATCH"
+
+
+def test_tampered_assertion_integrity_is_rejected() -> None:
+    service, assertion = _assertion()
+
+    with pytest.raises(AssertionValidationError) as exc_info:
+        service.validate(
+            assertion.with_updates(artifact_hash="sha256:tampered"),
+            expected_audience="agentops",
+            expected_device_public_key_thumbprint="thumb-1",
+            trace_id="trace-1",
+        )
+
+    assert exc_info.value.response.error_code == "ASSERTION_SIGNATURE_INVALID"

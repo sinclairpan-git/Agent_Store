@@ -162,6 +162,7 @@ class InstallationAssertionService:
                     trace_id,
                 )
             )
+        self._validate_integrity(assertion, trace_id)
         if assertion.audience != expected_audience:
             raise AssertionValidationError(
                 self._error(
@@ -191,6 +192,46 @@ class InstallationAssertionService:
             )
         if mark_nonce_seen:
             self._seen_nonces.add(assertion.nonce)
+
+    def _validate_integrity(
+        self,
+        assertion: SignedInstallationAssertion,
+        trace_id: str,
+    ) -> None:
+        canonical_payload = self._canonical_payload(
+            assertion_version=assertion.assertion_version,
+            installation_id=assertion.installation_id,
+            device_id=assertion.device_id,
+            artifact_hash=assertion.artifact_hash,
+            issuer=assertion.issuer,
+            issued_at=assertion.issued_at.isoformat(),
+            expires_at=assertion.expires_at.isoformat(),
+            key_id=assertion.key_id,
+            alg=assertion.alg,
+            canonicalization=assertion.canonicalization,
+            audience=assertion.audience,
+            subject_user_id=assertion.subject_user_id,
+            nonce=assertion.nonce,
+            replay_window_seconds=str(assertion.replay_window_seconds),
+            device_public_key_thumbprint=assertion.device_public_key_thumbprint,
+            revocation_status=assertion.revocation_status,
+        )
+        expected_hash = hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
+        expected_signature = hmac.new(
+            self._secret, expected_hash.encode("utf-8"), hashlib.sha256
+        ).hexdigest()
+        if not (
+            hmac.compare_digest(expected_hash, assertion.assertion_hash)
+            and hmac.compare_digest(expected_signature, assertion.signature)
+        ):
+            raise AssertionValidationError(
+                self._error(
+                    "ASSERTION_SIGNATURE_INVALID",
+                    "errors.assertionSignatureInvalid",
+                    "regenerate_activation_command",
+                    trace_id,
+                )
+            )
 
     @staticmethod
     def _canonical_payload(**fields: str) -> str:

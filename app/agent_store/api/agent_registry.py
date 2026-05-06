@@ -50,7 +50,7 @@ class AgentRegistryAPI:
             )
         except AgentRegistryError as exc:
             return exc.status_code, exc.response.to_dict()
-        except (TypeError, ValueError) as exc:
+        except (KeyError, TypeError, ValueError) as exc:
             return 400, ErrorResponse(
                 error_code="VALIDATION_ERROR",
                 message_key="errors.validationError",
