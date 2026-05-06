@@ -12,13 +12,23 @@
   Vue.component("sdlc-action-button", {
     props: ["action", "kind"],
     template: [
-      '<a class="action-button" :class="kindClass" :href="action.href || \'#\'"',
-      ' :aria-disabled="action.enabled === false">',
+      '<a class="action-button" :class="kindClass" :href="actionHref"',
+      ' :aria-disabled="disabled" :tabindex="disabled ? -1 : null"',
+      ' @click="guardDisabled" @keydown.enter="guardDisabled">',
       '  <span class="action-button__icon" aria-hidden="true">{{ icon }}</span>',
       '  <span>{{ action.action_id }}</span>',
       '</a>'
     ].join(""),
     computed: {
+      disabled: function disabled() {
+        return this.action.enabled === false;
+      },
+      actionHref: function actionHref() {
+        if (this.disabled) {
+          return null;
+        }
+        return this.action.href || "#";
+      },
       kindClass: function kindClass() {
         return "action-button--" + (this.kind || "secondary");
       },
@@ -30,6 +40,14 @@
           return "⌘";
         }
         return "→";
+      }
+    },
+    methods: {
+      guardDisabled: function guardDisabled(event) {
+        if (this.disabled) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       }
     }
   });

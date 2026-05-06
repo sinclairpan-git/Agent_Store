@@ -53,6 +53,12 @@ for (const requiredField of [
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
 assert(app.includes("new window.Vue"), "app must instantiate Vue2");
+assert(
+  componentLibrary.includes("actionHref: function actionHref()")
+    && componentLibrary.includes("return null;")
+    && componentLibrary.includes("@keydown.enter=\"guardDisabled\""),
+  "disabled action links must not expose keyboard-operable hrefs"
+);
 
 const indexPath = resolveRequestPath("/");
 assert(indexPath.status === 200, "server must resolve root route");

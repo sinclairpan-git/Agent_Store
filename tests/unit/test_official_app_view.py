@@ -106,3 +106,24 @@ def test_standalone_branch_does_not_require_installation_id() -> None:
     assert view["primary_action"]["target_system"] == "ai_autosdlc_cli"
     assert view["standalone"]["requires_installation_id"] is False
     assert "installation_id" not in view["enterprise_context"]
+
+
+def test_disabled_enterprise_state_blocks_activation_action() -> None:
+    response = build_official_app_view(
+        agent=_agent(),
+        version=_version(),
+        trace_id="trace-123",
+        enterprise_context=EnterpriseContext(
+            integration_mode="enterprise_managed",
+            enterprise_state="disabled",
+            source="tenant_policy",
+            can_ignore=False,
+            affected_actions=("enterprise_activation",),
+            requires_enterprise=True,
+        ),
+    )
+
+    view = response["view"]
+    assert view["current_user_installability"] == "blocked"
+    assert view["enterprise_activation_action"]["enabled"] is False
+    assert view["primary_action"]["enabled"] is False

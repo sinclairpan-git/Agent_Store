@@ -104,7 +104,10 @@ class OfficialAppViewModel:
         return ActionDescriptor(
             action_id="start_enterprise_activation",
             target_system="agent_store",
-            enabled=self.enterprise_context.integration_mode != "standalone",
+            enabled=(
+                self.enterprise_context.integration_mode != "standalone"
+                and self.enterprise_context.enterprise_state != "disabled"
+            ),
             requires_permission=True,
             audit_required=True,
             href=f"/api/v1/agents/{self.agent.agent_id}/activate",
