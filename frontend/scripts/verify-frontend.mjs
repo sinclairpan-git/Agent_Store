@@ -55,8 +55,8 @@ for (const [packagePath, packageMeta] of Object.entries(lock.packages || {})) {
     continue;
   }
   assert(
-    !/^https?:/.test(packageMeta.resolved),
-    `${packagePath} must not resolve from a public registry`
+    packageMeta.resolved.startsWith("file:"),
+    `${packagePath} must resolve from a vendored file tarball`
   );
   if (packageMeta.resolved.startsWith("file:../vendor/enterprise-vue2/")) {
     const tarballPath = packageMeta.resolved.slice("file:".length);
