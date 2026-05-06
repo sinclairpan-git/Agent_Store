@@ -24,6 +24,17 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
     validate_all_contracts(default_contracts_dir())
 
 
+def test_create_installation_contract_documents_error_responses() -> None:
+    contract = load_openapi_contract(default_contracts_dir() / "installation-bootstrap.openapi.yaml")
+    operation = contract["paths"]["/api/v1/installations"]["post"]
+    responses = operation["responses"]
+
+    assert {"201", "400", "403", "404", "409"}.issubset(responses.keys())
+    for status_code in ("400", "403", "404", "409"):
+        schema = responses[status_code]["content"]["application/json"]["schema"]
+        assert schema == {"$ref": "#/components/schemas/ErrorResponse"}
+
+
 def test_installation_assertion_contract_documents_error_responses() -> None:
     contract = load_openapi_contract(default_contracts_dir() / "installation-bootstrap.openapi.yaml")
     operation = contract["paths"]["/api/v1/installations/{installation_id}/assertion"]["post"]
