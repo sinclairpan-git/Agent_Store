@@ -23,6 +23,45 @@ class TrustedEvidenceLoopVerifier:
                 "errors.reporterSignatureInvalid",
                 trace_id,
             )
+
+        required_payload_refs = (
+            "installation_id",
+            "device_id",
+            "agent_id",
+            "agent_version",
+            "artifact_hash",
+            "trace_id",
+            "evidence_summary_id",
+        )
+        for field in required_payload_refs:
+            if not self._has_required_string(payload, field):
+                return self._failure(
+                    "EVIDENCE_TRACE_MISMATCH",
+                    "errors.evidenceTraceMismatch",
+                    trace_id,
+                )
+
+        required_reporter_refs = (
+            "event_id",
+            "event_type",
+            "idempotency_key",
+            "key_id",
+            "signed_at",
+        )
+        for field in required_reporter_refs:
+            if not self._has_required_string(reporter_event, field):
+                return self._failure(
+                    "EVIDENCE_TRACE_MISMATCH",
+                    "errors.evidenceTraceMismatch",
+                    trace_id,
+                )
+        if not isinstance(reporter_event.get("sequence_no"), int):
+            return self._failure(
+                "EVIDENCE_TRACE_MISMATCH",
+                "errors.evidenceTraceMismatch",
+                trace_id,
+            )
+
         event_hash = str(reporter_event.get("event_hash") or "")
         signature = str(reporter_event.get("signature") or "")
         if not event_hash or signature != f"sig:{event_hash}":
@@ -41,22 +80,11 @@ class TrustedEvidenceLoopVerifier:
                 trace_id,
             )
 
-        required_refs = (
-            ("installation_id", payload),
-            ("artifact_hash", payload),
-            ("evidence_summary_id", payload),
-            ("event_id", reporter_event),
-        )
-        for field, source in required_refs:
-            if not source.get(field):
-                return self._failure(
-                    "EVIDENCE_TRACE_MISMATCH",
-                    "errors.evidenceTraceMismatch",
-                    trace_id,
-                )
-
         checked_refs = [
             str(payload["installation_id"]),
+            str(payload["device_id"]),
+            str(payload["agent_id"]),
+            str(payload["agent_version"]),
             str(payload["artifact_hash"]),
             run_id,
             session_id,
@@ -73,6 +101,11 @@ class TrustedEvidenceLoopVerifier:
                 "checked_refs": checked_refs,
             },
         }
+
+    @staticmethod
+    def _has_required_string(source: Mapping[str, object], field: str) -> bool:
+        value = source.get(field)
+        return isinstance(value, str) and bool(value.strip())
 
     @staticmethod
     def _failure(error_code: str, message_key: str, trace_id: str) -> tuple[int, dict[str, object]]:

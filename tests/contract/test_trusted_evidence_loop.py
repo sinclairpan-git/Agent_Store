@@ -104,7 +104,42 @@ def test_trusted_evidence_loop_rejects_missing_reference_fields() -> None:
     assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
 
     payload = _payload()
+    del payload["device_id"]
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+    payload = _payload()
+    del payload["agent_id"]
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+    payload = _payload()
+    del payload["trace_id"]
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+    payload = _payload()
     del payload["reporter_event"]["event_id"]
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+    payload = _payload()
+    del payload["reporter_event"]["key_id"]
+    status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+    payload = _payload()
+    payload["reporter_event"]["sequence_no"] = None
     status, body = TrustedEvidenceLoopVerifier().assert_loop(payload)
 
     assert status == 409
