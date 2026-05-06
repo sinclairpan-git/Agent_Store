@@ -73,6 +73,44 @@ def test_create_installation_and_device_binding_is_idempotent() -> None:
     assert decision.ignored_client_user_id == "spoofed-user"
 
 
+def test_idempotent_retry_allows_fresh_permission_decision_id() -> None:
+    service = _service()
+    auth = _auth()
+    first_decision = _decision(auth)
+    second_decision = PermissionDecision.from_auth_context(
+        auth_context=auth,
+        decision="allow",
+        permission_decision_id="perm-retry",
+        audit_id="audit-retry",
+        trace_id="trace-retry",
+    )
+
+    first = service.create_installation(
+        agent_id="framework.ai-autosdlc",
+        agent_version="1.0.0",
+        artifact_hash="sha256:first",
+        device_os="macOS",
+        device_public_key_thumbprint="thumb-1",
+        auth_context=auth,
+        permission_decision=first_decision,
+        trace_id="trace-1",
+        idempotency_key="idem-1",
+    )
+    second = service.create_installation(
+        agent_id="framework.ai-autosdlc",
+        agent_version="1.0.0",
+        artifact_hash="sha256:first",
+        device_os="macOS",
+        device_public_key_thumbprint="thumb-1",
+        auth_context=auth,
+        permission_decision=second_decision,
+        trace_id="trace-2",
+        idempotency_key="idem-1",
+    )
+
+    assert second is first
+
+
 def test_idempotency_key_reuse_requires_same_request_identity() -> None:
     service = _service()
     auth = _auth()

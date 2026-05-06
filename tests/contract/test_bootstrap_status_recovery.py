@@ -46,7 +46,8 @@ def test_bootstrap_status_returns_polling_retry_and_diagnostic_fields() -> None:
     service, record = _record()
 
     status, body = BootstrapStatusAPI(service).get_bootstrap_status(
-        record.installation.installation_id
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
     )
 
     assert status == 200
@@ -64,6 +65,7 @@ def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> N
 
     _, body = BootstrapStatusAPI(service).get_bootstrap_status(
         record.installation.installation_id,
+        auth_context=record.installation.auth_context,
         last_error_code="INSTALLATION_ASSERTION_EXPIRED",
     )
 
@@ -102,3 +104,21 @@ def test_permission_denied_status_returns_access_and_return_path() -> None:
     assert status["audit_id"] == "audit-deny"
     assert status["return_path"] == "/official-apps/framework.ai-autosdlc"
     assert status["primary_action"]["action_id"] == "request_enterprise_access"
+
+
+def test_bootstrap_status_rejects_mismatched_auth_context() -> None:
+    service, record = _record()
+    other_auth = AuthContext(
+        auth_context_id="auth-2",
+        subject_user_id="user-2",
+        identity_confidence=0.99,
+    )
+
+    status, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=other_auth,
+    )
+
+    assert status == 403
+    assert body["error_code"] == "PERMISSION_DENIED"
+    assert body["retryable"] is False

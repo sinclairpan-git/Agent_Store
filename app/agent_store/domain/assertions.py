@@ -75,7 +75,7 @@ class InstallationAssertionService:
         self.key_id = key_id
         self._secret = secret
         self._issued_by_installation: dict[str, SignedInstallationAssertion] = {}
-        self._seen_nonces: set[tuple[str, str, str, str]] = set()
+        self._seen_nonces: dict[tuple[str, str, str, str], tuple[datetime, int]] = {}
 
     def issue(
         self,
@@ -182,6 +182,7 @@ class InstallationAssertionService:
                 )
             )
         replay_key = self._replay_key(assertion)
+        self._expire_seen_nonces(current_time)
         if replay_key in self._seen_nonces:
             raise AssertionValidationError(
                 self._error(
@@ -192,7 +193,10 @@ class InstallationAssertionService:
                 )
             )
         if mark_nonce_seen:
-            self._seen_nonces.add(replay_key)
+            self._seen_nonces[replay_key] = (
+                current_time,
+                max(0, assertion.replay_window_seconds),
+            )
 
     def _validate_integrity(
         self,
@@ -237,6 +241,15 @@ class InstallationAssertionService:
     @staticmethod
     def _canonical_payload(**fields: str) -> str:
         return "\n".join(f"{key}={fields[key]}" for key in sorted(fields))
+
+    def _expire_seen_nonces(self, current_time: datetime) -> None:
+        expired = [
+            replay_key
+            for replay_key, (seen_at, replay_window_seconds) in self._seen_nonces.items()
+            if current_time - seen_at >= timedelta(seconds=replay_window_seconds)
+        ]
+        for replay_key in expired:
+            del self._seen_nonces[replay_key]
 
     @staticmethod
     def _replay_key(assertion: SignedInstallationAssertion) -> tuple[str, str, str, str]:

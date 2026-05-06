@@ -60,7 +60,6 @@ class BootstrapRequestIdentity:
     org_id: str | None
     project_id: str | None
     repo_ref: str | None
-    permission_decision_id: str
     permission_decision: str
 
 
@@ -97,7 +96,6 @@ class BootstrapService:
             org_id=auth_context.org_id,
             project_id=auth_context.project_id,
             repo_ref=auth_context.repo_ref,
-            permission_decision_id=permission_decision.permission_decision_id,
             permission_decision=permission_decision.decision,
         )
         if idempotency_key in self._records:

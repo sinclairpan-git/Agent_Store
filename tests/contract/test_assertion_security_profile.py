@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pytest
 
 from agent_store.domain.assertions import (
@@ -121,6 +123,27 @@ def test_replay_is_rejected() -> None:
         )
 
     assert exc_info.value.response.error_code == "ASSERTION_REPLAY_DETECTED"
+
+
+def test_replay_window_allows_nonce_reuse_after_window_expires() -> None:
+    service, assertion = _assertion()
+    first_seen = assertion.issued_at + timedelta(seconds=1)
+    after_window = first_seen + timedelta(seconds=assertion.replay_window_seconds)
+
+    service.validate(
+        assertion,
+        expected_audience="agentops",
+        expected_device_public_key_thumbprint="thumb-1",
+        trace_id="trace-1",
+        now=first_seen,
+    )
+    service.validate(
+        assertion,
+        expected_audience="agentops",
+        expected_device_public_key_thumbprint="thumb-1",
+        trace_id="trace-2",
+        now=after_window,
+    )
 
 
 def test_same_nonce_is_allowed_for_different_installation_contexts() -> None:
