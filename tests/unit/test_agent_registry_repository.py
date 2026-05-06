@@ -89,10 +89,32 @@ def test_create_draft_idempotency_key_returns_same_record() -> None:
     )
     second = repo.create_draft(
         agent=_agent(),
-        version=_version("sha256:second"),
+        version=_version(),
         trace_id="trace-2",
         idempotency_key="idem-1",
     )
 
     assert second is first
     assert second.trace_id == "trace-1"
+
+
+def test_create_draft_idempotency_key_rejects_different_request_identity() -> None:
+    repo = InMemoryAgentRegistryRepository()
+    repo.create_draft(
+        agent=_agent(),
+        version=_version(),
+        trace_id="trace-1",
+        idempotency_key="idem-1",
+    )
+
+    with pytest.raises(AgentRegistryError) as exc_info:
+        repo.create_draft(
+            agent=_agent(),
+            version=_version("sha256:second"),
+            trace_id="trace-2",
+            idempotency_key="idem-1",
+        )
+
+    assert exc_info.value.status_code == 409
+    assert exc_info.value.response.error_code == "IDEMPOTENCY_KEY_CONFLICT"
+    assert exc_info.value.response.trace_id == "trace-2"

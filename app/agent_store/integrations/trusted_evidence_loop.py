@@ -135,6 +135,7 @@ class TrustedEvidenceLoopVerifier:
             str(payload["agent_id"]),
             str(payload["agent_version"]),
             str(payload["artifact_hash"]),
+            str(payload["trace_id"]),
             run_id,
             session_id,
             str(payload["evidence_summary_id"]),

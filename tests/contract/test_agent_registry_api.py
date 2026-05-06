@@ -25,7 +25,7 @@ def test_create_agent_draft_response_contains_required_envelope_and_idempotency(
         headers={"Idempotency-Key": "idem-1"},
     )
     retry_status, retry_body = api.create_agent_draft(
-        {**_payload(), "artifact_hash": "sha256:ignored"},
+        _payload(),
         headers={"Idempotency-Key": "idem-1"},
     )
 
@@ -34,6 +34,21 @@ def test_create_agent_draft_response_contains_required_envelope_and_idempotency(
     assert response_envelope_ok(body)
     assert retry_body["trace_id"] == body["trace_id"]
     assert body["agent"]["package_trust_summary"]["hash_match_state"] == "matched"
+
+
+def test_create_agent_draft_rejects_idempotency_key_for_different_payload() -> None:
+    api = AgentRegistryAPI()
+    api.create_agent_draft(_payload(), headers={"Idempotency-Key": "idem-1"})
+
+    status, body = api.create_agent_draft(
+        {**_payload(), "artifact_hash": "sha256:second", "trace_id": "trace-2"},
+        headers={"Idempotency-Key": "idem-1"},
+    )
+
+    assert status == 409
+    assert response_envelope_ok(body)
+    assert body["error_code"] == "IDEMPOTENCY_KEY_CONFLICT"
+    assert body["trace_id"] == "trace-2"
 
 
 def test_get_agent_detail_response_contains_required_envelope() -> None:

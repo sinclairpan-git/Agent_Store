@@ -19,6 +19,7 @@ def _event_hash(payload: dict[str, object]) -> str:
         str(payload["agent_id"]),
         str(payload["agent_version"]),
         str(payload["artifact_hash"]),
+        str(payload["trace_id"]),
         str(payload["run_id"]),
         str(payload["session_id"]),
         str(payload["evidence_summary_id"]),
@@ -119,6 +120,16 @@ def test_trusted_evidence_loop_rejects_empty_reporter_hash() -> None:
 def test_trusted_evidence_loop_rejects_replayed_signature_for_different_chain() -> None:
     payload = _payload()
     payload["session_id"] = "session-replayed"
+
+    status, body = _verifier().assert_loop(payload)
+
+    assert status == 409
+    assert body["error_code"] == "EVIDENCE_TRACE_MISMATCH"
+
+
+def test_trusted_evidence_loop_rejects_replayed_signature_for_different_trace_id() -> None:
+    payload = _payload()
+    payload["trace_id"] = "trace-replayed"
 
     status, body = _verifier().assert_loop(payload)
 
