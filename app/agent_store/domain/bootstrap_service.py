@@ -48,10 +48,26 @@ class BootstrapRecord:
         }
 
 
+@dataclass(frozen=True)
+class BootstrapRequestIdentity:
+    agent_id: str
+    agent_version: str
+    artifact_hash: str
+    device_os: str
+    device_public_key_thumbprint: str
+    subject_user_id: str
+    tenant_id: str | None
+    org_id: str | None
+    project_id: str | None
+    repo_ref: str | None
+    permission_decision_id: str
+    permission_decision: str
+
+
 class BootstrapService:
     def __init__(self, versions: dict[tuple[str, str], AgentVersion] | None = None) -> None:
         self._versions = versions or {}
-        self._records: dict[str, BootstrapRecord] = {}
+        self._records: dict[str, tuple[BootstrapRequestIdentity, BootstrapRecord]] = {}
         self._by_installation_id: dict[str, BootstrapRecord] = {}
 
     def register_version(self, version: AgentVersion) -> None:
@@ -70,8 +86,54 @@ class BootstrapService:
         trace_id: str,
         idempotency_key: str,
     ) -> BootstrapRecord:
+        request_identity = BootstrapRequestIdentity(
+            agent_id=agent_id,
+            agent_version=agent_version,
+            artifact_hash=artifact_hash,
+            device_os=device_os,
+            device_public_key_thumbprint=device_public_key_thumbprint,
+            subject_user_id=auth_context.subject_user_id,
+            tenant_id=auth_context.tenant_id,
+            org_id=auth_context.org_id,
+            project_id=auth_context.project_id,
+            repo_ref=auth_context.repo_ref,
+            permission_decision_id=permission_decision.permission_decision_id,
+            permission_decision=permission_decision.decision,
+        )
         if idempotency_key in self._records:
-            return self._records[idempotency_key]
+            existing_identity, record = self._records[idempotency_key]
+            if existing_identity == request_identity:
+                return record
+            raise BootstrapError(
+                ErrorResponse(
+                    error_code="VALIDATION_ERROR",
+                    message_key="errors.idempotencyKeyConflict",
+                    severity="error",
+                    retryable=False,
+                    recommended_action_id="use_new_idempotency_key",
+                    trace_id=trace_id,
+                    details={"idempotency_key": idempotency_key},
+                ),
+                status_code=409,
+            )
+
+        if permission_decision.decision != "allow":
+            raise BootstrapError(
+                ErrorResponse(
+                    error_code="PERMISSION_DENIED",
+                    message_key="errors.permissionDenied",
+                    severity="blocked",
+                    retryable=permission_decision.decision == "approval_required",
+                    recommended_action_id="request_access",
+                    trace_id=trace_id,
+                    details={
+                        "decision": permission_decision.decision,
+                        "denied_scope": permission_decision.denied_scope,
+                        "request_access_url": permission_decision.request_access_url,
+                    },
+                ),
+                status_code=403,
+            )
 
         expected_version = self._versions.get((agent_id, agent_version))
         if expected_version is not None and expected_version.artifact_hash != artifact_hash:
@@ -116,7 +178,7 @@ class BootstrapService:
             device_public_key_thumbprint=device_public_key_thumbprint,
         )
         record = BootstrapRecord(installation=installation, device_binding=binding)
-        self._records[idempotency_key] = record
+        self._records[idempotency_key] = (request_identity, record)
         self._by_installation_id[installation_id] = record
         return record
 

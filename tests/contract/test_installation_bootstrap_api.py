@@ -88,6 +88,31 @@ def test_create_installation_api_returns_hash_mismatch_error() -> None:
     assert body["error_code"] == "PACKAGE_HASH_MISMATCH"
 
 
+def test_create_installation_api_rejects_denied_permission_decision() -> None:
+    api = _api()
+    auth = _auth()
+    denied_decision = PermissionDecision.from_auth_context(
+        auth_context=auth,
+        decision="deny",
+        permission_decision_id="perm-deny",
+        audit_id="audit-1",
+        trace_id="trace-1",
+        denied_scope="agent.install",
+    )
+
+    status, body = api.create_installation(
+        _payload(),
+        headers={"Idempotency-Key": "idem-1"},
+        auth_context=auth,
+        permission_decision=denied_decision,
+    )
+
+    assert status == 403
+    assert body["schema_version"]
+    assert body["trace_id"]
+    assert body["error_code"] == "PERMISSION_DENIED"
+
+
 def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
     api = _api()
     auth = _auth()
