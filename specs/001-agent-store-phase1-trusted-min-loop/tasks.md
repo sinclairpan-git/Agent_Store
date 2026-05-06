@@ -14,12 +14,15 @@ Phase 3: AgentOps summary、Trusted Evidence Loop 与 standalone 边界
 Phase 4: 验证、归档与交付检查
 ```
 
+前端落地约束：阶段 1 官方页前端实现统一采用 Vue2，并使用 SDLC 内置组件库企业 Vue2 组件库。后端 view model 与 action/message_key 契约必须保持组件库无关，但页面实现不得引入其他前端主栈或组件库。
+
 ## Phase 0：项目骨架与契约测试基础
 
 ### Task 1.1 初始化 Python 服务骨架
 
 - **覆盖规格**：FR-001、FR-013
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：无
 - **文件**：`pyproject.toml`、`app/agent_store/__init__.py`、`app/agent_store/api/__init__.py`、`app/agent_store/domain/__init__.py`、`tests/__init__.py`
 - **可并行**：否
@@ -32,6 +35,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：AS-CT-001、AS-CT-003、AS-CT-004、AS-CT-005、AS-CT-006、AS-CT-007
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/contracts/loader.py`、`tests/contract/test_contract_files_parse.py`
 - **可并行**：否
@@ -44,6 +48,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-014、FR-015
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：Task 1.1
 - **文件**：`app/agent_store/domain/status_registry.py`、`tests/unit/test_status_registry.py`
 - **可并行**：是
@@ -56,6 +61,7 @@ Phase 4: 验证、归档与交付检查
 
 - **覆盖规格**：FR-019、FR-023、FR-024、AS-CT-010、AS-CT-012
 - **优先级**：P0
+- **执行状态**：已完成（Batch 2026-05-06-003）
 - **依赖**：Task 1.1、Task 1.3
 - **文件**：`app/agent_store/domain/actions.py`、`app/agent_store/domain/errors.py`、`app/agent_store/domain/permissions.py`、`tests/unit/test_governed_actions_errors_permissions.py`
 - **可并行**：是

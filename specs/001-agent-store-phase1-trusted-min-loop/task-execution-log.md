@@ -79,3 +79,37 @@
 
 - 对抗评审意见已合议落入 formal docs。
 - 下一步仍需用户明确授权后才进入产品代码实现。
+
+### Batch 2026-05-06-003 | execute phase 0 foundation
+
+#### 批次范围
+
+- 覆盖阶段：execute / Phase 0 项目骨架与契约测试基础
+- 覆盖任务：Task 1.1、Task 1.2、Task 1.3、Task 1.4
+- 前端技术决策：Vue2；SDLC 内置组件库企业 Vue2 组件库
+
+#### 代码与文档产物
+
+- 新增 Python 3.11+ 项目骨架：`pyproject.toml`、`app/agent_store/`、`tests/`
+- 新增 OpenAPI contract loader 与 response envelope 校验：`app/agent_store/contracts/loader.py`
+- 新增状态注册表：`app/agent_store/domain/status_registry.py`
+- 新增治理动作、错误响应、权限基础模型：`app/agent_store/domain/actions.py`、`app/agent_store/domain/errors.py`、`app/agent_store/domain/permissions.py`
+- 固化 execute 阶段用户技术决策：`.ai-sdlc/profiles/tech-stack.yml`、`.ai-sdlc/profiles/decisions.yml`、`plan.md`、`research.md`、`tasks.md`
+
+#### 验证命令
+
+- `uv run pytest tests/contract/test_contract_files_parse.py -q`
+- `uv run pytest tests/unit/test_status_registry.py -q`
+- `uv run pytest tests/unit/test_governed_actions_errors_permissions.py -q`
+- `uv run pytest -q`
+
+#### 任务/计划同步状态
+
+- Task 1.1 至 Task 1.4 已在 `tasks.md` 标注完成批次。
+- `python -m pytest` 在当前 Codex 裸 Python 环境中缺少 pytest；已通过 `uv run pytest` 建立项目虚拟环境并完成验证。
+- 下一批次进入 Task 2.1：Agent 与 AgentVersion 领域模型。
+
+#### 批次结论
+
+- Phase 0 基础任务已完成，全量测试 12 项通过。
+- execute 阶段可继续进入 Registry 草案与官方页 governed view model。
