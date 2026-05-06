@@ -1,5 +1,6 @@
 ai-sdlc-offline-*/
 ai-sdlc-offline-*.tar.gz
+dist-agent-store/
 .ai-sdlc/state/*.bak
 .ai-sdlc/local/telemetry/indexes/
 .ai-sdlc/local/telemetry/sessions/

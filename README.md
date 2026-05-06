@@ -1,0 +1,37 @@
+# Agent Store
+
+Agent Store is the governance and product-planning repository for the phase 1
+trusted minimum loop. It is managed with AI-SDLC and currently contains the
+canonical Codex instructions, governance memory, formal specs, OpenAPI
+contracts, and cross-platform GitHub automation.
+
+## AI-SDLC Entry
+
+Before changing `specs/` or `.ai-sdlc/` documents, run the safe entry check:
+
+```sh
+ai-sdlc adapter status
+ai-sdlc run --dry-run
+```
+
+If `ai-sdlc` is not on `PATH`, use:
+
+```sh
+python -m ai_sdlc adapter status
+python -m ai_sdlc run --dry-run
+```
+
+## Compatibility
+
+The protected branch gate is `Compatibility Gate Result`. It aggregates:
+
+- Linux, macOS, and Windows repository contract validation
+- Python 3.11 and 3.12 AI-SDLC adapter/dry-run smoke
+- Windows `pwsh` and `cmd` command compatibility
+- Cross-platform Agent Store bundle build and extraction smoke
+
+Release bundles are produced by:
+
+```sh
+python scripts/build_agent_store_bundle.py
+```

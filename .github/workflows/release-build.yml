@@ -1,0 +1,132 @@
+name: Release Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag or version to build.
+        required: true
+        default: v0.1.0
+      upload_to_release:
+        description: Upload smoke-passed assets to an existing GitHub Release.
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-build-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build-smoke-upload:
+    name: ${{ matrix.asset_os }} ${{ matrix.archive }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - asset_os: linux
+            runner: ubuntu-latest
+            archive: tar.gz
+          - asset_os: macos
+            runner: macos-latest
+            archive: tar.gz
+          - asset_os: windows
+            runner: windows-latest
+            archive: zip
+
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+      UPLOAD_TO_RELEASE: ${{ inputs.upload_to_release || 'false' }}
+      GH_TOKEN: ${{ github.token }}
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify repository contract
+        run: python .github/scripts/verify_repository.py
+
+      - name: Build release bundle
+        run: >-
+          python scripts/build_agent_store_bundle.py
+          --version "${{ env.RELEASE_TAG }}"
+          --asset-os ${{ matrix.asset_os }}
+
+      - name: Smoke POSIX release bundle
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$(find dist-agent-store -maxdepth 1 -name "agent-store-*-${{ matrix.asset_os }}-*.tar.gz" -type f | head -n 1)"
+          if [[ -z "${archive}" ]]; then
+            echo "Expected release tar.gz bundle was not produced." >&2
+            exit 1
+          fi
+          smoke_root="${RUNNER_TEMP}/agent-store-release-smoke"
+          rm -rf "${smoke_root}"
+          mkdir -p "${smoke_root}"
+          tar -xzf "${archive}" -C "${smoke_root}"
+          bundle_dir="$(find "${smoke_root}" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+          python "${bundle_dir}/.github/scripts/verify_repository.py" --root "${bundle_dir}"
+
+      - name: Smoke Windows release bundle
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Get-ChildItem -Path "dist-agent-store" -Filter "agent-store-*-windows-*.zip" -File | Select-Object -First 1
+          if (-not $archive) {
+            throw "Expected release zip bundle was not produced."
+          }
+          $smokeRoot = Join-Path $env:RUNNER_TEMP "agent-store-release-smoke"
+          Remove-Item -Recurse -Force $smokeRoot -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $smokeRoot | Out-Null
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath $smokeRoot -Force
+          $bundleDir = Get-ChildItem -Path $smokeRoot -Directory | Select-Object -First 1
+          if (-not $bundleDir) {
+            throw "Expanded release zip did not contain a bundle directory."
+          }
+          python (Join-Path $bundleDir.FullName ".github\scripts\verify_repository.py") --root $bundleDir.FullName
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-store-${{ matrix.asset_os }}-${{ matrix.archive }}
+          path: dist-agent-store/agent-store-*-${{ matrix.asset_os }}-*.${{ matrix.archive }}
+          if-no-files-found: error
+
+      - name: Upload smoke-passed asset to release
+        if: env.UPLOAD_TO_RELEASE == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.archive }}" == "zip" ]]; then
+            asset="$(find dist-agent-store -maxdepth 1 -name "agent-store-*-windows-*.zip" -type f | head -n 1)"
+          else
+            asset="$(find dist-agent-store -maxdepth 1 -name "agent-store-*-${{ matrix.asset_os }}-*.tar.gz" -type f | head -n 1)"
+          fi
+          if [[ -z "${asset}" ]]; then
+            echo "No release asset found." >&2
+            exit 1
+          fi
+          gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null
+          gh release upload "${RELEASE_TAG}" "${asset}" --clobber --repo "${GITHUB_REPOSITORY}"

@@ -1,0 +1,217 @@
+name: Compatibility Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  COLUMNS: "200"
+  PYTHONUTF8: "1"
+  PYTHONIOENCODING: utf-8
+  AI_SDLC_CLI_VERSION: "0.7.7"
+
+concurrency:
+  group: compatibility-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  formal-artifact-validation:
+    name: Formal Artifact Validation (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        python-version:
+          - "3.11"
+          - "3.12"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Verify repository contract
+        run: python .github/scripts/verify_repository.py
+
+      - name: Install AI-SDLC CLI
+        run: python -m pip install "ai-sdlc==${{ env.AI_SDLC_CLI_VERSION }}"
+
+      - name: AI-SDLC adapter status
+        run: python -m ai_sdlc adapter status
+
+      - name: AI-SDLC dry-run
+        run: python -m ai_sdlc run --dry-run
+
+  package-smoke:
+    name: Package Smoke (${{ matrix.asset_os }}, ${{ matrix.archive }})
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - asset_os: linux
+            runner: ubuntu-latest
+            archive: tar.gz
+          - asset_os: macos
+            runner: macos-latest
+            archive: tar.gz
+          - asset_os: windows
+            runner: windows-latest
+            archive: zip
+
+    env:
+      AGENT_STORE_VERSION: "0.1.0"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify repository contract before packaging
+        run: python .github/scripts/verify_repository.py
+
+      - name: Build governance bundle
+        run: >-
+          python scripts/build_agent_store_bundle.py
+          --asset-os ${{ matrix.asset_os }}
+
+      - name: Smoke POSIX bundle
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="$(find dist-agent-store -maxdepth 1 -name "agent-store-*-${{ matrix.asset_os }}-*.tar.gz" -type f | head -n 1)"
+          if [[ -z "${archive}" ]]; then
+            echo "Expected tar.gz bundle was not produced." >&2
+            exit 1
+          fi
+          smoke_root="${RUNNER_TEMP}/agent-store-package-smoke"
+          rm -rf "${smoke_root}"
+          mkdir -p "${smoke_root}"
+          tar -xzf "${archive}" -C "${smoke_root}"
+          bundle_dir="$(find "${smoke_root}" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+          python "${bundle_dir}/.github/scripts/verify_repository.py" --root "${bundle_dir}"
+          test -f "${bundle_dir}/bundle-manifest.json"
+
+      - name: Smoke Windows bundle
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $archive = Get-ChildItem -Path "dist-agent-store" -Filter "agent-store-*-windows-*.zip" -File | Select-Object -First 1
+          if (-not $archive) {
+            throw "Expected Windows zip bundle was not produced."
+          }
+          $smokeRoot = Join-Path $env:RUNNER_TEMP "agent-store-package-smoke"
+          Remove-Item -Recurse -Force $smokeRoot -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Force -Path $smokeRoot | Out-Null
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath $smokeRoot -Force
+          $bundleDir = Get-ChildItem -Path $smokeRoot -Directory | Select-Object -First 1
+          if (-not $bundleDir) {
+            throw "Expanded zip did not contain a bundle directory."
+          }
+          python (Join-Path $bundleDir.FullName ".github\scripts\verify_repository.py") --root $bundleDir.FullName
+          if (-not (Test-Path (Join-Path $bundleDir.FullName "bundle-manifest.json"))) {
+            throw "bundle-manifest.json was not produced."
+          }
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-store-${{ matrix.asset_os }}-${{ matrix.archive }}
+          path: dist-agent-store/*
+          if-no-files-found: error
+
+  windows-shell-smoke:
+    name: Windows Shell Smoke (${{ matrix.shell }})
+    runs-on: windows-latest
+    timeout-minutes: 25
+
+    strategy:
+      fail-fast: false
+      matrix:
+        shell:
+          - pwsh
+          - cmd
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Repository smoke (pwsh)
+        if: matrix.shell == 'pwsh'
+        shell: pwsh
+        run: |
+          python .github/scripts/verify_repository.py
+          python -m pip install "ai-sdlc==${{ env.AI_SDLC_CLI_VERSION }}"
+          python -m ai_sdlc adapter status
+
+      - name: Repository smoke (cmd)
+        if: matrix.shell == 'cmd'
+        shell: cmd
+        run: |
+          python .github\scripts\verify_repository.py || exit /b 1
+          python -m pip install "ai-sdlc==${{ env.AI_SDLC_CLI_VERSION }}" || exit /b 1
+          python -m ai_sdlc adapter status || exit /b 1
+
+  compatibility-gate-result:
+    name: Compatibility Gate Result
+    runs-on: ubuntu-latest
+    needs:
+      - formal-artifact-validation
+      - package-smoke
+      - windows-shell-smoke
+    if: always()
+
+    steps:
+      - name: Check compatibility gate inputs
+        run: |
+          echo "formal-artifact-validation: ${{ needs.formal-artifact-validation.result }}"
+          echo "package-smoke: ${{ needs.package-smoke.result }}"
+          echo "windows-shell-smoke: ${{ needs.windows-shell-smoke.result }}"
+
+          if [ "${{ needs.formal-artifact-validation.result }}" != "success" ]; then
+            echo "formal-artifact-validation did not succeed."
+            exit 1
+          fi
+
+          if [ "${{ needs.package-smoke.result }}" != "success" ]; then
+            echo "package-smoke did not succeed."
+            exit 1
+          fi
+
+          if [ "${{ needs.windows-shell-smoke.result }}" != "success" ]; then
+            echo "windows-shell-smoke did not succeed."
+            exit 1
+          fi
+
+          echo "Compatibility gate inputs succeeded."
