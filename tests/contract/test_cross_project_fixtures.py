@@ -73,10 +73,12 @@ def test_agentops_016_consumer_acceptance_is_frozen_in_appendix() -> None:
         "installation_assertion.issuer` is `agent-store",
         "installation_assertion.audience` is `agentops",
         "installation_assertion.canonicalization` is `json-c14n-v1",
+        "installation_assertion.revocation_status` is present and accepted by policy",
         "device_proof.proof_version` is `device_proof.v1",
         "device_proof.assertion_hash` equals `installation_assertion.assertion_hash",
         "Device proof `algorithm` is independent from the assertion `algorithm`",
         "bootstrap_status`, `next_action`,",
+        "`installation_id`, and `device_id`",
         "Agent Store must not infer `active`",
         "upgrade dry-run or local adapter state to `verified_loaded`",
     ]
