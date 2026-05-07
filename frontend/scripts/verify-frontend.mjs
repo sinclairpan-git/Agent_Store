@@ -178,6 +178,7 @@ assert(
 assert(
   componentLibrary.includes("sdlc-bootstrap-handoff")
     && componentLibrary.includes("handoff.handoff_state")
+    && componentLibrary.includes("installation_created")
     && componentLibrary.includes("handoff.idempotency_key")
     && componentLibrary.includes("handoff.next_action")
     && indexHtml.includes(":install-handoff=\"selectedBootstrapHandoff\""),

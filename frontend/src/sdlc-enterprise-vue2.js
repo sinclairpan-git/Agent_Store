@@ -333,7 +333,10 @@
     ].join(""),
     computed: {
       stateTone: function stateTone() {
-        if (this.handoff.handoff_state === "ready_to_create") {
+        if (
+          this.handoff.handoff_state === "ready_to_create"
+          || this.handoff.handoff_state === "installation_created"
+        ) {
           return "success";
         }
         if (this.handoff.handoff_state.indexOf("waiting_for_") === 0) {
