@@ -6,6 +6,7 @@ from agent_store.domain.agentops_summary import CredentialBootstrapSummary
 from agent_store.domain.bootstrap_service import BootstrapService
 from agent_store.domain.bootstrap_status import BootstrapStatus, status_for_installation
 from agent_store.domain.errors import ErrorResponse
+from agent_store.domain.installation import Installation
 from agent_store.domain.permissions import AuthContext
 
 
@@ -52,6 +53,24 @@ class BootstrapStatusAPI:
                         "auth_context_id": auth_context.auth_context_id,
                     },
                 ).to_dict()
+            if agentops_credential is not None and not _credential_matches_installation(
+                agentops_credential,
+                record.installation,
+            ):
+                return 409, ErrorResponse(
+                    error_code="VALIDATION_ERROR",
+                    message_key="errors.agentopsCredentialMismatch",
+                    severity="blocked",
+                    retryable=False,
+                    recommended_action_id="refresh_agentops_credential",
+                    trace_id=record.installation.trace_id,
+                    details={
+                        "installation_id": installation_id,
+                        "credential_installation_id": agentops_credential.installation_id,
+                        "device_id": record.installation.device_id,
+                        "credential_device_id": agentops_credential.device_id,
+                    },
+                ).to_dict()
             body = status_for_installation(
                 record.installation,
                 last_error_code=last_error_code,
@@ -63,3 +82,13 @@ class BootstrapStatusAPI:
             "error_code": "OK",
             "status": body,
         }
+
+
+def _credential_matches_installation(
+    credential: CredentialBootstrapSummary,
+    installation: Installation,
+) -> bool:
+    return (
+        credential.installation_id == installation.installation_id
+        and credential.device_id == installation.device_id
+    )

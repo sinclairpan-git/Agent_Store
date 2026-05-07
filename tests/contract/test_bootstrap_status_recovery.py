@@ -101,6 +101,61 @@ def test_bootstrap_status_timeline_uses_agentops_credential_echo() -> None:
     assert payload["timeline"][4]["status"] == "pending"
 
 
+def test_bootstrap_status_rejects_mismatched_agentops_credential_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "credential_issued",
+            "installation_id": "other-installation",
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    status, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    assert status == 409
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["recommended_action_id"] == "refresh_agentops_credential"
+    assert body["details"]["credential_installation_id"] == "other-installation"
+
+
+def test_bootstrap_status_rejects_mismatched_agentops_device_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "signature_verified",
+            "installation_id": record.installation.installation_id,
+            "device_id": "other-device",
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    status, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    assert status == 409
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["details"]["credential_device_id"] == "other-device"
+
+
 def test_bootstrap_status_timeline_marks_signature_verified_complete() -> None:
     service, record = _record()
     credential = CredentialBootstrapSummary.from_agentops_credential_response(
@@ -214,6 +269,38 @@ def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> N
     assert payload["timeline"][2]["status"] == "blocked"
     assert payload["timeline"][3]["status"] == "blocked"
     assert payload["timeline"][4]["status"] == "blocked"
+
+
+def test_expired_command_uses_store_timeline_even_with_agentops_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "credential_issued",
+            "installation_id": record.installation.installation_id,
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    _, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        last_error_code="INSTALLATION_ASSERTION_EXPIRED",
+        agentops_credential=credential,
+    )
+
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "expired"
+    assert payload["current_step"] == "issue_assertion"
+    assert payload["timeline"][0]["status"] == "blocked"
+    assert payload["timeline"][1]["status"] == "blocked"
+    assert payload["timeline"][2]["source"] == "pending"
+    assert payload["timeline"][3]["source"] == "pending"
 
 
 def test_permission_denied_status_returns_access_and_return_path() -> None:

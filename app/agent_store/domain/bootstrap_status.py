@@ -108,7 +108,7 @@ def status_for_installation(
                 enabled=True,
                 audit_required=True,
             ),
-            timeline=_timeline_for_status("expired", agentops_credential),
+            timeline=_timeline_for_status("expired", None),
         )
 
     if agentops_credential is not None:
