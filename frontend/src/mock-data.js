@@ -166,6 +166,29 @@ window.AgentStoreMock = {
       target_system: "ai_autosdlc_cli",
       enabled: true
     },
+    recommended_actions: [
+      {
+        action_id: "send_signature_test_event",
+        target_system: "ai_autosdlc_cli",
+        enabled: true,
+        audit_required: true,
+        href: "#signature-test"
+      },
+      {
+        action_id: "poll_bootstrap_status",
+        target_system: "agent_store",
+        enabled: true,
+        audit_required: false,
+        href: "#bootstrap-status"
+      },
+      {
+        action_id: "copy_diagnostic_ref",
+        target_system: "agent_store",
+        enabled: true,
+        audit_required: false,
+        href: "#diag-trace-1"
+      }
+    ],
     timeline: [
       {
         step_id: "create_installation",

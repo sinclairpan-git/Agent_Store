@@ -502,7 +502,7 @@ components:
           enum: [OK]
         status:
           type: object
-          required: [installation_id, bootstrap_status, current_step, step_status, primary_action, source_of_truth, entry_evidence, conflict_resolution, can_ignore, affected_actions]
+          required: [installation_id, bootstrap_status, current_step, step_status, primary_action, recommended_actions, source_of_truth, entry_evidence, conflict_resolution, can_ignore, affected_actions]
           properties:
             installation_id:
               type: string
@@ -533,6 +533,11 @@ components:
               $ref: "#/components/schemas/ActionDescriptor"
             secondary_actions:
               type: array
+              items:
+                $ref: "#/components/schemas/ActionDescriptor"
+            recommended_actions:
+              type: array
+              minItems: 1
               items:
                 $ref: "#/components/schemas/ActionDescriptor"
             timeline:

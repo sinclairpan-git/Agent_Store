@@ -92,6 +92,25 @@
     }
   });
 
+  Vue.component("sdlc-remediation-actions", {
+    props: ["actions"],
+    template: [
+      '<div class="remediation-actions" v-if="actions && actions.length">',
+      '  <div class="remediation-actions__heading">',
+      '    <span>推荐动作</span>',
+      '    <strong>{{ actions.length }}</strong>',
+      '  </div>',
+      '  <ol class="remediation-actions__list">',
+      '    <li v-for="(action, actionIndex) in actions" :key="action.action_id">',
+      '      <span class="remediation-actions__order">{{ actionIndex + 1 }}</span>',
+      '      <span class="remediation-actions__target">{{ action.target_system }}</span>',
+      '      <sdlc-action-button :action="action" :kind="actionIndex === 0 ? \'primary\' : \'secondary\'"></sdlc-action-button>',
+      '    </li>',
+      '  </ol>',
+      '</div>'
+    ].join("")
+  });
+
   Vue.component("sdlc-metric-row", {
     props: ["label", "value", "tone"],
     template: [
@@ -510,6 +529,7 @@
       '      </dl>',
       '      <sdlc-bootstrap-timeline v-if="bootstrap.timeline" :timeline="bootstrap.timeline"></sdlc-bootstrap-timeline>',
       '      <sdlc-source-facts :status="bootstrap"></sdlc-source-facts>',
+      '      <sdlc-remediation-actions :actions="bootstrap.recommended_actions"></sdlc-remediation-actions>',
       '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary"></sdlc-action-button>',
       '    </sdlc-section>',
       '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',

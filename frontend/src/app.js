@@ -192,7 +192,8 @@ new window.Vue({
           can_ignore: true,
           affected_actions: ["select_agent"],
           source_conflicts: [],
-          primary_action: this.selectedView.primary_action
+          primary_action: this.selectedView.primary_action,
+          recommended_actions: [this.selectedView.primary_action]
         };
       }
       if (this.selectedAgent.agent_id === "framework.ai-autosdlc") {
@@ -212,7 +213,16 @@ new window.Vue({
         can_ignore: this.selectedAgent.installability !== "activation_required",
         affected_actions: ["start_enterprise_activation"],
         source_conflicts: [],
-        primary_action: this.selectedAgent.primary_action
+        primary_action: this.selectedAgent.primary_action,
+        recommended_actions: [
+          this.selectedAgent.primary_action,
+          {
+            action_id: "copy_diagnostic_ref",
+            target_system: "agent_store",
+            enabled: true,
+            href: "#diag-" + this.selectedAgent.agent_id
+          }
+        ]
       };
     },
     selectedAgentops: function selectedAgentops() {
