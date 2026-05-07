@@ -93,6 +93,7 @@ for (const componentName of [
   "sdlc-agent-catalog",
   "sdlc-agent-card",
   "sdlc-install-workflow",
+  "sdlc-install-request",
   "sdlc-shell",
   "sdlc-section",
   "sdlc-status-chip",
@@ -131,6 +132,9 @@ assert(
     && app.includes("filteredCatalog")
     && app.includes("setTrustFilter")
     && app.includes("selectedInstallWorkflow")
+    && app.includes("selectedInstallationRequest")
+    && app.includes("pending_enterprise_activation")
+    && app.includes("pending_catalog_review")
     && app.includes("standalone_only")
     && app.includes("this.filteredCatalog.find")
     && app.includes("activeSelectedAgentId")
@@ -155,6 +159,14 @@ assert(
     && componentLibrary.includes("command_preview")
     && indexHtml.includes(":install-workflow=\"selectedInstallWorkflow\""),
   "Agent detail must expose installation workflow preview"
+);
+assert(
+  componentLibrary.includes("request-panel")
+    && componentLibrary.includes("request.request_state")
+    && componentLibrary.includes("request.next_action")
+    && componentLibrary.includes("request.blockers")
+    && indexHtml.includes(":install-request=\"selectedInstallationRequest\""),
+  "Agent detail must expose installation request audit queue state"
 );
 assert(
   componentLibrary.includes("stateDecisionTone")
