@@ -112,6 +112,32 @@ def status_for_installation(
         )
 
     if agentops_credential is not None:
+        if agentops_credential.bootstrap_status in {"expired", "failed"}:
+            return BootstrapStatus(
+                installation_id=installation.installation_id,
+                bootstrap_status=agentops_credential.bootstrap_status,
+                current_step="issue_credential",
+                step_status="blocked",
+                retryable=False,
+                diagnostic_ref=f"diag-{installation.trace_id}",
+                last_error_code=(
+                    "AGENTOPS_BOOTSTRAP_EXPIRED"
+                    if agentops_credential.bootstrap_status == "expired"
+                    else "AGENTOPS_BOOTSTRAP_FAILED"
+                ),
+                safe_to_rerun=False,
+                primary_action=ActionDescriptor(
+                    action_id="view_agentops_bootstrap_failure",
+                    target_system="agentops",
+                    enabled=True,
+                    audit_required=False,
+                    href=f"#agentops-evidence-{installation.installation_id}",
+                ),
+                timeline=_timeline_for_status(
+                    agentops_credential.bootstrap_status,
+                    agentops_credential,
+                ),
+            )
         if agentops_credential.bootstrap_status == "credential_issued":
             return BootstrapStatus(
                 installation_id=installation.installation_id,
@@ -192,7 +218,13 @@ def _timeline_for_status(
     credential_ready = bootstrap_status in {"credential_issued", "signature_verified"}
     signature_verified = bootstrap_status == "signature_verified"
     blocked = bootstrap_status in {"expired", "failed"}
-    proof_status = "blocked" if blocked else "completed" if credential_ready else "running"
+    agentops_blocked = blocked and agentops_credential is not None
+    store_blocked = blocked and agentops_credential is None
+    proof_status = (
+        "completed"
+        if credential_ready or agentops_blocked
+        else "blocked" if blocked else "running"
+    )
     credential_status = "blocked" if blocked else "completed" if credential_ready else "pending"
     signature_status = (
         "blocked" if blocked else "completed" if signature_verified else "pending"
@@ -203,7 +235,7 @@ def _timeline_for_status(
             step_id="create_installation",
             label="Create installation and device binding",
             owner_system="agent_store",
-            status="completed" if not blocked else "blocked",
+            status="blocked" if store_blocked else "completed",
             source="agent_store",
             action_id="create_installation",
         ),
@@ -211,7 +243,7 @@ def _timeline_for_status(
             step_id="issue_assertion",
             label="Issue signed_installation_assertion.v1",
             owner_system="agent_store",
-            status="completed" if not blocked else "blocked",
+            status="blocked" if store_blocked else "completed",
             source="agent_store",
             action_id="issue_installation_assertion",
         ),
@@ -220,7 +252,7 @@ def _timeline_for_status(
             label="Collect device_proof.v1 from Ai_AutoSDLC",
             owner_system="ai_autosdlc",
             status=proof_status,
-            source="ai_autosdlc" if credential_ready else "pending",
+            source="ai_autosdlc" if credential_ready or agentops_blocked else "pending",
             action_id="collect_device_proof",
         ),
         BootstrapTimelineStep(
