@@ -109,6 +109,17 @@ def test_agent_catalog_api_lists_filterable_cards() -> None:
     assert catalog["facets"]["agent_type"] == {"framework_capability": 1, "skill": 1}
 
 
+def test_agent_catalog_api_preserves_all_as_search_text() -> None:
+    status, body = _api().list_agents({"search": "all", "trace_id": "trace-catalog"})
+
+    assert status == 200
+    assert response_envelope_ok(body)
+    catalog = body["catalog"]
+    assert catalog["active_filters"]["search"] == "all"
+    assert catalog["filtered_count"] == 0
+    assert catalog["cards"] == []
+
+
 def test_agent_catalog_api_rejects_unsupported_filters() -> None:
     status, body = _api().list_agents(
         {"trust_state": "pending_review", "trace_id": "trace-catalog"}

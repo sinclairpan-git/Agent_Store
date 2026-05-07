@@ -49,6 +49,15 @@ def _primary_action(source: CatalogAgentSource) -> ActionDescriptor:
             href=f"#activate-{source.agent.agent_id}",
             message_key="catalog.actions.startActivation",
         )
+    if source.installability == "blocked":
+        return ActionDescriptor(
+            action_id="open_detail",
+            target_system="agent_store",
+            enabled=False,
+            requires_permission=False,
+            audit_required=False,
+            message_key="catalog.actions.blocked",
+        )
     return ActionDescriptor(
         action_id="open_detail",
         target_system="agent_store",

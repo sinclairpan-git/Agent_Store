@@ -185,3 +185,26 @@ def test_catalog_workbench_selection_is_constrained_to_filtered_cards() -> None:
     ]
     assert catalog["selected_agent_id"] == "agentops.evidence-reporter"
     assert catalog["selected_agent"]["agent_id"] == "agentops.evidence-reporter"
+
+
+def test_catalog_workbench_disables_blocked_primary_action() -> None:
+    response = build_catalog_workbench(
+        sources=(
+            _source(
+                "security.policy-guard",
+                "Policy Guard",
+                agent_type="agent",
+                category="Runtime Policy",
+                trust_state="blocked",
+                enterprise_state="disabled",
+                installability="blocked",
+                evidence_level="pending",
+            ),
+        ),
+        trace_id="trace-catalog",
+    )
+
+    action = response["catalog"]["cards"][0]["primary_action"]
+    assert action["action_id"] == "open_detail"
+    assert action["enabled"] is False
+    assert "href" not in action

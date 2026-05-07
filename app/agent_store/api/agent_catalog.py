@@ -73,14 +73,14 @@ class AgentCatalogAPI:
         if not isinstance(value, str):
             raise ValueError("filter values must be strings")
         stripped = value.strip()
-        if not stripped or stripped == "all":
+        if not stripped:
             return None
         return stripped
 
     @classmethod
     def _enum_value(cls, query: Mapping[str, object], field: str) -> str | None:
         value = cls._optional_string(query.get(field))
-        if value is None:
+        if value is None or value == "all":
             return None
         if value not in FILTER_FIELDS[field]:
             raise ValueError(f"unsupported {field}: {value}")
