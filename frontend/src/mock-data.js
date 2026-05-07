@@ -145,17 +145,59 @@ window.AgentStoreMock = {
   },
   bootstrap: {
     installation_id: "inst-1",
-    bootstrap_status: "assertion_issued",
-    current_step: "issue_credential",
+    bootstrap_status: "credential_issued",
+    current_step: "send_signature_test_event",
     step_status: "running",
     next_poll_after: 5,
     retryable: true,
     diagnostic_ref: "diag-trace-1",
     primary_action: {
-      action_id: "poll_bootstrap_status",
-      target_system: "agent_store",
+      action_id: "send_signature_test_event",
+      target_system: "ai_autosdlc_cli",
       enabled: true
-    }
+    },
+    timeline: [
+      {
+        step_id: "create_installation",
+        label: "Create installation and device binding",
+        owner_system: "agent_store",
+        status: "completed",
+        source: "agent_store",
+        action_id: "create_installation"
+      },
+      {
+        step_id: "issue_assertion",
+        label: "Issue signed_installation_assertion.v1",
+        owner_system: "agent_store",
+        status: "completed",
+        source: "agent_store",
+        action_id: "issue_installation_assertion"
+      },
+      {
+        step_id: "collect_device_proof",
+        label: "Collect device_proof.v1 from Ai_AutoSDLC",
+        owner_system: "ai_autosdlc",
+        status: "completed",
+        source: "ai_autosdlc",
+        action_id: "collect_device_proof"
+      },
+      {
+        step_id: "issue_credential",
+        label: "Issue AgentOps credential echo",
+        owner_system: "agentops",
+        status: "completed",
+        source: "agentops",
+        action_id: "issue_credentials"
+      },
+      {
+        step_id: "verify_signature_test",
+        label: "Verify signed test event",
+        owner_system: "agentops",
+        status: "pending",
+        source: "pending",
+        action_id: "send_signature_test_event"
+      }
+    ]
   },
   agentops: {
     trace_id: "trace-1",
@@ -176,6 +218,18 @@ window.AgentStoreMock = {
       fallback_action: "warn",
       runtime_risk_level: "low",
       enforcement_mode: "warn"
+    },
+    credential_bootstrap: {
+      bootstrap_status: "credential_issued",
+      credential_status: "active",
+      reporter_status: "pending_signature_test",
+      enterprise_state: "activating",
+      next_action: "send_signature_test_event",
+      credential_id: "cred-fixture",
+      token_id: "token-fixture",
+      device_key_id: "device-key-fixture",
+      installation_id: "inst-1",
+      device_id: "dev-1"
     },
     links: [
       {

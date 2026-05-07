@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from agent_store import SCHEMA_VERSION
 from agent_store.domain.actions import ActionDescriptor
+from agent_store.domain.agentops_summary import CredentialBootstrapSummary
 from agent_store.domain.bootstrap_service import BootstrapService
 from agent_store.domain.bootstrap_status import BootstrapStatus, status_for_installation
 from agent_store.domain.errors import ErrorResponse
@@ -18,6 +19,7 @@ class BootstrapStatusAPI:
         *,
         auth_context: AuthContext,
         last_error_code: str | None = None,
+        agentops_credential: CredentialBootstrapSummary | None = None,
     ) -> tuple[int, dict[str, object]]:
         record = self.bootstrap_service.get_record(installation_id)
         if record is None:
@@ -53,6 +55,7 @@ class BootstrapStatusAPI:
             body = status_for_installation(
                 record.installation,
                 last_error_code=last_error_code,
+                agentops_credential=agentops_credential,
             ).to_dict()
         return 200, {
             "schema_version": SCHEMA_VERSION,

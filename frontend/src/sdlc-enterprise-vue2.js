@@ -405,6 +405,19 @@
     }
   });
 
+  Vue.component("sdlc-bootstrap-timeline", {
+    props: ["timeline"],
+    template: [
+      '<ol class="bootstrap-timeline" aria-label="bootstrap timeline">',
+      '  <li v-for="step in timeline" :key="step.step_id" :class="\'bootstrap-timeline__item--\' + step.status">',
+      '    <span class="bootstrap-timeline__status">{{ step.status }}</span>',
+      '    <span class="bootstrap-timeline__label">{{ step.label }}</span>',
+      '    <span class="bootstrap-timeline__owner">{{ step.owner_system }}</span>',
+      '  </li>',
+      '</ol>'
+    ].join("")
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -476,6 +489,7 @@
       '        <sdlc-metric-row label="状态" :value="bootstrap.step_status" tone="warning"></sdlc-metric-row>',
       '        <sdlc-metric-row label="诊断" :value="bootstrap.diagnostic_ref" tone="neutral"></sdlc-metric-row>',
       '      </dl>',
+      '      <sdlc-bootstrap-timeline v-if="bootstrap.timeline" :timeline="bootstrap.timeline"></sdlc-bootstrap-timeline>',
       '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary"></sdlc-action-button>',
       '    </sdlc-section>',
       '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',
