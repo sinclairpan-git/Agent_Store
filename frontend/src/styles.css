@@ -352,6 +352,20 @@ h2 {
   overflow-wrap: anywhere;
 }
 
+.handoff-panel__meta {
+  display: grid;
+  gap: 6px;
+  margin: 14px 0;
+  padding: 10px;
+  border: 1px solid #d7e4ee;
+  border-radius: 8px;
+  background: #f7fafc;
+  color: #60707d;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
 .request-panel__blockers {
   display: flex;
   flex-wrap: wrap;
