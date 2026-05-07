@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from shlex import quote
 
 from agent_store import SCHEMA_VERSION
 from agent_store.domain.actions import ActionDescriptor
@@ -59,6 +60,10 @@ class InstallationWorkflowPreview:
             "error_code": "OK",
             "workflow": workflow,
         }
+
+
+def _quoted_agent_coordinate(source: CatalogAgentSource) -> str:
+    return quote(f"{source.agent.agent_id}@{source.version.version}")
 
 
 def _install_steps(source: CatalogAgentSource) -> tuple[WorkflowStep, ...]:
@@ -213,7 +218,7 @@ def build_installation_workflow_preview(
             steps=_install_steps(source),
             audit_id=audit_id,
             trace_id=trace_id,
-            command_preview=f"agent-store install {source.agent.agent_id}@{source.version.version}",
+            command_preview=(f"agent-store install {_quoted_agent_coordinate(source)}"),
         )
     elif installability == "activation_required":
         preview = InstallationWorkflowPreview(
@@ -231,8 +236,7 @@ def build_installation_workflow_preview(
             audit_id=audit_id,
             trace_id=trace_id,
             command_preview=(
-                "agent-store activate "
-                f"{source.agent.agent_id}@{source.version.version} --enterprise"
+                f"agent-store activate {_quoted_agent_coordinate(source)} --enterprise"
             ),
         )
     elif installability == "standalone_only":
@@ -251,8 +255,7 @@ def build_installation_workflow_preview(
             audit_id=audit_id,
             trace_id=trace_id,
             command_preview=(
-                "agent-store open "
-                f"{source.agent.agent_id}@{source.version.version} --standalone"
+                f"agent-store open {_quoted_agent_coordinate(source)} --standalone"
             ),
         )
     else:

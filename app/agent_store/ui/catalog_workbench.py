@@ -100,7 +100,13 @@ def _matches(card: dict[str, object], filters: CatalogFilter) -> bool:
     if filters.search:
         haystack = " ".join(
             str(card.get(key, ""))
-            for key in ("agent_id", "display_name", "summary", "owner_team")
+            for key in (
+                "agent_id",
+                "display_name",
+                "summary",
+                "owner_team",
+                "capability_type",
+            )
         ).lower()
         return filters.search.lower() in haystack
     return True

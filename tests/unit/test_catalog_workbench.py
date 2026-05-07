@@ -150,6 +150,29 @@ def test_catalog_workbench_filters_by_search_type_and_installability() -> None:
     }
 
 
+def test_catalog_workbench_search_matches_capability_type() -> None:
+    response = build_catalog_workbench(
+        sources=(
+            _source(
+                "security.policy-guard",
+                "Policy Guard",
+                agent_type="agent",
+                category="Runtime Policy",
+                trust_state="blocked",
+                enterprise_state="disabled",
+                installability="blocked",
+                evidence_level="pending",
+            ),
+        ),
+        trace_id="trace-catalog",
+        filters=CatalogFilter(search="runtime policy"),
+    )
+
+    catalog = response["catalog"]
+    assert catalog["filtered_count"] == 1
+    assert catalog["cards"][0]["agent_id"] == "security.policy-guard"
+
+
 def test_catalog_workbench_selection_is_constrained_to_filtered_cards() -> None:
     response = build_catalog_workbench(
         sources=(

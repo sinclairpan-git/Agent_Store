@@ -97,6 +97,27 @@ def test_installable_agent_workflow_has_install_steps_and_command() -> None:
     ]
 
 
+def test_installable_agent_workflow_shell_quotes_command_coordinate() -> None:
+    response = build_installation_workflow_preview(
+        source=_source(
+            "developer.release-notes;touch unsafe",
+            "Release Notes Writer",
+            agent_type="skill",
+            category="Developer Tool",
+            trust_state="warning",
+            enterprise_state="detected_optional",
+            installability="installable",
+            evidence_level="L2-static",
+        ),
+        trace_id="trace-workflow",
+    )
+
+    assert (
+        response["workflow"]["command_preview"]
+        == "agent-store install 'developer.release-notes;touch unsafe@1.0.0'"
+    )
+
+
 def test_activation_required_agent_workflow_has_enterprise_steps() -> None:
     response = build_installation_workflow_preview(
         source=_source(
