@@ -133,6 +133,9 @@ assert(
     && app.includes("setTrustFilter")
     && app.includes("selectedInstallWorkflow")
     && app.includes("selectedInstallationRequest")
+    && app.includes("selectedBootstrapHandoff")
+    && app.includes("create_installation_from_request")
+    && app.includes("device_public_key_thumbprint")
     && app.includes("pending_enterprise_activation")
     && app.includes("pending_catalog_review")
     && app.includes("standalone_only")
@@ -171,6 +174,14 @@ assert(
     && componentLibrary.includes("blockerIndex")
     && indexHtml.includes(":install-request=\"selectedInstallationRequest\""),
   "Agent detail must expose installation request audit queue state"
+);
+assert(
+  componentLibrary.includes("sdlc-bootstrap-handoff")
+    && componentLibrary.includes("handoff.handoff_state")
+    && componentLibrary.includes("handoff.idempotency_key")
+    && componentLibrary.includes("handoff.next_action")
+    && indexHtml.includes(":install-handoff=\"selectedBootstrapHandoff\""),
+  "Agent detail must expose bootstrap handoff state"
 );
 assert(
   componentLibrary.includes("stateDecisionTone")

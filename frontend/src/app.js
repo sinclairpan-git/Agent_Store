@@ -542,6 +542,47 @@ new window.Vue({
           agent.installability
         ]
       };
+    },
+    selectedBootstrapHandoff: function selectedBootstrapHandoff() {
+      var agent = this.selectedAgent;
+      var request = this.selectedInstallationRequest;
+      if (!agent) {
+        return {
+          handoff_state: "empty",
+          request_id: request.request_id,
+          audit_id: request.audit_id,
+          idempotency_key: "not-applicable",
+          device_os: "not-applicable",
+          installation_id: "not-applicable",
+          next_action: this.selectedView.primary_action
+        };
+      }
+      if (request.request_state === "accepted") {
+        return {
+          handoff_state: "ready_to_create",
+          request_id: request.request_id,
+          audit_id: request.audit_id,
+          idempotency_key: request.request_id,
+          device_os: "macOS",
+          device_public_key_thumbprint: "thumb-" + safeId(agent.agent_id),
+          installation_id: "pending-bootstrap-create",
+          next_action: {
+            action_id: "create_installation_from_request",
+            target_system: "agent_store",
+            enabled: true,
+            href: "#handoff-" + request.request_id
+          }
+        };
+      }
+      return {
+        handoff_state: "waiting_for_" + request.queue,
+        request_id: request.request_id,
+        audit_id: request.audit_id,
+        idempotency_key: "blocked-until-" + safeId(request.request_state),
+        device_os: "not-started",
+        installation_id: "not-created",
+        next_action: request.next_action
+      };
     }
   },
   methods: {

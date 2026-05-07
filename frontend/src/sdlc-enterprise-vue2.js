@@ -307,6 +307,52 @@
     }
   });
 
+  Vue.component("sdlc-bootstrap-handoff", {
+    props: ["handoff"],
+    template: [
+      '<section class="workspace-section handoff-panel">',
+      '  <div class="section-heading">',
+      '    <h2>Bootstrap Handoff</h2>',
+      '    <sdlc-status-chip :label="handoff.handoff_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="请求" :value="handoff.request_id" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="handoff.audit_id" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="设备" :value="handoff.device_os" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="安装" :value="handoff.installation_id" :tone="installationTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="handoff-panel__meta">',
+      '    <span>{{ handoff.idempotency_key }}</span>',
+      '    <span v-if="handoff.device_public_key_thumbprint">{{ handoff.device_public_key_thumbprint }}</span>',
+      '  </div>',
+      '  <div class="request-panel__footer">',
+      '    <span>Handoff</span>',
+      '    <sdlc-action-button :action="handoff.next_action" kind="primary"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.handoff.handoff_state === "ready_to_create") {
+          return "success";
+        }
+        if (this.handoff.handoff_state.indexOf("waiting_for_") === 0) {
+          return "warning";
+        }
+        return "danger";
+      },
+      installationTone: function installationTone() {
+        if (this.handoff.installation_id && this.handoff.installation_id.indexOf("pending") === 0) {
+          return "warning";
+        }
+        if (this.handoff.installation_id && this.handoff.installation_id.indexOf("inst-") === 0) {
+          return "success";
+        }
+        return "neutral";
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -322,7 +368,8 @@
       "trustedLoop",
       "stateDecision",
       "installWorkflow",
-      "installRequest"
+      "installRequest",
+      "installHandoff"
     ],
     template: [
       '<main class="workspace">',
@@ -380,6 +427,7 @@
       '    </sdlc-section>',
       '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',
       '    <sdlc-install-request :request="installRequest"></sdlc-install-request>',
+      '    <sdlc-bootstrap-handoff :handoff="installHandoff"></sdlc-bootstrap-handoff>',
       '    <sdlc-section title="AgentOps 摘要">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="证据等级" :value="agentops.quality_evidence.evidence_level" tone="info"></sdlc-metric-row>',
