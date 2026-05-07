@@ -239,7 +239,13 @@ components:
           type: string
     InstallationAssertionResponse:
       type: object
-      required: [schema_version, trace_id, error_code, assertion]
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - assertion
+        - agentops_handoff_assertion
+        - agentops_credential_handoff_template
       properties:
         schema_version:
           type: string
@@ -467,6 +473,7 @@ components:
                   type: string
                   enum: [not_revoked, revoked, unknown]
             device_proof:
+              type: object
               nullable: true
             trace_id:
               type: string

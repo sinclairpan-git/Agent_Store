@@ -51,6 +51,7 @@
 - Review evidence：CCT-001 固定 Agent Store assertion 外部字段，CCT-003 前半段固定 Store 只展示 AgentOps credential echo。
 - Codex Review 修复：PR #10 初审指出 checkpoint `linked_plan_uri` 仍指向 007，已修正为 `specs/008-agentops-handoff-producer-contract/spec.md`；同时将 OpenAPI `agentops_credential_handoff_template.installation_assertion` 从泛型 object 补齐为带 required/properties 的 typed schema，防止客户端接受畸形 handoff assertion。
 - Codex Review 修复：PR #10 二审指出 AgentOps handoff assertion 重写 `assertion_version`、`issuer` 等签名字段后复用了内部 `assertion_hash`/`signature`。已改为对 AgentOps 外部 payload 单独计算 `agentops_assertion_hash` 与 `agentops_signature`，API 导出的 handoff assertion 使用这组签名，内部 assertion 签名保持不变。
+- Codex Review 修复：PR #10 三审指出 `InstallationAssertionResponse` 父级 required 未强制新 handoff 字段，且 `device_proof` schema 只有 nullable。已将 `agentops_handoff_assertion`、`agentops_credential_handoff_template` 加入父级 required，并将 `device_proof` 约束为 nullable object。
 - 边界检查：`device_proof.v1.json` 仅作为 fixture；API template 中 `device_proof` 保持 `None`，避免 Store 越权生成或签名。
 - 状态检查：`CredentialBootstrapSummary.from_agentops_credential_response()` 将 `credential_issued` 保持为 `enterprise_state=activating`，不本地推导 `active` 或 `signature_verified`。
 
