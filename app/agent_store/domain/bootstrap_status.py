@@ -192,6 +192,11 @@ def _timeline_for_status(
     credential_ready = bootstrap_status in {"credential_issued", "signature_verified"}
     signature_verified = bootstrap_status == "signature_verified"
     blocked = bootstrap_status in {"expired", "failed"}
+    proof_status = "blocked" if blocked else "completed" if credential_ready else "running"
+    credential_status = "blocked" if blocked else "completed" if credential_ready else "pending"
+    signature_status = (
+        "blocked" if blocked else "completed" if signature_verified else "pending"
+    )
 
     return (
         BootstrapTimelineStep(
@@ -214,7 +219,7 @@ def _timeline_for_status(
             step_id="collect_device_proof",
             label="Collect device_proof.v1 from Ai_AutoSDLC",
             owner_system="ai_autosdlc",
-            status="completed" if credential_ready else "running",
+            status=proof_status,
             source="ai_autosdlc" if credential_ready else "pending",
             action_id="collect_device_proof",
         ),
@@ -222,7 +227,7 @@ def _timeline_for_status(
             step_id="issue_credential",
             label="Issue AgentOps credential echo",
             owner_system="agentops",
-            status="completed" if credential_ready else "pending",
+            status=credential_status,
             source="agentops" if agentops_credential is not None else "pending",
             action_id="issue_credentials",
         ),
@@ -230,7 +235,7 @@ def _timeline_for_status(
             step_id="verify_signature_test",
             label="Verify signed test event",
             owner_system="agentops",
-            status="completed" if signature_verified else "pending",
+            status=signature_status,
             source="agentops" if signature_verified else "pending",
             action_id="send_signature_test_event",
         ),

@@ -145,6 +145,10 @@ def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> N
     assert payload["safe_to_rerun"] is False
     assert payload["regenerate_command_url"].endswith("/assertion")
     assert payload["primary_action"]["action_id"] == "regenerate_activation_command"
+    assert payload["timeline"][2]["step_id"] == "collect_device_proof"
+    assert payload["timeline"][2]["status"] == "blocked"
+    assert payload["timeline"][3]["status"] == "blocked"
+    assert payload["timeline"][4]["status"] == "blocked"
 
 
 def test_permission_denied_status_returns_access_and_return_path() -> None:
