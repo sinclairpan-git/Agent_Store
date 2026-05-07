@@ -42,6 +42,7 @@
 - 自检结论：本阶段只修改契约与治理文档，不改变运行时行为。
 - 对抗重点：避免 Agent Store 越权签发 ReporterCredential/IngestionToken/DeviceKey；避免 AgentOps 越权写 Agent Store 注册事实；避免 Ai_AutoSDLC standalone 被企业接入阻断。
 - Review evidence：已明确 CCT-001 到 CCT-006，由三项目共享 fixture 验证 producer/consumer 契约。
+- Codex Review 修复：PR #9 初审指出 checkpoint `linked_wi_id` 已切到 007，但 `linked_plan_uri` 仍指向 001，可能导致恢复/同步工具加载错误 work item。已将其修正为 `specs/007-cross-project-contract-appendix/spec.md`。
 - 安全边界：附录禁止从弱状态推断 `active`、`verified_loaded` 或 L5 eligibility。
 
 ## 任务/计划同步状态
