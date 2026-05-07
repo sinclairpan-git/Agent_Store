@@ -428,3 +428,23 @@ def test_bootstrap_status_rejects_mismatched_auth_context() -> None:
     assert status == 403
     assert body["error_code"] == "PERMISSION_DENIED"
     assert body["retryable"] is False
+
+
+def test_missing_bootstrap_status_serializes_recommended_action() -> None:
+    auth = AuthContext(
+        auth_context_id="auth-1",
+        subject_user_id="user-1",
+        identity_confidence=0.99,
+    )
+
+    status, body = BootstrapStatusAPI(BootstrapService()).get_bootstrap_status(
+        "missing-installation",
+        auth_context=auth,
+    )
+
+    assert status == 200
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "failed"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "return_to_official_app",
+    ]

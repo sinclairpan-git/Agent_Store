@@ -109,10 +109,10 @@ class BootstrapStatus:
             data["secondary_actions"] = [
                 action.to_dict() for action in self.secondary_actions
             ]
-        if self.recommended_actions:
-            data["recommended_actions"] = [
-                action.to_dict() for action in self.recommended_actions
-            ]
+        recommendations = self.recommended_actions or (self.primary_action,)
+        data["recommended_actions"] = [
+            action.to_dict() for action in recommendations
+        ]
         if self.timeline:
             data["timeline"] = [step.to_dict() for step in self.timeline]
         if self.source_conflicts:
