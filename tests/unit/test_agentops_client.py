@@ -136,6 +136,22 @@ def test_credential_issue_client_requires_ai_autosdlc_device_proof() -> None:
         raise AssertionError("missing device_proof should fail")
 
 
+def test_credential_issue_client_requires_non_empty_assertion_hash_binding() -> None:
+    client = AgentOpsCredentialIssueClient({"boot-inst-1": _credential_response()})
+    handoff = _handoff()
+    assert isinstance(handoff["installation_assertion"], dict)
+    assert isinstance(handoff["device_proof"], dict)
+    handoff["installation_assertion"].pop("assertion_hash")
+    handoff["device_proof"].pop("assertion_hash")
+
+    try:
+        client.issue_credentials(handoff, headers={"Idempotency-Key": "idem-1"})
+    except ValueError as exc:
+        assert "installation_assertion.assertion_hash is required" in str(exc)
+    else:
+        raise AssertionError("missing assertion hashes should fail")
+
+
 def test_credential_issue_client_does_not_fabricate_missing_agentops_response() -> None:
     client = AgentOpsCredentialIssueClient()
 

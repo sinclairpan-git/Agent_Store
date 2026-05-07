@@ -86,7 +86,13 @@ class AgentOpsCredentialIssueClient:
             )
         if device_proof.get("proof_version") != "device_proof.v1":
             raise ValueError("device_proof must use device_proof.v1")
-        if assertion.get("assertion_hash") != device_proof.get("assertion_hash"):
+        assertion_hash = assertion.get("assertion_hash")
+        device_assertion_hash = device_proof.get("assertion_hash")
+        if not isinstance(assertion_hash, str) or not assertion_hash:
+            raise ValueError("installation_assertion.assertion_hash is required")
+        if not isinstance(device_assertion_hash, str) or not device_assertion_hash:
+            raise ValueError("device_proof.assertion_hash is required")
+        if assertion_hash != device_assertion_hash:
             raise ValueError(
                 "device_proof must bind to installation_assertion.assertion_hash"
             )
