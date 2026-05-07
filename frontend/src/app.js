@@ -6,6 +6,19 @@ function shellQuoteToken(value) {
   return "'" + token.replace(/'/g, "'\"'\"'") + "'";
 }
 
+function safeId(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "agent";
+}
+
+function buildRequestIdentity(agentId, actionId) {
+  var safeAgentId = safeId(agentId);
+  var safeActionId = safeId(actionId);
+  return {
+    request_id: "req-" + safeAgentId + "-" + safeActionId,
+    audit_id: "audit-" + safeAgentId + "-" + safeActionId
+  };
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
@@ -428,6 +441,7 @@ new window.Vue({
     selectedInstallationRequest: function selectedInstallationRequest() {
       var agent = this.selectedAgent;
       var coordinate;
+      var requestIdentity;
       if (!agent) {
         return {
           request_id: "req-empty-filter",
@@ -444,14 +458,15 @@ new window.Vue({
       }
       coordinate = agent.agent_id + "@" + agent.version;
       if (agent.installability === "installable") {
+        requestIdentity = buildRequestIdentity(agent.agent_id, "start_install");
         return {
-          request_id: "req-" + agent.agent_id + "-start-install",
+          request_id: requestIdentity.request_id,
           agent_coordinate: coordinate,
           requested_action_id: "start_install",
           request_state: "accepted",
           queue: "installation_bootstrap",
           owner_system: "agent_store",
-          audit_id: "audit-" + agent.agent_id + "-start-install",
+          audit_id: requestIdentity.audit_id,
           requested_by: "current-user",
           command_preview: "agent-store install " + shellQuoteToken(coordinate),
           next_action: {
@@ -464,14 +479,15 @@ new window.Vue({
         };
       }
       if (agent.installability === "activation_required") {
+        requestIdentity = buildRequestIdentity(agent.agent_id, "start_enterprise_activation");
         return {
-          request_id: "req-" + agent.agent_id + "-enterprise-activation",
+          request_id: requestIdentity.request_id,
           agent_coordinate: coordinate,
           requested_action_id: "start_enterprise_activation",
           request_state: "pending_enterprise_activation",
           queue: "enterprise_activation",
           owner_system: "agentops",
-          audit_id: "audit-" + agent.agent_id + "-enterprise-activation",
+          audit_id: requestIdentity.audit_id,
           requested_by: "current-user",
           command_preview: "agent-store activate " + shellQuoteToken(coordinate) + " --enterprise",
           next_action: {
@@ -484,14 +500,15 @@ new window.Vue({
         };
       }
       if (agent.installability === "standalone_only") {
+        requestIdentity = buildRequestIdentity(agent.agent_id, "open_standalone_readme");
         return {
-          request_id: "req-" + agent.agent_id + "-standalone",
+          request_id: requestIdentity.request_id,
           agent_coordinate: coordinate,
           requested_action_id: "open_standalone_readme",
           request_state: "standalone_ready",
           queue: "standalone_access",
           owner_system: "agent_store",
-          audit_id: "audit-" + agent.agent_id + "-standalone",
+          audit_id: requestIdentity.audit_id,
           requested_by: "current-user",
           command_preview: "agent-store open " + shellQuoteToken(coordinate) + " --standalone",
           next_action: {
@@ -503,14 +520,15 @@ new window.Vue({
           blockers: []
         };
       }
+      requestIdentity = buildRequestIdentity(agent.agent_id, "request_catalog_review");
       return {
-        request_id: "req-" + agent.agent_id + "-catalog-review",
+        request_id: requestIdentity.request_id,
         agent_coordinate: coordinate,
         requested_action_id: "request_catalog_review",
         request_state: "pending_catalog_review",
         queue: "catalog_review",
         owner_system: "security",
-        audit_id: "audit-" + agent.agent_id + "-catalog-review",
+        audit_id: requestIdentity.audit_id,
         requested_by: "current-user",
         next_action: {
           action_id: "review_catalog_blocker",

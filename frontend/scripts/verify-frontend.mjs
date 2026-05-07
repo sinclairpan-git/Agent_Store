@@ -140,6 +140,9 @@ assert(
     && app.includes("activeSelectedAgentId")
     && app.includes("catalog_filters_returned_no_agents")
     && app.includes("shellQuoteToken")
+    && app.includes("buildRequestIdentity(agent.agent_id, \"start_enterprise_activation\")")
+    && app.includes("buildRequestIdentity(agent.agent_id, \"open_standalone_readme\")")
+    && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\""),
