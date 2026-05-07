@@ -9,7 +9,9 @@ from agent_store.domain.assertions import (
     AssertionValidationError,
     InstallationAssertionService,
 )
+from agent_store.domain.actions import ActionDescriptor
 from agent_store.domain.bootstrap_service import BootstrapError, BootstrapService
+from agent_store.domain.bootstrap_status import status_for_installation
 from agent_store.domain.errors import ErrorResponse
 from agent_store.domain.permissions import AuthContext, PermissionDecision
 
@@ -66,7 +68,7 @@ class InstallationBootstrapAPI:
         permission_decision: PermissionDecision,
     ) -> tuple[int, dict[str, object]]:
         trace_id = str(payload.get("trace_id") or new_trace_id())
-        idempotency_key = headers.get("Idempotency-Key")
+        idempotency_key = self._header_value(headers, "Idempotency-Key")
         if not idempotency_key:
             return 400, self._validation_error(
                 "errors.idempotencyKeyRequired", trace_id
@@ -104,7 +106,7 @@ class InstallationBootstrapAPI:
         auth_context: AuthContext,
     ) -> tuple[int, dict[str, object]]:
         trace_id = str(payload.get("trace_id") or new_trace_id())
-        idempotency_key = headers.get("Idempotency-Key")
+        idempotency_key = self._header_value(headers, "Idempotency-Key")
         if not idempotency_key:
             return 400, self._validation_error(
                 "errors.idempotencyKeyRequired", trace_id
@@ -193,6 +195,28 @@ class InstallationBootstrapAPI:
             "schema_version": SCHEMA_VERSION,
             "trace_id": trace_id,
             "error_code": "OK",
+            "assertion_handoff": {
+                "handoff_id": f"assertion-{installation_id}-{nonce}",
+                "assertion_state": "issued",
+                "installation_id": installation_id,
+                "audience": audience,
+                "nonce": nonce,
+                "idempotency_key": idempotency_key,
+                "assertion_hash": assertion.assertion_hash,
+                "replay_window_seconds": assertion.replay_window_seconds,
+                "diagnostic_ref": f"diag-{trace_id}",
+                "next_action": ActionDescriptor(
+                    action_id="sync_agentops_evidence",
+                    target_system="agentops",
+                    enabled=True,
+                    requires_permission=True,
+                    audit_required=True,
+                    href=f"#agentops-sync-{installation_id}",
+                ).to_dict(),
+            },
+            "bootstrap_status": status_for_installation(
+                record.installation,
+            ).to_dict(),
             "assertion": assertion.to_dict(),
         }
         self._assertion_idempotency[scoped_idempotency_key] = (
@@ -232,3 +256,11 @@ class InstallationBootstrapAPI:
             auth_context.project_id,
             auth_context.repo_ref,
         )
+
+    @staticmethod
+    def _header_value(headers: Mapping[str, str], field: str) -> str | None:
+        normalized_field = field.lower()
+        for name, value in headers.items():
+            if name.lower() == normalized_field:
+                return value
+        return None
