@@ -12,7 +12,7 @@
 
 - 新增 `agent_store.ui.installation_workflow`。
 - 新增 `agent_store.api.installation_workflow`。
-- 覆盖 installable、activation_required、blocked、not found。
+- 覆盖 installable、activation_required、standalone_only、blocked、not found。
 
 ### Batch 003-B：前端工作流面板
 

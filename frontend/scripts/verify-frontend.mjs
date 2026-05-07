@@ -131,6 +131,7 @@ assert(
     && app.includes("filteredCatalog")
     && app.includes("setTrustFilter")
     && app.includes("selectedInstallWorkflow")
+    && app.includes("standalone_only")
     && indexHtml.includes(":catalog=\"filteredCatalog\""),
   "app must render Agent list cards before the detail view"
 );
@@ -138,6 +139,7 @@ assert(
   componentLibrary.includes("catalog-toolbar")
     && componentLibrary.includes("update-search")
     && componentLibrary.includes("set-installability-filter")
+    && componentLibrary.includes("standalone_only")
     && componentLibrary.includes("empty-state"),
   "Agent catalog must support search, filters, and empty state"
 );

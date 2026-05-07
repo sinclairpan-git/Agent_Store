@@ -161,6 +161,37 @@ def _blocked_steps(source: CatalogAgentSource) -> tuple[WorkflowStep, ...]:
     )
 
 
+def _standalone_steps(source: CatalogAgentSource) -> tuple[WorkflowStep, ...]:
+    return (
+        WorkflowStep(
+            step_id="verify_standalone_boundary",
+            label="确认 standalone 边界不依赖 enterprise installation",
+            state="ready",
+            owner_system="agent_store",
+        ),
+        WorkflowStep(
+            step_id="open_standalone_path",
+            label="打开 standalone 使用说明",
+            state="ready",
+            owner_system="agent_store",
+            action=ActionDescriptor(
+                action_id="open_standalone_readme",
+                target_system="agent_store",
+                enabled=True,
+                requires_permission=False,
+                audit_required=False,
+                href=f"#standalone-{source.agent.agent_id}",
+            ),
+        ),
+        WorkflowStep(
+            step_id="keep_enterprise_optional",
+            label="企业接入保持可选，不阻断 standalone 使用",
+            state="pending",
+            owner_system="agent_store",
+        ),
+    )
+
+
 def build_installation_workflow_preview(
     *, source: CatalogAgentSource, trace_id: str
 ) -> dict[str, object]:
@@ -202,6 +233,26 @@ def build_installation_workflow_preview(
             command_preview=(
                 "agent-store activate "
                 f"{source.agent.agent_id}@{source.version.version} --enterprise"
+            ),
+        )
+    elif installability == "standalone_only":
+        preview = InstallationWorkflowPreview(
+            agent=card,
+            workflow_state="standalone_only",
+            primary_action=ActionDescriptor(
+                action_id="open_standalone_readme",
+                target_system="agent_store",
+                enabled=True,
+                requires_permission=False,
+                audit_required=False,
+                href=f"#standalone-{source.agent.agent_id}",
+            ),
+            steps=_standalone_steps(source),
+            audit_id=audit_id,
+            trace_id=trace_id,
+            command_preview=(
+                "agent-store open "
+                f"{source.agent.agent_id}@{source.version.version} --standalone"
             ),
         )
     else:

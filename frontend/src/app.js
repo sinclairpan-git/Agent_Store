@@ -237,6 +237,39 @@ new window.Vue({
           ]
         };
       }
+      if (agent.installability === "standalone_only") {
+        return {
+          workflow_state: "standalone_only",
+          audit_id: "audit-" + agent.agent_id,
+          command_preview: "agent-store open " + agent.agent_id + "@" + agent.version + " --standalone",
+          primary_action: {
+            action_id: "open_standalone_readme",
+            target_system: "agent_store",
+            enabled: true,
+            href: "#standalone-" + agent.agent_id
+          },
+          steps: [
+            {
+              step_id: "verify_standalone_boundary",
+              label: "确认 standalone 边界不依赖 enterprise installation",
+              state: "ready",
+              owner_system: "agent_store"
+            },
+            {
+              step_id: "open_standalone_path",
+              label: "打开 standalone 使用说明",
+              state: "ready",
+              owner_system: "agent_store"
+            },
+            {
+              step_id: "keep_enterprise_optional",
+              label: "企业接入保持可选，不阻断 standalone 使用",
+              state: "pending",
+              owner_system: "agent_store"
+            }
+          ]
+        };
+      }
       return {
         workflow_state: "blocked",
         audit_id: "audit-" + agent.agent_id,

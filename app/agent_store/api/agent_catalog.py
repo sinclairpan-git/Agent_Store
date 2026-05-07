@@ -38,6 +38,7 @@ class AgentCatalogAPI:
         trace_id = str(query.get("trace_id") or new_trace_id())
         try:
             filters = self._filters_from_query(query)
+            selected_agent_id = self._optional_string(query.get("selected_agent_id"))
         except ValueError as exc:
             return 400, ErrorResponse(
                 error_code="VALIDATION_ERROR",
@@ -53,7 +54,7 @@ class AgentCatalogAPI:
             sources=self.sources,
             trace_id=trace_id,
             filters=filters,
-            selected_agent_id=self._optional_string(query.get("selected_agent_id")),
+            selected_agent_id=selected_agent_id,
         )
 
     @classmethod

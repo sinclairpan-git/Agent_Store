@@ -118,3 +118,14 @@ def test_agent_catalog_api_rejects_unsupported_filters() -> None:
     assert response_envelope_ok(body)
     assert body["error_code"] == "VALIDATION_ERROR"
     assert body["recommended_action_id"] == "fix_catalog_filters"
+
+
+def test_agent_catalog_api_rejects_non_string_selected_agent_id() -> None:
+    status, body = _api().list_agents(
+        {"selected_agent_id": 123, "trace_id": "trace-catalog"}
+    )
+
+    assert status == 400
+    assert response_envelope_ok(body)
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["recommended_action_id"] == "fix_catalog_filters"

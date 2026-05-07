@@ -50,13 +50,17 @@ def _source(
             hash_match_state="matched" if trust_state == "trusted" else "unknown",
             issuer_display="Agent Store",
         ),
-        enterprise_context=EnterpriseContext(
-            integration_mode="enterprise_managed",
-            enterprise_state=enterprise_state,
-            source="tenant_policy",
-            can_ignore=False,
-            affected_actions=("install",),
-            requires_enterprise=True,
+        enterprise_context=(
+            EnterpriseContext.standalone()
+            if installability == "standalone_only"
+            else EnterpriseContext(
+                integration_mode="enterprise_managed",
+                enterprise_state=enterprise_state,
+                source="tenant_policy",
+                can_ignore=False,
+                affected_actions=("install",),
+                requires_enterprise=True,
+            )
         ),
         evidence_level=evidence_level,
         installability=installability,
@@ -135,3 +139,30 @@ def test_blocked_agent_workflow_exposes_recovery_action() -> None:
     assert workflow["primary_action"]["action_id"] == "view_blocking_policy"
     assert workflow["recovery_action"]["action_id"] == "request_catalog_review"
     assert workflow["steps"][0]["state"] == "blocked"
+
+
+def test_standalone_only_agent_workflow_stays_out_of_blocked_recovery() -> None:
+    response = build_installation_workflow_preview(
+        source=_source(
+            "framework.local-sdlc",
+            "Local SDLC",
+            agent_type="framework_capability",
+            category="SDLC Framework",
+            trust_state="trusted",
+            enterprise_state="not_detected",
+            installability="standalone_only",
+            evidence_level="L4-local",
+        ),
+        trace_id="trace-workflow",
+    )
+
+    workflow = response["workflow"]
+    assert workflow["workflow_state"] == "standalone_only"
+    assert workflow["primary_action"]["action_id"] == "open_standalone_readme"
+    assert "recovery_action" not in workflow
+    assert workflow["command_preview"].endswith(" --standalone")
+    assert [step["step_id"] for step in workflow["steps"]] == [
+        "verify_standalone_boundary",
+        "open_standalone_path",
+        "keep_enterprise_optional",
+    ]

@@ -6,7 +6,7 @@
 
 - **状态**：已完成
 - **文件**：`app/agent_store/ui/installation_workflow.py`、`tests/unit/test_installation_workflow_preview.py`
-- **验收**：installable、activation_required、blocked 三类路径均有稳定 steps、primary_action、audit_id。
+- **验收**：installable、activation_required、standalone_only、blocked 四类路径均有稳定 steps、primary_action、audit_id。
 
 ### Task 1.2 实现 workflow preview API handler
 

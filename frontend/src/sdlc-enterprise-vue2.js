@@ -195,6 +195,7 @@
       '      <button type="button" :class="{ active: installabilityFilter === \'all\' }" @click="$emit(\'set-installability-filter\', \'all\')">安装全部</button>',
       '      <button type="button" :class="{ active: installabilityFilter === \'installable\' }" @click="$emit(\'set-installability-filter\', \'installable\')">installable</button>',
       '      <button type="button" :class="{ active: installabilityFilter === \'activation_required\' }" @click="$emit(\'set-installability-filter\', \'activation_required\')">activation</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'standalone_only\' }" @click="$emit(\'set-installability-filter\', \'standalone_only\')">standalone</button>',
       '      <button type="button" :class="{ active: installabilityFilter === \'blocked\' }" @click="$emit(\'set-installability-filter\', \'blocked\')">blocked</button>',
       '    </div>',
       '  </div>',
@@ -250,6 +251,9 @@
         }
         if (this.workflow.workflow_state === "activation_required") {
           return "warning";
+        }
+        if (this.workflow.workflow_state === "standalone_only") {
+          return "info";
         }
         return "danger";
       }
