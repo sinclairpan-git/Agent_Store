@@ -215,6 +215,7 @@ def test_bootstrap_status_blocks_failed_agentops_credential_echo() -> None:
     assert payload["primary_action"]["target_system"] == "agentops"
     assert payload["timeline"][2]["status"] == "completed"
     assert payload["timeline"][3]["status"] == "blocked"
+    assert payload["timeline"][4]["source"] == "agentops"
     assert payload["timeline"][4]["status"] == "blocked"
 
 
@@ -248,6 +249,7 @@ def test_bootstrap_status_blocks_expired_agentops_credential_echo() -> None:
     assert payload["timeline"][0]["status"] == "completed"
     assert payload["timeline"][1]["status"] == "completed"
     assert payload["timeline"][3]["source"] == "agentops"
+    assert payload["timeline"][4]["source"] == "agentops"
 
 
 def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> None:

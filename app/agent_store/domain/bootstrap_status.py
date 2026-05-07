@@ -268,7 +268,7 @@ def _timeline_for_status(
             label="Verify signed test event",
             owner_system="agentops",
             status=signature_status,
-            source="agentops" if signature_verified else "pending",
+            source="agentops" if signature_verified or agentops_blocked else "pending",
             action_id="send_signature_test_event",
         ),
     )
