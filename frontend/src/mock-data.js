@@ -151,6 +151,16 @@ window.AgentStoreMock = {
     next_poll_after: 5,
     retryable: true,
     diagnostic_ref: "diag-trace-1",
+    source_of_truth: "agentops",
+    entry_evidence: [
+      "agentops_credential_echo",
+      "installation_id_match",
+      "device_id_match"
+    ],
+    conflict_resolution: "agentops_bootstrap_echo_after_identity_match",
+    can_ignore: false,
+    affected_actions: ["send_signature_test_event"],
+    source_conflicts: [],
     primary_action: {
       action_id: "send_signature_test_event",
       target_system: "ai_autosdlc_cli",

@@ -418,6 +418,25 @@
     ].join("")
   });
 
+  Vue.component("sdlc-source-facts", {
+    props: ["status"],
+    template: [
+      '<div class="source-facts">',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="事实源" :value="status.source_of_truth" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="裁决" :value="status.conflict_resolution" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="可忽略" :value="status.can_ignore ? \'yes\' : \'no\'" :tone="status.can_ignore ? \'warning\' : \'danger\'"></sdlc-metric-row>',
+      '  </dl>',
+      '  <ul class="tag-list source-facts__evidence"><li v-for="item in status.entry_evidence" :key="item">{{ item }}</li></ul>',
+      '  <div v-if="status.source_conflicts && status.source_conflicts.length" class="source-conflicts">',
+      '    <div v-for="conflict in status.source_conflicts" :key="conflict.source_of_truth + conflict.state" class="source-conflicts__row">',
+      '      <span>{{ conflict.source_of_truth }}</span><strong>{{ conflict.state }}</strong>',
+      '    </div>',
+      '  </div>',
+      '</div>'
+    ].join("")
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -490,6 +509,7 @@
       '        <sdlc-metric-row label="诊断" :value="bootstrap.diagnostic_ref" tone="neutral"></sdlc-metric-row>',
       '      </dl>',
       '      <sdlc-bootstrap-timeline v-if="bootstrap.timeline" :timeline="bootstrap.timeline"></sdlc-bootstrap-timeline>',
+      '      <sdlc-source-facts :status="bootstrap"></sdlc-source-facts>',
       '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary"></sdlc-action-button>',
       '    </sdlc-section>',
       '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',

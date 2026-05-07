@@ -577,6 +577,32 @@ h2 {
   background: #fff6f5;
 }
 
+.source-facts {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.source-facts__evidence {
+  margin: 0;
+}
+
+.source-conflicts {
+  display: grid;
+  gap: 6px;
+}
+
+.source-conflicts__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 8px 10px;
+}
+
 @media (max-width: 980px) {
   .catalog-toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));

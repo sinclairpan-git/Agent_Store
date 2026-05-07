@@ -502,7 +502,7 @@ components:
           enum: [OK]
         status:
           type: object
-          required: [installation_id, bootstrap_status, current_step, step_status, primary_action]
+          required: [installation_id, bootstrap_status, current_step, step_status, primary_action, source_of_truth, entry_evidence, conflict_resolution, can_ignore, affected_actions]
           properties:
             installation_id:
               type: string
@@ -539,6 +539,25 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/BootstrapTimelineStep"
+            source_of_truth:
+              type: string
+              enum: [agent_store, ai_autosdlc, agentops, conflict_guard]
+            entry_evidence:
+              type: array
+              items:
+                type: string
+            conflict_resolution:
+              type: string
+            can_ignore:
+              type: boolean
+            affected_actions:
+              type: array
+              items:
+                type: string
+            source_conflicts:
+              type: array
+              items:
+                $ref: "#/components/schemas/BootstrapSourceSignal"
     BootstrapTimelineStep:
       type: object
       required: [step_id, label, owner_system, status, source]
@@ -558,6 +577,21 @@ components:
           type: string
           enum: [agent_store, ai_autosdlc, agentops, pending]
         action_id:
+          type: string
+    BootstrapSourceSignal:
+      type: object
+      required: [source_of_truth, state, entry_evidence]
+      properties:
+        source_of_truth:
+          type: string
+          enum: [agent_store, ai_autosdlc, agentops, conflict_guard]
+        state:
+          type: string
+        entry_evidence:
+          type: array
+          items:
+            type: string
+        last_verified_at:
           type: string
     ActionDescriptor:
       type: object
