@@ -43,6 +43,38 @@ The cross-project request body is `agentops_credential_handoff.v1`:
 
 `Idempotency-Key` remains an HTTP header and is case-insensitive. The same `bootstrap_id`, assertion identity, device proof identity, and caller context must return the same credential response. A reused idempotency key with different identity must return a stable conflict.
 
+### AgentOps 016 Consumer Acceptance
+
+AgentOps stage `016-cross-project-credential-handoff-consumer` is the normative
+consumer implementation for `agentops_credential_handoff.v1`. It must consume
+the same fixture names defined in `contracts/cross-project/fixtures/` and should
+record the Agent Store source commit or fixture checksum when the fixtures are
+vendored into AgentOps.
+
+AgentOps Credential Issue must reject requests unless all of these checks pass:
+
+- `schema_version` is `agentops_credential_handoff.v1`.
+- `installation_assertion.assertion_version` is `signed_installation_assertion.v1`.
+- `installation_assertion.issuer` is `agent-store`.
+- `installation_assertion.audience` is `agentops`.
+- `installation_assertion.canonicalization` is `json-c14n-v1`.
+- `installation_assertion.revocation_status` is present and accepted by policy.
+- `device_proof.proof_version` is `device_proof.v1`.
+- `device_proof.assertion_hash` equals `installation_assertion.assertion_hash`.
+- `installation_id`, `device_id`, `user_id`, `agent_id`, `agent_version`, and `artifact_hash` stay bound across the assertion, device proof, and caller context.
+- The handoff assertion hash and signature are verified against the external `signed_installation_assertion.v1` payload, not against an Agent Store internal legacy assertion representation.
+- Device proof `algorithm` is independent from the assertion `algorithm`; AgentOps must not require them to be equal.
+- Unsupported major schema versions return the CCT-006 unsupported-schema error shape.
+
+AgentOps Credential Issue must produce the response fields defined in
+`credential_issue_response.v1`, including `bootstrap_status`, `next_action`,
+`installation_id`, and `device_id`. Agent Store consumes these fields as an echo
+only; Agent Store must not infer `active` or issue credentials locally.
+
+AgentOps 016 must not write Agent Store registration facts, implement the
+Ai_AutoSDLC CLI, upgrade dry-run or local adapter state to `verified_loaded`, or
+replace the current mock signing boundary with a real key management system.
+
 ### Signed Installation Assertion
 
 `installation_assertion` must use these external field names:
@@ -129,7 +161,7 @@ Each project must implement contract tests against the same fixture set:
 | --- | --- | --- | --- |
 | CCT-001 assertion handoff sample | Agent Store | AgentOps | AgentOps accepts `signed_installation_assertion.v1` without field-name adapters in test code. |
 | CCT-002 device proof binding | Ai_AutoSDLC | AgentOps | Device proof must bind `installation_id`, `device_id`, and `assertion_hash`. |
-| CCT-003 credential response echo | AgentOps | Agent Store | Agent Store only displays `credential_issued` from AgentOps response. |
+| CCT-003 credential response echo | AgentOps | Agent Store | AgentOps produces `credential_issue_response.v1`; Agent Store only displays AgentOps echo fields and does not infer `active`. |
 | CCT-004 signed test event | Ai_AutoSDLC | AgentOps | Enterprise managed event requires active credential, active device key, installation id, signature, sequence number, and idempotency key. |
 | CCT-005 standalone regression | Ai_AutoSDLC | Agent Store, AgentOps | No Agent Store or AgentOps dependency may block `ai-sdlc run --dry-run` or local reports. |
 | CCT-006 stale schema rejection | All | All | Unknown major schema versions return explainable unsupported-schema errors. |
@@ -150,4 +182,3 @@ Each project must implement contract tests against the same fixture set:
 3. Update AgentOps consumer tests and credential issue adapter.
 4. Update Ai_AutoSDLC activation command/device proof and signed test event.
 5. Add one end-to-end contract test: Agent Store assertion fixture plus Ai_AutoSDLC device proof fixture consumed by AgentOps, followed by Agent Store status echo.
-
