@@ -26,8 +26,9 @@
 - PR 创建后评论 `@codex review` 触发 Codex Review。
 - 为当前线程创建每 5 分钟一次的 heartbeat 守护任务，检查 PR review 结果与 GitHub checks 状态。
 - 若 review 或 checks 发现可执行问题，立即定位、修复、运行相关验证、提交并 push，再次评论 `@codex review`，继续守护。
-- 只有当 Codex Review 无可执行问题且 GitHub required checks 全部通过时，才可认定“同意合入”。
-- 不得在用户未明确授权时自动 merge；达到可合入状态后，向用户报告 PR、review 与 checks 的最终状态。
+- 只有当 Codex Review 明确反馈“没有发现问题”（例如 `Didn't find any major issues` / `没有发现问题` 等等价结论）且 GitHub required checks 全部通过时，才可认定“同意合入”。
+- PR 守护达到“Codex Review 反馈没有发现问题 + GitHub required checks 全部通过”状态后，默认自动 merge 到目标分支；若 PR 仍为 draft，先标记 ready，再执行 merge。
+- 只有当用户明确要求“不自动合入 / 仅报告 / 等我确认”时，才在达到可合入状态后停止并向用户报告 PR、review 与 checks 的最终状态。
 
 <!-- AI-SDLC managed shell guidance -->
 Project preferred shell: zsh.
