@@ -12,6 +12,18 @@ APPROVAL_STATUSES = frozenset(
     {"not_required", "pending", "approved", "rejected", "expired", "revoked"}
 )
 AGENTOPS_CREDENTIAL_NEXT_ACTIONS = frozenset({"send_signature_test_event"})
+AGENTOPS_BOOTSTRAP_STATUSES = frozenset(
+    {
+        "not_started",
+        "assertion_issued",
+        "device_bound",
+        "credential_issued",
+        "signature_verified",
+        "expired",
+        "failed",
+    }
+)
+AGENTOPS_CREDENTIAL_STATUSES = frozenset({"active", "rotating", "expired", "revoked"})
 
 
 @dataclass(frozen=True)
@@ -218,6 +230,10 @@ class CredentialBootstrapSummary:
     degraded_reason: str | None = None
 
     def __post_init__(self) -> None:
+        if self.bootstrap_status not in AGENTOPS_BOOTSTRAP_STATUSES:
+            raise ValueError(f"unsupported bootstrap_status: {self.bootstrap_status}")
+        if self.credential_status not in AGENTOPS_CREDENTIAL_STATUSES:
+            raise ValueError(f"unsupported credential_status: {self.credential_status}")
         if (
             self.next_action is not None
             and self.next_action not in AGENTOPS_CREDENTIAL_NEXT_ACTIONS
@@ -231,15 +247,14 @@ class CredentialBootstrapSummary:
     ) -> "CredentialBootstrapSummary":
         bootstrap_status = cls._required_string(payload, "bootstrap_status")
         next_action = cls._required_string(payload, "next_action")
+        reporter_status, enterprise_state = cls._display_state_from_agentops(
+            bootstrap_status,
+        )
         return cls(
             bootstrap_status=bootstrap_status,
             credential_status=cls._required_string(payload, "status"),
-            reporter_status="pending_signature_test",
-            enterprise_state=(
-                "activating"
-                if bootstrap_status == "credential_issued"
-                else "degraded"
-            ),
+            reporter_status=reporter_status,
+            enterprise_state=enterprise_state,
             next_action=next_action,
             credential_id=cls._required_string(payload, "credential_id"),
             token_id=cls._required_string(payload, "token_id"),
@@ -248,6 +263,18 @@ class CredentialBootstrapSummary:
             device_id=cls._required_string(payload, "device_id"),
             expires_at=cls._parse_datetime(payload.get("expires_at")),
         )
+
+    @staticmethod
+    def _display_state_from_agentops(bootstrap_status: str) -> tuple[str, str]:
+        if bootstrap_status == "credential_issued":
+            return "pending_signature_test", "activating"
+        if bootstrap_status == "signature_verified":
+            return "sent", "active"
+        if bootstrap_status == "expired":
+            return "failed", "degraded"
+        if bootstrap_status == "failed":
+            return "failed", "degraded"
+        return "degraded", "degraded"
 
     def to_dict(self) -> dict[str, object]:
         data: dict[str, object] = {

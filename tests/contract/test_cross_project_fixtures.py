@@ -61,6 +61,18 @@ def test_cct_003_store_consumes_agentops_credential_echo_without_inferring_activ
     assert payload["credential_id"] == "cred-fixture"
 
 
+def test_cct_003_store_consumes_agentops_signature_verified_echo_as_active() -> None:
+    response = _load_fixture("credential_bootstrap_signature_verified.v1.json")
+    summary = CredentialBootstrapSummary.from_agentops_credential_response(response)
+    payload = summary.to_dict()
+
+    assert payload["bootstrap_status"] == "signature_verified"
+    assert payload["credential_status"] == "active"
+    assert payload["enterprise_state"] == "active"
+    assert payload["reporter_status"] == "sent"
+    assert payload["credential_id"] == "cred-fixture"
+
+
 def test_agentops_016_consumer_acceptance_is_frozen_in_appendix() -> None:
     appendix = Path("docs/cross-project-contract-appendix.md").read_text(
         encoding="utf-8",
@@ -80,6 +92,8 @@ def test_agentops_016_consumer_acceptance_is_frozen_in_appendix() -> None:
         "bootstrap_status`, `next_action`,",
         "`installation_id`, and `device_id`",
         "Agent Store must not infer `active`",
+        "bootstrap_status=signature_verified",
+        "advance from `credential_issued` to `signature_verified` locally",
         "upgrade dry-run or local adapter state to `verified_loaded`",
     ]
 

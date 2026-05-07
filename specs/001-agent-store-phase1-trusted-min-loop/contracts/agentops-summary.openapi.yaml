@@ -202,10 +202,26 @@ components:
           enum: [active, rotating, expired, revoked]
         reporter_status:
           type: string
-          enum: [disabled, local_only, pending_upload, sent, degraded, failed]
+          enum: [disabled, local_only, pending_upload, pending_signature_test, sent, degraded, failed]
         enterprise_state:
           type: string
           enum: [not_detected, detected_optional, required_unactivated, activating, active, degraded, disabled]
+        next_action:
+          type: string
+          enum: [send_signature_test_event]
+        credential_id:
+          type: string
+        token_id:
+          type: string
+        device_key_id:
+          type: string
+        installation_id:
+          type: string
+        device_id:
+          type: string
+        expires_at:
+          type: string
+          format: date-time
     CrossSystemLink:
       type: object
       required: [rel, target_system, href, trace_id]

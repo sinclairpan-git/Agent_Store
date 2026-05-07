@@ -105,3 +105,45 @@ def test_credential_response_echo_keeps_store_in_activation_state() -> None:
     assert payload["enterprise_state"] == "activating"
     assert payload["reporter_status"] == "pending_signature_test"
     assert payload["next_action"] == "send_signature_test_event"
+
+
+def test_signature_verified_echo_marks_store_active_from_agentops_status() -> None:
+    summary = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "signature_verified",
+            "installation_id": "inst-1",
+            "device_id": "dev-1",
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    payload = summary.to_dict()
+    assert payload["bootstrap_status"] == "signature_verified"
+    assert payload["enterprise_state"] == "active"
+    assert payload["reporter_status"] == "sent"
+
+
+def test_credential_response_rejects_unknown_bootstrap_status() -> None:
+    try:
+        CredentialBootstrapSummary.from_agentops_credential_response(
+            {
+                "credential_id": "cred-1",
+                "token_id": "token-1",
+                "device_key_id": "device-key-1",
+                "status": "active",
+                "bootstrap_status": "locally_verified",
+                "installation_id": "inst-1",
+                "device_id": "dev-1",
+                "expires_at": "2026-05-07T13:00:00+00:00",
+                "next_action": "send_signature_test_event",
+            }
+        )
+    except ValueError as exc:
+        assert "unsupported bootstrap_status" in str(exc)
+    else:
+        raise AssertionError("unknown bootstrap_status should fail")
