@@ -356,6 +356,55 @@
     }
   });
 
+  Vue.component("sdlc-assertion-handoff", {
+    props: ["assertion"],
+    template: [
+      '<section class="workspace-section assertion-panel">',
+      '  <div class="section-heading">',
+      '    <h2>Assertion Handoff</h2>',
+      '    <sdlc-status-chip :label="assertion.assertion_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="安装" :value="assertion.installation_id" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Audience" :value="assertion.audience" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Replay" :value="assertion.replay_window_seconds" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Hash" :value="assertion.assertion_hash" :tone="hashTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="handoff-panel__meta">',
+      '    <span>{{ assertion.idempotency_key }}</span>',
+      '    <span>{{ assertion.nonce }}</span>',
+      '  </div>',
+      '  <div class="request-panel__footer">',
+      '    <span>Assertion</span>',
+      '    <sdlc-action-button :action="assertion.next_action" kind="primary"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (
+          this.assertion.assertion_state === "ready_to_issue"
+          || this.assertion.assertion_state === "issued"
+        ) {
+          return "success";
+        }
+        if (this.assertion.assertion_state.indexOf("waiting_for_") === 0) {
+          return "warning";
+        }
+        return "danger";
+      },
+      hashTone: function hashTone() {
+        if (this.assertion.assertion_hash && this.assertion.assertion_hash.indexOf("pending") === 0) {
+          return "warning";
+        }
+        if (this.assertion.assertion_hash && this.assertion.assertion_hash !== "not-issued") {
+          return "success";
+        }
+        return "neutral";
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -372,7 +421,8 @@
       "stateDecision",
       "installWorkflow",
       "installRequest",
-      "installHandoff"
+      "installHandoff",
+      "assertionHandoff"
     ],
     template: [
       '<main class="workspace">',
@@ -431,6 +481,7 @@
       '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',
       '    <sdlc-install-request :request="installRequest"></sdlc-install-request>',
       '    <sdlc-bootstrap-handoff :handoff="installHandoff"></sdlc-bootstrap-handoff>',
+      '    <sdlc-assertion-handoff :assertion="assertionHandoff"></sdlc-assertion-handoff>',
       '    <sdlc-section title="AgentOps 摘要">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="证据等级" :value="agentops.quality_evidence.evidence_level" tone="info"></sdlc-metric-row>',

@@ -195,8 +195,41 @@ def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
     assert body == retry_body
     assert body["schema_version"]
     assert body["error_code"] == "OK"
+    assert body["assertion_handoff"]["assertion_state"] == "issued"
+    assert body["assertion_handoff"]["installation_id"] == installation_id
+    assert body["assertion_handoff"]["audience"] == "agentops"
+    assert body["assertion_handoff"]["next_action"]["action_id"] == (
+        "sync_agentops_evidence"
+    )
+    assert body["bootstrap_status"]["bootstrap_status"] == "assertion_issued"
     assert body["assertion"]["installation_id"] == installation_id
     assert body["assertion"]["signature"]
+
+
+def test_issue_assertion_api_accepts_lowercase_idempotency_header() -> None:
+    api = _api()
+    auth = _auth()
+    _, installation_body = api.create_installation(
+        _payload(),
+        headers={"idempotency-key": "install-1"},
+        auth_context=auth,
+        permission_decision=_decision(auth),
+    )
+
+    status, body = api.issue_installation_assertion(
+        installation_body["installation"]["installation_id"],
+        {
+            "device_public_key_thumbprint": "thumb-1",
+            "nonce": "nonce-1",
+            "audience": "agentops",
+        },
+        headers={"idempotency-key": "assert-1"},
+        auth_context=auth,
+    )
+
+    assert status == 200
+    assert body["error_code"] == "OK"
+    assert body["assertion_handoff"]["idempotency_key"] == "assert-1"
 
 
 def test_issue_assertion_api_rejects_device_thumbprint_mismatch() -> None:

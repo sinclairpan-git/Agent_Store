@@ -134,7 +134,9 @@ assert(
     && app.includes("selectedInstallWorkflow")
     && app.includes("selectedInstallationRequest")
     && app.includes("selectedBootstrapHandoff")
+    && app.includes("selectedAssertionHandoff")
     && app.includes("create_installation_from_request")
+    && app.includes("issue_installation_assertion")
     && app.includes("device_public_key_thumbprint")
     && app.includes("pending_enterprise_activation")
     && app.includes("pending_catalog_review")
@@ -183,6 +185,14 @@ assert(
     && componentLibrary.includes("handoff.next_action")
     && indexHtml.includes(":install-handoff=\"selectedBootstrapHandoff\""),
   "Agent detail must expose bootstrap handoff state"
+);
+assert(
+  componentLibrary.includes("sdlc-assertion-handoff")
+    && componentLibrary.includes("assertion.assertion_state")
+    && componentLibrary.includes("ready_to_issue")
+    && componentLibrary.includes("assertion.replay_window_seconds")
+    && indexHtml.includes(":assertion-handoff=\"selectedAssertionHandoff\""),
+  "Agent detail must expose installation assertion handoff state"
 );
 assert(
   componentLibrary.includes("stateDecisionTone")

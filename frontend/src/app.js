@@ -583,6 +583,49 @@ new window.Vue({
         installation_id: "not-created",
         next_action: request.next_action
       };
+    },
+    selectedAssertionHandoff: function selectedAssertionHandoff() {
+      var agent = this.selectedAgent;
+      var handoff = this.selectedBootstrapHandoff;
+      if (!agent) {
+        return {
+          assertion_state: "empty",
+          installation_id: "not-applicable",
+          audience: "not-applicable",
+          nonce: "not-applicable",
+          idempotency_key: "not-applicable",
+          replay_window_seconds: 0,
+          assertion_hash: "not-applicable",
+          next_action: this.selectedView.primary_action
+        };
+      }
+      if (handoff.handoff_state === "ready_to_create") {
+        return {
+          assertion_state: "ready_to_issue",
+          installation_id: handoff.installation_id,
+          audience: "agentops",
+          nonce: "nonce-" + safeId(handoff.request_id),
+          idempotency_key: "assert-" + handoff.request_id,
+          replay_window_seconds: 300,
+          assertion_hash: "pending-assertion-hash",
+          next_action: {
+            action_id: "issue_installation_assertion",
+            target_system: "agent_store",
+            enabled: true,
+            href: "#assertion-" + handoff.request_id
+          }
+        };
+      }
+      return {
+        assertion_state: "waiting_for_" + handoff.handoff_state,
+        installation_id: handoff.installation_id,
+        audience: "agentops",
+        nonce: "not-issued",
+        idempotency_key: "blocked-until-" + safeId(handoff.handoff_state),
+        replay_window_seconds: 0,
+        assertion_hash: "not-issued",
+        next_action: handoff.next_action
+      };
     }
   },
   methods: {
