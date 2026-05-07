@@ -186,6 +186,12 @@ new window.Vue({
           next_poll_after: 0,
           retryable: false,
           diagnostic_ref: "catalog-empty-filter",
+          source_of_truth: "agent_store",
+          entry_evidence: ["catalog_filters_returned_no_agents"],
+          conflict_resolution: "no_bootstrap_until_agent_selected",
+          can_ignore: true,
+          affected_actions: ["select_agent"],
+          source_conflicts: [],
           primary_action: this.selectedView.primary_action
         };
       }
@@ -200,6 +206,12 @@ new window.Vue({
         next_poll_after: 0,
         retryable: this.selectedAgent.installability !== "blocked",
         diagnostic_ref: "catalog-" + this.selectedAgent.agent_id,
+        source_of_truth: "agent_store",
+        entry_evidence: ["catalog_selection"],
+        conflict_resolution: "no_bootstrap_until_activation_started",
+        can_ignore: this.selectedAgent.installability !== "activation_required",
+        affected_actions: ["start_enterprise_activation"],
+        source_conflicts: [],
         primary_action: this.selectedAgent.primary_action
       };
     },

@@ -59,6 +59,16 @@ def test_bootstrap_status_returns_polling_retry_and_diagnostic_fields() -> None:
     assert payload["retryable"] is True
     assert payload["diagnostic_ref"] == "diag-trace-1"
     assert payload["primary_action"]["action_id"] == "poll_bootstrap_status"
+    assert payload["source_of_truth"] == "agent_store"
+    assert payload["entry_evidence"] == [
+        "signed_installation_assertion.v1",
+        "device_binding",
+    ]
+    assert (
+        payload["conflict_resolution"]
+        == "wait_for_ai_autosdlc_device_proof_then_agentops_echo"
+    )
+    assert "collect_device_proof" in payload["affected_actions"]
     assert [step["step_id"] for step in payload["timeline"]] == [
         "create_installation",
         "issue_assertion",
@@ -96,6 +106,16 @@ def test_bootstrap_status_timeline_uses_agentops_credential_echo() -> None:
     assert payload["bootstrap_status"] == "credential_issued"
     assert payload["current_step"] == "send_signature_test_event"
     assert payload["primary_action"]["target_system"] == "ai_autosdlc_cli"
+    assert payload["source_of_truth"] == "agentops"
+    assert payload["entry_evidence"] == [
+        "agentops_credential_echo",
+        "installation_id_match",
+        "device_id_match",
+    ]
+    assert (
+        payload["conflict_resolution"]
+        == "agentops_bootstrap_echo_after_identity_match"
+    )
     assert payload["timeline"][2]["status"] == "completed"
     assert payload["timeline"][3]["source"] == "agentops"
     assert payload["timeline"][4]["status"] == "pending"
@@ -181,6 +201,9 @@ def test_bootstrap_status_timeline_marks_signature_verified_complete() -> None:
     payload = body["status"]
     assert payload["bootstrap_status"] == "signature_verified"
     assert payload["step_status"] == "completed"
+    assert payload["source_of_truth"] == "agentops"
+    assert "signature_test_verified" in payload["entry_evidence"]
+    assert payload["conflict_resolution"] == "agentops_signature_verified_is_display_fact"
     assert payload["timeline"][4]["status"] == "completed"
     assert payload["primary_action"]["action_id"] == "view_agentops_evidence"
 
@@ -213,6 +236,8 @@ def test_bootstrap_status_blocks_failed_agentops_credential_echo() -> None:
     assert payload["retryable"] is False
     assert payload["last_error_code"] == "AGENTOPS_BOOTSTRAP_FAILED"
     assert payload["primary_action"]["target_system"] == "agentops"
+    assert payload["source_of_truth"] == "agentops"
+    assert "agentops_credential_echo" in payload["entry_evidence"]
     assert payload["timeline"][2]["status"] == "completed"
     assert payload["timeline"][3]["status"] == "blocked"
     assert payload["timeline"][4]["source"] == "agentops"
@@ -246,6 +271,7 @@ def test_bootstrap_status_blocks_expired_agentops_credential_echo() -> None:
     assert payload["step_status"] == "blocked"
     assert payload["last_error_code"] == "AGENTOPS_BOOTSTRAP_EXPIRED"
     assert payload["primary_action"]["action_id"] == "view_agentops_bootstrap_failure"
+    assert payload["source_of_truth"] == "agentops"
     assert payload["timeline"][0]["status"] == "completed"
     assert payload["timeline"][1]["status"] == "completed"
     assert payload["timeline"][3]["source"] == "agentops"
@@ -267,6 +293,12 @@ def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> N
     assert payload["safe_to_rerun"] is False
     assert payload["regenerate_command_url"].endswith("/assertion")
     assert payload["primary_action"]["action_id"] == "regenerate_activation_command"
+    assert payload["source_of_truth"] == "agent_store"
+    assert payload["entry_evidence"] == ["assertion_expires_at", "last_error_code"]
+    assert (
+        payload["conflict_resolution"]
+        == "agent_store_assertion_error_overrides_agentops_echo"
+    )
     assert payload["timeline"][2]["step_id"] == "collect_device_proof"
     assert payload["timeline"][2]["status"] == "blocked"
     assert payload["timeline"][3]["status"] == "blocked"
@@ -303,6 +335,14 @@ def test_expired_command_uses_store_timeline_even_with_agentops_echo() -> None:
     assert payload["timeline"][1]["status"] == "blocked"
     assert payload["timeline"][2]["source"] == "pending"
     assert payload["timeline"][3]["source"] == "pending"
+    assert payload["source_conflicts"] == [
+        {
+            "source_of_truth": "agentops",
+            "state": "credential_issued",
+            "entry_evidence": ["agentops_credential_echo"],
+            "last_verified_at": "2026-05-07T13:00:00+00:00",
+        }
+    ]
 
 
 def test_permission_denied_status_returns_access_and_return_path() -> None:
@@ -331,6 +371,8 @@ def test_permission_denied_status_returns_access_and_return_path() -> None:
     assert status["request_access_url"] == "/agentops/access/request"
     assert status["audit_id"] == "audit-deny"
     assert status["return_path"] == "/official-apps/framework.ai-autosdlc"
+    assert status["source_of_truth"] == "agentops"
+    assert status["entry_evidence"] == ["permission_decision", "denied_scope"]
     assert status["primary_action"]["action_id"] == "request_enterprise_access"
 
 

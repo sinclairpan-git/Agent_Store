@@ -95,6 +95,7 @@ for (const componentName of [
   "sdlc-install-workflow",
   "sdlc-install-request",
   "sdlc-bootstrap-timeline",
+  "sdlc-source-facts",
   "sdlc-shell",
   "sdlc-section",
   "sdlc-status-chip",
@@ -201,7 +202,11 @@ assert(
     && componentLibrary.includes("bootstrap.timeline")
     && mockData.includes("verify_signature_test")
     && mockData.includes("credential_bootstrap")
-    && mockData.includes("send_signature_test_event"),
+    && mockData.includes("send_signature_test_event")
+    && mockData.includes("source_of_truth")
+    && mockData.includes("entry_evidence")
+    && mockData.includes("conflict_resolution")
+    && componentLibrary.includes("sdlc-source-facts"),
   "Agent detail must expose Agent Store/Ai_AutoSDLC/AgentOps bootstrap timeline"
 );
 assert(

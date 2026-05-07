@@ -31,6 +31,24 @@ class BootstrapTimelineStep:
 
 
 @dataclass(frozen=True)
+class BootstrapSourceSignal:
+    source_of_truth: str
+    state: str
+    entry_evidence: tuple[str, ...]
+    last_verified_at: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        data: dict[str, object] = {
+            "source_of_truth": self.source_of_truth,
+            "state": self.state,
+            "entry_evidence": list(self.entry_evidence),
+        }
+        if self.last_verified_at is not None:
+            data["last_verified_at"] = self.last_verified_at
+        return data
+
+
+@dataclass(frozen=True)
 class BootstrapStatus:
     installation_id: str
     bootstrap_status: str
@@ -50,6 +68,12 @@ class BootstrapStatus:
     audit_id: str | None = None
     return_path: str | None = None
     timeline: tuple[BootstrapTimelineStep, ...] = ()
+    source_of_truth: str = "agent_store"
+    entry_evidence: tuple[str, ...] = ()
+    conflict_resolution: str = "show_degraded_when_sources_conflict"
+    can_ignore: bool = False
+    affected_actions: tuple[str, ...] = ()
+    source_conflicts: tuple[BootstrapSourceSignal, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         data: dict[str, object] = {
@@ -58,6 +82,11 @@ class BootstrapStatus:
             "current_step": self.current_step,
             "step_status": self.step_status,
             "primary_action": self.primary_action.to_dict(),
+            "source_of_truth": self.source_of_truth,
+            "entry_evidence": list(self.entry_evidence),
+            "conflict_resolution": self.conflict_resolution,
+            "can_ignore": self.can_ignore,
+            "affected_actions": list(self.affected_actions),
         }
         optional = {
             "next_poll_after": self.next_poll_after,
@@ -81,6 +110,10 @@ class BootstrapStatus:
             ]
         if self.timeline:
             data["timeline"] = [step.to_dict() for step in self.timeline]
+        if self.source_conflicts:
+            data["source_conflicts"] = [
+                signal.to_dict() for signal in self.source_conflicts
+            ]
         return data
 
 
@@ -109,6 +142,17 @@ def status_for_installation(
                 audit_required=True,
             ),
             timeline=_timeline_for_status("expired", None),
+            source_of_truth="agent_store",
+            entry_evidence=("assertion_expires_at", "last_error_code"),
+            conflict_resolution="agent_store_assertion_error_overrides_agentops_echo",
+            affected_actions=(
+                "issue_assertion",
+                "collect_device_proof",
+                "issue_credential",
+                "send_signature_test_event",
+            ),
+            return_path="/official-apps/framework.ai-autosdlc",
+            source_conflicts=_agentops_conflicts(agentops_credential),
         )
 
     if agentops_credential is not None:
@@ -137,6 +181,15 @@ def status_for_installation(
                     agentops_credential.bootstrap_status,
                     agentops_credential,
                 ),
+                source_of_truth="agentops",
+                entry_evidence=(
+                    "agentops_credential_echo",
+                    "installation_id_match",
+                    "device_id_match",
+                ),
+                conflict_resolution="agentops_bootstrap_echo_after_identity_match",
+                affected_actions=("issue_credential", "send_signature_test_event"),
+                return_path="/official-apps/framework.ai-autosdlc",
             )
         if agentops_credential.bootstrap_status == "credential_issued":
             return BootstrapStatus(
@@ -159,6 +212,15 @@ def status_for_installation(
                     agentops_credential.bootstrap_status,
                     agentops_credential,
                 ),
+                source_of_truth="agentops",
+                entry_evidence=(
+                    "agentops_credential_echo",
+                    "installation_id_match",
+                    "device_id_match",
+                ),
+                conflict_resolution="agentops_bootstrap_echo_after_identity_match",
+                affected_actions=("send_signature_test_event",),
+                return_path="/official-apps/framework.ai-autosdlc",
             )
         if agentops_credential.bootstrap_status == "signature_verified":
             return BootstrapStatus(
@@ -181,6 +243,16 @@ def status_for_installation(
                     agentops_credential.bootstrap_status,
                     agentops_credential,
                 ),
+                source_of_truth="agentops",
+                entry_evidence=(
+                    "agentops_credential_echo",
+                    "installation_id_match",
+                    "device_id_match",
+                    "signature_test_verified",
+                ),
+                conflict_resolution="agentops_signature_verified_is_display_fact",
+                affected_actions=("view_agentops_evidence",),
+                return_path="/official-apps/framework.ai-autosdlc",
             )
 
     return BootstrapStatus(
@@ -208,6 +280,30 @@ def status_for_installation(
             ),
         ),
         timeline=_timeline_for_status("assertion_issued", agentops_credential),
+        source_of_truth="agent_store",
+        entry_evidence=("signed_installation_assertion.v1", "device_binding"),
+        conflict_resolution="wait_for_ai_autosdlc_device_proof_then_agentops_echo",
+        affected_actions=("collect_device_proof", "issue_credential"),
+        return_path="/official-apps/framework.ai-autosdlc",
+    )
+
+
+def _agentops_conflicts(
+    agentops_credential: CredentialBootstrapSummary | None,
+) -> tuple[BootstrapSourceSignal, ...]:
+    if agentops_credential is None:
+        return ()
+    return (
+        BootstrapSourceSignal(
+            source_of_truth="agentops",
+            state=agentops_credential.bootstrap_status,
+            entry_evidence=("agentops_credential_echo",),
+            last_verified_at=(
+                agentops_credential.expires_at.isoformat()
+                if agentops_credential.expires_at
+                else None
+            ),
+        ),
     )
 
 
@@ -293,6 +389,10 @@ def permission_denied_status(
         request_access_url=decision.request_access_url,
         audit_id=decision.audit_id,
         return_path=return_path,
+        source_of_truth="agentops",
+        entry_evidence=("permission_decision", "denied_scope"),
+        conflict_resolution="agentops_permission_denial_blocks_bootstrap",
+        affected_actions=("issue_credential", "enterprise_activation"),
         primary_action=ActionDescriptor(
             action_id="request_enterprise_access",
             target_system="agentops",
