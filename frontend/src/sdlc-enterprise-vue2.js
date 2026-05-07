@@ -112,14 +112,190 @@
     ].join("")
   });
 
+  Vue.component("sdlc-agent-card", {
+    props: ["agent", "active"],
+    template: [
+      '<article class="agent-card" :class="{ \'agent-card--active\': active }">',
+      '  <button class="agent-card__button" type="button" @click="$emit(\'select\', agent)">',
+      '    <span class="agent-card__type">{{ agent.capability_type }}</span>',
+      '    <span class="agent-card__name">{{ agent.display_name }}</span>',
+      '    <span class="agent-card__summary">{{ agent.summary }}</span>',
+      '  </button>',
+      '  <dl class="agent-card__facts">',
+      '    <sdlc-metric-row label="版本" :value="agent.version" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="可信" :value="agent.trust_state" :tone="trustTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="企业状态" :value="agent.enterprise_state" :tone="enterpriseTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="证据" :value="agent.evidence_level" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="agent-card__footer">',
+      '    <span>{{ agent.owner_team }}</span>',
+      '    <sdlc-action-button :action="agent.primary_action" :kind="active ? \'primary\' : \'secondary\'"></sdlc-action-button>',
+      '  </div>',
+      '</article>'
+    ].join(""),
+    computed: {
+      trustTone: function trustTone() {
+        if (this.agent.trust_state === "trusted") {
+          return "success";
+        }
+        if (this.agent.trust_state === "warning") {
+          return "warning";
+        }
+        return "danger";
+      },
+      enterpriseTone: function enterpriseTone() {
+        if (this.agent.enterprise_state === "active") {
+          return "success";
+        }
+        if (this.agent.enterprise_state === "required_unactivated") {
+          return "warning";
+        }
+        return "info";
+      }
+    }
+  });
+
+  Vue.component("sdlc-agent-catalog", {
+    props: [
+      "catalog",
+      "catalogTotalCount",
+      "selectedAgentId",
+      "searchQuery",
+      "typeFilter",
+      "trustFilter",
+      "installabilityFilter"
+    ],
+    template: [
+      '<section class="catalog-band" aria-labelledby="catalog-title">',
+      '  <div class="catalog-heading">',
+      '    <div>',
+      '      <div class="product-mark">Agent Store</div>',
+      '      <h1 id="catalog-title">Agent 应用列表</h1>',
+      '    </div>',
+      '    <p>{{ catalog.length }} / {{ catalogTotalCount }} 个条目，覆盖 Agent、Skill、Framework Capability 与运行时治理组件。</p>',
+      '  </div>',
+      '  <div class="catalog-toolbar">',
+      '    <label class="catalog-search">',
+      '      <span>搜索</span>',
+      '      <input type="search" :value="searchQuery" placeholder="Agent 名称、Owner、能力" @input="$emit(\'update-search\', $event.target.value)">',
+      '    </label>',
+      '    <div class="filter-group" aria-label="类型筛选">',
+      '      <button type="button" :class="{ active: typeFilter === \'all\' }" @click="$emit(\'set-type-filter\', \'all\')">全部</button>',
+      '      <button type="button" :class="{ active: typeFilter === \'framework_capability\' }" @click="$emit(\'set-type-filter\', \'framework_capability\')">Framework</button>',
+      '      <button type="button" :class="{ active: typeFilter === \'agent\' }" @click="$emit(\'set-type-filter\', \'agent\')">Agent</button>',
+      '      <button type="button" :class="{ active: typeFilter === \'skill\' }" @click="$emit(\'set-type-filter\', \'skill\')">Skill</button>',
+      '    </div>',
+      '    <div class="filter-group" aria-label="可信状态筛选">',
+      '      <button type="button" :class="{ active: trustFilter === \'all\' }" @click="$emit(\'set-trust-filter\', \'all\')">可信全部</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'trusted\' }" @click="$emit(\'set-trust-filter\', \'trusted\')">trusted</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'warning\' }" @click="$emit(\'set-trust-filter\', \'warning\')">warning</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'blocked\' }" @click="$emit(\'set-trust-filter\', \'blocked\')">blocked</button>',
+      '    </div>',
+      '    <div class="filter-group" aria-label="安装状态筛选">',
+      '      <button type="button" :class="{ active: installabilityFilter === \'all\' }" @click="$emit(\'set-installability-filter\', \'all\')">安装全部</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'installable\' }" @click="$emit(\'set-installability-filter\', \'installable\')">installable</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'activation_required\' }" @click="$emit(\'set-installability-filter\', \'activation_required\')">activation</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'standalone_only\' }" @click="$emit(\'set-installability-filter\', \'standalone_only\')">standalone</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'blocked\' }" @click="$emit(\'set-installability-filter\', \'blocked\')">blocked</button>',
+      '    </div>',
+      '  </div>',
+      '  <div class="catalog-grid">',
+      '    <sdlc-agent-card',
+      '      v-for="agent in catalog"',
+      '      :key="agent.agent_id"',
+      '      :agent="agent"',
+      '      :active="agent.agent_id === selectedAgentId"',
+      '      @select="$emit(\'select-agent\', $event)"',
+      '    ></sdlc-agent-card>',
+      '  </div>',
+      '  <div class="empty-state" v-if="catalog.length === 0">',
+      '    <strong>没有匹配的 Agent</strong>',
+      '    <span>调整搜索词或筛选条件后重试。</span>',
+      '  </div>',
+      '</section>'
+    ].join("")
+  });
+
+  Vue.component("sdlc-install-workflow", {
+    props: ["workflow"],
+    template: [
+      '<section class="workspace-section install-panel">',
+      '  <div class="section-heading">',
+      '    <h2>安装与激活流程</h2>',
+      '    <sdlc-status-chip :label="workflow.workflow_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <div class="command-preview" v-if="workflow.command_preview">',
+      '    <span>命令预览</span>',
+      '    <code>{{ workflow.command_preview }}</code>',
+      '  </div>',
+      '  <ol class="workflow-steps">',
+      '    <li v-for="step in workflow.steps" :key="step.step_id" :class="\'workflow-step--\' + step.state">',
+      '      <span class="workflow-step__state">{{ step.state }}</span>',
+      '      <span class="workflow-step__label">{{ step.label }}</span>',
+      '      <span class="workflow-step__owner">{{ step.owner_system }}</span>',
+      '    </li>',
+      '  </ol>',
+      '  <div class="install-panel__footer">',
+      '    <span>audit: {{ workflow.audit_id }}</span>',
+      '    <div class="install-panel__actions">',
+      '      <sdlc-action-button :action="workflow.primary_action" kind="primary"></sdlc-action-button>',
+      '      <sdlc-action-button v-if="workflow.recovery_action" :action="workflow.recovery_action"></sdlc-action-button>',
+      '    </div>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.workflow.workflow_state === "ready_to_install") {
+          return "success";
+        }
+        if (this.workflow.workflow_state === "activation_required") {
+          return "warning";
+        }
+        if (this.workflow.workflow_state === "standalone_only") {
+          return "info";
+        }
+        return "danger";
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
-    props: ["view", "agentops", "bootstrap", "trustedLoop", "stateDecision"],
+    props: [
+      "catalog",
+      "catalogTotalCount",
+      "selectedAgentId",
+      "searchQuery",
+      "typeFilter",
+      "trustFilter",
+      "installabilityFilter",
+      "view",
+      "agentops",
+      "bootstrap",
+      "trustedLoop",
+      "stateDecision",
+      "installWorkflow"
+    ],
     template: [
       '<main class="workspace">',
       '  <sdlc-enterprise-provider-meta></sdlc-enterprise-provider-meta>',
+      '  <sdlc-agent-catalog',
+      '    :catalog="catalog"',
+      '    :catalog-total-count="catalogTotalCount"',
+      '    :selected-agent-id="selectedAgentId"',
+      '    :search-query="searchQuery"',
+      '    :type-filter="typeFilter"',
+      '    :trust-filter="trustFilter"',
+      '    :installability-filter="installabilityFilter"',
+      '    @select-agent="$emit(\'select-agent\', $event)"',
+      '    @update-search="$emit(\'update-search\', $event)"',
+      '    @set-type-filter="$emit(\'set-type-filter\', $event)"',
+      '    @set-trust-filter="$emit(\'set-trust-filter\', $event)"',
+      '    @set-installability-filter="$emit(\'set-installability-filter\', $event)"',
+      '  ></sdlc-agent-catalog>',
       '  <header class="topbar">',
       '    <div>',
-      '      <div class="product-mark">Agent Store</div>',
+      '      <div class="product-mark">官方详情</div>',
       '      <h1>{{ view.display_name }}</h1>',
       '    </div>',
       '    <nav class="topbar__actions" aria-label="primary actions">',
@@ -141,9 +317,9 @@
       '    <sdlc-section title="可信状态">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="L5 展示" :value="view.l5_display_state" :tone="view.actual_l5_display_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="包可信" :value="view.package_trust_summary.trust_state" tone="success"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="签名" :value="view.package_trust_summary.signature_state" tone="success"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="Hash" :value="view.package_trust_summary.hash_match_state" tone="success"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="包可信" :value="view.package_trust_summary.trust_state" :tone="packageTrustTone"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="签名" :value="view.package_trust_summary.signature_state" :tone="signatureTone"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="Hash" :value="view.package_trust_summary.hash_match_state" :tone="hashTone"></sdlc-metric-row>',
       '      </dl>',
       '    </sdlc-section>',
       '    <sdlc-section title="企业激活">',
@@ -154,11 +330,12 @@
       '      </dl>',
       '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary"></sdlc-action-button>',
       '    </sdlc-section>',
+      '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',
       '    <sdlc-section title="AgentOps 摘要">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="证据等级" :value="agentops.quality_evidence.evidence_level" tone="info"></sdlc-metric-row>',
       '        <sdlc-metric-row label="有效性" :value="agentops.quality_evidence.summary_validity_state" tone="warning"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="审批" :value="agentops.approval.status" tone="success"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="审批" :value="agentops.approval.status" :tone="approvalTone"></sdlc-metric-row>',
       '        <sdlc-metric-row label="策略" :value="agentops.runtime_policy.enforcement_mode" tone="neutral"></sdlc-metric-row>',
       '      </dl>',
       '      <div class="link-row" v-for="link in agentops.links" :key="link.rel">',
@@ -169,7 +346,7 @@
       '      <dl class="facts">',
       '        <sdlc-metric-row label="Trusted Loop" :value="trustedLoop.trusted_loop_verified ? \'verified\' : \'blocked\'" :tone="trustedLoop.trusted_loop_verified ? \'success\' : \'danger\'"></sdlc-metric-row>',
       '        <sdlc-metric-row label="Actual L5" :value="trustedLoop.actual_l5_display_allowed ? \'allowed\' : \'blocked\'" :tone="trustedLoop.actual_l5_display_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="状态裁决" :value="stateDecision.state" :tone="stateDecision.state === \'degraded\' ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="状态裁决" :value="stateDecision.state" :tone="stateDecisionTone"></sdlc-metric-row>',
       '      </dl>',
       '      <ol class="ref-list"><li v-for="ref in trustedLoop.checked_refs" :key="ref">{{ ref }}</li></ol>',
       '    </sdlc-section>',
@@ -179,6 +356,53 @@
       '    </sdlc-section>',
       '  </div>',
       '</main>'
-    ].join("")
+    ].join(""),
+    computed: {
+      packageTrustTone: function packageTrustTone() {
+        if (this.view.package_trust_summary.trust_state === "trusted") {
+          return "success";
+        }
+        if (this.view.package_trust_summary.trust_state === "warning") {
+          return "warning";
+        }
+        return "danger";
+      },
+      signatureTone: function signatureTone() {
+        if (this.view.package_trust_summary.signature_state === "verified") {
+          return "success";
+        }
+        if (this.view.package_trust_summary.signature_state === "unknown") {
+          return "warning";
+        }
+        return "danger";
+      },
+      hashTone: function hashTone() {
+        if (this.view.package_trust_summary.hash_match_state === "matched") {
+          return "success";
+        }
+        if (this.view.package_trust_summary.hash_match_state === "unknown") {
+          return "warning";
+        }
+        return "danger";
+      },
+      approvalTone: function approvalTone() {
+        if (this.agentops.approval.status === "approved") {
+          return "success";
+        }
+        if (this.agentops.approval.status === "pending") {
+          return "warning";
+        }
+        return "danger";
+      },
+      stateDecisionTone: function stateDecisionTone() {
+        if (["blocked", "degraded", "empty"].indexOf(this.stateDecision.state) >= 0) {
+          return "danger";
+        }
+        if (this.stateDecision.state === "ready") {
+          return "success";
+        }
+        return "warning";
+      }
+    }
   });
 })(window.Vue);

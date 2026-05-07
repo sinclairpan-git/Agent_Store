@@ -11,11 +11,24 @@
   <body>
     <div id="app" class="app-root">
       <sdlc-shell
-        :view="view"
-        :agentops="agentops"
-        :bootstrap="bootstrap"
-        :trusted-loop="trustedLoop"
-        :state-decision="stateDecision"
+        :catalog="filteredCatalog"
+        :catalog-total-count="catalog.length"
+        :selected-agent-id="activeSelectedAgentId"
+        :search-query="searchQuery"
+        :type-filter="typeFilter"
+        :trust-filter="trustFilter"
+        :installability-filter="installabilityFilter"
+        :view="selectedView"
+        :agentops="selectedAgentops"
+        :bootstrap="selectedBootstrap"
+        :trusted-loop="selectedTrustedLoop"
+        :state-decision="selectedStateDecision"
+        :install-workflow="selectedInstallWorkflow"
+        @select-agent="selectAgent"
+        @update-search="updateSearch"
+        @set-type-filter="setTypeFilter"
+        @set-trust-filter="setTrustFilter"
+        @set-installability-filter="setInstallabilityFilter"
       ></sdlc-shell>
     </div>
     <script src="./node_modules/vue/dist/vue.js"></script>

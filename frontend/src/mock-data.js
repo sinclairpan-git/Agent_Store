@@ -1,4 +1,90 @@
 window.AgentStoreMock = {
+  agentCatalog: [
+    {
+      agent_id: "framework.ai-autosdlc",
+      display_name: "Ai_AutoSDLC",
+      summary: "官方 SDLC Framework Capability，支持本地 standalone 使用与企业证据闭环接入。",
+      capability_type: "SDLC Framework",
+      agent_type: "framework_capability",
+      version: "1.0.0",
+      owner_team: "SDLC Platform",
+      release_status: "manual_installable-preview",
+      trust_state: "trusted",
+      enterprise_state: "required_unactivated",
+      evidence_level: "L5-capable",
+      installability: "activation_required",
+      use_cases: ["governed delivery", "trusted evidence loop", "manual activation preview"],
+      primary_action: {
+        action_id: "start_enterprise_activation",
+        target_system: "agent_store",
+        enabled: true,
+        href: "#activation-framework.ai-autosdlc"
+      }
+    },
+    {
+      agent_id: "agentops.evidence-reporter",
+      display_name: "Evidence Reporter",
+      summary: "负责把运行证据、签名事件和诊断摘要回传到 AgentOps。",
+      capability_type: "Evidence Connector",
+      agent_type: "agent",
+      version: "0.4.0",
+      owner_team: "AgentOps",
+      release_status: "draft",
+      trust_state: "warning",
+      enterprise_state: "active",
+      evidence_level: "L3-summary",
+      installability: "installable",
+      use_cases: ["evidence upload", "signature test", "diagnostic sync"],
+      primary_action: {
+        action_id: "start_install",
+        target_system: "agentops",
+        enabled: true,
+        href: "#install-agentops.evidence-reporter"
+      }
+    },
+    {
+      agent_id: "security.policy-guard",
+      display_name: "Policy Guard",
+      summary: "在安装、激活和运行时回显策略阻断原因与恢复动作。",
+      capability_type: "Runtime Policy",
+      agent_type: "agent",
+      version: "0.2.1",
+      owner_team: "Security",
+      release_status: "design",
+      trust_state: "blocked",
+      enterprise_state: "disabled",
+      evidence_level: "pending",
+      installability: "blocked",
+      use_cases: ["runtime policy", "denied reason", "recovery action"],
+      primary_action: {
+        action_id: "view_policy",
+        target_system: "agent_store",
+        enabled: false,
+        href: "#"
+      }
+    },
+    {
+      agent_id: "developer.release-notes",
+      display_name: "Release Notes Writer",
+      summary: "根据治理证据、变更记录和检查结果生成可审计发布说明。",
+      capability_type: "Developer Tool",
+      agent_type: "skill",
+      version: "0.1.2",
+      owner_team: "Developer Experience",
+      release_status: "draft",
+      trust_state: "warning",
+      enterprise_state: "detected_optional",
+      evidence_level: "L2-static",
+      installability: "installable",
+      use_cases: ["release note", "change summary", "check evidence"],
+      primary_action: {
+        action_id: "start_install",
+        target_system: "agent_store",
+        enabled: true,
+        href: "#install-developer.release-notes"
+      }
+    }
+  ],
   officialView: {
     display_name: "Ai_AutoSDLC",
     summary: "官方 SDLC Framework Capability，支持本地 standalone 使用与企业证据闭环接入。",

@@ -90,6 +90,9 @@ assert(
   "provider metadata must use portable baseline references"
 );
 for (const componentName of [
+  "sdlc-agent-catalog",
+  "sdlc-agent-card",
+  "sdlc-install-workflow",
   "sdlc-shell",
   "sdlc-section",
   "sdlc-status-chip",
@@ -101,6 +104,14 @@ for (const componentName of [
     `${componentName} must be registered by SDLC enterprise Vue2 adapter`
   );
 }
+assert(
+  mockData.includes("agentCatalog")
+    && mockData.includes("framework.ai-autosdlc")
+    && mockData.includes("agentops.evidence-reporter")
+    && mockData.includes("security.policy-guard")
+    && mockData.includes("developer.release-notes"),
+  "Agent Store must expose list-card catalog data"
+);
 for (const requiredField of [
   "package_trust_summary",
   "enterprise_context",
@@ -114,6 +125,46 @@ for (const requiredField of [
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
 assert(app.includes("new window.Vue"), "app must instantiate Vue2");
+assert(
+  app.includes("selectedAgentId")
+    && app.includes("selectAgent")
+    && app.includes("filteredCatalog")
+    && app.includes("setTrustFilter")
+    && app.includes("selectedInstallWorkflow")
+    && app.includes("standalone_only")
+    && app.includes("this.filteredCatalog.find")
+    && app.includes("activeSelectedAgentId")
+    && app.includes("catalog_filters_returned_no_agents")
+    && app.includes("shellQuoteToken")
+    && app.includes("coordinate = shellQuoteToken")
+    && indexHtml.includes(":catalog=\"filteredCatalog\"")
+    && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\""),
+  "app must render Agent list cards before the detail view"
+);
+assert(
+  componentLibrary.includes("catalog-toolbar")
+    && componentLibrary.includes("update-search")
+    && componentLibrary.includes("set-installability-filter")
+    && componentLibrary.includes("standalone_only")
+    && componentLibrary.includes("empty-state"),
+  "Agent catalog must support search, filters, and empty state"
+);
+assert(
+  componentLibrary.includes("install-panel")
+    && componentLibrary.includes("workflow.steps")
+    && componentLibrary.includes("command_preview")
+    && indexHtml.includes(":install-workflow=\"selectedInstallWorkflow\""),
+  "Agent detail must expose installation workflow preview"
+);
+assert(
+  componentLibrary.includes("stateDecisionTone")
+    && componentLibrary.includes("packageTrustTone")
+    && componentLibrary.includes("signatureTone")
+    && componentLibrary.includes("hashTone")
+    && componentLibrary.includes("approvalTone")
+    && componentLibrary.includes('"blocked", "degraded", "empty"'),
+  "risk states must derive tones instead of rendering as fixed success"
+);
 assert(
   componentLibrary.includes("actionHref: function actionHref()")
     && componentLibrary.includes("return null;")
