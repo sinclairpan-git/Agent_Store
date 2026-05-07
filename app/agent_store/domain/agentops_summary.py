@@ -11,6 +11,7 @@ SUMMARY_VALIDITY_STATES = frozenset({"fresh", "stale", "expired", "degraded"})
 APPROVAL_STATUSES = frozenset(
     {"not_required", "pending", "approved", "rejected", "expired", "revoked"}
 )
+AGENTOPS_CREDENTIAL_NEXT_ACTIONS = frozenset({"send_signature_test_event"})
 
 
 @dataclass(frozen=True)
@@ -207,7 +208,46 @@ class CredentialBootstrapSummary:
     credential_status: str
     reporter_status: str
     enterprise_state: str
+    next_action: str | None = None
+    credential_id: str | None = None
+    token_id: str | None = None
+    device_key_id: str | None = None
+    installation_id: str | None = None
+    device_id: str | None = None
+    expires_at: datetime | None = None
     degraded_reason: str | None = None
+
+    def __post_init__(self) -> None:
+        if (
+            self.next_action is not None
+            and self.next_action not in AGENTOPS_CREDENTIAL_NEXT_ACTIONS
+        ):
+            raise ValueError(f"unsupported next_action: {self.next_action}")
+
+    @classmethod
+    def from_agentops_credential_response(
+        cls,
+        payload: dict[str, object],
+    ) -> "CredentialBootstrapSummary":
+        bootstrap_status = cls._required_string(payload, "bootstrap_status")
+        next_action = cls._required_string(payload, "next_action")
+        return cls(
+            bootstrap_status=bootstrap_status,
+            credential_status=cls._required_string(payload, "status"),
+            reporter_status="pending_signature_test",
+            enterprise_state=(
+                "activating"
+                if bootstrap_status == "credential_issued"
+                else "degraded"
+            ),
+            next_action=next_action,
+            credential_id=cls._required_string(payload, "credential_id"),
+            token_id=cls._required_string(payload, "token_id"),
+            device_key_id=cls._required_string(payload, "device_key_id"),
+            installation_id=cls._required_string(payload, "installation_id"),
+            device_id=cls._required_string(payload, "device_id"),
+            expires_at=cls._parse_datetime(payload.get("expires_at")),
+        )
 
     def to_dict(self) -> dict[str, object]:
         data: dict[str, object] = {
@@ -216,9 +256,36 @@ class CredentialBootstrapSummary:
             "reporter_status": self.reporter_status,
             "enterprise_state": self.enterprise_state,
         }
+        optional = {
+            "next_action": self.next_action,
+            "credential_id": self.credential_id,
+            "token_id": self.token_id,
+            "device_key_id": self.device_key_id,
+            "installation_id": self.installation_id,
+            "device_id": self.device_id,
+            "expires_at": self.expires_at.isoformat() if self.expires_at else None,
+        }
+        data.update(
+            {key: value for key, value in optional.items() if value is not None}
+        )
         if self.degraded_reason is not None:
             data["degraded_reason"] = self.degraded_reason
         return data
+
+    @staticmethod
+    def _required_string(payload: dict[str, object], field: str) -> str:
+        value = payload[field]
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"{field} must be a non-empty string")
+        return value
+
+    @staticmethod
+    def _parse_datetime(value: object) -> datetime | None:
+        if value is None:
+            return None
+        if not isinstance(value, str) or not value:
+            raise ValueError("expires_at must be an ISO-8601 string")
+        return datetime.fromisoformat(value)
 
 
 @dataclass(frozen=True)

@@ -34,39 +34,43 @@ specs:
   path: specs/007-cross-project-contract-appendix
   depends_on:
   - 006-installation-assertion-handoff
+- id: 008-agentops-handoff-producer-contract
+  path: specs/008-agentops-handoff-producer-contract
+  depends_on:
+  - 007-cross-project-contract-appendix
 truth_snapshot:
-  generated_at: '2026-05-07T10:56:53Z'
+  generated_at: '2026-05-07T13:23:09Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: a9a4877
-  authoring_hash: 0215ef5a94d7ca7f0cb327246e29e52d36cd3ae83c5512ca553cceb9400be934
+  repo_revision: 711aebf
+  authoring_hash: df649bd5219b5dfc25f9bba52cefdbdbc0811b1a16821058f302d2ddef90de11
   source_hashes: {}
-  snapshot_hash: 94e5ae5a170f7c10a83130f6ca580cf990e6c4e9a173abb686cbf44ddbf9c9b5
+  snapshot_hash: 8d091e218cf6099db80786c6d26dfed0d405e356737669b9255b093b06c69d23
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 37
-    mapped_sources: 37
+    total_sources: 42
+    mapped_sources: 42
     unmapped_sources: 0
     missing_sources: 10
     phase_signal_count: 22
-    deferred_signal_count: 49
-    non_goal_signal_count: 6
+    deferred_signal_count: 54
+    non_goal_signal_count: 7
     layer_totals:
       blueprint: 1
-      spec: 7
-      plan: 7
-      tasks: 7
-      execution: 7
-      close: 7
+      spec: 8
+      plan: 8
+      tasks: 8
+      execution: 8
+      close: 8
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 7
-      plan: 7
-      tasks: 7
-      execution: 2
-      close: 2
+      spec: 8
+      plan: 8
+      tasks: 8
+      execution: 3
+      close: 3
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -392,6 +396,51 @@ truth_snapshot:
       mapping_ref: 007-cross-project-contract-appendix
       phase_signal_count: 0
       deferred_signal_count: 2
+      non_goal_signal_count: 0
+    - path: specs/008-agentops-handoff-producer-contract/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 008-agentops-handoff-producer-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/008-agentops-handoff-producer-contract/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 008-agentops-handoff-producer-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/008-agentops-handoff-producer-contract/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 008-agentops-handoff-producer-contract
+      phase_signal_count: 0
+      deferred_signal_count: 3
+      non_goal_signal_count: 0
+    - path: specs/008-agentops-handoff-producer-contract/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 008-agentops-handoff-producer-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/008-agentops-handoff-producer-contract/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 008-agentops-handoff-producer-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog

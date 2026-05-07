@@ -9,6 +9,10 @@ from .errors import ErrorResponse
 from .installation import Installation
 from .models import utc_now
 
+AGENTOPS_ASSERTION_VERSION = "signed_installation_assertion.v1"
+AGENTOPS_ISSUER = "agent-store"
+AGENTOPS_CANONICALIZATION = "json-c14n-v1"
+
 
 class AssertionValidationError(Exception):
     def __init__(self, response: ErrorResponse) -> None:
@@ -21,6 +25,8 @@ class SignedInstallationAssertion:
     assertion_version: str
     installation_id: str
     device_id: str
+    agent_id: str
+    agent_version: str
     artifact_hash: str
     issuer: str
     issued_at: datetime
@@ -36,12 +42,16 @@ class SignedInstallationAssertion:
     assertion_hash: str
     revocation_status: str
     signature: str
+    agentops_assertion_hash: str | None = None
+    agentops_signature: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
             "assertion_version": self.assertion_version,
             "installation_id": self.installation_id,
             "device_id": self.device_id,
+            "agent_id": self.agent_id,
+            "agent_version": self.agent_version,
             "artifact_hash": self.artifact_hash,
             "issuer": self.issuer,
             "issued_at": self.issued_at.isoformat(),
@@ -57,6 +67,34 @@ class SignedInstallationAssertion:
             "assertion_hash": self.assertion_hash,
             "revocation_status": self.revocation_status,
             "signature": self.signature,
+        }
+
+    def to_agentops_handoff_assertion(self) -> dict[str, object]:
+        """Return the cross-project assertion field names consumed by AgentOps."""
+
+        if not self.agentops_assertion_hash or not self.agentops_signature:
+            raise ValueError("AgentOps handoff assertion is not signed")
+        return {
+            "assertion_version": AGENTOPS_ASSERTION_VERSION,
+            "issuer": AGENTOPS_ISSUER,
+            "key_id": self.key_id,
+            "algorithm": self.alg,
+            "canonicalization": AGENTOPS_CANONICALIZATION,
+            "signature": self.agentops_signature,
+            "assertion_hash": self.agentops_assertion_hash,
+            "installation_id": self.installation_id,
+            "device_id": self.device_id,
+            "device_public_key_thumbprint": self.device_public_key_thumbprint,
+            "agent_id": self.agent_id,
+            "agent_version": self.agent_version,
+            "artifact_hash": self.artifact_hash,
+            "user_id": self.subject_user_id,
+            "audience": self.audience,
+            "nonce": self.nonce,
+            "replay_window_seconds": self.replay_window_seconds,
+            "issued_at": self.issued_at.isoformat(),
+            "expires_at": self.expires_at.isoformat(),
+            "revocation_status": self.revocation_status,
         }
 
     def with_updates(self, **changes: object) -> "SignedInstallationAssertion":
@@ -94,6 +132,8 @@ class InstallationAssertionService:
             assertion_version="1",
             installation_id=installation.installation_id,
             device_id=installation.device_id,
+            agent_id=installation.agent_id,
+            agent_version=installation.agent_version,
             artifact_hash=installation.artifact_hash,
             issuer=self.issuer,
             issued_at=issued_at.isoformat(),
@@ -112,10 +152,37 @@ class InstallationAssertionService:
         signature = hmac.new(
             self._secret, assertion_hash.encode("utf-8"), hashlib.sha256
         ).hexdigest()
+        agentops_canonical_payload = self._canonical_payload(
+            **self._agentops_handoff_payload_fields(
+                installation_id=installation.installation_id,
+                device_id=installation.device_id,
+                agent_id=installation.agent_id,
+                agent_version=installation.agent_version,
+                artifact_hash=installation.artifact_hash,
+                issued_at=issued_at.isoformat(),
+                expires_at=expires_at.isoformat(),
+                key_id=self.key_id,
+                alg="HS256",
+                audience=audience,
+                subject_user_id=installation.user,
+                nonce=nonce,
+                replay_window_seconds=300,
+                device_public_key_thumbprint=device_public_key_thumbprint,
+                revocation_status="not_revoked",
+            )
+        )
+        agentops_assertion_hash = hashlib.sha256(
+            agentops_canonical_payload.encode("utf-8")
+        ).hexdigest()
+        agentops_signature = hmac.new(
+            self._secret, agentops_assertion_hash.encode("utf-8"), hashlib.sha256
+        ).hexdigest()
         assertion = SignedInstallationAssertion(
             assertion_version="1",
             installation_id=installation.installation_id,
             device_id=installation.device_id,
+            agent_id=installation.agent_id,
+            agent_version=installation.agent_version,
             artifact_hash=installation.artifact_hash,
             issuer=self.issuer,
             issued_at=issued_at,
@@ -131,6 +198,8 @@ class InstallationAssertionService:
             assertion_hash=assertion_hash,
             revocation_status="not_revoked",
             signature=signature,
+            agentops_assertion_hash=agentops_assertion_hash,
+            agentops_signature=agentops_signature,
         )
         self._issued_by_installation[installation.installation_id] = assertion
         return assertion
@@ -212,6 +281,8 @@ class InstallationAssertionService:
             assertion_version=assertion.assertion_version,
             installation_id=assertion.installation_id,
             device_id=assertion.device_id,
+            agent_id=assertion.agent_id,
+            agent_version=assertion.agent_version,
             artifact_hash=assertion.artifact_hash,
             issuer=assertion.issuer,
             issued_at=assertion.issued_at.isoformat(),
@@ -246,6 +317,46 @@ class InstallationAssertionService:
     @staticmethod
     def _canonical_payload(**fields: str) -> str:
         return "\n".join(f"{key}={fields[key]}" for key in sorted(fields))
+
+    @staticmethod
+    def _agentops_handoff_payload_fields(
+        *,
+        installation_id: str,
+        device_id: str,
+        agent_id: str,
+        agent_version: str,
+        artifact_hash: str,
+        issued_at: str,
+        expires_at: str,
+        key_id: str,
+        alg: str,
+        audience: str,
+        subject_user_id: str,
+        nonce: str,
+        replay_window_seconds: int,
+        device_public_key_thumbprint: str,
+        revocation_status: str,
+    ) -> dict[str, str]:
+        return {
+            "assertion_version": AGENTOPS_ASSERTION_VERSION,
+            "issuer": AGENTOPS_ISSUER,
+            "key_id": key_id,
+            "algorithm": alg,
+            "canonicalization": AGENTOPS_CANONICALIZATION,
+            "installation_id": installation_id,
+            "device_id": device_id,
+            "device_public_key_thumbprint": device_public_key_thumbprint,
+            "agent_id": agent_id,
+            "agent_version": agent_version,
+            "artifact_hash": artifact_hash,
+            "user_id": subject_user_id,
+            "audience": audience,
+            "nonce": nonce,
+            "replay_window_seconds": str(replay_window_seconds),
+            "issued_at": issued_at,
+            "expires_at": expires_at,
+            "revocation_status": revocation_status,
+        }
 
     def _expire_seen_nonces(self, current_time: datetime) -> None:
         expired = [

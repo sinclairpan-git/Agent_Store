@@ -1,0 +1,6 @@
+{
+  "schema_version": "agentops_credential_handoff.v2",
+  "error_code": "UNSUPPORTED_SCHEMA",
+  "message_key": "errors.unsupportedSchema",
+  "recommended_action_id": "upgrade_contract_adapter"
+}

@@ -1,12 +1,12 @@
 pipeline_started_at: '2026-05-04T05:48:26+00:00'
-pipeline_last_updated: '2026-05-07T10:56:59+00:00'
+pipeline_last_updated: '2026-05-07T12:47:22+00:00'
 current_stage: close
 feature:
-  id: 007-cross-project-contract-appendix
-  spec_dir: specs/007-cross-project-contract-appendix
-  design_branch: design/007-cross-project-contract-appendix-docs
-  feature_branch: feature/007-cross-project-contract-appendix-dev
-  current_branch: feature/007-cross-project-contract-appendix
+  id: 008-agentops-handoff-producer-contract
+  spec_dir: specs/008-agentops-handoff-producer-contract
+  design_branch: design/008-agentops-handoff-producer-contract-docs
+  feature_branch: feature/008-agentops-handoff-producer-contract-dev
+  current_branch: feature/008-agentops-handoff-producer-contract
   docs_baseline_ref: ''
   docs_baseline_at: ''
 multi_agent:
@@ -16,33 +16,33 @@ multi_agent:
 prd_source: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
 completed_stages:
 - stage: init
-  completed_at: '2026-05-07T10:56:59+00:00'
+  completed_at: '2026-05-07T12:47:22+00:00'
   artifacts: []
 - stage: refine
-  completed_at: '2026-05-07T10:56:59+00:00'
+  completed_at: '2026-05-07T12:47:22+00:00'
   artifacts:
   - spec.md
 - stage: design
-  completed_at: '2026-05-07T10:56:59+00:00'
+  completed_at: '2026-05-07T12:47:22+00:00'
   artifacts:
   - plan.md
 - stage: decompose
-  completed_at: '2026-05-07T10:56:59+00:00'
+  completed_at: '2026-05-07T12:47:22+00:00'
   artifacts:
   - tasks.md
 - stage: verify
-  completed_at: '2026-05-07T10:56:59+00:00'
+  completed_at: '2026-05-07T12:47:22+00:00'
   artifacts:
   - task-execution-log.md
   - tasks.md
 - stage: execute
-  completed_at: '2026-05-07T10:56:59+00:00'
+  completed_at: '2026-05-07T12:47:22+00:00'
   artifacts:
   - development-summary.md
   - task-execution-log.md
 execute_progress: null
 ai_decisions_count: 0
 execution_mode: auto
-linked_wi_id: 007-cross-project-contract-appendix
-linked_plan_uri: specs/007-cross-project-contract-appendix/spec.md
-last_synced_at: '2026-05-07T10:56:59+00:00'
+linked_wi_id: 008-agentops-handoff-producer-contract
+linked_plan_uri: specs/008-agentops-handoff-producer-contract/spec.md
+last_synced_at: '2026-05-07T12:47:22+00:00'
