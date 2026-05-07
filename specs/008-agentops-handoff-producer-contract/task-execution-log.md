@@ -49,6 +49,7 @@
 
 - 自检结论：本阶段只新增 Agent Store producer adapter、handoff template 和 contract fixtures，不改变旧 assertion 响应字段，不修改 AgentOps/Ai_AutoSDLC。
 - Review evidence：CCT-001 固定 Agent Store assertion 外部字段，CCT-003 前半段固定 Store 只展示 AgentOps credential echo。
+- Codex Review 修复：PR #10 初审指出 checkpoint `linked_plan_uri` 仍指向 007，已修正为 `specs/008-agentops-handoff-producer-contract/spec.md`；同时将 OpenAPI `agentops_credential_handoff_template.installation_assertion` 从泛型 object 补齐为带 required/properties 的 typed schema，防止客户端接受畸形 handoff assertion。
 - 边界检查：`device_proof.v1.json` 仅作为 fixture；API template 中 `device_proof` 保持 `None`，避免 Store 越权生成或签名。
 - 状态检查：`CredentialBootstrapSummary.from_agentops_credential_response()` 将 `credential_issued` 保持为 `enterprise_state=activating`，不本地推导 `active` 或 `signature_verified`。
 
