@@ -6,6 +6,19 @@ function shellQuoteToken(value) {
   return "'" + token.replace(/'/g, "'\"'\"'") + "'";
 }
 
+function safeId(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "agent";
+}
+
+function buildRequestIdentity(agentId, actionId) {
+  var safeAgentId = safeId(agentId);
+  var safeActionId = safeId(actionId);
+  return {
+    request_id: "req-" + safeAgentId + "-" + safeActionId,
+    audit_id: "audit-" + safeAgentId + "-" + safeActionId
+  };
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
@@ -422,6 +435,111 @@ new window.Vue({
             state: "ready",
             owner_system: "agent_store"
           }
+        ]
+      };
+    },
+    selectedInstallationRequest: function selectedInstallationRequest() {
+      var agent = this.selectedAgent;
+      var coordinate;
+      var requestIdentity;
+      if (!agent) {
+        return {
+          request_id: "req-empty-filter",
+          agent_coordinate: "not-applicable",
+          requested_action_id: "adjust_catalog_filters",
+          request_state: "empty",
+          queue: "catalog_filter",
+          owner_system: "agent_store",
+          audit_id: "audit-empty-filter",
+          requested_by: "current-user",
+          next_action: this.selectedView.primary_action,
+          blockers: ["catalog_filters_returned_no_agents"]
+        };
+      }
+      coordinate = agent.agent_id + "@" + agent.version;
+      if (agent.installability === "installable") {
+        requestIdentity = buildRequestIdentity(agent.agent_id, "start_install");
+        return {
+          request_id: requestIdentity.request_id,
+          agent_coordinate: coordinate,
+          requested_action_id: "start_install",
+          request_state: "accepted",
+          queue: "installation_bootstrap",
+          owner_system: "agent_store",
+          audit_id: requestIdentity.audit_id,
+          requested_by: "current-user",
+          command_preview: "agent-store install " + shellQuoteToken(coordinate),
+          next_action: {
+            action_id: "create_installation",
+            target_system: "agent_store",
+            enabled: true,
+            href: "#create-installation-" + agent.agent_id
+          },
+          blockers: []
+        };
+      }
+      if (agent.installability === "activation_required") {
+        requestIdentity = buildRequestIdentity(agent.agent_id, "start_enterprise_activation");
+        return {
+          request_id: requestIdentity.request_id,
+          agent_coordinate: coordinate,
+          requested_action_id: "start_enterprise_activation",
+          request_state: "pending_enterprise_activation",
+          queue: "enterprise_activation",
+          owner_system: "agentops",
+          audit_id: requestIdentity.audit_id,
+          requested_by: "current-user",
+          command_preview: "agent-store activate " + shellQuoteToken(coordinate) + " --enterprise",
+          next_action: {
+            action_id: "issue_reporter_credential",
+            target_system: "agentops",
+            enabled: true,
+            href: "#agentops-activation-" + agent.agent_id
+          },
+          blockers: []
+        };
+      }
+      if (agent.installability === "standalone_only") {
+        requestIdentity = buildRequestIdentity(agent.agent_id, "open_standalone_readme");
+        return {
+          request_id: requestIdentity.request_id,
+          agent_coordinate: coordinate,
+          requested_action_id: "open_standalone_readme",
+          request_state: "standalone_ready",
+          queue: "standalone_access",
+          owner_system: "agent_store",
+          audit_id: requestIdentity.audit_id,
+          requested_by: "current-user",
+          command_preview: "agent-store open " + shellQuoteToken(coordinate) + " --standalone",
+          next_action: {
+            action_id: "open_standalone_readme",
+            target_system: "agent_store",
+            enabled: true,
+            href: "#standalone-" + agent.agent_id
+          },
+          blockers: []
+        };
+      }
+      requestIdentity = buildRequestIdentity(agent.agent_id, "request_catalog_review");
+      return {
+        request_id: requestIdentity.request_id,
+        agent_coordinate: coordinate,
+        requested_action_id: "request_catalog_review",
+        request_state: "pending_catalog_review",
+        queue: "catalog_review",
+        owner_system: "security",
+        audit_id: requestIdentity.audit_id,
+        requested_by: "current-user",
+        next_action: {
+          action_id: "review_catalog_blocker",
+          target_system: "agent_store",
+          enabled: true,
+          href: "#review-catalog-blocker-" + agent.agent_id
+        },
+        blockers: [
+          agent.trust_state,
+          agent.enterprise_state,
+          agent.installability
         ]
       };
     }

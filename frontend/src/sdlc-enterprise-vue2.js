@@ -260,6 +260,53 @@
     }
   });
 
+  Vue.component("sdlc-install-request", {
+    props: ["request"],
+    template: [
+      '<section class="workspace-section request-panel">',
+      '  <div class="section-heading">',
+      '    <h2>安装申请</h2>',
+      '    <sdlc-status-chip :label="request.request_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="队列" :value="request.queue" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Owner" :value="request.owner_system" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="动作" :value="request.requested_action_id" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="request.audit_id" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="request-panel__meta">',
+      '    <span>{{ request.request_id }}</span>',
+      '    <span>{{ request.agent_coordinate }}</span>',
+      '  </div>',
+      '  <div class="command-preview" v-if="request.command_preview">',
+      '    <span>提交命令</span>',
+      '    <code>{{ request.command_preview }}</code>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="request.blockers && request.blockers.length">',
+      '    <li v-for="(blocker, blockerIndex) in request.blockers" :key="blocker + \'-\' + blockerIndex">{{ blocker }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>下一步</span>',
+      '    <sdlc-action-button :action="request.next_action" kind="primary"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.request.request_state === "accepted" || this.request.request_state === "standalone_ready") {
+          return "success";
+        }
+        if (
+          this.request.request_state === "pending_enterprise_activation"
+          || this.request.request_state === "pending_catalog_review"
+        ) {
+          return "warning";
+        }
+        return "danger";
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -274,7 +321,8 @@
       "bootstrap",
       "trustedLoop",
       "stateDecision",
-      "installWorkflow"
+      "installWorkflow",
+      "installRequest"
     ],
     template: [
       '<main class="workspace">',
@@ -331,6 +379,7 @@
       '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary"></sdlc-action-button>',
       '    </sdlc-section>',
       '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',
+      '    <sdlc-install-request :request="installRequest"></sdlc-install-request>',
       '    <sdlc-section title="AgentOps 摘要">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="证据等级" :value="agentops.quality_evidence.evidence_level" tone="info"></sdlc-metric-row>',
