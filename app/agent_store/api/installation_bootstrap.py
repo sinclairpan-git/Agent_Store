@@ -218,6 +218,24 @@ class InstallationBootstrapAPI:
                 record.installation,
             ).to_dict(),
             "assertion": assertion.to_dict(),
+            "agentops_handoff_assertion": assertion.to_agentops_handoff_assertion(),
+            "agentops_credential_handoff_template": {
+                "schema_version": "agentops_credential_handoff.v1",
+                "bootstrap_id": f"boot-{installation_id}",
+                "installation_assertion": assertion.to_agentops_handoff_assertion(),
+                "device_proof": None,
+                "trace_id": trace_id,
+                "audit_id": record.installation.permission_decision.audit_id,
+                "return_url": f"/agent-store/installations/{installation_id}",
+                "next_action": ActionDescriptor(
+                    action_id="collect_device_proof",
+                    target_system="ai_autosdlc_cli",
+                    enabled=True,
+                    requires_permission=False,
+                    audit_required=True,
+                    href=f"#device-proof-{installation_id}",
+                ).to_dict(),
+            },
         }
         self._assertion_idempotency[scoped_idempotency_key] = (
             request_identity,

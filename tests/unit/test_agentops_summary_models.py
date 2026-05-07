@@ -82,3 +82,26 @@ def test_run_evidence_summary_preserves_explicit_zero_source_event_count() -> No
     )
 
     assert summary.to_dict()["source_event_count"] == 0
+
+
+def test_credential_response_echo_keeps_store_in_activation_state() -> None:
+    summary = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "credential_issued",
+            "installation_id": "inst-1",
+            "device_id": "dev-1",
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    payload = summary.to_dict()
+    assert payload["credential_status"] == "active"
+    assert payload["bootstrap_status"] == "credential_issued"
+    assert payload["enterprise_state"] == "activating"
+    assert payload["reporter_status"] == "pending_signature_test"
+    assert payload["next_action"] == "send_signature_test_event"

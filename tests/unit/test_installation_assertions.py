@@ -71,6 +71,32 @@ def test_assertion_contains_required_phase1_and_security_fields() -> None:
     assert data["revocation_status"] == "not_revoked"
 
 
+def test_assertion_exports_agentops_handoff_field_names_without_mutating_internal_model() -> None:
+    assertion = InstallationAssertionService(secret=TEST_ASSERTION_SECRET).issue(
+        _installation(),
+        device_public_key_thumbprint="thumb-1",
+        nonce="nonce-1",
+        audience="agentops",
+    )
+
+    internal = assertion.to_dict()
+    external = assertion.to_agentops_handoff_assertion()
+
+    assert internal["assertion_version"] == "1"
+    assert internal["issuer"] == "Agent Store"
+    assert internal["alg"] == "HS256"
+    assert internal["subject_user_id"] == "user-1"
+    assert external["assertion_version"] == "signed_installation_assertion.v1"
+    assert external["issuer"] == "agent-store"
+    assert external["algorithm"] == "HS256"
+    assert external["user_id"] == "user-1"
+    assert external["canonicalization"] == "json-c14n-v1"
+    assert external["agent_id"] == "framework.ai-autosdlc"
+    assert external["agent_version"] == "1.0.0"
+    assert "alg" not in external
+    assert "subject_user_id" not in external
+
+
 def test_expired_assertion_returns_stable_error() -> None:
     service = InstallationAssertionService(secret=TEST_ASSERTION_SECRET)
     now = utc_now()

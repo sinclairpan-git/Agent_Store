@@ -204,6 +204,21 @@ def test_issue_assertion_api_matches_contract_and_is_idempotent() -> None:
     assert body["bootstrap_status"]["bootstrap_status"] == "assertion_issued"
     assert body["assertion"]["installation_id"] == installation_id
     assert body["assertion"]["signature"]
+    agentops_assertion = body["agentops_handoff_assertion"]
+    assert agentops_assertion["assertion_version"] == (
+        "signed_installation_assertion.v1"
+    )
+    assert agentops_assertion["issuer"] == "agent-store"
+    assert agentops_assertion["algorithm"] == "HS256"
+    assert agentops_assertion["user_id"] == "user-1"
+    assert agentops_assertion["installation_id"] == installation_id
+    assert "alg" not in agentops_assertion
+    assert "subject_user_id" not in agentops_assertion
+    handoff_template = body["agentops_credential_handoff_template"]
+    assert handoff_template["schema_version"] == "agentops_credential_handoff.v1"
+    assert handoff_template["installation_assertion"] == agentops_assertion
+    assert handoff_template["device_proof"] is None
+    assert handoff_template["next_action"]["action_id"] == "collect_device_proof"
 
 
 def test_issue_assertion_api_accepts_lowercase_idempotency_header() -> None:

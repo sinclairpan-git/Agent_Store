@@ -9,6 +9,10 @@ from .errors import ErrorResponse
 from .installation import Installation
 from .models import utc_now
 
+AGENTOPS_ASSERTION_VERSION = "signed_installation_assertion.v1"
+AGENTOPS_ISSUER = "agent-store"
+AGENTOPS_CANONICALIZATION = "json-c14n-v1"
+
 
 class AssertionValidationError(Exception):
     def __init__(self, response: ErrorResponse) -> None:
@@ -21,6 +25,8 @@ class SignedInstallationAssertion:
     assertion_version: str
     installation_id: str
     device_id: str
+    agent_id: str
+    agent_version: str
     artifact_hash: str
     issuer: str
     issued_at: datetime
@@ -42,6 +48,8 @@ class SignedInstallationAssertion:
             "assertion_version": self.assertion_version,
             "installation_id": self.installation_id,
             "device_id": self.device_id,
+            "agent_id": self.agent_id,
+            "agent_version": self.agent_version,
             "artifact_hash": self.artifact_hash,
             "issuer": self.issuer,
             "issued_at": self.issued_at.isoformat(),
@@ -57,6 +65,32 @@ class SignedInstallationAssertion:
             "assertion_hash": self.assertion_hash,
             "revocation_status": self.revocation_status,
             "signature": self.signature,
+        }
+
+    def to_agentops_handoff_assertion(self) -> dict[str, object]:
+        """Return the cross-project assertion field names consumed by AgentOps."""
+
+        return {
+            "assertion_version": AGENTOPS_ASSERTION_VERSION,
+            "issuer": AGENTOPS_ISSUER,
+            "key_id": self.key_id,
+            "algorithm": self.alg,
+            "canonicalization": AGENTOPS_CANONICALIZATION,
+            "signature": self.signature,
+            "assertion_hash": self.assertion_hash,
+            "installation_id": self.installation_id,
+            "device_id": self.device_id,
+            "device_public_key_thumbprint": self.device_public_key_thumbprint,
+            "agent_id": self.agent_id,
+            "agent_version": self.agent_version,
+            "artifact_hash": self.artifact_hash,
+            "user_id": self.subject_user_id,
+            "audience": self.audience,
+            "nonce": self.nonce,
+            "replay_window_seconds": self.replay_window_seconds,
+            "issued_at": self.issued_at.isoformat(),
+            "expires_at": self.expires_at.isoformat(),
+            "revocation_status": self.revocation_status,
         }
 
     def with_updates(self, **changes: object) -> "SignedInstallationAssertion":
@@ -94,6 +128,8 @@ class InstallationAssertionService:
             assertion_version="1",
             installation_id=installation.installation_id,
             device_id=installation.device_id,
+            agent_id=installation.agent_id,
+            agent_version=installation.agent_version,
             artifact_hash=installation.artifact_hash,
             issuer=self.issuer,
             issued_at=issued_at.isoformat(),
@@ -116,6 +152,8 @@ class InstallationAssertionService:
             assertion_version="1",
             installation_id=installation.installation_id,
             device_id=installation.device_id,
+            agent_id=installation.agent_id,
+            agent_version=installation.agent_version,
             artifact_hash=installation.artifact_hash,
             issuer=self.issuer,
             issued_at=issued_at,
@@ -212,6 +250,8 @@ class InstallationAssertionService:
             assertion_version=assertion.assertion_version,
             installation_id=assertion.installation_id,
             device_id=assertion.device_id,
+            agent_id=assertion.agent_id,
+            agent_version=assertion.agent_version,
             artifact_hash=assertion.artifact_hash,
             issuer=assertion.issuer,
             issued_at=assertion.issued_at.isoformat(),

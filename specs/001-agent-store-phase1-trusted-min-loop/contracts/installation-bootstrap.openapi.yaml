@@ -309,6 +309,105 @@ components:
               enum: [not_revoked, revoked, unknown]
             signature:
               type: string
+        agentops_handoff_assertion:
+          type: object
+          required:
+            - assertion_version
+            - issuer
+            - key_id
+            - algorithm
+            - canonicalization
+            - signature
+            - assertion_hash
+            - installation_id
+            - device_id
+            - device_public_key_thumbprint
+            - agent_id
+            - agent_version
+            - artifact_hash
+            - user_id
+            - audience
+            - nonce
+            - replay_window_seconds
+            - issued_at
+            - expires_at
+            - revocation_status
+          properties:
+            assertion_version:
+              type: string
+              enum: [signed_installation_assertion.v1]
+            issuer:
+              type: string
+              enum: [agent-store]
+            key_id:
+              type: string
+            algorithm:
+              type: string
+            canonicalization:
+              type: string
+              enum: [json-c14n-v1]
+            signature:
+              type: string
+            assertion_hash:
+              type: string
+            installation_id:
+              type: string
+            device_id:
+              type: string
+            device_public_key_thumbprint:
+              type: string
+            agent_id:
+              type: string
+            agent_version:
+              type: string
+            artifact_hash:
+              type: string
+            user_id:
+              type: string
+            audience:
+              type: string
+            nonce:
+              type: string
+            replay_window_seconds:
+              type: integer
+            issued_at:
+              type: string
+              format: date-time
+            expires_at:
+              type: string
+              format: date-time
+            revocation_status:
+              type: string
+              enum: [not_revoked, revoked, unknown]
+        agentops_credential_handoff_template:
+          type: object
+          required:
+            - schema_version
+            - bootstrap_id
+            - installation_assertion
+            - device_proof
+            - trace_id
+            - audit_id
+            - return_url
+            - next_action
+          properties:
+            schema_version:
+              type: string
+              enum: [agentops_credential_handoff.v1]
+            bootstrap_id:
+              type: string
+            installation_assertion:
+              type: object
+            device_proof:
+              nullable: true
+            trace_id:
+              type: string
+            audit_id:
+              type: string
+            return_url:
+              type: string
+            next_action:
+              $ref: "#/components/schemas/ActionDescriptor"
     BootstrapStatusResponse:
       type: object
       required: [schema_version, trace_id, error_code, status]
