@@ -35,7 +35,7 @@ class InstallationRequestAPI:
                 trace_id=trace_id,
             ).to_dict()
 
-        requested_by = payload.get("requested_by") or "current-user"
+        requested_by_value = payload.get("requested_by", "current-user")
         action_id = payload.get("action_id")
         if action_id is not None and not isinstance(action_id, str):
             return 400, self._validation_error(
@@ -43,12 +43,13 @@ class InstallationRequestAPI:
                 message_key="errors.invalidRequestAction",
                 details={"field": "action_id"},
             )
-        if not isinstance(requested_by, str):
+        if not isinstance(requested_by_value, str) or not requested_by_value:
             return 400, self._validation_error(
                 trace_id=trace_id,
                 message_key="errors.invalidRequestedBy",
                 details={"field": "requested_by"},
             )
+        requested_by = requested_by_value
 
         allowed_actions = allowed_request_actions(source)
         if action_id is not None and action_id not in allowed_actions:

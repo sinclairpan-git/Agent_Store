@@ -165,6 +165,7 @@ assert(
     && componentLibrary.includes("request.request_state")
     && componentLibrary.includes("request.next_action")
     && componentLibrary.includes("request.blockers")
+    && componentLibrary.includes("blockerIndex")
     && indexHtml.includes(":install-request=\"selectedInstallationRequest\""),
   "Agent detail must expose installation request audit queue state"
 );

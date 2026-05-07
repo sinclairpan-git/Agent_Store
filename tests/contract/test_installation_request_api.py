@@ -140,3 +140,16 @@ def test_installation_request_api_accepts_blocked_catalog_review() -> None:
     assert response_envelope_ok(body)
     assert body["request"]["request_state"] == "pending_catalog_review"
     assert body["request"]["queue"] == "catalog_review"
+
+
+def test_installation_request_api_rejects_malformed_requested_by() -> None:
+    for requested_by in (0, [], ""):
+        status, body = _api().submit_request(
+            "developer.release-notes",
+            {"trace_id": "trace-request", "requested_by": requested_by},
+        )
+
+        assert status == 400
+        assert response_envelope_ok(body)
+        assert body["message_key"] == "errors.invalidRequestedBy"
+        assert body["details"]["field"] == "requested_by"

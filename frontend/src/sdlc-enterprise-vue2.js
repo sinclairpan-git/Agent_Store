@@ -283,7 +283,7 @@
       '    <code>{{ request.command_preview }}</code>',
       '  </div>',
       '  <ul class="request-panel__blockers" v-if="request.blockers && request.blockers.length">',
-      '    <li v-for="blocker in request.blockers" :key="blocker">{{ blocker }}</li>',
+      '    <li v-for="(blocker, blockerIndex) in request.blockers" :key="blocker + \'-\' + blockerIndex">{{ blocker }}</li>',
       '  </ul>',
       '  <div class="request-panel__footer">',
       '    <span>下一步</span>',
