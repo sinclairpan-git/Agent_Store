@@ -94,6 +94,7 @@ for (const componentName of [
   "sdlc-agent-card",
   "sdlc-install-workflow",
   "sdlc-install-request",
+  "sdlc-bootstrap-timeline",
   "sdlc-shell",
   "sdlc-section",
   "sdlc-status-chip",
@@ -194,6 +195,14 @@ assert(
     && componentLibrary.includes("assertion.replay_window_seconds")
     && indexHtml.includes(":assertion-handoff=\"selectedAssertionHandoff\""),
   "Agent detail must expose installation assertion handoff state"
+);
+assert(
+  componentLibrary.includes("sdlc-bootstrap-timeline")
+    && componentLibrary.includes("bootstrap.timeline")
+    && mockData.includes("verify_signature_test")
+    && mockData.includes("credential_bootstrap")
+    && mockData.includes("send_signature_test_event"),
+  "Agent detail must expose Agent Store/Ai_AutoSDLC/AgentOps bootstrap timeline"
 );
 assert(
   componentLibrary.includes("stateDecisionTone")

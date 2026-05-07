@@ -1,4 +1,5 @@
 from agent_store.api.bootstrap_status import BootstrapStatusAPI
+from agent_store.domain.agentops_summary import CredentialBootstrapSummary
 from agent_store.domain.bootstrap_service import BootstrapService
 from agent_store.domain.bootstrap_status import permission_denied_status
 from agent_store.domain.models import AgentVersion
@@ -52,12 +53,203 @@ def test_bootstrap_status_returns_polling_retry_and_diagnostic_fields() -> None:
 
     assert status == 200
     payload = body["status"]
-    assert payload["current_step"] == "issue_credential"
+    assert payload["current_step"] == "collect_device_proof"
     assert payload["step_status"] == "running"
     assert payload["next_poll_after"] == 5
     assert payload["retryable"] is True
     assert payload["diagnostic_ref"] == "diag-trace-1"
     assert payload["primary_action"]["action_id"] == "poll_bootstrap_status"
+    assert [step["step_id"] for step in payload["timeline"]] == [
+        "create_installation",
+        "issue_assertion",
+        "collect_device_proof",
+        "issue_credential",
+        "verify_signature_test",
+    ]
+    assert payload["timeline"][2]["owner_system"] == "ai_autosdlc"
+    assert payload["timeline"][2]["status"] == "running"
+
+
+def test_bootstrap_status_timeline_uses_agentops_credential_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "credential_issued",
+            "installation_id": record.installation.installation_id,
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    _, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "credential_issued"
+    assert payload["current_step"] == "send_signature_test_event"
+    assert payload["primary_action"]["target_system"] == "ai_autosdlc_cli"
+    assert payload["timeline"][2]["status"] == "completed"
+    assert payload["timeline"][3]["source"] == "agentops"
+    assert payload["timeline"][4]["status"] == "pending"
+
+
+def test_bootstrap_status_rejects_mismatched_agentops_credential_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "credential_issued",
+            "installation_id": "other-installation",
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    status, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    assert status == 409
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["recommended_action_id"] == "refresh_agentops_credential"
+    assert body["details"]["credential_installation_id"] == "other-installation"
+
+
+def test_bootstrap_status_rejects_mismatched_agentops_device_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "signature_verified",
+            "installation_id": record.installation.installation_id,
+            "device_id": "other-device",
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    status, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    assert status == 409
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["details"]["credential_device_id"] == "other-device"
+
+
+def test_bootstrap_status_timeline_marks_signature_verified_complete() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "signature_verified",
+            "installation_id": record.installation.installation_id,
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    _, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "signature_verified"
+    assert payload["step_status"] == "completed"
+    assert payload["timeline"][4]["status"] == "completed"
+    assert payload["primary_action"]["action_id"] == "view_agentops_evidence"
+
+
+def test_bootstrap_status_blocks_failed_agentops_credential_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "revoked",
+            "bootstrap_status": "failed",
+            "installation_id": record.installation.installation_id,
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    _, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "failed"
+    assert payload["step_status"] == "blocked"
+    assert payload["retryable"] is False
+    assert payload["last_error_code"] == "AGENTOPS_BOOTSTRAP_FAILED"
+    assert payload["primary_action"]["target_system"] == "agentops"
+    assert payload["timeline"][2]["status"] == "completed"
+    assert payload["timeline"][3]["status"] == "blocked"
+    assert payload["timeline"][4]["source"] == "agentops"
+    assert payload["timeline"][4]["status"] == "blocked"
+
+
+def test_bootstrap_status_blocks_expired_agentops_credential_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "expired",
+            "bootstrap_status": "expired",
+            "installation_id": record.installation.installation_id,
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    _, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        agentops_credential=credential,
+    )
+
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "expired"
+    assert payload["step_status"] == "blocked"
+    assert payload["last_error_code"] == "AGENTOPS_BOOTSTRAP_EXPIRED"
+    assert payload["primary_action"]["action_id"] == "view_agentops_bootstrap_failure"
+    assert payload["timeline"][0]["status"] == "completed"
+    assert payload["timeline"][1]["status"] == "completed"
+    assert payload["timeline"][3]["source"] == "agentops"
+    assert payload["timeline"][4]["source"] == "agentops"
 
 
 def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> None:
@@ -75,6 +267,42 @@ def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> N
     assert payload["safe_to_rerun"] is False
     assert payload["regenerate_command_url"].endswith("/assertion")
     assert payload["primary_action"]["action_id"] == "regenerate_activation_command"
+    assert payload["timeline"][2]["step_id"] == "collect_device_proof"
+    assert payload["timeline"][2]["status"] == "blocked"
+    assert payload["timeline"][3]["status"] == "blocked"
+    assert payload["timeline"][4]["status"] == "blocked"
+
+
+def test_expired_command_uses_store_timeline_even_with_agentops_echo() -> None:
+    service, record = _record()
+    credential = CredentialBootstrapSummary.from_agentops_credential_response(
+        {
+            "credential_id": "cred-1",
+            "token_id": "token-1",
+            "device_key_id": "device-key-1",
+            "status": "active",
+            "bootstrap_status": "credential_issued",
+            "installation_id": record.installation.installation_id,
+            "device_id": record.installation.device_id,
+            "expires_at": "2026-05-07T13:00:00+00:00",
+            "next_action": "send_signature_test_event",
+        }
+    )
+
+    _, body = BootstrapStatusAPI(service).get_bootstrap_status(
+        record.installation.installation_id,
+        auth_context=record.installation.auth_context,
+        last_error_code="INSTALLATION_ASSERTION_EXPIRED",
+        agentops_credential=credential,
+    )
+
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "expired"
+    assert payload["current_step"] == "issue_assertion"
+    assert payload["timeline"][0]["status"] == "blocked"
+    assert payload["timeline"][1]["status"] == "blocked"
+    assert payload["timeline"][2]["source"] == "pending"
+    assert payload["timeline"][3]["source"] == "pending"
 
 
 def test_permission_denied_status_returns_access_and_return_path() -> None:

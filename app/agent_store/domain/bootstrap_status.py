@@ -3,8 +3,31 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .actions import ActionDescriptor
+from .agentops_summary import CredentialBootstrapSummary
 from .installation import Installation
 from .permissions import PermissionDecision
+
+
+@dataclass(frozen=True)
+class BootstrapTimelineStep:
+    step_id: str
+    label: str
+    owner_system: str
+    status: str
+    source: str
+    action_id: str | None = None
+
+    def to_dict(self) -> dict[str, object]:
+        data: dict[str, object] = {
+            "step_id": self.step_id,
+            "label": self.label,
+            "owner_system": self.owner_system,
+            "status": self.status,
+            "source": self.source,
+        }
+        if self.action_id is not None:
+            data["action_id"] = self.action_id
+        return data
 
 
 @dataclass(frozen=True)
@@ -26,6 +49,7 @@ class BootstrapStatus:
     request_access_url: str | None = None
     audit_id: str | None = None
     return_path: str | None = None
+    timeline: tuple[BootstrapTimelineStep, ...] = ()
 
     def to_dict(self) -> dict[str, object]:
         data: dict[str, object] = {
@@ -55,6 +79,8 @@ class BootstrapStatus:
             data["secondary_actions"] = [
                 action.to_dict() for action in self.secondary_actions
             ]
+        if self.timeline:
+            data["timeline"] = [step.to_dict() for step in self.timeline]
         return data
 
 
@@ -62,6 +88,7 @@ def status_for_installation(
     installation: Installation,
     *,
     last_error_code: str | None = None,
+    agentops_credential: CredentialBootstrapSummary | None = None,
 ) -> BootstrapStatus:
     if last_error_code == "INSTALLATION_ASSERTION_EXPIRED":
         return BootstrapStatus(
@@ -81,12 +108,85 @@ def status_for_installation(
                 enabled=True,
                 audit_required=True,
             ),
+            timeline=_timeline_for_status("expired", None),
         )
+
+    if agentops_credential is not None:
+        if agentops_credential.bootstrap_status in {"expired", "failed"}:
+            return BootstrapStatus(
+                installation_id=installation.installation_id,
+                bootstrap_status=agentops_credential.bootstrap_status,
+                current_step="issue_credential",
+                step_status="blocked",
+                retryable=False,
+                diagnostic_ref=f"diag-{installation.trace_id}",
+                last_error_code=(
+                    "AGENTOPS_BOOTSTRAP_EXPIRED"
+                    if agentops_credential.bootstrap_status == "expired"
+                    else "AGENTOPS_BOOTSTRAP_FAILED"
+                ),
+                safe_to_rerun=False,
+                primary_action=ActionDescriptor(
+                    action_id="view_agentops_bootstrap_failure",
+                    target_system="agentops",
+                    enabled=True,
+                    audit_required=False,
+                    href=f"#agentops-evidence-{installation.installation_id}",
+                ),
+                timeline=_timeline_for_status(
+                    agentops_credential.bootstrap_status,
+                    agentops_credential,
+                ),
+            )
+        if agentops_credential.bootstrap_status == "credential_issued":
+            return BootstrapStatus(
+                installation_id=installation.installation_id,
+                bootstrap_status="credential_issued",
+                current_step="send_signature_test_event",
+                step_status="running",
+                next_poll_after=5,
+                retryable=True,
+                retry_after=30,
+                diagnostic_ref=f"diag-{installation.trace_id}",
+                safe_to_rerun=True,
+                primary_action=ActionDescriptor(
+                    action_id="send_signature_test_event",
+                    target_system="ai_autosdlc_cli",
+                    enabled=True,
+                    audit_required=True,
+                ),
+                timeline=_timeline_for_status(
+                    agentops_credential.bootstrap_status,
+                    agentops_credential,
+                ),
+            )
+        if agentops_credential.bootstrap_status == "signature_verified":
+            return BootstrapStatus(
+                installation_id=installation.installation_id,
+                bootstrap_status="signature_verified",
+                current_step="complete",
+                step_status="completed",
+                next_poll_after=0,
+                retryable=False,
+                diagnostic_ref=f"diag-{installation.trace_id}",
+                safe_to_rerun=False,
+                primary_action=ActionDescriptor(
+                    action_id="view_agentops_evidence",
+                    target_system="agentops",
+                    enabled=True,
+                    audit_required=False,
+                    href=f"#agentops-evidence-{installation.installation_id}",
+                ),
+                timeline=_timeline_for_status(
+                    agentops_credential.bootstrap_status,
+                    agentops_credential,
+                ),
+            )
 
     return BootstrapStatus(
         installation_id=installation.installation_id,
         bootstrap_status="assertion_issued",
-        current_step="issue_credential",
+        current_step="collect_device_proof",
         step_status="running",
         next_poll_after=5,
         retryable=True,
@@ -106,6 +206,70 @@ def status_for_installation(
                 enabled=True,
                 audit_required=False,
             ),
+        ),
+        timeline=_timeline_for_status("assertion_issued", agentops_credential),
+    )
+
+
+def _timeline_for_status(
+    bootstrap_status: str,
+    agentops_credential: CredentialBootstrapSummary | None,
+) -> tuple[BootstrapTimelineStep, ...]:
+    credential_ready = bootstrap_status in {"credential_issued", "signature_verified"}
+    signature_verified = bootstrap_status == "signature_verified"
+    blocked = bootstrap_status in {"expired", "failed"}
+    agentops_blocked = blocked and agentops_credential is not None
+    store_blocked = blocked and agentops_credential is None
+    proof_status = (
+        "completed"
+        if credential_ready or agentops_blocked
+        else "blocked" if blocked else "running"
+    )
+    credential_status = "blocked" if blocked else "completed" if credential_ready else "pending"
+    signature_status = (
+        "blocked" if blocked else "completed" if signature_verified else "pending"
+    )
+
+    return (
+        BootstrapTimelineStep(
+            step_id="create_installation",
+            label="Create installation and device binding",
+            owner_system="agent_store",
+            status="blocked" if store_blocked else "completed",
+            source="agent_store",
+            action_id="create_installation",
+        ),
+        BootstrapTimelineStep(
+            step_id="issue_assertion",
+            label="Issue signed_installation_assertion.v1",
+            owner_system="agent_store",
+            status="blocked" if store_blocked else "completed",
+            source="agent_store",
+            action_id="issue_installation_assertion",
+        ),
+        BootstrapTimelineStep(
+            step_id="collect_device_proof",
+            label="Collect device_proof.v1 from Ai_AutoSDLC",
+            owner_system="ai_autosdlc",
+            status=proof_status,
+            source="ai_autosdlc" if credential_ready or agentops_blocked else "pending",
+            action_id="collect_device_proof",
+        ),
+        BootstrapTimelineStep(
+            step_id="issue_credential",
+            label="Issue AgentOps credential echo",
+            owner_system="agentops",
+            status=credential_status,
+            source="agentops" if agentops_credential is not None else "pending",
+            action_id="issue_credentials",
+        ),
+        BootstrapTimelineStep(
+            step_id="verify_signature_test",
+            label="Verify signed test event",
+            owner_system="agentops",
+            status=signature_status,
+            source="agentops" if signature_verified or agentops_blocked else "pending",
+            action_id="send_signature_test_event",
         ),
     )
 

@@ -525,6 +525,58 @@ h2 {
   font-weight: 700;
 }
 
+.bootstrap-timeline {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 14px 0;
+  list-style: none;
+}
+
+.bootstrap-timeline li {
+  display: grid;
+  grid-template-columns: minmax(76px, 0.6fr) minmax(0, 1.4fr) minmax(88px, 0.7fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px;
+  border: 1px solid #e5ebef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.bootstrap-timeline__status,
+.bootstrap-timeline__owner {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.bootstrap-timeline__label {
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.bootstrap-timeline__item--completed {
+  border-color: #b7dfc5;
+  background: #f2fbf6;
+}
+
+.bootstrap-timeline__item--running {
+  border-color: #b7d5ee;
+  background: #f2f8fd;
+}
+
+.bootstrap-timeline__item--pending {
+  border-color: #eadba9;
+  background: #fffaf0;
+}
+
+.bootstrap-timeline__item--blocked {
+  border-color: #ffc9c3;
+  background: #fff6f5;
+}
+
 @media (max-width: 980px) {
   .catalog-toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -127,6 +127,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: AgentOps credential echo does not match installation or device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
@@ -505,10 +511,10 @@ components:
               enum: [not_started, assertion_issued, device_bound, credential_issued, signature_verified, expired, failed]
             current_step:
               type: string
-              enum: [issue_assertion, bind_device, issue_credential, signature_test, complete]
+              enum: [issue_assertion, bind_device, collect_device_proof, issue_credential, send_signature_test_event, signature_test, complete]
             step_status:
               type: string
-              enum: [not_started, running, succeeded, failed, blocked]
+              enum: [not_started, running, succeeded, completed, failed, blocked]
             next_poll_after:
               type: integer
             retryable:
@@ -529,6 +535,30 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/ActionDescriptor"
+            timeline:
+              type: array
+              items:
+                $ref: "#/components/schemas/BootstrapTimelineStep"
+    BootstrapTimelineStep:
+      type: object
+      required: [step_id, label, owner_system, status, source]
+      properties:
+        step_id:
+          type: string
+          enum: [create_installation, issue_assertion, collect_device_proof, issue_credential, verify_signature_test]
+        label:
+          type: string
+        owner_system:
+          type: string
+          enum: [agent_store, ai_autosdlc, agentops]
+        status:
+          type: string
+          enum: [pending, running, completed, blocked]
+        source:
+          type: string
+          enum: [agent_store, ai_autosdlc, agentops, pending]
+        action_id:
+          type: string
     ActionDescriptor:
       type: object
       required: [action_id, target_system, enabled]
