@@ -10,39 +10,63 @@ specs:
 - id: 001-agent-store-phase1-trusted-min-loop
   path: specs/001-agent-store-phase1-trusted-min-loop
   depends_on: []
+- id: 002-agent-store-catalog-workbench
+  path: specs/002-agent-store-catalog-workbench
+  depends_on:
+  - 001-agent-store-phase1-trusted-min-loop
+- id: 003-agent-installation-workflow-preview
+  path: specs/003-agent-installation-workflow-preview
+  depends_on:
+  - 002-agent-store-catalog-workbench
+- id: 004-installation-request-audit-queue
+  path: specs/004-installation-request-audit-queue
+  depends_on:
+  - 003-agent-installation-workflow-preview
+- id: 005-installation-request-bootstrap-handoff
+  path: specs/005-installation-request-bootstrap-handoff
+  depends_on:
+  - 004-installation-request-audit-queue
+- id: 006-installation-assertion-handoff
+  path: specs/006-installation-assertion-handoff
+  depends_on:
+  - 005-installation-request-bootstrap-handoff
+- id: 007-cross-project-contract-appendix
+  path: specs/007-cross-project-contract-appendix
+  depends_on:
+  - 006-installation-assertion-handoff
 truth_snapshot:
-  generated_at: '2026-05-06T14:46:38Z'
+  generated_at: '2026-05-07T10:56:53Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 1a5e1a0
-  authoring_hash: 6eb20846c63a76a45e860cd38a5d905f87823ddd9350872cdbfab165fb090c5d
+  repo_revision: a9a4877
+  authoring_hash: 0215ef5a94d7ca7f0cb327246e29e52d36cd3ae83c5512ca553cceb9400be934
   source_hashes: {}
-  snapshot_hash: 0a05d450c3472a9c93d63bfa770f3fa619e8c958bef2e3dc0aea48eae3eb0995
+  snapshot_hash: 94e5ae5a170f7c10a83130f6ca580cf990e6c4e9a173abb686cbf44ddbf9c9b5
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 7
-    mapped_sources: 7
+    total_sources: 37
+    mapped_sources: 37
     unmapped_sources: 0
-    missing_sources: 0
+    missing_sources: 10
     phase_signal_count: 22
-    deferred_signal_count: 36
-    non_goal_signal_count: 3
+    deferred_signal_count: 49
+    non_goal_signal_count: 6
     layer_totals:
       blueprint: 1
-      spec: 1
-      plan: 1
-      tasks: 1
-      execution: 1
-      close: 1
+      spec: 7
+      plan: 7
+      tasks: 7
+      execution: 7
+      close: 7
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 1
-      plan: 1
-      tasks: 1
-      execution: 1
-      close: 1
+      spec: 7
+      plan: 7
+      tasks: 7
+      execution: 2
+      close: 2
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -98,6 +122,276 @@ truth_snapshot:
       mapping_ref: 001-agent-store-phase1-trusted-min-loop
       phase_signal_count: 0
       deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/002-agent-store-catalog-workbench/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 002-agent-store-catalog-workbench
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/002-agent-store-catalog-workbench/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 002-agent-store-catalog-workbench
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/002-agent-store-catalog-workbench/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 002-agent-store-catalog-workbench
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/002-agent-store-catalog-workbench/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: false
+      mapping_ref: 002-agent-store-catalog-workbench
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/002-agent-store-catalog-workbench/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: false
+      mapping_ref: 002-agent-store-catalog-workbench
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/003-agent-installation-workflow-preview/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 003-agent-installation-workflow-preview
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/003-agent-installation-workflow-preview/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 003-agent-installation-workflow-preview
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/003-agent-installation-workflow-preview/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 003-agent-installation-workflow-preview
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/003-agent-installation-workflow-preview/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: false
+      mapping_ref: 003-agent-installation-workflow-preview
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/003-agent-installation-workflow-preview/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: false
+      mapping_ref: 003-agent-installation-workflow-preview
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/004-installation-request-audit-queue/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 004-installation-request-audit-queue
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/004-installation-request-audit-queue/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 004-installation-request-audit-queue
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/004-installation-request-audit-queue/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 004-installation-request-audit-queue
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/004-installation-request-audit-queue/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: false
+      mapping_ref: 004-installation-request-audit-queue
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/004-installation-request-audit-queue/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: false
+      mapping_ref: 004-installation-request-audit-queue
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/005-installation-request-bootstrap-handoff/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 005-installation-request-bootstrap-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/005-installation-request-bootstrap-handoff/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 005-installation-request-bootstrap-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/005-installation-request-bootstrap-handoff/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 005-installation-request-bootstrap-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/005-installation-request-bootstrap-handoff/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: false
+      mapping_ref: 005-installation-request-bootstrap-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/005-installation-request-bootstrap-handoff/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: false
+      mapping_ref: 005-installation-request-bootstrap-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/006-installation-assertion-handoff/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 006-installation-assertion-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/006-installation-assertion-handoff/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 006-installation-assertion-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/006-installation-assertion-handoff/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 006-installation-assertion-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/006-installation-assertion-handoff/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: false
+      mapping_ref: 006-installation-assertion-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/006-installation-assertion-handoff/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: false
+      mapping_ref: 006-installation-assertion-handoff
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/007-cross-project-contract-appendix/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 007-cross-project-contract-appendix
+      phase_signal_count: 0
+      deferred_signal_count: 2
+      non_goal_signal_count: 1
+    - path: specs/007-cross-project-contract-appendix/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 007-cross-project-contract-appendix
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/007-cross-project-contract-appendix/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 007-cross-project-contract-appendix
+      phase_signal_count: 0
+      deferred_signal_count: 5
+      non_goal_signal_count: 0
+    - path: specs/007-cross-project-contract-appendix/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 007-cross-project-contract-appendix
+      phase_signal_count: 0
+      deferred_signal_count: 3
+      non_goal_signal_count: 0
+    - path: specs/007-cross-project-contract-appendix/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 007-cross-project-contract-appendix
+      phase_signal_count: 0
+      deferred_signal_count: 2
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
