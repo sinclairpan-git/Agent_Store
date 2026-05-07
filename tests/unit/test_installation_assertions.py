@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 from datetime import timedelta
 
 import pytest
@@ -93,8 +95,38 @@ def test_assertion_exports_agentops_handoff_field_names_without_mutating_interna
     assert external["canonicalization"] == "json-c14n-v1"
     assert external["agent_id"] == "framework.ai-autosdlc"
     assert external["agent_version"] == "1.0.0"
+    assert external["assertion_hash"] != internal["assertion_hash"]
+    assert external["signature"] != internal["signature"]
     assert "alg" not in external
     assert "subject_user_id" not in external
+
+
+def test_agentops_handoff_assertion_signature_matches_external_payload() -> None:
+    assertion = InstallationAssertionService(secret=TEST_ASSERTION_SECRET).issue(
+        _installation(),
+        device_public_key_thumbprint="thumb-1",
+        nonce="nonce-1",
+        audience="agentops",
+    )
+
+    external = assertion.to_agentops_handoff_assertion()
+    signed_fields = {
+        key: str(value)
+        for key, value in external.items()
+        if key not in {"assertion_hash", "signature"}
+    }
+    canonical_payload = "\n".join(
+        f"{key}={signed_fields[key]}" for key in sorted(signed_fields)
+    )
+    expected_hash = hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
+    expected_signature = hmac.new(
+        TEST_ASSERTION_SECRET,
+        expected_hash.encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+    assert external["assertion_hash"] == expected_hash
+    assert external["signature"] == expected_signature
 
 
 def test_expired_assertion_returns_stable_error() -> None:
