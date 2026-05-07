@@ -92,7 +92,7 @@ class InstallationRequestHandoffAPI:
                 },
             )
 
-        idempotency_key = headers.get("Idempotency-Key")
+        idempotency_key = self._header_value(headers, "Idempotency-Key")
         if not idempotency_key:
             return 400, self._handoff_error(
                 trace_id=str(request_body["trace_id"]),
@@ -181,6 +181,14 @@ class InstallationRequestHandoffAPI:
         ):
             request_ids.append(request_payload["request_id"])
         return tuple(request_ids)
+
+    @staticmethod
+    def _header_value(headers: Mapping[str, str], field: str) -> str | None:
+        normalized_field = field.lower()
+        for name, value in headers.items():
+            if name.lower() == normalized_field:
+                return value
+        return None
 
     @staticmethod
     def _handoff_error(

@@ -185,6 +185,25 @@ def test_handoff_is_idempotent_for_same_request_identity() -> None:
     )
 
 
+def test_handoff_accepts_lowercase_idempotency_header() -> None:
+    auth = _auth()
+
+    status, body = _api().create_installation_from_request(
+        "developer.release-notes",
+        _payload(),
+        headers={"idempotency-key": "idem-request-1"},
+        auth_context=auth,
+        permission_decision=_decision(
+            auth,
+            "audit-developer-release-notes-start-install",
+        ),
+    )
+
+    assert status == 201
+    assert response_envelope_ok(body)
+    assert body["handoff"]["idempotency_key"] == "idem-request-1"
+
+
 def test_handoff_returns_request_state_for_activation_required_agent() -> None:
     auth = _auth()
 
