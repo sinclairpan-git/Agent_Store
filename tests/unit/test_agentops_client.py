@@ -9,7 +9,43 @@ from agent_store.domain.agentops_summary import (
     RuntimePolicySummary,
 )
 from agent_store.domain.models import utc_now
-from agent_store.integrations.agentops_client import AgentOpsSummaryClient
+from agent_store.integrations.agentops_client import (
+    AgentOpsCredentialIssueClient,
+    AgentOpsSummaryClient,
+    AgentOpsUnavailableError,
+)
+
+
+def _handoff() -> dict[str, object]:
+    return {
+        "schema_version": "agentops_credential_handoff.v1",
+        "bootstrap_id": "boot-inst-1",
+        "installation_assertion": {
+            "assertion_version": "signed_installation_assertion.v1",
+            "assertion_hash": "sha256:assertion",
+        },
+        "device_proof": {
+            "proof_version": "device_proof.v1",
+            "assertion_hash": "sha256:assertion",
+        },
+    }
+
+
+def _credential_response(
+    *,
+    bootstrap_status: str = "credential_issued",
+) -> dict[str, object]:
+    return {
+        "credential_id": "cred-1",
+        "token_id": "token-1",
+        "device_key_id": "device-key-1",
+        "status": "active",
+        "bootstrap_status": bootstrap_status,
+        "installation_id": "inst-1",
+        "device_id": "dev-1",
+        "expires_at": "2026-05-07T13:00:00+00:00",
+        "next_action": "send_signature_test_event",
+    }
 
 
 def _summary() -> AgentOpsSummaryBundle:
@@ -69,6 +105,46 @@ def test_agentops_unavailable_returns_pending_sync_degraded_summary() -> None:
         == "enterprise_evidence_pending_sync"
     )
     assert response["credential_bootstrap"]["enterprise_state"] == "degraded"
+
+
+def test_credential_issue_client_consumes_registered_agentops_echo() -> None:
+    client = AgentOpsCredentialIssueClient(
+        {"boot-inst-1": _credential_response(bootstrap_status="signature_verified")}
+    )
+
+    summary = client.issue_credentials(
+        _handoff(),
+        headers={"Idempotency-Key": "idem-1"},
+    )
+
+    payload = summary.to_dict()
+    assert payload["bootstrap_status"] == "signature_verified"
+    assert payload["enterprise_state"] == "active"
+    assert payload["credential_id"] == "cred-1"
+
+
+def test_credential_issue_client_requires_ai_autosdlc_device_proof() -> None:
+    client = AgentOpsCredentialIssueClient({"boot-inst-1": _credential_response()})
+    handoff = _handoff()
+    handoff["device_proof"] = None
+
+    try:
+        client.issue_credentials(handoff, headers={"Idempotency-Key": "idem-1"})
+    except ValueError as exc:
+        assert "device_proof must be provided by Ai_AutoSDLC" in str(exc)
+    else:
+        raise AssertionError("missing device_proof should fail")
+
+
+def test_credential_issue_client_does_not_fabricate_missing_agentops_response() -> None:
+    client = AgentOpsCredentialIssueClient()
+
+    try:
+        client.issue_credentials(_handoff(), headers={"Idempotency-Key": "idem-1"})
+    except AgentOpsUnavailableError as exc:
+        assert "not registered" in str(exc)
+    else:
+        raise AssertionError("missing AgentOps response should fail")
 
 
 def test_raw_evidence_denied_returns_redacted_summary_and_access_link() -> None:

@@ -23,6 +23,75 @@ class AgentOpsUnavailableError(RuntimeError):
     """Raised by test/provider fakes when AgentOps cannot be reached."""
 
 
+class AgentOpsCredentialIssueClient:
+    """Consumes AgentOps credential echo responses without issuing credentials."""
+
+    def __init__(
+        self,
+        responses: dict[str, dict[str, object]] | None = None,
+    ) -> None:
+        self._responses = responses or {}
+        self.unavailable = False
+
+    def register_response(
+        self,
+        bootstrap_id: str,
+        response: dict[str, object],
+    ) -> None:
+        self._responses[bootstrap_id] = dict(response)
+
+    def issue_credentials(
+        self,
+        handoff: dict[str, object],
+        *,
+        headers: dict[str, str],
+    ) -> CredentialBootstrapSummary:
+        if self.unavailable:
+            raise AgentOpsUnavailableError("agentops credential issue unavailable")
+        self._validate_handoff(handoff, headers=headers)
+        bootstrap_id = str(handoff["bootstrap_id"])
+        response = self._responses.get(bootstrap_id)
+        if response is None:
+            raise AgentOpsUnavailableError(
+                f"agentops credential response not registered: {bootstrap_id}"
+            )
+        return CredentialBootstrapSummary.from_agentops_credential_response(response)
+
+    @staticmethod
+    def _validate_handoff(
+        handoff: dict[str, object],
+        *,
+        headers: dict[str, str],
+    ) -> None:
+        if handoff.get("schema_version") != "agentops_credential_handoff.v1":
+            raise ValueError("schema_version must be agentops_credential_handoff.v1")
+        bootstrap_id = handoff.get("bootstrap_id")
+        if not isinstance(bootstrap_id, str) or not bootstrap_id:
+            raise ValueError("bootstrap_id must be a non-empty string")
+        has_idempotency_key = any(
+            name.lower() == "idempotency-key" and value
+            for name, value in headers.items()
+        )
+        if not has_idempotency_key:
+            raise ValueError("Idempotency-Key header is required")
+        assertion = handoff.get("installation_assertion")
+        if not isinstance(assertion, dict):
+            raise ValueError("installation_assertion must be provided by Agent Store")
+        device_proof = handoff.get("device_proof")
+        if not isinstance(device_proof, dict):
+            raise ValueError("device_proof must be provided by Ai_AutoSDLC")
+        if assertion.get("assertion_version") != "signed_installation_assertion.v1":
+            raise ValueError(
+                "installation_assertion must use signed_installation_assertion.v1"
+            )
+        if device_proof.get("proof_version") != "device_proof.v1":
+            raise ValueError("device_proof must use device_proof.v1")
+        if assertion.get("assertion_hash") != device_proof.get("assertion_hash"):
+            raise ValueError(
+                "device_proof must bind to installation_assertion.assertion_hash"
+            )
+
+
 class AgentOpsSummaryClient:
     def __init__(
         self,

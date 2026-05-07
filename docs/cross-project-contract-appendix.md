@@ -71,6 +71,11 @@ AgentOps Credential Issue must produce the response fields defined in
 `installation_id`, and `device_id`. Agent Store consumes these fields as an echo
 only; Agent Store must not infer `active` or issue credentials locally.
 
+After AgentOps accepts a valid signed test event, AgentOps may echo
+`bootstrap_status=signature_verified` for the same credential/bootstrap identity.
+Agent Store may display this as active only from the AgentOps echo; it must not
+advance from `credential_issued` to `signature_verified` locally.
+
 AgentOps 016 must not write Agent Store registration facts, implement the
 Ai_AutoSDLC CLI, upgrade dry-run or local adapter state to `verified_loaded`, or
 replace the current mock signing boundary with a real key management system.
@@ -161,7 +166,7 @@ Each project must implement contract tests against the same fixture set:
 | --- | --- | --- | --- |
 | CCT-001 assertion handoff sample | Agent Store | AgentOps | AgentOps accepts `signed_installation_assertion.v1` without field-name adapters in test code. |
 | CCT-002 device proof binding | Ai_AutoSDLC | AgentOps | Device proof must bind `installation_id`, `device_id`, and `assertion_hash`. |
-| CCT-003 credential response echo | AgentOps | Agent Store | AgentOps produces `credential_issue_response.v1`; Agent Store only displays AgentOps echo fields and does not infer `active`. |
+| CCT-003 credential response echo | AgentOps | Agent Store | AgentOps produces `credential_issue_response.v1` and `signature_verified` bootstrap echo; Agent Store only displays AgentOps echo fields and does not infer `active` from predecessor states. |
 | CCT-004 signed test event | Ai_AutoSDLC | AgentOps | Enterprise managed event requires active credential, active device key, installation id, signature, sequence number, and idempotency key. |
 | CCT-005 standalone regression | Ai_AutoSDLC | Agent Store, AgentOps | No Agent Store or AgentOps dependency may block `ai-sdlc run --dry-run` or local reports. |
 | CCT-006 stale schema rejection | All | All | Unknown major schema versions return explainable unsupported-schema errors. |
