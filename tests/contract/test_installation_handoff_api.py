@@ -230,6 +230,30 @@ def test_handoff_rejects_request_identity_mismatch() -> None:
     assert body["message_key"] == "errors.requestIdentityMismatch"
 
 
+def test_handoff_rejects_nested_request_identity_mismatch() -> None:
+    auth = _auth()
+
+    status, body = _api().create_installation_from_request(
+        "developer.release-notes",
+        {
+            "request": _payload(request_id="req-other-start-install"),
+            "device_os": "macOS",
+            "device_public_key_thumbprint": "thumb-1",
+        },
+        headers={"Idempotency-Key": "idem-request-1"},
+        auth_context=auth,
+        permission_decision=_decision(
+            auth,
+            "audit-developer-release-notes-start-install",
+        ),
+    )
+
+    assert status == 409
+    assert response_envelope_ok(body)
+    assert body["message_key"] == "errors.requestIdentityMismatch"
+    assert body["details"]["request_id"] == "req-other-start-install"
+
+
 def test_handoff_rejects_permission_audit_mismatch() -> None:
     auth = _auth()
 

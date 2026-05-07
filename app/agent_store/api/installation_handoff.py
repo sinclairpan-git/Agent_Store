@@ -67,19 +67,19 @@ class InstallationRequestHandoffAPI:
             )
 
         expected_request_id = str(request["request_id"])
-        requested_request_id = payload.get("request_id")
-        if (
-            requested_request_id is not None
-            and requested_request_id != expected_request_id
+        for requested_request_id in self._requested_request_ids(
+            payload,
+            request_payload,
         ):
-            return 409, self._handoff_error(
-                trace_id=str(request_body["trace_id"]),
-                message_key="errors.requestIdentityMismatch",
-                details={
-                    "expected_request_id": expected_request_id,
-                    "request_id": requested_request_id,
-                },
-            )
+            if requested_request_id != expected_request_id:
+                return 409, self._handoff_error(
+                    trace_id=str(request_body["trace_id"]),
+                    message_key="errors.requestIdentityMismatch",
+                    details={
+                        "expected_request_id": expected_request_id,
+                        "request_id": requested_request_id,
+                    },
+                )
 
         audit_id = str(request["audit_id"])
         if permission_decision.audit_id != audit_id:
@@ -166,6 +166,21 @@ class InstallationRequestHandoffAPI:
         if isinstance(request_payload, Mapping):
             return request_payload
         return payload
+
+    @staticmethod
+    def _requested_request_ids(
+        payload: Mapping[str, object],
+        request_payload: Mapping[str, object],
+    ) -> tuple[object, ...]:
+        request_ids: list[object] = []
+        if payload.get("request_id") is not None:
+            request_ids.append(payload["request_id"])
+        if (
+            request_payload is not payload
+            and request_payload.get("request_id") is not None
+        ):
+            request_ids.append(request_payload["request_id"])
+        return tuple(request_ids)
 
     @staticmethod
     def _handoff_error(
