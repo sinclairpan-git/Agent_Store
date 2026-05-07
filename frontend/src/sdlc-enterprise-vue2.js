@@ -346,7 +346,7 @@
       '      <dl class="facts">',
       '        <sdlc-metric-row label="Trusted Loop" :value="trustedLoop.trusted_loop_verified ? \'verified\' : \'blocked\'" :tone="trustedLoop.trusted_loop_verified ? \'success\' : \'danger\'"></sdlc-metric-row>',
       '        <sdlc-metric-row label="Actual L5" :value="trustedLoop.actual_l5_display_allowed ? \'allowed\' : \'blocked\'" :tone="trustedLoop.actual_l5_display_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="状态裁决" :value="stateDecision.state" :tone="stateDecision.state === \'degraded\' ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="状态裁决" :value="stateDecision.state" :tone="stateDecisionTone"></sdlc-metric-row>',
       '      </dl>',
       '      <ol class="ref-list"><li v-for="ref in trustedLoop.checked_refs" :key="ref">{{ ref }}</li></ol>',
       '    </sdlc-section>',
@@ -356,6 +356,17 @@
       '    </sdlc-section>',
       '  </div>',
       '</main>'
-    ].join("")
+    ].join(""),
+    computed: {
+      stateDecisionTone: function stateDecisionTone() {
+        if (["blocked", "degraded", "empty"].indexOf(this.stateDecision.state) >= 0) {
+          return "danger";
+        }
+        if (this.stateDecision.state === "ready") {
+          return "success";
+        }
+        return "warning";
+      }
+    }
   });
 })(window.Vue);

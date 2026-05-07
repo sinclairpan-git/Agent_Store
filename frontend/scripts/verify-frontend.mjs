@@ -133,8 +133,10 @@ assert(
     && app.includes("selectedInstallWorkflow")
     && app.includes("standalone_only")
     && app.includes("this.filteredCatalog.find")
+    && app.includes("activeSelectedAgentId")
     && app.includes("catalog_filters_returned_no_agents")
-    && indexHtml.includes(":catalog=\"filteredCatalog\""),
+    && indexHtml.includes(":catalog=\"filteredCatalog\"")
+    && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\""),
   "app must render Agent list cards before the detail view"
 );
 assert(
@@ -151,6 +153,11 @@ assert(
     && componentLibrary.includes("command_preview")
     && indexHtml.includes(":install-workflow=\"selectedInstallWorkflow\""),
   "Agent detail must expose installation workflow preview"
+);
+assert(
+  componentLibrary.includes("stateDecisionTone")
+    && componentLibrary.includes('"blocked", "degraded", "empty"'),
+  "blocked and degraded state decisions must not render as success"
 );
 assert(
   componentLibrary.includes("actionHref: function actionHref()")

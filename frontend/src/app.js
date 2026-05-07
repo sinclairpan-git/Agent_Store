@@ -49,6 +49,9 @@ new window.Vue({
         return agent.agent_id === this.selectedAgentId;
       }, this) || this.filteredCatalog[0] || null;
     },
+    activeSelectedAgentId: function activeSelectedAgentId() {
+      return this.selectedAgent ? this.selectedAgent.agent_id : null;
+    },
     selectedView: function selectedView() {
       var agent = this.selectedAgent;
       if (!agent) {
