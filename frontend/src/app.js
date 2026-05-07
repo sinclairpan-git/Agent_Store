@@ -10,6 +10,19 @@ function safeId(value) {
   return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "agent";
 }
 
+function hasCreatedInstallation(handoff) {
+  return Boolean(
+    handoff
+      && (
+        handoff.handoff_state === "installation_created"
+        || (
+          handoff.installation_id
+          && handoff.installation_id.indexOf("inst-") === 0
+        )
+      )
+  );
+}
+
 function buildRequestIdentity(agentId, actionId) {
   var safeAgentId = safeId(agentId);
   var safeActionId = safeId(actionId);
@@ -546,6 +559,7 @@ new window.Vue({
     selectedBootstrapHandoff: function selectedBootstrapHandoff() {
       var agent = this.selectedAgent;
       var request = this.selectedInstallationRequest;
+      var bootstrap;
       if (!agent) {
         return {
           handoff_state: "empty",
@@ -558,6 +572,24 @@ new window.Vue({
         };
       }
       if (request.request_state === "accepted") {
+        bootstrap = this.selectedBootstrap;
+        if (bootstrap.installation_id && bootstrap.installation_id.indexOf("inst-") === 0) {
+          return {
+            handoff_state: "installation_created",
+            request_id: request.request_id,
+            audit_id: request.audit_id,
+            idempotency_key: request.request_id,
+            device_os: "macOS",
+            device_public_key_thumbprint: "thumb-" + safeId(agent.agent_id),
+            installation_id: bootstrap.installation_id,
+            next_action: {
+              action_id: "issue_installation_assertion",
+              target_system: "agent_store",
+              enabled: true,
+              href: "#assertion-" + request.request_id
+            }
+          };
+        }
         return {
           handoff_state: "ready_to_create",
           request_id: request.request_id,
@@ -599,7 +631,7 @@ new window.Vue({
           next_action: this.selectedView.primary_action
         };
       }
-      if (handoff.handoff_state === "ready_to_create") {
+      if (hasCreatedInstallation(handoff)) {
         return {
           assertion_state: "ready_to_issue",
           installation_id: handoff.installation_id,

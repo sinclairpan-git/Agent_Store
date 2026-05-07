@@ -190,6 +190,7 @@ assert(
   componentLibrary.includes("sdlc-assertion-handoff")
     && componentLibrary.includes("assertion.assertion_state")
     && componentLibrary.includes("ready_to_issue")
+    && app.includes("hasCreatedInstallation(handoff)")
     && componentLibrary.includes("assertion.replay_window_seconds")
     && indexHtml.includes(":assertion-handoff=\"selectedAssertionHandoff\""),
   "Agent detail must expose installation assertion handoff state"
