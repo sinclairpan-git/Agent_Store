@@ -59,6 +59,12 @@ def test_bootstrap_status_returns_polling_retry_and_diagnostic_fields() -> None:
     assert payload["retryable"] is True
     assert payload["diagnostic_ref"] == "diag-trace-1"
     assert payload["primary_action"]["action_id"] == "poll_bootstrap_status"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "collect_device_proof",
+        "poll_bootstrap_status",
+        "copy_diagnostic_ref",
+    ]
+    assert payload["recommended_actions"][0]["target_system"] == "ai_autosdlc_cli"
     assert payload["source_of_truth"] == "agent_store"
     assert payload["entry_evidence"] == [
         "signed_installation_assertion.v1",
@@ -106,6 +112,11 @@ def test_bootstrap_status_timeline_uses_agentops_credential_echo() -> None:
     assert payload["bootstrap_status"] == "credential_issued"
     assert payload["current_step"] == "send_signature_test_event"
     assert payload["primary_action"]["target_system"] == "ai_autosdlc_cli"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "send_signature_test_event",
+        "poll_bootstrap_status",
+        "copy_diagnostic_ref",
+    ]
     assert payload["source_of_truth"] == "agentops"
     assert payload["entry_evidence"] == [
         "agentops_credential_echo",
@@ -206,6 +217,10 @@ def test_bootstrap_status_timeline_marks_signature_verified_complete() -> None:
     assert payload["conflict_resolution"] == "agentops_signature_verified_is_display_fact"
     assert payload["timeline"][4]["status"] == "completed"
     assert payload["primary_action"]["action_id"] == "view_agentops_evidence"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "view_agentops_evidence",
+        "return_to_official_app",
+    ]
 
 
 def test_bootstrap_status_blocks_failed_agentops_credential_echo() -> None:
@@ -236,6 +251,12 @@ def test_bootstrap_status_blocks_failed_agentops_credential_echo() -> None:
     assert payload["retryable"] is False
     assert payload["last_error_code"] == "AGENTOPS_BOOTSTRAP_FAILED"
     assert payload["primary_action"]["target_system"] == "agentops"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "request_agentops_access_review",
+        "copy_diagnostic_ref",
+        "return_to_official_app",
+    ]
+    assert payload["recommended_actions"][0]["requires_permission"] is True
     assert payload["source_of_truth"] == "agentops"
     assert "agentops_credential_echo" in payload["entry_evidence"]
     assert payload["timeline"][2]["status"] == "completed"
@@ -271,6 +292,11 @@ def test_bootstrap_status_blocks_expired_agentops_credential_echo() -> None:
     assert payload["step_status"] == "blocked"
     assert payload["last_error_code"] == "AGENTOPS_BOOTSTRAP_EXPIRED"
     assert payload["primary_action"]["action_id"] == "view_agentops_bootstrap_failure"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "refresh_agentops_credential",
+        "regenerate_activation_command",
+        "copy_diagnostic_ref",
+    ]
     assert payload["source_of_truth"] == "agentops"
     assert payload["timeline"][0]["status"] == "completed"
     assert payload["timeline"][1]["status"] == "completed"
@@ -293,6 +319,11 @@ def test_expired_command_blocks_old_command_and_returns_regenerate_action() -> N
     assert payload["safe_to_rerun"] is False
     assert payload["regenerate_command_url"].endswith("/assertion")
     assert payload["primary_action"]["action_id"] == "regenerate_activation_command"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "regenerate_activation_command",
+        "copy_diagnostic_ref",
+        "return_to_official_app",
+    ]
     assert payload["source_of_truth"] == "agent_store"
     assert payload["entry_evidence"] == ["assertion_expires_at", "last_error_code"]
     assert (
@@ -374,6 +405,11 @@ def test_permission_denied_status_returns_access_and_return_path() -> None:
     assert status["source_of_truth"] == "agentops"
     assert status["entry_evidence"] == ["permission_decision", "denied_scope"]
     assert status["primary_action"]["action_id"] == "request_enterprise_access"
+    assert [action["action_id"] for action in status["recommended_actions"]] == [
+        "request_enterprise_access",
+        "copy_diagnostic_ref",
+        "return_to_official_app",
+    ]
 
 
 def test_bootstrap_status_rejects_mismatched_auth_context() -> None:
@@ -392,3 +428,23 @@ def test_bootstrap_status_rejects_mismatched_auth_context() -> None:
     assert status == 403
     assert body["error_code"] == "PERMISSION_DENIED"
     assert body["retryable"] is False
+
+
+def test_missing_bootstrap_status_serializes_recommended_action() -> None:
+    auth = AuthContext(
+        auth_context_id="auth-1",
+        subject_user_id="user-1",
+        identity_confidence=0.99,
+    )
+
+    status, body = BootstrapStatusAPI(BootstrapService()).get_bootstrap_status(
+        "missing-installation",
+        auth_context=auth,
+    )
+
+    assert status == 200
+    payload = body["status"]
+    assert payload["bootstrap_status"] == "failed"
+    assert [action["action_id"] for action in payload["recommended_actions"]] == [
+        "return_to_official_app",
+    ]

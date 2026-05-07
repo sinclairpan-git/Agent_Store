@@ -96,6 +96,7 @@ for (const componentName of [
   "sdlc-install-request",
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
+  "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
   "sdlc-status-chip",
@@ -206,8 +207,17 @@ assert(
     && mockData.includes("source_of_truth")
     && mockData.includes("entry_evidence")
     && mockData.includes("conflict_resolution")
-    && componentLibrary.includes("sdlc-source-facts"),
+    && mockData.includes("recommended_actions")
+    && componentLibrary.includes("sdlc-source-facts")
+    && componentLibrary.includes("sdlc-remediation-actions"),
   "Agent detail must expose Agent Store/Ai_AutoSDLC/AgentOps bootstrap timeline"
+);
+assert(
+  componentLibrary.includes("remediation-actions__list")
+    && componentLibrary.includes("bootstrap.recommended_actions")
+    && mockData.includes("poll_bootstrap_status")
+    && mockData.includes("copy_diagnostic_ref"),
+  "Agent detail must expose executable bootstrap remediation actions"
 );
 assert(
   componentLibrary.includes("stateDecisionTone")

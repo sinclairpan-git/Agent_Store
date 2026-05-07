@@ -63,6 +63,7 @@ class BootstrapStatus:
     last_error_code: str | None = None
     safe_to_rerun: bool | None = None
     secondary_actions: tuple[ActionDescriptor, ...] = ()
+    recommended_actions: tuple[ActionDescriptor, ...] = ()
     denied_scope: str | None = None
     request_access_url: str | None = None
     audit_id: str | None = None
@@ -108,6 +109,10 @@ class BootstrapStatus:
             data["secondary_actions"] = [
                 action.to_dict() for action in self.secondary_actions
             ]
+        recommendations = self.recommended_actions or (self.primary_action,)
+        data["recommended_actions"] = [
+            action.to_dict() for action in recommendations
+        ]
         if self.timeline:
             data["timeline"] = [step.to_dict() for step in self.timeline]
         if self.source_conflicts:
@@ -140,6 +145,18 @@ def status_for_installation(
                 target_system="agent_store",
                 enabled=True,
                 audit_required=True,
+            ),
+            recommended_actions=(
+                _action(
+                    "regenerate_activation_command",
+                    audit_required=True,
+                    href=f"/api/v1/installations/{installation.installation_id}/assertion",
+                ),
+                _action("copy_diagnostic_ref"),
+                _action(
+                    "return_to_official_app",
+                    href="/official-apps/framework.ai-autosdlc",
+                ),
             ),
             timeline=_timeline_for_status("expired", None),
             source_of_truth="agent_store",
@@ -177,6 +194,10 @@ def status_for_installation(
                     audit_required=False,
                     href=f"#agentops-evidence-{installation.installation_id}",
                 ),
+                recommended_actions=_agentops_blocked_actions(
+                    installation,
+                    agentops_credential,
+                ),
                 timeline=_timeline_for_status(
                     agentops_credential.bootstrap_status,
                     agentops_credential,
@@ -208,6 +229,15 @@ def status_for_installation(
                     enabled=True,
                     audit_required=True,
                 ),
+                recommended_actions=(
+                    _action(
+                        "send_signature_test_event",
+                        target_system="ai_autosdlc_cli",
+                        audit_required=True,
+                    ),
+                    _action("poll_bootstrap_status"),
+                    _action("copy_diagnostic_ref"),
+                ),
                 timeline=_timeline_for_status(
                     agentops_credential.bootstrap_status,
                     agentops_credential,
@@ -238,6 +268,17 @@ def status_for_installation(
                     enabled=True,
                     audit_required=False,
                     href=f"#agentops-evidence-{installation.installation_id}",
+                ),
+                recommended_actions=(
+                    _action(
+                        "view_agentops_evidence",
+                        target_system="agentops",
+                        href=f"#agentops-evidence-{installation.installation_id}",
+                    ),
+                    _action(
+                        "return_to_official_app",
+                        href="/official-apps/framework.ai-autosdlc",
+                    ),
                 ),
                 timeline=_timeline_for_status(
                     agentops_credential.bootstrap_status,
@@ -279,12 +320,99 @@ def status_for_installation(
                 audit_required=False,
             ),
         ),
+        recommended_actions=(
+            _action(
+                "collect_device_proof",
+                target_system="ai_autosdlc_cli",
+                audit_required=True,
+            ),
+            _action("poll_bootstrap_status"),
+            _action("copy_diagnostic_ref"),
+        ),
         timeline=_timeline_for_status("assertion_issued", agentops_credential),
         source_of_truth="agent_store",
         entry_evidence=("signed_installation_assertion.v1", "device_binding"),
         conflict_resolution="wait_for_ai_autosdlc_device_proof_then_agentops_echo",
         affected_actions=("collect_device_proof", "issue_credential"),
         return_path="/official-apps/framework.ai-autosdlc",
+    )
+
+
+def _action(
+    action_id: str,
+    *,
+    target_system: str = "agent_store",
+    enabled: bool = True,
+    requires_permission: bool = False,
+    audit_required: bool = False,
+    href: str | None = None,
+) -> ActionDescriptor:
+    return ActionDescriptor(
+        action_id=action_id,
+        target_system=target_system,
+        enabled=enabled,
+        requires_permission=requires_permission,
+        audit_required=audit_required,
+        href=href,
+    )
+
+
+def _agentops_blocked_actions(
+    installation: Installation,
+    agentops_credential: CredentialBootstrapSummary,
+) -> tuple[ActionDescriptor, ...]:
+    evidence_href = f"#agentops-evidence-{installation.installation_id}"
+    if agentops_credential.credential_status == "revoked":
+        return (
+            _action(
+                "request_agentops_access_review",
+                target_system="agentops",
+                requires_permission=True,
+                audit_required=True,
+                href=evidence_href,
+            ),
+            _action("copy_diagnostic_ref"),
+            _action(
+                "return_to_official_app",
+                href="/official-apps/framework.ai-autosdlc",
+            ),
+        )
+    if agentops_credential.credential_status == "expired":
+        return (
+            _action(
+                "refresh_agentops_credential",
+                target_system="agentops",
+                audit_required=True,
+                href=evidence_href,
+            ),
+            _action(
+                "regenerate_activation_command",
+                audit_required=True,
+                href=f"/api/v1/installations/{installation.installation_id}/assertion",
+            ),
+            _action("copy_diagnostic_ref"),
+        )
+    if agentops_credential.credential_status == "rotating":
+        return (
+            _action("poll_bootstrap_status"),
+            _action(
+                "view_agentops_bootstrap_failure",
+                target_system="agentops",
+                href=evidence_href,
+            ),
+            _action("copy_diagnostic_ref"),
+        )
+    return (
+        _action(
+            "view_agentops_bootstrap_failure",
+            target_system="agentops",
+            href=evidence_href,
+        ),
+        _action("copy_diagnostic_ref"),
+        _action(
+            "return_to_official_app",
+            href="/official-apps/framework.ai-autosdlc",
+        ),
     )
 
 
@@ -400,5 +528,17 @@ def permission_denied_status(
             requires_permission=True,
             audit_required=True,
             href=decision.request_access_url,
+        ),
+        recommended_actions=(
+            _action(
+                "request_enterprise_access",
+                target_system="agentops",
+                enabled=bool(decision.request_access_url),
+                requires_permission=True,
+                audit_required=True,
+                href=decision.request_access_url,
+            ),
+            _action("copy_diagnostic_ref"),
+            _action("return_to_official_app", href=return_path),
         ),
     )
