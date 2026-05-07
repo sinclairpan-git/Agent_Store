@@ -135,6 +135,8 @@ assert(
     && app.includes("this.filteredCatalog.find")
     && app.includes("activeSelectedAgentId")
     && app.includes("catalog_filters_returned_no_agents")
+    && app.includes("shellQuoteToken")
+    && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\""),
   "app must render Agent list cards before the detail view"

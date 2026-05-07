@@ -1,3 +1,11 @@
+function shellQuoteToken(value) {
+  var token = String(value);
+  if (/^[A-Za-z0-9_@%+=:,./-]+$/.test(token)) {
+    return token;
+  }
+  return "'" + token.replace(/'/g, "'\"'\"'") + "'";
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
@@ -266,6 +274,7 @@ new window.Vue({
     },
     selectedInstallWorkflow: function selectedInstallWorkflow() {
       var agent = this.selectedAgent;
+      var coordinate;
       if (!agent) {
         return {
           workflow_state: "empty",
@@ -282,11 +291,12 @@ new window.Vue({
           ]
         };
       }
+      coordinate = shellQuoteToken(agent.agent_id + "@" + agent.version);
       if (agent.installability === "installable") {
         return {
           workflow_state: "ready_to_install",
           audit_id: "audit-" + agent.agent_id,
-          command_preview: "agent-store install " + agent.agent_id + "@" + agent.version,
+          command_preview: "agent-store install " + coordinate,
           primary_action: agent.primary_action,
           steps: [
             {
@@ -320,7 +330,7 @@ new window.Vue({
         return {
           workflow_state: "activation_required",
           audit_id: "audit-" + agent.agent_id,
-          command_preview: "agent-store activate " + agent.agent_id + "@" + agent.version + " --enterprise",
+          command_preview: "agent-store activate " + coordinate + " --enterprise",
           primary_action: agent.primary_action,
           steps: [
             {
@@ -354,7 +364,7 @@ new window.Vue({
         return {
           workflow_state: "standalone_only",
           audit_id: "audit-" + agent.agent_id,
-          command_preview: "agent-store open " + agent.agent_id + "@" + agent.version + " --standalone",
+          command_preview: "agent-store open " + coordinate + " --standalone",
           primary_action: {
             action_id: "open_standalone_readme",
             target_system: "agent_store",
