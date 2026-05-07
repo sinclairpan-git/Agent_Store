@@ -53,7 +53,7 @@ def test_bootstrap_status_returns_polling_retry_and_diagnostic_fields() -> None:
 
     assert status == 200
     payload = body["status"]
-    assert payload["current_step"] == "issue_credential"
+    assert payload["current_step"] == "collect_device_proof"
     assert payload["step_status"] == "running"
     assert payload["next_poll_after"] == 5
     assert payload["retryable"] is True

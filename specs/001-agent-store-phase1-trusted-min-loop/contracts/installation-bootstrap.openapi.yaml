@@ -511,7 +511,7 @@ components:
               enum: [not_started, assertion_issued, device_bound, credential_issued, signature_verified, expired, failed]
             current_step:
               type: string
-              enum: [issue_assertion, bind_device, issue_credential, send_signature_test_event, signature_test, complete]
+              enum: [issue_assertion, bind_device, collect_device_proof, issue_credential, send_signature_test_event, signature_test, complete]
             step_status:
               type: string
               enum: [not_started, running, succeeded, completed, failed, blocked]

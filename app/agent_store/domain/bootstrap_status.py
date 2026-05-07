@@ -186,7 +186,7 @@ def status_for_installation(
     return BootstrapStatus(
         installation_id=installation.installation_id,
         bootstrap_status="assertion_issued",
-        current_step="issue_credential",
+        current_step="collect_device_proof",
         step_status="running",
         next_poll_after=5,
         retryable=True,
