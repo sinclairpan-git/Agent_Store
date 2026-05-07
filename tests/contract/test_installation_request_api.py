@@ -143,7 +143,7 @@ def test_installation_request_api_accepts_blocked_catalog_review() -> None:
 
 
 def test_installation_request_api_rejects_malformed_requested_by() -> None:
-    for requested_by in (0, [], ""):
+    for requested_by in (0, [], "", "   "):
         status, body = _api().submit_request(
             "developer.release-notes",
             {"trace_id": "trace-request", "requested_by": requested_by},
