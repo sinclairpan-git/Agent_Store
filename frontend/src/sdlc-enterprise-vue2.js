@@ -317,9 +317,9 @@
       '    <sdlc-section title="可信状态">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="L5 展示" :value="view.l5_display_state" :tone="view.actual_l5_display_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="包可信" :value="view.package_trust_summary.trust_state" tone="success"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="签名" :value="view.package_trust_summary.signature_state" tone="success"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="Hash" :value="view.package_trust_summary.hash_match_state" tone="success"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="包可信" :value="view.package_trust_summary.trust_state" :tone="packageTrustTone"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="签名" :value="view.package_trust_summary.signature_state" :tone="signatureTone"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="Hash" :value="view.package_trust_summary.hash_match_state" :tone="hashTone"></sdlc-metric-row>',
       '      </dl>',
       '    </sdlc-section>',
       '    <sdlc-section title="企业激活">',
@@ -335,7 +335,7 @@
       '      <dl class="facts">',
       '        <sdlc-metric-row label="证据等级" :value="agentops.quality_evidence.evidence_level" tone="info"></sdlc-metric-row>',
       '        <sdlc-metric-row label="有效性" :value="agentops.quality_evidence.summary_validity_state" tone="warning"></sdlc-metric-row>',
-      '        <sdlc-metric-row label="审批" :value="agentops.approval.status" tone="success"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="审批" :value="agentops.approval.status" :tone="approvalTone"></sdlc-metric-row>',
       '        <sdlc-metric-row label="策略" :value="agentops.runtime_policy.enforcement_mode" tone="neutral"></sdlc-metric-row>',
       '      </dl>',
       '      <div class="link-row" v-for="link in agentops.links" :key="link.rel">',
@@ -358,6 +358,42 @@
       '</main>'
     ].join(""),
     computed: {
+      packageTrustTone: function packageTrustTone() {
+        if (this.view.package_trust_summary.trust_state === "trusted") {
+          return "success";
+        }
+        if (this.view.package_trust_summary.trust_state === "warning") {
+          return "warning";
+        }
+        return "danger";
+      },
+      signatureTone: function signatureTone() {
+        if (this.view.package_trust_summary.signature_state === "verified") {
+          return "success";
+        }
+        if (this.view.package_trust_summary.signature_state === "unknown") {
+          return "warning";
+        }
+        return "danger";
+      },
+      hashTone: function hashTone() {
+        if (this.view.package_trust_summary.hash_match_state === "matched") {
+          return "success";
+        }
+        if (this.view.package_trust_summary.hash_match_state === "unknown") {
+          return "warning";
+        }
+        return "danger";
+      },
+      approvalTone: function approvalTone() {
+        if (this.agentops.approval.status === "approved") {
+          return "success";
+        }
+        if (this.agentops.approval.status === "pending") {
+          return "warning";
+        }
+        return "danger";
+      },
       stateDecisionTone: function stateDecisionTone() {
         if (["blocked", "degraded", "empty"].indexOf(this.stateDecision.state) >= 0) {
           return "danger";

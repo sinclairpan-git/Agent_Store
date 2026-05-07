@@ -158,8 +158,12 @@ assert(
 );
 assert(
   componentLibrary.includes("stateDecisionTone")
+    && componentLibrary.includes("packageTrustTone")
+    && componentLibrary.includes("signatureTone")
+    && componentLibrary.includes("hashTone")
+    && componentLibrary.includes("approvalTone")
     && componentLibrary.includes('"blocked", "degraded", "empty"'),
-  "blocked and degraded state decisions must not render as success"
+  "risk states must derive tones instead of rendering as fixed success"
 );
 assert(
   componentLibrary.includes("actionHref: function actionHref()")
