@@ -120,7 +120,7 @@ def build_catalog_workbench(
     selected = None
     if selected_agent_id:
         selected = next(
-            (card for card in all_cards if card["agent_id"] == selected_agent_id), None
+            (card for card in cards if card["agent_id"] == selected_agent_id), None
         )
     if selected is None and cards:
         selected = cards[0]

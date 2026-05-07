@@ -148,3 +148,40 @@ def test_catalog_workbench_filters_by_search_type_and_installability() -> None:
         "trust_state": "all",
         "installability": "installable",
     }
+
+
+def test_catalog_workbench_selection_is_constrained_to_filtered_cards() -> None:
+    response = build_catalog_workbench(
+        sources=(
+            _source(
+                "framework.ai-autosdlc",
+                "Ai_AutoSDLC",
+                agent_type="framework_capability",
+                category="SDLC Framework",
+                trust_state="trusted",
+                enterprise_state="required_unactivated",
+                installability="activation_required",
+                evidence_level="L5-capable",
+            ),
+            _source(
+                "agentops.evidence-reporter",
+                "Evidence Reporter",
+                agent_type="agent",
+                category="Evidence Connector",
+                trust_state="warning",
+                enterprise_state="active",
+                installability="installable",
+                evidence_level="L3-summary",
+            ),
+        ),
+        trace_id="trace-catalog",
+        filters=CatalogFilter(agent_type="agent"),
+        selected_agent_id="framework.ai-autosdlc",
+    )
+
+    catalog = response["catalog"]
+    assert [card["agent_id"] for card in catalog["cards"]] == [
+        "agentops.evidence-reporter"
+    ]
+    assert catalog["selected_agent_id"] == "agentops.evidence-reporter"
+    assert catalog["selected_agent"]["agent_id"] == "agentops.evidence-reporter"

@@ -132,6 +132,8 @@ assert(
     && app.includes("setTrustFilter")
     && app.includes("selectedInstallWorkflow")
     && app.includes("standalone_only")
+    && app.includes("this.filteredCatalog.find")
+    && app.includes("catalog_filters_returned_no_agents")
     && indexHtml.includes(":catalog=\"filteredCatalog\""),
   "app must render Agent list cards before the detail view"
 );

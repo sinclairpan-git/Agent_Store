@@ -45,12 +45,57 @@ new window.Vue({
       }, this);
     },
     selectedAgent: function selectedAgent() {
-      return this.catalog.find(function findAgent(agent) {
+      return this.filteredCatalog.find(function findAgent(agent) {
         return agent.agent_id === this.selectedAgentId;
-      }, this) || this.catalog[0];
+      }, this) || this.filteredCatalog[0] || null;
     },
     selectedView: function selectedView() {
       var agent = this.selectedAgent;
+      if (!agent) {
+        return Object.assign({}, this.view, {
+          display_name: "未选择 Agent",
+          summary: "当前筛选条件下没有可选 Agent。",
+          use_cases: [],
+          capability_type: "empty",
+          actual_l5_display_allowed: false,
+          l5_display_state: "not_applicable",
+          primary_action: {
+            action_id: "adjust_catalog_filters",
+            target_system: "agent_store",
+            enabled: false,
+            href: "#"
+          },
+          enterprise_activation_action: {
+            action_id: "request_enterprise_activation",
+            target_system: "agent_store",
+            enabled: false,
+            href: "#"
+          },
+          maintenance: {
+            owner_team: "-",
+            owner_user: "-",
+            version: "-",
+            release_status: "not_applicable"
+          },
+          package_trust_summary: {
+            package_id: "-",
+            trust_state: "unknown",
+            signature_state: "unknown",
+            hash_match_state: "unknown",
+            issuer_display: "Agent Store"
+          },
+          enterprise_context: {
+            integration_mode: "standalone",
+            enterprise_state: "not_detected",
+            source: "catalog_filter",
+            can_ignore: true,
+            affected_actions: [],
+            requires_enterprise: false
+          },
+          role_visible_sections: [],
+          accessibility_contract: this.view.accessibility_contract
+        });
+      }
       var isOfficialSdlc = agent.agent_id === "framework.ai-autosdlc";
       if (isOfficialSdlc) {
         return this.view;
@@ -95,6 +140,18 @@ new window.Vue({
       });
     },
     selectedBootstrap: function selectedBootstrap() {
+      if (!this.selectedAgent) {
+        return {
+          installation_id: "not-applicable",
+          bootstrap_status: "not_applicable",
+          current_step: "adjust_catalog_filters",
+          step_status: "empty",
+          next_poll_after: 0,
+          retryable: false,
+          diagnostic_ref: "catalog-empty-filter",
+          primary_action: this.selectedView.primary_action
+        };
+      }
       if (this.selectedAgent.agent_id === "framework.ai-autosdlc") {
         return this.bootstrap;
       }
@@ -110,6 +167,30 @@ new window.Vue({
       };
     },
     selectedAgentops: function selectedAgentops() {
+      if (!this.selectedAgent) {
+        return {
+          trace_id: "trace-catalog-empty-filter",
+          quality_evidence: {
+            evidence_level: "not_applicable",
+            summary_validity_state: "not_applicable",
+            confidence: 0,
+            missing_evidence: [],
+            score_template_id: "agentops-empty-filter"
+          },
+          approval: {
+            approval_id: "approval-empty-filter",
+            status: "not_applicable",
+            audit_id: "audit-empty-filter"
+          },
+          runtime_policy: {
+            policy_ref: "policy-empty-filter",
+            fallback_action: "adjust_filters",
+            runtime_risk_level: "none",
+            enforcement_mode: "none"
+          },
+          links: []
+        };
+      }
       if (this.selectedAgent.agent_id === "framework.ai-autosdlc") {
         return this.agentops;
       }
@@ -144,6 +225,13 @@ new window.Vue({
       };
     },
     selectedTrustedLoop: function selectedTrustedLoop() {
+      if (!this.selectedAgent) {
+        return {
+          trusted_loop_verified: false,
+          actual_l5_display_allowed: false,
+          checked_refs: ["catalog-empty-filter"]
+        };
+      }
       if (this.selectedAgent.agent_id === "framework.ai-autosdlc") {
         return this.trustedLoop;
       }
@@ -159,6 +247,12 @@ new window.Vue({
       };
     },
     selectedStateDecision: function selectedStateDecision() {
+      if (!this.selectedAgent) {
+        return {
+          state: "empty",
+          degraded_reason: "catalog_filters_returned_no_agents"
+        };
+      }
       if (this.selectedAgent.agent_id === "framework.ai-autosdlc") {
         return this.stateDecision;
       }
@@ -169,6 +263,22 @@ new window.Vue({
     },
     selectedInstallWorkflow: function selectedInstallWorkflow() {
       var agent = this.selectedAgent;
+      if (!agent) {
+        return {
+          workflow_state: "empty",
+          audit_id: "audit-empty-filter",
+          command_preview: "",
+          primary_action: this.selectedView.primary_action,
+          steps: [
+            {
+              step_id: "adjust_catalog_filters",
+              label: "调整筛选条件后选择 Agent",
+              state: "ready",
+              owner_system: "agent_store"
+            }
+          ]
+        };
+      }
       if (agent.installability === "installable") {
         return {
           workflow_state: "ready_to_install",
