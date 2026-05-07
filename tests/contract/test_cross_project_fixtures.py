@@ -59,3 +59,27 @@ def test_cct_003_store_consumes_agentops_credential_echo_without_inferring_activ
     assert payload["enterprise_state"] == "activating"
     assert payload["reporter_status"] == "pending_signature_test"
     assert payload["credential_id"] == "cred-fixture"
+
+
+def test_agentops_016_consumer_acceptance_is_frozen_in_appendix() -> None:
+    appendix = Path("docs/cross-project-contract-appendix.md").read_text(
+        encoding="utf-8",
+    )
+
+    required_terms = [
+        "016-cross-project-credential-handoff-consumer",
+        "schema_version` is `agentops_credential_handoff.v1",
+        "installation_assertion.assertion_version` is `signed_installation_assertion.v1",
+        "installation_assertion.issuer` is `agent-store",
+        "installation_assertion.audience` is `agentops",
+        "installation_assertion.canonicalization` is `json-c14n-v1",
+        "device_proof.proof_version` is `device_proof.v1",
+        "device_proof.assertion_hash` equals `installation_assertion.assertion_hash",
+        "Device proof `algorithm` is independent from the assertion `algorithm`",
+        "bootstrap_status`, `next_action`,",
+        "Agent Store must not infer `active`",
+        "upgrade dry-run or local adapter state to `verified_loaded`",
+    ]
+
+    for term in required_terms:
+        assert term in appendix
