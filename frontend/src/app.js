@@ -152,7 +152,7 @@ new window.Vue({
       };
     },
     discoveryHighlight: function discoveryHighlight() {
-      var selected = this.selectedAgent || this.catalog[0];
+      var selected = this.selectedAgent;
       if (!selected) {
         return {
           title: "暂无可推荐 Agent",

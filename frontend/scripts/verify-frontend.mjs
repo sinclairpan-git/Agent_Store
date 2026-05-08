@@ -153,6 +153,8 @@ assert(
     && app.includes("discoveryCollection")
     && app.includes("discoveryCollections")
     && app.includes("discoveryHighlight")
+    && app.includes("var selected = this.selectedAgent;")
+    && !app.includes("var selected = this.selectedAgent || this.catalog[0];")
     && app.includes("setDiscoveryCollection")
     && app.includes("arrayOrEmpty")
     && app.includes("this.filteredCatalog[0] || this.catalog[0] || null")

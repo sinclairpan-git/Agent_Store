@@ -63,13 +63,13 @@ specs:
   depends_on:
   - 013-bootstrap-remediation-actions
 truth_snapshot:
-  generated_at: '2026-05-08T06:54:59Z'
+  generated_at: '2026-05-08T07:06:09Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 5da88f8
+  repo_revision: fe6dca0
   authoring_hash: a5215c7a68609210fb964deb9b2a91bef1b9effb5aedb97d4b73118579ab9f14
   source_hashes: {}
-  snapshot_hash: 57d4bd8724ce7e7c2f28cf486ac3fe856e629bf24b593d96cd2dabc0b1cedd2e
+  snapshot_hash: 38bb236b5ec77fb2da28daf22c85999e5a26d7f90079374c534ac572bab9754b
   computed_capabilities: []
   source_inventory:
     state: complete
