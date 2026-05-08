@@ -63,6 +63,11 @@ function recommendationEnvelopeFor(envelopes, agentId) {
   return envelopes[agentId] || null;
 }
 
+function recommendationStateApiUrl(agentId) {
+  return "/api/v1/agents/" + encodeURIComponent(agentId)
+    + "/recommendation-state?trace_id=trace-ui-" + safeId(agentId);
+}
+
 function fallbackRecommendationState(agent) {
   if (agent.installability === "blocked" || agent.trust_state === "blocked") {
     return "blocked";
@@ -119,7 +124,8 @@ new window.Vue({
   data: function data() {
     return {
       catalog: window.AgentStoreMock.agentCatalog,
-      recommendationStates: window.AgentStoreMock.recommendationStates,
+      recommendationStates: {},
+      recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
       searchQuery: "",
       discoveryCollection: "recommended",
@@ -139,6 +145,14 @@ new window.Vue({
         message: "选择一个 Agent 后，可查看本地使用或企业激活路径。"
       }
     };
+  },
+  watch: {
+    activeSelectedAgentId: function activeSelectedAgentId(agentId) {
+      this.loadRecommendationState(agentId);
+    }
+  },
+  mounted: function mounted() {
+    this.loadRecommendationState(this.activeSelectedAgentId);
   },
   computed: {
     filteredCatalog: function filteredCatalog() {
@@ -882,6 +896,7 @@ new window.Vue({
     selectAgent: function selectAgent(agent) {
       this.selectedAgentId = agent.agent_id;
       this.resetActionFeedback(agent);
+      this.loadRecommendationState(agent.agent_id);
     },
     updateSearch: function updateSearch(value) {
       this.searchQuery = value;
@@ -905,6 +920,41 @@ new window.Vue({
         this.selectedAgentId = nextAgent ? nextAgent.agent_id : "";
       }
       this.resetActionFeedback(this.selectedAgent);
+      this.loadRecommendationState(this.activeSelectedAgentId);
+    },
+    markRecommendationStateUnavailable: function markRecommendationStateUnavailable(agentId, errorCode) {
+      this.$set(this.recommendationStateRequests, agentId, errorCode);
+    },
+    loadRecommendationState: function loadRecommendationState(agentId) {
+      var requestState = agentId ? this.recommendationStateRequests[agentId] : "";
+      if (!agentId || this.recommendationStates[agentId] || requestState === "loading") {
+        return;
+      }
+      if (typeof window.fetch !== "function") {
+        this.markRecommendationStateUnavailable(agentId, "recommendation_state_fetch_unsupported");
+        return;
+      }
+      this.$set(this.recommendationStateRequests, agentId, "loading");
+      window.fetch(recommendationStateApiUrl(agentId), {
+        headers: { accept: "application/json" }
+      }).then(function parseRecommendationState(response) {
+        return response.json().then(function parsed(body) {
+          return { ok: response.ok, body: body };
+        });
+      }).then(function storeRecommendationState(result) {
+        var body = result.body || {};
+        if (result.ok && body.error_code === "OK" && body.recommendation) {
+          this.$set(this.recommendationStates, agentId, body);
+          this.$set(this.recommendationStateRequests, agentId, "ready");
+          return;
+        }
+        this.markRecommendationStateUnavailable(
+          agentId,
+          body.error_code || "recommendation_state_api_error"
+        );
+      }.bind(this)).catch(function markFetchError() {
+        this.markRecommendationStateUnavailable(agentId, "recommendation_state_api_unavailable");
+      }.bind(this));
     },
     recommendationState: function recommendationState(agent) {
       if (agent.installability === "blocked" || agent.trust_state === "blocked") {

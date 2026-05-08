@@ -2,7 +2,11 @@ import fs from "node:fs";
 import path from "node:path";
 import url from "node:url";
 
-import { resolveRequestPath, root as serverRoot } from "../server.mjs";
+import {
+  resolveRecommendationStateRequest,
+  resolveRequestPath,
+  root as serverRoot
+} from "../server.mjs";
 
 const root = path.dirname(path.dirname(url.fileURLToPath(import.meta.url)));
 
@@ -22,6 +26,7 @@ const indexHtml = read("index.html");
 const componentLibrary = read("src/sdlc-enterprise-vue2.js");
 const app = read("src/app.js");
 const mockData = read("src/mock-data.js");
+const recommendationStates = JSON.parse(read("api/recommendation-states.json"));
 
 assert(
   pkg.dependencies.vue === "file:../vendor/enterprise-vue2/vue-2.7.16.tgz",
@@ -139,14 +144,18 @@ for (const requiredField of [
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
 assert(
-  mockData.includes("recommendationStates")
-    && mockData.includes('schema_version: "agent-store.phase1.v1"')
-    && mockData.includes("recommendation_state")
-    && mockData.includes("actual_l5_display_allowed")
-    && mockData.includes("source_of_truth")
-    && mockData.includes("next_best_action")
-    && mockData.includes("trust_blockers"),
-  "frontend fixtures must carry backend-shaped recommendation_state envelopes"
+  !mockData.includes("recommendationStates:")
+    && recommendationStates["framework.ai-autosdlc"]
+    && recommendationStates["framework.ai-autosdlc"].schema_version === "agent-store.phase1.v1"
+    && recommendationStates["framework.ai-autosdlc"].recommendation.recommendation_state
+    && Object.prototype.hasOwnProperty.call(
+      recommendationStates["framework.ai-autosdlc"].recommendation,
+      "actual_l5_display_allowed"
+    )
+    && recommendationStates["framework.ai-autosdlc"].recommendation.source_of_truth
+    && recommendationStates["framework.ai-autosdlc"].recommendation.next_best_action
+    && Array.isArray(recommendationStates["framework.ai-autosdlc"].recommendation.trust_blockers),
+  "recommendation_state envelopes must come from the API fixture, not window mock data"
 );
 assert(
   mockData.includes('discovery_bucket: ["recommended", "enterprise", "guarded"]')
@@ -165,11 +174,16 @@ assert(
     && app.includes("selectedInstallationRequest")
     && app.includes("selectedRecommendationDecision")
     && app.includes("recommendationEnvelopeFor")
+    && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
     && app.includes("fallbackRecommendationState")
     && app.includes('agent.installability === "blocked" || agent.trust_state === "blocked"')
     && app.includes('agent.installability === "activation_required"')
     && app.includes("recommendationStates")
+    && app.includes("recommendationStateRequests")
+    && app.includes("loadRecommendationState")
+    && app.includes("window.fetch")
+    && app.includes("this.$set(this.recommendationStates")
     && app.includes("selectedBootstrapHandoff")
     && app.includes("selectedAssertionHandoff")
     && app.includes("actionFeedback")
@@ -372,5 +386,40 @@ assert(traversalPath.status === 403, "server must reject directory traversal");
 
 const malformedPath = resolveRequestPath("/%E0%A4%A");
 assert(malformedPath.status === 400, "server must reject malformed percent-encoding");
+
+const recommendationPath = resolveRecommendationStateRequest(
+  "/api/v1/agents/framework.ai-autosdlc/recommendation-state?trace_id=trace-ui"
+);
+assert(recommendationPath.status === 200, "server must resolve recommendation state API");
+assert(
+  recommendationPath.body.error_code === "OK"
+    && recommendationPath.body.trace_id === "trace-ui"
+    && recommendationPath.body.recommendation.agent_id === "framework.ai-autosdlc",
+  "recommendation state API must return a backend-shaped envelope"
+);
+assert(
+  recommendationPath.body.recommendation.trace_id === "trace-ui",
+  "recommendation state API success envelopes must propagate request trace_id"
+);
+
+const missingRecommendationPath = resolveRecommendationStateRequest(
+  "/api/v1/agents/missing.agent/recommendation-state?trace_id=trace-missing"
+);
+assert(missingRecommendationPath.status === 404, "server must govern missing recommendation states");
+assert(
+  missingRecommendationPath.body.error_code === "AGENT_NOT_FOUND"
+    && missingRecommendationPath.body.trace_id === "trace-missing",
+  "missing recommendation state API responses must stay envelope-shaped"
+);
+assert(
+  missingRecommendationPath.body.message_key === "errors.agentNotFound"
+    && missingRecommendationPath.body.severity === "error"
+    && missingRecommendationPath.body.retryable === false
+    && missingRecommendationPath.body.recommended_action_id === "adjust_catalog_filters",
+  "missing recommendation state API responses must include governed error fields"
+);
+
+const nonApiPath = resolveRecommendationStateRequest("/src/app.js");
+assert(nonApiPath === null, "recommendation API resolver must ignore static asset paths");
 
 console.log("frontend verification passed");
