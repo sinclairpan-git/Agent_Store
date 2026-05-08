@@ -304,7 +304,7 @@
         return "info";
       },
       setupLabel: function setupLabel() {
-        if (!this.agent.setup_minutes) {
+        if (this.agent.setup_minutes === null || this.agent.setup_minutes === undefined || this.agent.setup_minutes === "") {
           return "待评估";
         }
         return this.agent.setup_minutes + " 分钟";
@@ -313,7 +313,12 @@
         if (this.agent.installability === "blocked") {
           return "danger";
         }
-        if (this.agent.setup_minutes && this.agent.setup_minutes <= 8) {
+        if (
+          this.agent.setup_minutes !== null
+          && this.agent.setup_minutes !== undefined
+          && this.agent.setup_minutes !== ""
+          && this.agent.setup_minutes <= 8
+        ) {
           return "success";
         }
         return "warning";

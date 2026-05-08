@@ -14,6 +14,7 @@
 - 根据第二轮 Codex Review 修复 legacy catalog item 缺少 `discovery_bucket` 时推荐决策崩溃的问题，并补充产品化展示字段的容错。
 - 根据第三轮 Codex Review 修复筛选结果为空时 discovery highlight 回退到全量目录第一项造成的状态冲突。
 - 根据第四轮 Codex Review 修复治理关注集合 bucket id 从 `governed` 到 `guarded`，保证 tab 计数和筛选一致。
+- 根据第五轮 Codex Review 修复 `setup_minutes: 0` 被误判为待评估的问题，保留 0 分钟安装成本显示。
 - 修复工作区卡片在 CSS grid 中被同一行强行拉高的问题。
 
 ### 本地验证

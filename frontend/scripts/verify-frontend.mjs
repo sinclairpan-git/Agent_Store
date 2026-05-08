@@ -210,6 +210,14 @@ assert(
   "Agent catalog must support search, filters, and empty state"
 );
 assert(
+  componentLibrary.includes("setupLabel")
+    && componentLibrary.includes("this.agent.setup_minutes === null")
+    && componentLibrary.includes("this.agent.setup_minutes === undefined")
+    && componentLibrary.includes('this.agent.setup_minutes === ""')
+    && !componentLibrary.includes("if (!this.agent.setup_minutes)"),
+  "Agent card setup labels must treat zero-minute setup as a valid estimate"
+);
+assert(
   componentLibrary.includes("sdlc-recommendation-decision")
     && componentLibrary.includes("recommendation_state")
     && componentLibrary.includes("why_recommended")
