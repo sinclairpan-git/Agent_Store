@@ -277,9 +277,9 @@
       '    <sdlc-metric-row label="适合" :value="agent.audience" tone="info"></sdlc-metric-row>',
       '    <sdlc-metric-row label="接入" :value="setupLabel" :tone="setupTone"></sdlc-metric-row>',
       '  </dl>',
-      '  <ul class="agent-card__tags"><li v-for="tag in agent.product_tags" :key="tag">{{ tag }}</li></ul>',
+      '  <ul class="agent-card__tags"><li v-for="tag in productTags" :key="tag">{{ tag }}</li></ul>',
       '  <div class="agent-card__footer">',
-      '    <span>{{ agent.rating_summary }} · {{ agent.adoption }}</span>',
+      '    <span>{{ productMeta }}</span>',
       '    <span class="agent-card__intent">{{ displayLabel(agent.installability) }}</span>',
       '  </div>',
       '</article>'
@@ -304,16 +304,28 @@
         return "info";
       },
       setupLabel: function setupLabel() {
+        if (!this.agent.setup_minutes) {
+          return "待评估";
+        }
         return this.agent.setup_minutes + " 分钟";
       },
       setupTone: function setupTone() {
         if (this.agent.installability === "blocked") {
           return "danger";
         }
-        if (this.agent.setup_minutes <= 8) {
+        if (this.agent.setup_minutes && this.agent.setup_minutes <= 8) {
           return "success";
         }
         return "warning";
+      },
+      productTags: function productTags() {
+        return Array.isArray(this.agent.product_tags) ? this.agent.product_tags : [];
+      },
+      productMeta: function productMeta() {
+        return [
+          this.agent.rating_summary || "暂无评分",
+          this.agent.adoption || "暂无采用数据"
+        ].join(" · ");
       }
     },
     methods: {

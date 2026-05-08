@@ -52,6 +52,10 @@ function actionMessage(action) {
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
+function arrayOrEmpty(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
@@ -164,7 +168,7 @@ new window.Vue({
       return {
         title: selected.display_name,
         verdict: this.recommendationVerdict(selected),
-        reason: selected.discovery_reasons[0],
+        reason: arrayOrEmpty(selected.discovery_reasons)[0] || selected.summary,
         next_action: selected.primary_action
       };
     },
@@ -450,12 +454,12 @@ new window.Vue({
         source_of_truth: agent.agent_id === "framework.ai-autosdlc" ? "agentops_echo_and_catalog" : "catalog_curated_preview",
         trace_id: this.selectedAgentops.trace_id,
         audit_id: request.audit_id,
-        why_recommended: agent.discovery_reasons,
+        why_recommended: arrayOrEmpty(agent.discovery_reasons),
         why_not: this.recommendationRisks(agent),
         missing_evidence: this.selectedAgentops.quality_evidence.missing_evidence || [],
         trust_blockers: this.trustBlockers(agent),
-        requirements: agent.prerequisites,
-        outcomes: agent.expected_outcomes,
+        requirements: arrayOrEmpty(agent.prerequisites),
+        outcomes: arrayOrEmpty(agent.expected_outcomes),
         next_best_action: request.next_action,
         diagnostic_ref: bootstrap.diagnostic_ref
       };
@@ -862,7 +866,7 @@ new window.Vue({
       if (agent.trust_state === "warning") {
         return "eligible_pending_verification";
       }
-      return agent.discovery_bucket.indexOf("recommended") >= 0 ? "recommended" : "eligible";
+      return arrayOrEmpty(agent.discovery_bucket).indexOf("recommended") >= 0 ? "recommended" : "eligible";
     },
     recommendationVerdict: function recommendationVerdict(agent) {
       var state = this.recommendationState(agent);
