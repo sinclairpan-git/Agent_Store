@@ -185,3 +185,36 @@ def test_skill_registry_security_revoked_is_terminal() -> None:
     assert any(
         issue.issue_id == "SKILL_SECURITY_REVOKED_TERMINAL" for issue in decision.issues
     )
+
+
+def test_skill_registry_security_revoke_can_reassert_terminal_status() -> None:
+    record = SkillRegistryRecord(
+        skill_id="repo.detect",
+        skill_version="1.0.0",
+        schema_ref="schemas/repo.detect.v1.json",
+        risk_level="medium",
+        package_id="pkg-guided-uploader-001",
+        agent_id="agent.guided-uploader",
+        owner_team="Agent Platform",
+        owner_user="owner@example.com",
+        status="security_revoked",
+        status_reason="Unsafe schema",
+    )
+
+    decision = build_skill_transition_decision(
+        record,
+        {
+            "transition_action": "security_revoke",
+            "reason": "Reassert unsafe schema",
+            "evidence_ref": "incident://SEC-019-retry",
+        },
+        trace_id="trace-019",
+        audit_id="audit-019",
+    )
+
+    assert decision.registry_status == "security_revoked"
+    assert not decision.issues
+    assert decision.skill is not None
+    assert decision.skill.status == "security_revoked"
+    assert decision.event is not None
+    assert decision.event.evidence_ref == "incident://SEC-019-retry"

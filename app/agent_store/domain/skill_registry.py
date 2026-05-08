@@ -336,7 +336,7 @@ def _transition_issues(
     record: SkillRegistryRecord,
 ) -> tuple[SkillRegistryIssue, ...]:
     issues: list[SkillRegistryIssue] = []
-    if record.status == TERMINAL_SECURITY_STATUS:
+    if record.status == TERMINAL_SECURITY_STATUS and action == "deprecate":
         issues.append(
             SkillRegistryIssue(
                 issue_id="SKILL_SECURITY_REVOKED_TERMINAL",
