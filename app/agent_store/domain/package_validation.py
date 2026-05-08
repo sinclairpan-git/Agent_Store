@@ -213,6 +213,8 @@ def _contains_placeholder_token(value: str) -> bool:
     normalized = value.lower().strip()
     if normalized in PLACEHOLDER_VALUES:
         return True
+    if re.search(r"(?<![a-z0-9])n/a(?![a-z0-9])", normalized):
+        return True
     return bool(set(re.findall(r"[a-z0-9]+", normalized)) & PLACEHOLDER_VALUES)
 
 
@@ -370,7 +372,7 @@ def _validation_status(issues: list[PackageValidationIssue]) -> str:
 
 def _fix_prompt(issue: PackageValidationIssue) -> FixPrompt:
     return FixPrompt(
-        prompt_id=f"fix-{issue.issue_id.lower()}",
+        prompt_id=f"fix-{issue.issue_id.lower()}-{_prompt_id_segment(issue.field_path)}",
         target_field=issue.field_path,
         title=f"Fix {issue.field_path}",
         prompt_text=(
@@ -381,3 +383,7 @@ def _fix_prompt(issue: PackageValidationIssue) -> FixPrompt:
         source_issue_id=issue.issue_id,
         safe_to_apply_in_store=issue.severity in {"warning", "error"},
     )
+
+
+def _prompt_id_segment(field_path: str) -> str:
+    return "-".join(re.findall(r"[a-z0-9]+", field_path.lower()))

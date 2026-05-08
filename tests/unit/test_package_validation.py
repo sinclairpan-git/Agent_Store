@@ -96,6 +96,43 @@ def test_package_validation_blocks_placeholder_word_token() -> None:
     assert any(issue.issue_id == "PLACEHOLDER_VALUE_BLOCKED" for issue in report.issues)
 
 
+def test_package_validation_blocks_embedded_na_placeholder_token() -> None:
+    manifest = _manifest()
+    manifest["summary"] = "Summary pending, n/a for now."
+
+    report = build_package_validation_report(
+        manifest,
+        trace_id="trace-018",
+        audit_id="audit-018",
+    )
+
+    assert report.validation_status == "validation_failed"
+    assert any(issue.issue_id == "PLACEHOLDER_VALUE_BLOCKED" for issue in report.issues)
+
+
+def test_package_validation_fix_prompt_ids_include_field_path() -> None:
+    manifest = _manifest()
+    manifest["display_name"] = "TODO"
+    manifest["summary"] = "TODO: describe package before review."
+
+    report = build_package_validation_report(
+        manifest,
+        trace_id="trace-018",
+        audit_id="audit-018",
+    )
+    placeholder_prompts = [
+        prompt
+        for prompt in report.fix_prompts
+        if prompt.source_issue_id == "PLACEHOLDER_VALUE_BLOCKED"
+    ]
+    prompt_ids = {prompt.prompt_id for prompt in placeholder_prompts}
+
+    assert len(placeholder_prompts) == 2
+    assert len(prompt_ids) == 2
+    assert "fix-placeholder_value_blocked-display-name" in prompt_ids
+    assert "fix-placeholder_value_blocked-summary" in prompt_ids
+
+
 def test_package_validation_requires_high_risk_skill_justification() -> None:
     manifest = _manifest()
     manifest["skills"] = [

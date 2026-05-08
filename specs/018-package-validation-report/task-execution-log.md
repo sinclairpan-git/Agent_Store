@@ -42,6 +42,8 @@
 - 新增回归测试覆盖 trace/audit 变化下的幂等重试、合法文本不误阻断、`TODO:` token 仍阻断。
 - 修复复审 P1：`Idempotency-Key` 读取改为大小写不敏感，兼容 HTTP header 标准大小写语义。
 - 修复复审 P2：OpenAPI `FieldSource` 移除 `source_id` required，让 incomplete field source 进入 validation report 并返回 `AI_FIELD_SOURCE_REQUIRED`。
+- 修复第三轮 P2：Fix Prompt `prompt_id` 加入 field path disambiguator，避免多个同类 issue 覆盖同一 prompt id。
+- 修复第三轮 P2：placeholder token 检测补充嵌入式 `n/a` 识别，避免 `summary pending, n/a for now` 绕过阻断。
 
 ### 本地验证
 
