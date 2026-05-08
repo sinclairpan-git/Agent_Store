@@ -63,7 +63,7 @@ export function resolveRecommendationStateRequest(requestUrl) {
     return {
       status: 503,
       body: {
-        schema_version: "1.0",
+        schema_version: "agent-store.phase1.v1",
         error_code: "RECOMMENDATION_STATE_SOURCE_UNAVAILABLE",
         recommended_action_id: "retry_recommendation_state_fetch"
       }
@@ -74,7 +74,7 @@ export function resolveRecommendationStateRequest(requestUrl) {
     return {
       status: 404,
       body: {
-        schema_version: "1.0",
+        schema_version: "agent-store.phase1.v1",
         error_code: "AGENT_NOT_FOUND",
         recommended_action_id: "adjust_catalog_filters",
         details: { agent_id: agentId }

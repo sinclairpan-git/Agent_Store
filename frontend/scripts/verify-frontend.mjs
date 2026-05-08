@@ -146,7 +146,7 @@ for (const requiredField of [
 assert(
   !mockData.includes("recommendationStates:")
     && recommendationStates["framework.ai-autosdlc"]
-    && recommendationStates["framework.ai-autosdlc"].schema_version
+    && recommendationStates["framework.ai-autosdlc"].schema_version === "agent-store.phase1.v1"
     && recommendationStates["framework.ai-autosdlc"].recommendation.recommendation_state
     && Object.prototype.hasOwnProperty.call(
       recommendationStates["framework.ai-autosdlc"].recommendation,
