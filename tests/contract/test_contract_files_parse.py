@@ -91,6 +91,9 @@ def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> No
     transition = contract["paths"][
         "/api/v1/skills/{skill_id}/versions/{skill_version}/status"
     ]["patch"]
+    transition_request = contract["components"]["schemas"][
+        "SkillStatusTransitionRequest"
+    ]
     decision = contract["components"]["schemas"]["SkillRegistryDecision"]
     record = contract["components"]["schemas"]["SkillRegistryRecord"]
     event = contract["components"]["schemas"]["SkillRegistryEvent"]
@@ -101,6 +104,19 @@ def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> No
 
     assert {"201", "400", "409"}.issubset(publish["responses"].keys())
     assert {"200", "400", "404", "409"}.issubset(transition["responses"].keys())
+    assert {"transition_action", "reason"}.issubset(transition_request["required"])
+    assert {"security_revoke"} == {
+        rule["if"]["properties"]["transition_action"]["const"]
+        for rule in transition_request["allOf"]
+    }
+    assert {
+        tuple(option["required"])
+        for option in transition_request["allOf"][0]["then"]["anyOf"]
+    } == {
+        ("evidence_ref",),
+        ("security_evidence_ref",),
+        ("incident_id",),
+    }
     assert "agentops_consumption" in decision["required"]
     assert "registry_key" in record["required"]
     assert "skill_security_revoked" in event_types

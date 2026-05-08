@@ -21,6 +21,7 @@
 - 修复 Codex Review P2：Skill Registry 幂等缓存按 operation 分区，避免 publish 与 status transition 复用同一客户端 key 时误判冲突。
 - 修复 Codex Review P2：`security_revoked` 终态 guard 仅阻止降级为 `deprecated`，允许带证据的重复 `security_revoke` 重新确认最强安全状态。
 - 修复 Codex Review P2：缺失 Skill 的 transition 404 标记为 `retryable=True`，与不缓存该可恢复结果的语义一致。
+- 修复 Codex Review P2：OpenAPI `SkillStatusTransitionRequest` 使用条件 schema 要求 `security_revoke` 至少携带一种证据引用。
 
 ### 双专家对抗评审
 
@@ -42,6 +43,7 @@
 - 高风险 Skill 发布继续要求 `risk_justification`，保持与 Package Validation 一致。
 - security_revoked 要求 incident 或 evidence reference，并作为 terminal safety signal。
 - OpenAPI documented `evidence_ref`、`security_evidence_ref`、`incident_id` 三种证据入口统一归一到 lifecycle event `evidence_ref`。
+- OpenAPI request contract 与领域规则一致：`security_revoke` 必须提供 `evidence_ref`、`security_evidence_ref` 或 `incident_id`。
 - 缺失 Skill 的 transition 404 是可恢复查找结果，不作为幂等事实缓存；真正执行后的 lifecycle transition 继续保持幂等。
 - missing-skill transition response 明确提示客户端可重试，避免 eventually consistent 发布路径中断。
 - `publish_skill` 与 `update_skill_status` 保留各自操作内的 idempotency conflict 保护，但跨操作复用 key 不再互相污染。

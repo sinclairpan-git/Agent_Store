@@ -147,6 +147,16 @@ components:
     SkillStatusTransitionRequest:
       type: object
       required: [transition_action, reason]
+      allOf:
+        - if:
+            properties:
+              transition_action:
+                const: security_revoke
+          then:
+            anyOf:
+              - required: [evidence_ref]
+              - required: [security_evidence_ref]
+              - required: [incident_id]
       properties:
         trace_id:
           type: string
