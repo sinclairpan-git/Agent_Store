@@ -139,6 +139,16 @@ for (const requiredField of [
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
 assert(
+  mockData.includes("recommendationStates")
+    && mockData.includes("schema_version")
+    && mockData.includes("recommendation_state")
+    && mockData.includes("actual_l5_display_allowed")
+    && mockData.includes("source_of_truth")
+    && mockData.includes("next_best_action")
+    && mockData.includes("trust_blockers"),
+  "frontend fixtures must carry backend-shaped recommendation_state envelopes"
+);
+assert(
   mockData.includes('discovery_bucket: ["recommended", "enterprise", "guarded"]')
     && mockData.includes('discovery_bucket: ["recommended", "ready", "guarded"]')
     && !mockData.includes('discovery_bucket: ["recommended", "enterprise", "governed"]')
@@ -154,6 +164,9 @@ assert(
     && app.includes("selectedInstallWorkflow")
     && app.includes("selectedInstallationRequest")
     && app.includes("selectedRecommendationDecision")
+    && app.includes("recommendationEnvelopeFor")
+    && app.includes("normalizeRecommendationDecision")
+    && app.includes("recommendationStates")
     && app.includes("selectedBootstrapHandoff")
     && app.includes("selectedAssertionHandoff")
     && app.includes("actionFeedback")
@@ -181,8 +194,6 @@ assert(
     && app.includes("activeSelectedAgentId")
     && app.includes("catalog_filters_returned_no_agents")
     && app.includes("shellQuoteToken")
-    && app.includes("catalog_curated_preview")
-    && app.includes("agentops_echo_and_catalog")
     && app.includes("buildRequestIdentity(agent.agent_id, \"start_enterprise_activation\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"open_standalone_readme\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
@@ -220,6 +231,9 @@ assert(
 assert(
   componentLibrary.includes("sdlc-recommendation-decision")
     && componentLibrary.includes("recommendation_state")
+    && componentLibrary.includes("formatSourceOfTruth")
+    && componentLibrary.includes("formatTrustBlocker")
+    && componentLibrary.includes("sourceTruthSummary")
     && componentLibrary.includes("why_recommended")
     && componentLibrary.includes("missing_evidence")
     && componentLibrary.includes("trust_blockers")

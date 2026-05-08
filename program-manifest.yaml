@@ -66,39 +66,43 @@ specs:
   path: specs/015-recommendation-state-contract
   depends_on:
   - 014-agent-store-consumer-productization
+- id: 016-recommendation-state-frontend-consumer
+  path: specs/016-recommendation-state-frontend-consumer
+  depends_on:
+  - 015-recommendation-state-contract
 truth_snapshot:
-  generated_at: '2026-05-08T09:29:43Z'
+  generated_at: '2026-05-08T10:02:48Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 55b6c09
-  authoring_hash: 334904e9179c1f77ca7e81232aac3a5e74a23ccff54ab524730f622cacd4a6d1
+  repo_revision: 476802c
+  authoring_hash: c0d8763b99afd2db513bfbb8eac610ec5151341b487d081e39737599e8b1687a
   source_hashes: {}
-  snapshot_hash: aa38a5b0dbd068aae9756f7b5fdc759de50ab30eac77a6170df7bcfbb8e559b0
+  snapshot_hash: 28bdd84540a3edcd051998694430a7e99141a7b4581dc0cc3a9e71ce6a34b279
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 77
-    mapped_sources: 77
+    total_sources: 82
+    mapped_sources: 82
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 22
-    deferred_signal_count: 75
-    non_goal_signal_count: 15
+    deferred_signal_count: 78
+    non_goal_signal_count: 16
     layer_totals:
       blueprint: 1
-      spec: 15
-      plan: 15
-      tasks: 15
-      execution: 15
-      close: 15
+      spec: 16
+      plan: 16
+      tasks: 16
+      execution: 16
+      close: 16
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 15
-      plan: 15
-      tasks: 15
-      execution: 15
-      close: 15
+      spec: 16
+      plan: 16
+      tasks: 16
+      execution: 16
+      close: 16
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -784,6 +788,51 @@ truth_snapshot:
       mapping_ref: 015-recommendation-state-contract
       phase_signal_count: 0
       deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/016-recommendation-state-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 016-recommendation-state-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/016-recommendation-state-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 016-recommendation-state-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/016-recommendation-state-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 016-recommendation-state-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/016-recommendation-state-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 016-recommendation-state-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/016-recommendation-state-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 016-recommendation-state-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 2
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog

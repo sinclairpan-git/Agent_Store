@@ -98,6 +98,7 @@
     poll_bootstrap_status: "刷新激活状态",
     copy_diagnostic_ref: "复制诊断编号",
     request_catalog_review: "申请目录复核",
+    request_agentops_summary: "申请 AgentOps 摘要",
     review_catalog_blocker: "查看阻断原因",
     view_policy: "查看策略说明",
     view_blocking_policy: "查看阻断策略",
@@ -112,7 +113,33 @@
     no: "不可忽略",
     catalog_curated_preview: "目录策展预览",
     agentops_echo_and_catalog: "AgentOps 回显 + 目录",
-    catalog_filter: "目录筛选"
+    catalog_filter: "目录筛选",
+    catalog: "目录",
+    package_trust: "包可信",
+    enterprise_context: "企业策略",
+    quality_evidence: "质量证据",
+    l5_gate: "L5 门禁",
+    agent_store_catalog: "Agent Store 目录",
+    agent_store_package_trust: "Agent Store 包可信",
+    agent_store_enterprise_context: "Agent Store 企业策略",
+    agentops_summary: "AgentOps 摘要",
+    agentops_summary_missing: "AgentOps 摘要缺失",
+    agentops_summary_pending_signature_test: "AgentOps 等待签名测试",
+    frontend_fallback_no_recommendation_envelope: "前端降级展示",
+    recommendation_state_api: "Recommendation State API",
+    recommendation_state_envelope_missing: "缺少推荐状态 envelope",
+    signed_test_event_verified: "签名测试待验证",
+    security_review: "安全复核",
+    trusted_evidence_incomplete: "可信证据不完整",
+    package_trust_not_verified: "包可信未验证",
+    enterprise_activation_required: "需要企业激活",
+    governance_blocked: "治理阻断",
+    agentops_l5_gate_not_passed: "AgentOps L5 门禁未通过",
+    actual_l5_blocked_until_agentops_verification: "等待 AgentOps 验证实际 L5",
+    installability_blocked: "安装状态阻断",
+    l5_unavailable_without_agentops_summary: "缺少 AgentOps 摘要，不能展示 L5",
+    fresh_agentops_quality_summary: "新鲜 AgentOps 质量摘要",
+    agentops_l5_gate: "AgentOps L5 门禁"
   };
 
   function displayLabel(value) {
@@ -125,7 +152,30 @@
     if (value === null || value === undefined || value === "") {
       return "暂无";
     }
+    if (typeof value === "object") {
+      return JSON.stringify(value);
+    }
     return DISPLAY_LABELS[value] || value;
+  }
+
+  function formatSourceOfTruth(sourceOfTruth) {
+    if (!sourceOfTruth || typeof sourceOfTruth !== "object") {
+      return displayLabel(sourceOfTruth);
+    }
+    return Object.keys(sourceOfTruth).map(function mapSource(key) {
+      return displayLabel(key) + ": " + displayLabel(sourceOfTruth[key]);
+    }).join(" / ");
+  }
+
+  function formatTrustBlocker(blocker) {
+    if (!blocker || typeof blocker !== "object") {
+      return displayLabel(blocker);
+    }
+    return [
+      displayLabel(blocker.blocker_id),
+      displayLabel(blocker.source),
+      displayLabel(blocker.severity)
+    ].filter(Boolean).join(" / ");
   }
 
   Vue.component("sdlc-enterprise-provider-meta", {
@@ -673,9 +723,10 @@
       '  </div>',
       '  <p class="decision-panel__verdict">{{ decision.verdict }}</p>',
       '  <dl class="facts">',
-      '    <sdlc-metric-row label="事实源" :value="decision.source_of_truth" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
       '    <sdlc-metric-row label="Trace" :value="decision.trace_id" tone="neutral"></sdlc-metric-row>',
       '    <sdlc-metric-row label="审计" :value="decision.audit_id" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Actual L5" :value="decision.actual_l5_display_allowed ? \'allowed\' : \'blocked\'" :tone="decision.actual_l5_display_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
       '    <sdlc-metric-row v-if="decision.diagnostic_ref" label="诊断" :value="decision.diagnostic_ref" tone="neutral"></sdlc-metric-row>',
       '  </dl>',
       '  <div class="decision-grid">',
@@ -721,7 +772,10 @@
         return Array.from(new Set([]
           .concat(this.decision.why_not || [])
           .concat(this.decision.missing_evidence || [])
-          .concat(this.decision.trust_blockers || [])));
+          .concat((this.decision.trust_blockers || []).map(formatTrustBlocker))));
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.decision.source_of_truth);
       }
     },
     methods: {

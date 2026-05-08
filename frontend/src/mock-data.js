@@ -161,6 +161,221 @@ window.AgentStoreMock = {
       }
     }
   ],
+  recommendationStates: {
+    "framework.ai-autosdlc": {
+      schema_version: "1.0",
+      trace_id: "trace-rec-framework",
+      error_code: "OK",
+      recommendation: {
+        agent_id: "framework.ai-autosdlc",
+        agent_version: "1.0.0",
+        recommendation_state: "needs_activation",
+        verdict: "适合进入企业激活；签名测试回显前只展示 L5-capable。",
+        why_recommended: [
+          "catalog_capability:SDLC Framework",
+          "installability:activation_required",
+          "use_case:governed delivery",
+          "use_case:trusted evidence loop",
+          "agentops_summary:available"
+        ],
+        why_not: [
+          "enterprise_activation_required",
+          "agentops_l5_gate_not_passed"
+        ],
+        missing_evidence: [
+          "signed_test_event_verified"
+        ],
+        trust_blockers: [
+          {
+            blocker_id: "actual_l5_blocked_until_agentops_verification",
+            source: "agentops",
+            severity: "warning",
+            can_ignore: false
+          }
+        ],
+        next_best_action: {
+          action_id: "start_enterprise_activation",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true,
+          href: "#activation-framework.ai-autosdlc",
+          message_key: "recommendation.actions.startActivation"
+        },
+        source_of_truth: {
+          catalog: "agent_store_catalog",
+          package_trust: "agent_store_package_trust",
+          enterprise_context: "agent_store_enterprise_context",
+          quality_evidence: "agentops_summary",
+          l5_gate: "agentops_summary_pending_signature_test"
+        },
+        actual_l5_display_allowed: false,
+        audit_id: "audit-1",
+        trace_id: "trace-rec-framework"
+      }
+    },
+    "agentops.evidence-reporter": {
+      schema_version: "1.0",
+      trace_id: "trace-rec-evidence-reporter",
+      error_code: "OK",
+      recommendation: {
+        agent_id: "agentops.evidence-reporter",
+        agent_version: "0.4.0",
+        recommendation_state: "eligible_pending_verification",
+        verdict: "可提交评估，但推荐事实必须等待 AgentOps 摘要补齐。",
+        why_recommended: [
+          "catalog_capability:Evidence Connector",
+          "installability:installable",
+          "use_case:evidence upload",
+          "use_case:signature test"
+        ],
+        why_not: [
+          "trusted_evidence_incomplete"
+        ],
+        missing_evidence: [
+          "agentops_summary",
+          "agentops_l5_gate"
+        ],
+        trust_blockers: [
+          {
+            blocker_id: "l5_unavailable_without_agentops_summary",
+            source: "agentops",
+            severity: "warning",
+            can_ignore: false
+          }
+        ],
+        next_best_action: {
+          action_id: "request_agentops_summary",
+          target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true,
+          href: "#review-agentops.evidence-reporter",
+          message_key: "recommendation.actions.requestAgentOpsSummary"
+        },
+        source_of_truth: {
+          catalog: "agent_store_catalog",
+          package_trust: "agent_store_package_trust",
+          enterprise_context: "agent_store_enterprise_context",
+          quality_evidence: "agentops_summary_missing",
+          l5_gate: "agentops_summary_missing"
+        },
+        actual_l5_display_allowed: false,
+        audit_id: "audit-agentops.evidence-reporter",
+        trace_id: "trace-rec-evidence-reporter"
+      }
+    },
+    "security.policy-guard": {
+      schema_version: "1.0",
+      trace_id: "trace-rec-policy-guard",
+      error_code: "OK",
+      recommendation: {
+        agent_id: "security.policy-guard",
+        agent_version: "0.2.1",
+        recommendation_state: "blocked",
+        verdict: "当前存在治理阻断，需先完成目录或策略复核。",
+        why_recommended: [
+          "catalog_capability:Runtime Policy",
+          "installability:blocked",
+          "use_case:runtime policy"
+        ],
+        why_not: [
+          "governance_blocked",
+          "package_trust_not_verified",
+          "trusted_evidence_incomplete"
+        ],
+        missing_evidence: [
+          "agentops_summary",
+          "security_review"
+        ],
+        trust_blockers: [
+          {
+            blocker_id: "installability_blocked",
+            source: "agent_store_catalog",
+            severity: "blocked",
+            can_ignore: false
+          },
+          {
+            blocker_id: "l5_unavailable_without_agentops_summary",
+            source: "agentops",
+            severity: "warning",
+            can_ignore: false
+          }
+        ],
+        next_best_action: {
+          action_id: "request_catalog_review",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true,
+          href: "#request-review-security.policy-guard",
+          message_key: "recommendation.actions.requestCatalogReview"
+        },
+        source_of_truth: {
+          catalog: "agent_store_catalog",
+          package_trust: "agent_store_package_trust",
+          enterprise_context: "agent_store_enterprise_context",
+          quality_evidence: "agentops_summary_missing",
+          l5_gate: "agentops_summary_missing"
+        },
+        actual_l5_display_allowed: false,
+        audit_id: "audit-security.policy-guard",
+        trace_id: "trace-rec-policy-guard"
+      }
+    },
+    "developer.release-notes": {
+      schema_version: "1.0",
+      trace_id: "trace-rec-release-notes",
+      error_code: "OK",
+      recommendation: {
+        agent_id: "developer.release-notes",
+        agent_version: "0.1.2",
+        recommendation_state: "eligible_pending_verification",
+        verdict: "可作为候选方案评估；后端事实源补齐前不展示实际 L5。",
+        why_recommended: [
+          "catalog_capability:Developer Tool",
+          "installability:installable",
+          "use_case:release note",
+          "use_case:change summary"
+        ],
+        why_not: [
+          "package_trust_not_verified",
+          "trusted_evidence_incomplete"
+        ],
+        missing_evidence: [
+          "agentops_summary",
+          "fresh_agentops_quality_summary"
+        ],
+        trust_blockers: [
+          {
+            blocker_id: "l5_unavailable_without_agentops_summary",
+            source: "agentops",
+            severity: "warning",
+            can_ignore: false
+          }
+        ],
+        next_best_action: {
+          action_id: "request_agentops_summary",
+          target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true,
+          href: "#review-developer.release-notes",
+          message_key: "recommendation.actions.requestAgentOpsSummary"
+        },
+        source_of_truth: {
+          catalog: "agent_store_catalog",
+          package_trust: "agent_store_package_trust",
+          enterprise_context: "agent_store_enterprise_context",
+          quality_evidence: "agentops_summary_missing",
+          l5_gate: "agentops_summary_missing"
+        },
+        actual_l5_display_allowed: false,
+        audit_id: "audit-developer.release-notes",
+        trace_id: "trace-rec-release-notes"
+      }
+    }
+  },
   officialView: {
     display_name: "Ai_AutoSDLC",
     summary: "官方 SDLC Framework Capability，支持本地 standalone 使用与企业证据闭环接入。",
