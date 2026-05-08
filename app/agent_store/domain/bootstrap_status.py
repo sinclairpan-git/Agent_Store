@@ -110,9 +110,7 @@ class BootstrapStatus:
                 action.to_dict() for action in self.secondary_actions
             ]
         recommendations = self.recommended_actions or (self.primary_action,)
-        data["recommended_actions"] = [
-            action.to_dict() for action in recommendations
-        ]
+        data["recommended_actions"] = [action.to_dict() for action in recommendations]
         if self.timeline:
             data["timeline"] = [step.to_dict() for step in self.timeline]
         if self.source_conflicts:
@@ -447,9 +445,13 @@ def _timeline_for_status(
     proof_status = (
         "completed"
         if credential_ready or agentops_blocked
-        else "blocked" if blocked else "running"
+        else "blocked"
+        if blocked
+        else "running"
     )
-    credential_status = "blocked" if blocked else "completed" if credential_ready else "pending"
+    credential_status = (
+        "blocked" if blocked else "completed" if credential_ready else "pending"
+    )
     signature_status = (
         "blocked" if blocked else "completed" if signature_verified else "pending"
     )

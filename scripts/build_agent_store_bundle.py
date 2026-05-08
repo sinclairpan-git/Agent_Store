@@ -52,9 +52,13 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", default=".", help="Repository root.")
     parser.add_argument("--dist", default="dist-agent-store", help="Output directory.")
-    parser.add_argument("--version", default=os.environ.get("AGENT_STORE_VERSION", "0.1.0"))
+    parser.add_argument(
+        "--version", default=os.environ.get("AGENT_STORE_VERSION", "0.1.0")
+    )
     parser.add_argument("--asset-os", default=os.environ.get("AGENT_STORE_ASSET_OS"))
-    parser.add_argument("--asset-arch", default=os.environ.get("AGENT_STORE_ASSET_ARCH"))
+    parser.add_argument(
+        "--asset-arch", default=os.environ.get("AGENT_STORE_ASSET_ARCH")
+    )
     return parser.parse_args()
 
 
@@ -118,7 +122,9 @@ def collect_files(root: Path) -> list[Path]:
     return sorted(files, key=lambda path: path.relative_to(root).as_posix())
 
 
-def build_manifest(root: Path, files: list[Path], version: str, asset_os: str, asset_arch: str) -> dict[str, object]:
+def build_manifest(
+    root: Path, files: list[Path], version: str, asset_os: str, asset_arch: str
+) -> dict[str, object]:
     return {
         "schema_version": 1,
         "name": "Agent Store",
@@ -131,8 +137,16 @@ def build_manifest(root: Path, files: list[Path], version: str, asset_os: str, a
     }
 
 
-def write_zip(archive_path: Path, root: Path, base_dir: str, files: list[Path], manifest: dict[str, object]) -> None:
-    with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+def write_zip(
+    archive_path: Path,
+    root: Path,
+    base_dir: str,
+    files: list[Path],
+    manifest: dict[str, object],
+) -> None:
+    with zipfile.ZipFile(
+        archive_path, "w", compression=zipfile.ZIP_DEFLATED
+    ) as archive:
         for path in files:
             archive.write(path, f"{base_dir}/{path.relative_to(root).as_posix()}")
         archive.writestr(
@@ -141,12 +155,24 @@ def write_zip(archive_path: Path, root: Path, base_dir: str, files: list[Path], 
         )
 
 
-def write_tar(archive_path: Path, root: Path, base_dir: str, files: list[Path], manifest: dict[str, object]) -> None:
+def write_tar(
+    archive_path: Path,
+    root: Path,
+    base_dir: str,
+    files: list[Path],
+    manifest: dict[str, object],
+) -> None:
     with tarfile.open(archive_path, "w:gz", format=tarfile.PAX_FORMAT) as archive:
         for path in files:
-            archive.add(path, arcname=f"{base_dir}/{path.relative_to(root).as_posix()}", recursive=False)
+            archive.add(
+                path,
+                arcname=f"{base_dir}/{path.relative_to(root).as_posix()}",
+                recursive=False,
+            )
 
-        payload = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode("utf-8")
+        payload = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode(
+            "utf-8"
+        )
         info = tarfile.TarInfo(f"{base_dir}/bundle-manifest.json")
         info.size = len(payload)
         info.mtime = int(datetime.now(timezone.utc).timestamp())
@@ -178,7 +204,12 @@ def main() -> int:
     write_zip(zip_path, root, base_dir, files, manifest)
     write_tar(tar_path, root, base_dir, files, manifest)
 
-    print(json.dumps({"zip": str(zip_path), "tar_gz": str(tar_path), "files": len(files)}, indent=2))
+    print(
+        json.dumps(
+            {"zip": str(zip_path), "tar_gz": str(tar_path), "files": len(files)},
+            indent=2,
+        )
+    )
     return 0
 
 

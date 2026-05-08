@@ -124,8 +124,7 @@ def test_bootstrap_status_timeline_uses_agentops_credential_echo() -> None:
         "device_id_match",
     ]
     assert (
-        payload["conflict_resolution"]
-        == "agentops_bootstrap_echo_after_identity_match"
+        payload["conflict_resolution"] == "agentops_bootstrap_echo_after_identity_match"
     )
     assert payload["timeline"][2]["status"] == "completed"
     assert payload["timeline"][3]["source"] == "agentops"
@@ -214,7 +213,9 @@ def test_bootstrap_status_timeline_marks_signature_verified_complete() -> None:
     assert payload["step_status"] == "completed"
     assert payload["source_of_truth"] == "agentops"
     assert "signature_test_verified" in payload["entry_evidence"]
-    assert payload["conflict_resolution"] == "agentops_signature_verified_is_display_fact"
+    assert (
+        payload["conflict_resolution"] == "agentops_signature_verified_is_display_fact"
+    )
     assert payload["timeline"][4]["status"] == "completed"
     assert payload["primary_action"]["action_id"] == "view_agentops_evidence"
     assert [action["action_id"] for action in payload["recommended_actions"]] == [
