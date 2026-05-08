@@ -168,16 +168,6 @@ class RecommendationStateModel:
                 href=f"/api/v1/agents/{self.source.agent.agent_id}/activate",
                 message_key="recommendation.actions.startActivation",
             )
-        if self.missing_evidence or self.l5_gate_blocks_recommendation:
-            return ActionDescriptor(
-                action_id="request_agentops_summary",
-                target_system="agentops",
-                enabled=True,
-                requires_permission=True,
-                audit_required=True,
-                href=f"/agentops/summaries/{self.source.agent.agent_id}",
-                message_key="recommendation.actions.requestAgentOpsSummary",
-            )
         if self.source.installability == "standalone_only":
             return ActionDescriptor(
                 action_id="open_standalone_readme",
@@ -187,6 +177,16 @@ class RecommendationStateModel:
                 audit_required=False,
                 href=f"/docs/agents/{self.source.agent.agent_id}/standalone",
                 message_key="recommendation.actions.openStandaloneReadme",
+            )
+        if self.missing_evidence or self.l5_gate_blocks_recommendation:
+            return ActionDescriptor(
+                action_id="request_agentops_summary",
+                target_system="agentops",
+                enabled=True,
+                requires_permission=True,
+                audit_required=True,
+                href=f"/agentops/summaries/{self.source.agent.agent_id}",
+                message_key="recommendation.actions.requestAgentOpsSummary",
             )
         return ActionDescriptor(
             action_id="start_install",

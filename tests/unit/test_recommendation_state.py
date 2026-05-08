@@ -163,6 +163,20 @@ def test_recommendation_state_standalone_next_action_is_executable() -> None:
     assert action["audit_required"] is False
 
 
+def test_recommendation_state_standalone_action_survives_missing_agentops() -> None:
+    response = build_recommendation_state(
+        source=_source(installability="standalone_only"),
+        trace_id="trace-rec",
+        agentops_summary=None,
+    )
+
+    decision = response["recommendation"]
+    assert decision["recommendation_state"] == "eligible_pending_verification"
+    assert "agentops_summary" in decision["missing_evidence"]
+    assert decision["next_best_action"]["action_id"] == "open_standalone_readme"
+    assert decision["next_best_action"]["target_system"] == "ai_autosdlc_cli"
+
+
 def test_recommendation_state_blocks_catalog_or_package_trust_denials() -> None:
     response = build_recommendation_state(
         source=_source(trust_state="blocked", installability="blocked"),
