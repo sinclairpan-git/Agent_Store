@@ -842,13 +842,13 @@ new window.Vue({
       this.installabilityFilter = value;
     },
     setDiscoveryCollection: function setDiscoveryCollection(value) {
+      var nextAgent;
       this.discoveryCollection = value;
       if (!this.filteredCatalog.some(function includesSelected(agent) {
         return agent.agent_id === this.selectedAgentId;
       }, this)) {
-        this.selectedAgentId = this.filteredCatalog[0]
-          ? this.filteredCatalog[0].agent_id
-          : this.catalog[0].agent_id;
+        nextAgent = this.filteredCatalog[0] || this.catalog[0] || null;
+        this.selectedAgentId = nextAgent ? nextAgent.agent_id : "";
       }
       this.resetActionFeedback(this.selectedAgent);
     },

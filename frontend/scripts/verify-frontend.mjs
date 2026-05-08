@@ -154,6 +154,8 @@ assert(
     && app.includes("discoveryCollections")
     && app.includes("discoveryHighlight")
     && app.includes("setDiscoveryCollection")
+    && app.includes("this.filteredCatalog[0] || this.catalog[0] || null")
+    && app.includes("nextAgent ? nextAgent.agent_id : \"\"")
     && app.includes("recommendationState")
     && app.includes("recommendationVerdict")
     && app.includes("trustBlockers")

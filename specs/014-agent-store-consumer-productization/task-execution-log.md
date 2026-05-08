@@ -10,6 +10,7 @@
 - Agent 卡片改为面向 C 端决策的信息结构，突出适合对象、接入成本、评分/采用度和安装意图。
 - 保持前端可信边界：非官方条目仍不从目录字段推导 AgentOps/L5/signature/credential 结果。
 - 修复集合切换后的反馈状态重置与阻断项重复 key 问题。
+- 根据 Codex Review 修复空目录租户下集合切换 fallback 读取 `catalog[0].agent_id` 的崩溃风险。
 - 修复工作区卡片在 CSS grid 中被同一行强行拉高的问题。
 
 ### 本地验证
