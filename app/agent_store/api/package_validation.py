@@ -103,5 +103,6 @@ def _header_value(headers: Mapping[str, str], name: str) -> str | None:
     normalized = name.lower()
     for key, value in headers.items():
         if key.lower() == normalized:
-            return value
+            stripped = value.strip()
+            return stripped if stripped else None
     return None

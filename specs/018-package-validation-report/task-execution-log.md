@@ -46,6 +46,7 @@
 - 修复第三轮 P2：placeholder token 检测补充嵌入式 `n/a` 识别，避免 `summary pending, n/a for now` 绕过阻断。
 - 修复第四轮 P2：Package Validation idempotency cache 存储与重放均使用防御性深拷贝，避免调用方修改首个 response 后污染后续幂等重放。
 - 修复第五轮 P2：Skill candidate 校验保留原始 `skills[n]` 下标生成字段路径，避免混合非对象条目时修复 Prompt 指向错误 Skill。
+- 修复第六轮 P2：`Idempotency-Key` header 读取时 trim 并拒绝空白值，避免共享空白 key 导致冲突或错误重放。
 
 ### 本地验证
 
@@ -62,3 +63,4 @@
 - Codex Review 修复后专项验证：`uv run pytest tests/unit/test_package_validation.py tests/contract/test_package_validation_api.py -q`：14 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：76 files already formatted。
 - 第四轮 Codex Review 修复后验证：`uv run pytest tests/contract/test_package_validation_api.py -q`：8 passed；`uv run pytest -q`：199 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：76 files already formatted；`python -m ai_sdlc program truth sync --execute --yes`：ready，source inventory 92/92 mapped；`python -m ai_sdlc program truth audit`：ready / fresh；`python -m ai_sdlc run --dry-run`：PASS；`python -m ai_sdlc run`：PASS，Stage close。
 - 第五轮 Codex Review 修复后验证：`uv run pytest tests/unit/test_package_validation.py -q`：11 passed；`uv run pytest -q`：200 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：76 files already formatted；`python -m ai_sdlc program truth sync --execute --yes`：ready，source inventory 92/92 mapped；`python -m ai_sdlc program truth audit`：ready / fresh；`python -m ai_sdlc run --dry-run`：PASS；`python -m ai_sdlc run`：PASS，Stage close。
+- 第六轮 Codex Review 修复后验证：`uv run pytest tests/contract/test_package_validation_api.py -q`：9 passed；`uv run pytest -q`：201 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：76 files already formatted；`python -m ai_sdlc program truth sync --execute --yes`：ready，source inventory 92/92 mapped；`python -m ai_sdlc program truth audit`：ready / fresh；`python -m ai_sdlc run --dry-run`：PASS；`python -m ai_sdlc run`：PASS，Stage close。

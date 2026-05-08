@@ -58,6 +58,20 @@ def test_validate_package_accepts_case_insensitive_idempotency_header() -> None:
     assert body["package_validation"]["validation_status"] == "passed"
 
 
+def test_validate_package_rejects_blank_idempotency_header() -> None:
+    api = PackageValidationAPI()
+
+    status, body = api.validate_package(
+        _payload(),
+        headers={"Idempotency-Key": "   "},
+    )
+
+    assert status == 400
+    assert response_envelope_ok(body)
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["message_key"] == "errors.idempotencyKeyRequired"
+
+
 def test_validate_package_returns_field_level_fix_prompts() -> None:
     api = PackageValidationAPI()
     payload = _payload()
