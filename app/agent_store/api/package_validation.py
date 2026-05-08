@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from collections.abc import Mapping
 from uuid import uuid4
 
@@ -24,6 +25,10 @@ def _identity(payload: Mapping[str, object]) -> str:
         separators=(",", ":"),
         default=str,
     )
+
+
+def _response_copy(response: Mapping[str, object]) -> dict[str, object]:
+    return deepcopy(dict(response))
 
 
 class PackageValidationAPI:
@@ -60,7 +65,7 @@ class PackageValidationAPI:
                     recommended_action_id="use_unique_idempotency_key",
                     trace_id=trace_id,
                 ).to_dict()
-            return 200, stored_response
+            return 200, _response_copy(stored_response)
 
         manifest = payload.get("package_manifest")
         if not isinstance(manifest, Mapping):
@@ -80,8 +85,11 @@ class PackageValidationAPI:
             trace_id=trace_id,
             audit_id=audit_id,
         ).to_response()
-        self._idempotency[idempotency_key] = (request_identity, response)
-        return 200, response
+        self._idempotency[idempotency_key] = (
+            request_identity,
+            _response_copy(response),
+        )
+        return 200, _response_copy(response)
 
 
 def _trace_id(payload: Mapping[str, object]) -> str:

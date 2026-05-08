@@ -101,6 +101,25 @@ def test_validate_package_reuses_idempotent_result() -> None:
     assert retry_body == body
 
 
+def test_validate_package_returns_defensive_idempotency_copies() -> None:
+    api = PackageValidationAPI()
+
+    status, body = api.validate_package(
+        _payload(),
+        headers={"Idempotency-Key": "pkg-018"},
+    )
+    body["package_validation"]["validation_status"] = "tampered"
+    retry_status, retry_body = api.validate_package(
+        _payload(),
+        headers={"Idempotency-Key": "pkg-018"},
+    )
+
+    assert status == 200
+    assert retry_status == 200
+    assert retry_body is not body
+    assert retry_body["package_validation"]["validation_status"] == "passed"
+
+
 def test_validate_package_idempotency_ignores_observability_fields() -> None:
     api = PackageValidationAPI()
 

@@ -79,13 +79,13 @@ specs:
   depends_on:
   - 017-recommendation-state-api-fetch
 truth_snapshot:
-  generated_at: '2026-05-08T15:38:25Z'
+  generated_at: '2026-05-08T15:50:38Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: '8838862'
+  repo_revision: ad2a48f
   authoring_hash: 7723ee8285e4df4ee17071850c8834534c2a25039c26052d10ce5f48c9c99ad2
   source_hashes: {}
-  snapshot_hash: 4408bbeebb6dac2c1e14e648373745e779f279ba289c819743481b9214f246d5
+  snapshot_hash: b800899ad9df8146dce22ece13fb97dda6cd2437cda16a22b3506c21d93602a9
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -93,8 +93,8 @@ truth_snapshot:
     mapped_sources: 92
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 28
-    deferred_signal_count: 90
+    phase_signal_count: 29
+    deferred_signal_count: 92
     non_goal_signal_count: 18
     layer_totals:
       blueprint: 1
@@ -920,8 +920,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 018-package-validation-report
-      phase_signal_count: 6
-      deferred_signal_count: 7
+      phase_signal_count: 7
+      deferred_signal_count: 9
       non_goal_signal_count: 0
     - path: specs/018-package-validation-report/development-summary.md
       source_type: development_summary
