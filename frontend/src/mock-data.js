@@ -13,6 +13,25 @@ window.AgentStoreMock = {
       enterprise_state: "required_unactivated",
       evidence_level: "L5-capable",
       installability: "activation_required",
+      audience: "研发团队 / 交付负责人",
+      discovery_bucket: ["recommended", "enterprise", "guarded"],
+      product_tags: ["官方", "治理闭环", "SDLC"],
+      rating_summary: "4.9 / 5",
+      adoption: "2.4k workspaces",
+      setup_minutes: 12,
+      recommendation_score: 98,
+      discovery_reasons: [
+        "官方框架能力，适合需要阶段门禁和证据闭环的团队",
+        "支持 standalone 使用，企业接入后可进入 AgentOps 可信回显"
+      ],
+      prerequisites: [
+        "需要确认企业策略",
+        "真实 L5 展示等待 AgentOps 签名测试"
+      ],
+      expected_outcomes: [
+        "生成可追溯阶段证据",
+        "把安装、断言和 AgentOps 回显串成闭环"
+      ],
       use_cases: ["governed delivery", "trusted evidence loop", "manual activation preview"],
       primary_action: {
         action_id: "start_enterprise_activation",
@@ -34,6 +53,25 @@ window.AgentStoreMock = {
       enterprise_state: "active",
       evidence_level: "L3-summary",
       installability: "installable",
+      audience: "平台工程 / AgentOps 管理员",
+      discovery_bucket: ["recommended", "ready", "guarded"],
+      product_tags: ["证据同步", "可安装", "AgentOps"],
+      rating_summary: "4.6 / 5",
+      adoption: "840 installs",
+      setup_minutes: 8,
+      recommendation_score: 91,
+      discovery_reasons: [
+        "适合把本地运行证据同步到 AgentOps 的团队",
+        "已具备安装路径，但仍需要后端事实源确认可信摘要"
+      ],
+      prerequisites: [
+        "需要 AgentOps tenant",
+        "需要 reporter credential"
+      ],
+      expected_outcomes: [
+        "回传诊断摘要",
+        "支撑签名测试事件"
+      ],
       use_cases: ["evidence upload", "signature test", "diagnostic sync"],
       primary_action: {
         action_id: "start_install",
@@ -55,6 +93,25 @@ window.AgentStoreMock = {
       enterprise_state: "disabled",
       evidence_level: "pending",
       installability: "blocked",
+      audience: "安全团队 / 策略管理员",
+      discovery_bucket: ["guarded", "enterprise"],
+      product_tags: ["策略", "阻断说明", "恢复动作"],
+      rating_summary: "待发布",
+      adoption: "design preview",
+      setup_minutes: 18,
+      recommendation_score: 42,
+      discovery_reasons: [
+        "用于解释运行时策略阻断和恢复路径",
+        "当前目录状态阻断，不允许直接安装"
+      ],
+      prerequisites: [
+        "需要 Security 复核",
+        "需要补充可信证据"
+      ],
+      expected_outcomes: [
+        "展示阻断原因",
+        "引导 Owner / Security 复核"
+      ],
       use_cases: ["runtime policy", "denied reason", "recovery action"],
       primary_action: {
         action_id: "view_policy",
@@ -76,6 +133,25 @@ window.AgentStoreMock = {
       enterprise_state: "detected_optional",
       evidence_level: "L2-static",
       installability: "installable",
+      audience: "开发者 / Release Owner",
+      discovery_bucket: ["ready", "local"],
+      product_tags: ["发布说明", "本地增强", "低接入成本"],
+      rating_summary: "4.4 / 5",
+      adoption: "320 installs",
+      setup_minutes: 5,
+      recommendation_score: 78,
+      discovery_reasons: [
+        "适合需要从变更证据生成发布说明的团队",
+        "企业接入可选，能先以本地工作流试用"
+      ],
+      prerequisites: [
+        "需要可读变更记录",
+        "需要人工复核输出内容"
+      ],
+      expected_outcomes: [
+        "生成发布摘要",
+        "减少手工整理检查结果"
+      ],
       use_cases: ["release note", "change summary", "check evidence"],
       primary_action: {
         action_id: "start_install",

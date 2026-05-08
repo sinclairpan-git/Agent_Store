@@ -38,9 +38,14 @@
     pending: "待补充",
     accepted: "已受理",
     pending_enterprise_activation: "等待企业激活",
+    waiting_for_enterprise_activation: "等待企业激活",
+    waiting_for_installation_bootstrap: "等待安装记录",
+    waiting_for_standalone_access: "等待本地路径",
+    waiting_for_catalog_review: "等待目录复核",
     pending_catalog_review: "等待目录复核",
     standalone_ready: "可本地使用",
     ready_to_install: "可开始安装",
+    ready: "就绪",
     ready_to_create: "可创建安装记录",
     installation_created: "安装记录已创建",
     ready_to_issue: "可签发安装断言",
@@ -49,6 +54,10 @@
     pending_signature_test: "等待签名测试",
     running: "进行中",
     completed: "已完成",
+    fresh: "新鲜",
+    approved: "已批准",
+    warn: "提示",
+    allowed: "已允许",
     degraded: "降级",
     unavailable: "暂无事实源",
     materialized: "已物化，待验证加载",
@@ -70,8 +79,13 @@
     non_official_catalog_item_has_no_agentops_summary: "非官方条目缺少 AgentOps 摘要",
     agent_store: "Agent Store",
     agentops: "AgentOps",
+    ai_autosdlc: "Ai_AutoSDLC",
     ai_autosdlc_cli: "Ai_AutoSDLC CLI",
     evidence_vault: "Evidence Vault",
+    enterprise_activation: "企业激活",
+    installation_bootstrap: "安装启动",
+    standalone_access: "本地访问",
+    catalog_review: "目录复核",
     start_enterprise_activation: "开始企业激活",
     open_standalone_readme: "查看本地使用说明",
     request_enterprise_activation: "申请企业激活",
@@ -87,7 +101,18 @@
     review_catalog_blocker: "查看阻断原因",
     view_policy: "查看策略说明",
     view_blocking_policy: "查看阻断策略",
-    adjust_catalog_filters: "调整筛选条件"
+    adjust_catalog_filters: "调整筛选条件",
+    recommended: "优先推荐",
+    eligible: "可评估",
+    eligible_pending_verification: "待验证候选",
+    needs_activation: "需激活",
+    insufficient_evidence: "证据不足",
+    empty: "暂无结果",
+    yes: "可忽略",
+    no: "不可忽略",
+    catalog_curated_preview: "目录策展预览",
+    agentops_echo_and_catalog: "AgentOps 回显 + 目录",
+    catalog_filter: "目录筛选"
   };
 
   function displayLabel(value) {
@@ -249,11 +274,12 @@
       '  <dl class="agent-card__facts">',
       '    <sdlc-metric-row label="版本" :value="agent.version" tone="neutral"></sdlc-metric-row>',
       '    <sdlc-metric-row label="可信" :value="agent.trust_state" :tone="trustTone"></sdlc-metric-row>',
-      '    <sdlc-metric-row label="企业状态" :value="agent.enterprise_state" :tone="enterpriseTone"></sdlc-metric-row>',
-      '    <sdlc-metric-row label="证据" :value="agent.evidence_level" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="适合" :value="agent.audience" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="接入" :value="setupLabel" :tone="setupTone"></sdlc-metric-row>',
       '  </dl>',
+      '  <ul class="agent-card__tags"><li v-for="tag in productTags" :key="tag">{{ tag }}</li></ul>',
       '  <div class="agent-card__footer">',
-      '    <span>{{ agent.owner_team }}</span>',
+      '    <span>{{ productMeta }}</span>',
       '    <span class="agent-card__intent">{{ displayLabel(agent.installability) }}</span>',
       '  </div>',
       '</article>'
@@ -276,6 +302,35 @@
           return "warning";
         }
         return "info";
+      },
+      setupLabel: function setupLabel() {
+        if (this.agent.setup_minutes === null || this.agent.setup_minutes === undefined || this.agent.setup_minutes === "") {
+          return "待评估";
+        }
+        return this.agent.setup_minutes + " 分钟";
+      },
+      setupTone: function setupTone() {
+        if (this.agent.installability === "blocked") {
+          return "danger";
+        }
+        if (
+          this.agent.setup_minutes !== null
+          && this.agent.setup_minutes !== undefined
+          && this.agent.setup_minutes !== ""
+          && this.agent.setup_minutes <= 8
+        ) {
+          return "success";
+        }
+        return "warning";
+      },
+      productTags: function productTags() {
+        return Array.isArray(this.agent.product_tags) ? this.agent.product_tags : [];
+      },
+      productMeta: function productMeta() {
+        return [
+          this.agent.rating_summary || "暂无评分",
+          this.agent.adoption || "暂无采用数据"
+        ].join(" · ");
       }
     },
     methods: {
@@ -283,12 +338,49 @@
     }
   });
 
+  Vue.component("sdlc-discovery-rail", {
+    props: ["collections", "stats", "highlight", "activeCollection"],
+    template: [
+      '<section class="discovery-rail" aria-labelledby="discovery-title">',
+      '  <div class="discovery-rail__main">',
+      '    <div class="product-mark">Agent Store</div>',
+      '    <h1 id="discovery-title">发现适合当前交付任务的 Agent</h1>',
+      '    <p>{{ highlight.verdict }}</p>',
+      '    <div class="discovery-rail__highlight">',
+      '      <span>当前推荐</span>',
+      '      <strong>{{ highlight.title }}</strong>',
+      '      <small>{{ highlight.reason }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <div class="discovery-rail__side">',
+      '    <dl class="discovery-stats">',
+      '      <div><dt>目录</dt><dd>{{ stats.total }}</dd></div>',
+      '      <div><dt>推荐</dt><dd>{{ stats.recommended }}</dd></div>',
+      '      <div><dt>可开始</dt><dd>{{ stats.ready }}</dd></div>',
+      '      <div><dt>需关注</dt><dd>{{ stats.guarded }}</dd></div>',
+      '    </dl>',
+      '    <div class="collection-tabs" aria-label="发现集合">',
+      '      <button v-for="collection in collections" :key="collection.id" type="button"',
+      '        :class="{ active: collection.active }"',
+      '        @click="$emit(\'set-discovery-collection\', collection.id)">',
+      '        <span>{{ collection.label }}</span><strong>{{ collection.count }}</strong>',
+      '      </button>',
+      '    </div>',
+      '  </div>',
+      '</section>'
+    ].join("")
+  });
+
   Vue.component("sdlc-agent-catalog", {
     props: [
       "catalog",
       "catalogTotalCount",
+      "discoveryCollections",
+      "discoveryStats",
+      "discoveryHighlight",
       "selectedAgentId",
       "searchQuery",
+      "discoveryCollection",
       "typeFilter",
       "trustFilter",
       "installabilityFilter"
@@ -297,8 +389,8 @@
       '<section class="catalog-band" aria-labelledby="catalog-title">',
       '  <div class="catalog-heading">',
       '    <div>',
-      '      <div class="product-mark">Agent Store</div>',
-      '      <h1 id="catalog-title">Agent 应用列表</h1>',
+      '      <div class="product-mark">目录</div>',
+      '      <h2 id="catalog-title">Agent 应用列表</h2>',
       '    </div>',
       '    <p>{{ catalog.length }} / {{ catalogTotalCount }} 个条目，覆盖 Agent、Skill、Framework Capability 与运行时治理组件。</p>',
       '  </div>',
@@ -358,9 +450,9 @@
       '  </div>',
       '  <ol class="workflow-steps">',
       '    <li v-for="step in workflow.steps" :key="step.step_id" :class="\'workflow-step--\' + step.state">',
-      '      <span class="workflow-step__state">{{ step.state }}</span>',
+      '      <span class="workflow-step__state">{{ displayLabel(step.state) }}</span>',
       '      <span class="workflow-step__label">{{ step.label }}</span>',
-      '      <span class="workflow-step__owner">{{ step.owner_system }}</span>',
+      '      <span class="workflow-step__owner">{{ displayLabel(step.owner_system) }}</span>',
       '    </li>',
       '  </ol>',
       '  <div class="install-panel__footer">',
@@ -385,6 +477,9 @@
         }
         return "danger";
       }
+    },
+    methods: {
+      displayLabel: displayLabel
     }
   });
 
@@ -538,12 +633,15 @@
     template: [
       '<ol class="bootstrap-timeline" aria-label="bootstrap timeline">',
       '  <li v-for="step in timeline" :key="step.step_id" :class="\'bootstrap-timeline__item--\' + step.status">',
-      '    <span class="bootstrap-timeline__status">{{ step.status }}</span>',
+      '    <span class="bootstrap-timeline__status">{{ displayLabel(step.status) }}</span>',
       '    <span class="bootstrap-timeline__label">{{ step.label }}</span>',
-      '    <span class="bootstrap-timeline__owner">{{ step.owner_system }}</span>',
+      '    <span class="bootstrap-timeline__owner">{{ displayLabel(step.owner_system) }}</span>',
       '  </li>',
       '</ol>'
-    ].join("")
+    ].join(""),
+    methods: {
+      displayLabel: displayLabel
+    }
   });
 
   Vue.component("sdlc-source-facts", {
@@ -565,12 +663,82 @@
     ].join("")
   });
 
+  Vue.component("sdlc-recommendation-decision", {
+    props: ["decision"],
+    template: [
+      '<section class="workspace-section decision-panel">',
+      '  <div class="section-heading">',
+      '    <h2>推荐决策</h2>',
+      '    <sdlc-status-chip :label="decision.recommendation_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="decision-panel__verdict">{{ decision.verdict }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="事实源" :value="decision.source_of_truth" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Trace" :value="decision.trace_id" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="decision.audit_id" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row v-if="decision.diagnostic_ref" label="诊断" :value="decision.diagnostic_ref" tone="neutral"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="decision-grid">',
+      '    <div>',
+      '      <span>为什么选</span>',
+      '      <ul><li v-for="item in decision.why_recommended" :key="item">{{ item }}</li></ul>',
+      '    </div>',
+      '    <div>',
+      '      <span>需要确认</span>',
+      '      <ul><li v-for="item in decision.requirements" :key="item">{{ item }}</li></ul>',
+      '    </div>',
+      '    <div>',
+      '      <span>完成后</span>',
+      '      <ul><li v-for="item in decision.outcomes" :key="item">{{ item }}</li></ul>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="allBlockers.length">',
+      '    <li v-for="item in allBlockers" :key="item">{{ displayLabel(item) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>下一步</span>',
+      '    <sdlc-action-button :action="decision.next_best_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.decision.recommendation_state === "recommended") {
+          return "success";
+        }
+        if (
+          this.decision.recommendation_state === "needs_activation"
+          || this.decision.recommendation_state === "eligible_pending_verification"
+        ) {
+          return "warning";
+        }
+        if (this.decision.recommendation_state === "blocked") {
+          return "danger";
+        }
+        return "info";
+      },
+      allBlockers: function allBlockers() {
+        return Array.from(new Set([]
+          .concat(this.decision.why_not || [])
+          .concat(this.decision.missing_evidence || [])
+          .concat(this.decision.trust_blockers || [])));
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
       "catalogTotalCount",
+      "discoveryCollections",
+      "discoveryStats",
+      "discoveryHighlight",
       "selectedAgentId",
       "searchQuery",
+      "discoveryCollection",
       "typeFilter",
       "trustFilter",
       "installabilityFilter",
@@ -581,6 +749,7 @@
       "stateDecision",
       "installWorkflow",
       "installRequest",
+      "recommendationDecision",
       "installHandoff",
       "assertionHandoff",
       "actionFeedback"
@@ -588,6 +757,13 @@
     template: [
       '<main class="workspace">',
       '  <sdlc-enterprise-provider-meta></sdlc-enterprise-provider-meta>',
+      '  <sdlc-discovery-rail',
+      '    :collections="discoveryCollections"',
+      '    :stats="discoveryStats"',
+      '    :highlight="discoveryHighlight"',
+      '    :active-collection="discoveryCollection"',
+      '    @set-discovery-collection="$emit(\'set-discovery-collection\', $event)"',
+      '  ></sdlc-discovery-rail>',
       '  <sdlc-agent-catalog',
       '    :catalog="catalog"',
       '    :catalog-total-count="catalogTotalCount"',
@@ -604,7 +780,7 @@
       '  ></sdlc-agent-catalog>',
       '  <header class="topbar">',
       '    <div>',
-      '      <div class="product-mark">官方详情</div>',
+      '      <div class="product-mark">Agent 详情</div>',
       '      <h1>{{ view.display_name }}</h1>',
       '    </div>',
       '    <nav class="topbar__actions" aria-label="primary actions">',
@@ -614,6 +790,7 @@
       '  </header>',
       '  <sdlc-action-feedback :feedback="actionFeedback"></sdlc-action-feedback>',
       '  <div class="workspace-grid">',
+      '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-section title="应用事实">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="类型" :value="view.capability_type" tone="info"></sdlc-metric-row>',

@@ -52,6 +52,10 @@ function actionMessage(action) {
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
+function arrayOrEmpty(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
@@ -59,6 +63,7 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       selectedAgentId: "framework.ai-autosdlc",
       searchQuery: "",
+      discoveryCollection: "recommended",
       typeFilter: "all",
       trustFilter: "all",
       installabilityFilter: "all",
@@ -102,8 +107,70 @@ new window.Vue({
         ) {
           return false;
         }
+        if (
+          this.discoveryCollection !== "all"
+          && (!agent.discovery_bucket || agent.discovery_bucket.indexOf(this.discoveryCollection) < 0)
+        ) {
+          return false;
+        }
         return true;
       }, this);
+    },
+    discoveryCollections: function discoveryCollections() {
+      var buckets = [
+        { id: "recommended", label: "推荐", tone: "success" },
+        { id: "ready", label: "可开始", tone: "info" },
+        { id: "local", label: "本地可用", tone: "neutral" },
+        { id: "enterprise", label: "企业激活", tone: "warning" },
+        { id: "guarded", label: "治理关注", tone: "danger" },
+        { id: "all", label: "全部", tone: "neutral" }
+      ];
+      return buckets.map(function mapBucket(bucket) {
+        var count = bucket.id === "all"
+          ? this.catalog.length
+          : this.catalog.filter(function hasBucket(agent) {
+            return agent.discovery_bucket && agent.discovery_bucket.indexOf(bucket.id) >= 0;
+          }).length;
+        return Object.assign({}, bucket, {
+          count: count,
+          active: this.discoveryCollection === bucket.id
+        });
+      }, this);
+    },
+    discoveryStats: function discoveryStats() {
+      return {
+        total: this.catalog.length,
+        recommended: this.discoveryCollections.find(function findCollection(item) {
+          return item.id === "recommended";
+        }).count,
+        ready: this.catalog.filter(function ready(agent) {
+          return agent.installability === "installable" || agent.installability === "standalone_only";
+        }).length,
+        guarded: this.catalog.filter(function guarded(agent) {
+          return agent.trust_state === "blocked" || agent.trust_state === "warning";
+        }).length
+      };
+    },
+    discoveryHighlight: function discoveryHighlight() {
+      var selected = this.selectedAgent;
+      if (!selected) {
+        return {
+          title: "暂无可推荐 Agent",
+          verdict: "调整筛选后查看目录结果",
+          reason: "当前筛选没有返回可展示条目。",
+          next_action: {
+            action_id: "adjust_catalog_filters",
+            target_system: "agent_store",
+            enabled: false
+          }
+        };
+      }
+      return {
+        title: selected.display_name,
+        verdict: this.recommendationVerdict(selected),
+        reason: arrayOrEmpty(selected.discovery_reasons)[0] || selected.summary,
+        next_action: selected.primary_action
+      };
     },
     selectedAgent: function selectedAgent() {
       return this.filteredCatalog.find(function findAgent(agent) {
@@ -359,6 +426,42 @@ new window.Vue({
       return {
         state: this.selectedAgent.installability === "blocked" ? "blocked" : "degraded",
         degraded_reason: "catalog_summary_requires_runtime_verification"
+      };
+    },
+    selectedRecommendationDecision: function selectedRecommendationDecision() {
+      var agent = this.selectedAgent;
+      var request = this.selectedInstallationRequest;
+      var bootstrap = this.selectedBootstrap;
+      if (!agent) {
+        return {
+          recommendation_state: "empty",
+          verdict: "当前没有可评估 Agent",
+          source_of_truth: "catalog_filter",
+          trace_id: "trace-catalog-empty-filter",
+          audit_id: "audit-empty-filter",
+          why_recommended: [],
+          why_not: ["catalog_filters_returned_no_agents"],
+          missing_evidence: [],
+          trust_blockers: [],
+          requirements: ["调整筛选条件"],
+          outcomes: [],
+          next_best_action: this.selectedView.primary_action
+        };
+      }
+      return {
+        recommendation_state: this.recommendationState(agent),
+        verdict: this.recommendationVerdict(agent),
+        source_of_truth: agent.agent_id === "framework.ai-autosdlc" ? "agentops_echo_and_catalog" : "catalog_curated_preview",
+        trace_id: this.selectedAgentops.trace_id,
+        audit_id: request.audit_id,
+        why_recommended: arrayOrEmpty(agent.discovery_reasons),
+        why_not: this.recommendationRisks(agent),
+        missing_evidence: this.selectedAgentops.quality_evidence.missing_evidence || [],
+        trust_blockers: this.trustBlockers(agent),
+        requirements: arrayOrEmpty(agent.prerequisites),
+        outcomes: arrayOrEmpty(agent.expected_outcomes),
+        next_best_action: request.next_action,
+        diagnostic_ref: bootstrap.diagnostic_ref
       };
     },
     selectedInstallWorkflow: function selectedInstallWorkflow() {
@@ -712,7 +815,9 @@ new window.Vue({
         };
       }
       return {
-        assertion_state: "waiting_for_" + handoff.handoff_state,
+        assertion_state: handoff.handoff_state.indexOf("waiting_for_") === 0
+          ? handoff.handoff_state
+          : "waiting_for_" + handoff.handoff_state,
         installation_id: handoff.installation_id,
         audience: "agentops",
         nonce: "not-issued",
@@ -726,6 +831,7 @@ new window.Vue({
   methods: {
     selectAgent: function selectAgent(agent) {
       this.selectedAgentId = agent.agent_id;
+      this.resetActionFeedback(agent);
     },
     updateSearch: function updateSearch(value) {
       this.searchQuery = value;
@@ -738,6 +844,82 @@ new window.Vue({
     },
     setInstallabilityFilter: function setInstallabilityFilter(value) {
       this.installabilityFilter = value;
+    },
+    setDiscoveryCollection: function setDiscoveryCollection(value) {
+      var nextAgent;
+      this.discoveryCollection = value;
+      if (!this.filteredCatalog.some(function includesSelected(agent) {
+        return agent.agent_id === this.selectedAgentId;
+      }, this)) {
+        nextAgent = this.filteredCatalog[0] || this.catalog[0] || null;
+        this.selectedAgentId = nextAgent ? nextAgent.agent_id : "";
+      }
+      this.resetActionFeedback(this.selectedAgent);
+    },
+    recommendationState: function recommendationState(agent) {
+      if (agent.installability === "blocked" || agent.trust_state === "blocked") {
+        return "blocked";
+      }
+      if (agent.installability === "activation_required") {
+        return "needs_activation";
+      }
+      if (agent.trust_state === "warning") {
+        return "eligible_pending_verification";
+      }
+      return arrayOrEmpty(agent.discovery_bucket).indexOf("recommended") >= 0 ? "recommended" : "eligible";
+    },
+    recommendationVerdict: function recommendationVerdict(agent) {
+      var state = this.recommendationState(agent);
+      if (state === "recommended") {
+        return "推荐优先试用，企业可信状态仍以 AgentOps 回显为准";
+      }
+      if (state === "needs_activation") {
+        return "适合企业接入，需先完成激活与签名测试";
+      }
+      if (state === "eligible_pending_verification") {
+        return "可提交安装申请，但可信摘要仍待后端事实源确认";
+      }
+      if (state === "blocked") {
+        return "当前不建议安装，需要先处理治理阻断";
+      }
+      return "可作为候选方案评估";
+    },
+    recommendationRisks: function recommendationRisks(agent) {
+      var risks = [];
+      if (agent.agent_id !== "framework.ai-autosdlc") {
+        risks.push("缺少 AgentOps 摘要时不展示实际 L5");
+      }
+      if (agent.installability === "activation_required") {
+        risks.push("企业激活完成前只能预览下一步");
+      }
+      if (agent.installability === "blocked") {
+        risks.push("目录状态已阻断，必须复核后才能继续");
+      }
+      return risks;
+    },
+    trustBlockers: function trustBlockers(agent) {
+      var blockers = [];
+      if (agent.trust_state !== "trusted") {
+        blockers.push(agent.trust_state);
+      }
+      if (agent.installability === "activation_required") {
+        blockers.push("pending_enterprise_activation");
+      }
+      if (agent.agent_id !== "framework.ai-autosdlc") {
+        blockers.push("agentops_summary_unavailable");
+      }
+      return blockers;
+    },
+    resetActionFeedback: function resetActionFeedback(agent) {
+      this.actionFeedback = {
+        state: "idle",
+        action_id: agent ? agent.primary_action.action_id : "adjust_catalog_filters",
+        audit_id: "",
+        boundary: "本阶段只提交可审计预览，不执行真实安装，不本地判定 AgentOps 结果。",
+        message: agent
+          ? "已选择 " + agent.display_name + "，可查看推荐决策和下一步动作。"
+          : "选择一个 Agent 后，可查看本地使用或企业激活路径。"
+      };
     },
     invokeAction: function invokeAction(action) {
       var agent = this.selectedAgent;

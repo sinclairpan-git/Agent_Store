@@ -58,39 +58,43 @@ specs:
   path: specs/013-bootstrap-remediation-actions
   depends_on:
   - 012-bootstrap-source-of-truth-contract
+- id: 014-agent-store-consumer-productization
+  path: specs/014-agent-store-consumer-productization
+  depends_on:
+  - 013-bootstrap-remediation-actions
 truth_snapshot:
-  generated_at: '2026-05-08T06:14:47Z'
+  generated_at: '2026-05-08T07:56:52Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 603ba48
-  authoring_hash: ab15f098f56dab93964f8b1ddd129f6cffdd4f7ee28209a757979889d65f3232
+  repo_revision: e00d6a8
+  authoring_hash: a5215c7a68609210fb964deb9b2a91bef1b9effb5aedb97d4b73118579ab9f14
   source_hashes: {}
-  snapshot_hash: 59a2f55170b7092f24b3de17fab4b2b753ed75e89a772a8db193f16979a9c7e4
+  snapshot_hash: 1ab3164dd263a981454b3ee7c55eacb3299bc54d7a391dfca67dd4d214fcdc45
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 67
-    mapped_sources: 67
+    total_sources: 72
+    mapped_sources: 72
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 22
-    deferred_signal_count: 72
-    non_goal_signal_count: 13
+    deferred_signal_count: 73
+    non_goal_signal_count: 14
     layer_totals:
       blueprint: 1
-      spec: 13
-      plan: 13
-      tasks: 13
-      execution: 13
-      close: 13
+      spec: 14
+      plan: 14
+      tasks: 14
+      execution: 14
+      close: 14
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 13
-      plan: 13
-      tasks: 13
-      execution: 13
-      close: 13
+      spec: 14
+      plan: 14
+      tasks: 14
+      execution: 14
+      close: 14
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -686,6 +690,51 @@ truth_snapshot:
       mapping_ref: 013-bootstrap-remediation-actions
       phase_signal_count: 0
       deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/014-agent-store-consumer-productization/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 014-agent-store-consumer-productization
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/014-agent-store-consumer-productization/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 014-agent-store-consumer-productization
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/014-agent-store-consumer-productization/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 014-agent-store-consumer-productization
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/014-agent-store-consumer-productization/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 014-agent-store-consumer-productization
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/014-agent-store-consumer-productization/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 014-agent-store-consumer-productization
+      phase_signal_count: 0
+      deferred_signal_count: 1
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
