@@ -59,22 +59,22 @@ specs:
   depends_on:
   - 012-bootstrap-source-of-truth-contract
 truth_snapshot:
-  generated_at: '2026-05-08T05:28:25Z'
+  generated_at: '2026-05-08T06:14:47Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 5b8bf0e
+  repo_revision: 603ba48
   authoring_hash: ab15f098f56dab93964f8b1ddd129f6cffdd4f7ee28209a757979889d65f3232
   source_hashes: {}
-  snapshot_hash: 03bd28ed303f32c7ade9c81e60c396a0e93e1399211cea06c59c3fb9421cdd21
+  snapshot_hash: 59a2f55170b7092f24b3de17fab4b2b753ed75e89a772a8db193f16979a9c7e4
   computed_capabilities: []
   source_inventory:
     state: complete
     total_sources: 67
     mapped_sources: 67
     unmapped_sources: 0
-    missing_sources: 2
+    missing_sources: 0
     phase_signal_count: 22
-    deferred_signal_count: 68
+    deferred_signal_count: 72
     non_goal_signal_count: 13
     layer_totals:
       blueprint: 1
@@ -89,8 +89,8 @@ truth_snapshot:
       spec: 13
       plan: 13
       tasks: 13
-      execution: 12
-      close: 12
+      execution: 13
+      close: 13
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -358,7 +358,7 @@ truth_snapshot:
       source_type: execution_log
       truth_layer: execution
       mapped: true
-      exists: false
+      exists: true
       mapping_ref: 006-installation-assertion-handoff
       phase_signal_count: 0
       deferred_signal_count: 0
@@ -367,10 +367,10 @@ truth_snapshot:
       source_type: development_summary
       truth_layer: close
       mapped: true
-      exists: false
+      exists: true
       mapping_ref: 006-installation-assertion-handoff
       phase_signal_count: 0
-      deferred_signal_count: 0
+      deferred_signal_count: 4
       non_goal_signal_count: 0
     - path: specs/007-cross-project-contract-appendix/spec.md
       source_type: spec_doc
