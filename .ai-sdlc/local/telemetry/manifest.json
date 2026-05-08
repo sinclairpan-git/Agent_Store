@@ -23,6 +23,10 @@
     "wr_8daa5cefecaa4c62": {
       "goal_session_id": "gs_20dbfea261ea4a19",
       "path": "sessions/gs_20dbfea261ea4a19/runs/wr_8daa5cefecaa4c62"
+    },
+    "wr_e3a156b704b64250": {
+      "goal_session_id": "gs_9e645a219eed4313",
+      "path": "sessions/gs_9e645a219eed4313/runs/wr_e3a156b704b64250"
     }
   },
   "sessions": {
@@ -44,11 +48,17 @@
     "gs_78caf26d12b34e73": {
       "path": "sessions/gs_78caf26d12b34e73"
     },
+    "gs_7d31917c0c1746aa": {
+      "path": "sessions/gs_7d31917c0c1746aa"
+    },
     "gs_81e201a62b084dd5": {
       "path": "sessions/gs_81e201a62b084dd5"
     },
     "gs_94202fd498cc40dc": {
       "path": "sessions/gs_94202fd498cc40dc"
+    },
+    "gs_9e645a219eed4313": {
+      "path": "sessions/gs_9e645a219eed4313"
     }
   },
   "steps": {
@@ -56,6 +66,11 @@
       "goal_session_id": "gs_20dbfea261ea4a19",
       "path": "sessions/gs_20dbfea261ea4a19/runs/wr_8daa5cefecaa4c62/steps/st_261bb95d7db84d4b",
       "workflow_run_id": "wr_8daa5cefecaa4c62"
+    },
+    "st_2b655d30c2b543a5": {
+      "goal_session_id": "gs_9e645a219eed4313",
+      "path": "sessions/gs_9e645a219eed4313/runs/wr_e3a156b704b64250/steps/st_2b655d30c2b543a5",
+      "workflow_run_id": "wr_e3a156b704b64250"
     },
     "st_4fa3eb2c1fdf463b": {
       "goal_session_id": "gs_81e201a62b084dd5",
