@@ -1,12 +1,12 @@
 pipeline_started_at: '2026-05-04T05:48:26+00:00'
-pipeline_last_updated: '2026-05-08T06:14:48+00:00'
+pipeline_last_updated: '2026-05-08T10:06:31+00:00'
 current_stage: close
 feature:
-  id: 008-agentops-handoff-producer-contract
-  spec_dir: specs/008-agentops-handoff-producer-contract
-  design_branch: design/008-agentops-handoff-producer-contract-docs
-  feature_branch: feature/008-agentops-handoff-producer-contract-dev
-  current_branch: feature/008-agentops-handoff-producer-contract
+  id: 016-recommendation-state-frontend-consumer
+  spec_dir: specs/016-recommendation-state-frontend-consumer
+  design_branch: design/016-recommendation-state-frontend-consumer-docs
+  feature_branch: feature/016-recommendation-state-frontend-consumer-dev
+  current_branch: codex/recommendation-frontend-016
   docs_baseline_ref: ''
   docs_baseline_at: ''
 multi_agent:
@@ -70,9 +70,24 @@ completed_stages:
 - stage: close
   completed_at: '2026-05-08T06:14:48+00:00'
   artifacts: []
+- stage: close
+  completed_at: '2026-05-08T09:51:35+00:00'
+  artifacts: []
+- stage: close
+  completed_at: '2026-05-08T09:56:28+00:00'
+  artifacts: []
+- stage: close
+  completed_at: '2026-05-08T09:59:02+00:00'
+  artifacts: []
+- stage: close
+  completed_at: '2026-05-08T10:03:00+00:00'
+  artifacts: []
+- stage: close
+  completed_at: '2026-05-08T10:06:31+00:00'
+  artifacts: []
 execute_progress: null
 ai_decisions_count: 0
 execution_mode: auto
-linked_wi_id: 008-agentops-handoff-producer-contract
-linked_plan_uri: specs/008-agentops-handoff-producer-contract/spec.md
-last_synced_at: '2026-05-07T12:47:22+00:00'
+linked_wi_id: 016-recommendation-state-frontend-consumer
+linked_plan_uri: specs/016-recommendation-state-frontend-consumer/spec.md
+last_synced_at: '2026-05-08T09:59:02+00:00'

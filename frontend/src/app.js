@@ -56,11 +56,70 @@ function arrayOrEmpty(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function recommendationEnvelopeFor(envelopes, agentId) {
+  if (!envelopes || !agentId) {
+    return null;
+  }
+  return envelopes[agentId] || null;
+}
+
+function fallbackRecommendationState(agent) {
+  if (agent.installability === "blocked" || agent.trust_state === "blocked") {
+    return "blocked";
+  }
+  if (agent.installability === "activation_required") {
+    return "needs_activation";
+  }
+  return "eligible_pending_verification";
+}
+
+function normalizeRecommendationDecision(envelope, agent, request, bootstrap) {
+  var decision = envelope && envelope.error_code === "OK" ? envelope.recommendation : null;
+  var fallbackState = fallbackRecommendationState(agent);
+  if (!decision) {
+    return {
+      agent_id: agent.agent_id,
+      agent_version: agent.version,
+      recommendation_state: fallbackState,
+      verdict: "缺少后端 recommendation_state envelope，前端只保留目录候选展示。",
+      source_of_truth: {
+        catalog: "agent_store_catalog",
+        recommendation: "frontend_fallback_no_recommendation_envelope"
+      },
+      trace_id: "trace-missing-recommendation-" + safeId(agent.agent_id),
+      audit_id: request.audit_id,
+      why_recommended: arrayOrEmpty(agent.discovery_reasons),
+      why_not: ["recommendation_state_envelope_missing"],
+      missing_evidence: ["recommendation_state_api"],
+      trust_blockers: [
+        {
+          blocker_id: "recommendation_state_envelope_missing",
+          source: "agent_store",
+          severity: fallbackState === "blocked" ? "blocked" : "warning",
+          can_ignore: false
+        }
+      ],
+      actual_l5_display_allowed: false,
+      requirements: arrayOrEmpty(agent.prerequisites),
+      outcomes: arrayOrEmpty(agent.expected_outcomes),
+      next_best_action: request.next_action,
+      diagnostic_ref: bootstrap.diagnostic_ref
+    };
+  }
+  return Object.assign({}, decision, {
+    requirements: arrayOrEmpty(agent.prerequisites),
+    outcomes: arrayOrEmpty(agent.expected_outcomes),
+    next_best_action: decision.next_best_action || request.next_action,
+    diagnostic_ref: bootstrap.diagnostic_ref
+  });
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
     return {
       catalog: window.AgentStoreMock.agentCatalog,
+      recommendationStates: window.AgentStoreMock.recommendationStates,
       selectedAgentId: "framework.ai-autosdlc",
       searchQuery: "",
       discoveryCollection: "recommended",
@@ -432,11 +491,15 @@ new window.Vue({
       var agent = this.selectedAgent;
       var request = this.selectedInstallationRequest;
       var bootstrap = this.selectedBootstrap;
+      var envelope;
       if (!agent) {
         return {
           recommendation_state: "empty",
           verdict: "当前没有可评估 Agent",
-          source_of_truth: "catalog_filter",
+          source_of_truth: {
+            catalog: "catalog_filter",
+            recommendation: "not_applicable"
+          },
           trace_id: "trace-catalog-empty-filter",
           audit_id: "audit-empty-filter",
           why_recommended: [],
@@ -448,21 +511,8 @@ new window.Vue({
           next_best_action: this.selectedView.primary_action
         };
       }
-      return {
-        recommendation_state: this.recommendationState(agent),
-        verdict: this.recommendationVerdict(agent),
-        source_of_truth: agent.agent_id === "framework.ai-autosdlc" ? "agentops_echo_and_catalog" : "catalog_curated_preview",
-        trace_id: this.selectedAgentops.trace_id,
-        audit_id: request.audit_id,
-        why_recommended: arrayOrEmpty(agent.discovery_reasons),
-        why_not: this.recommendationRisks(agent),
-        missing_evidence: this.selectedAgentops.quality_evidence.missing_evidence || [],
-        trust_blockers: this.trustBlockers(agent),
-        requirements: arrayOrEmpty(agent.prerequisites),
-        outcomes: arrayOrEmpty(agent.expected_outcomes),
-        next_best_action: request.next_action,
-        diagnostic_ref: bootstrap.diagnostic_ref
-      };
+      envelope = recommendationEnvelopeFor(this.recommendationStates, agent.agent_id);
+      return normalizeRecommendationDecision(envelope, agent, request, bootstrap);
     },
     selectedInstallWorkflow: function selectedInstallWorkflow() {
       var agent = this.selectedAgent;

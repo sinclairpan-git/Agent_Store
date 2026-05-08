@@ -91,7 +91,9 @@ def test_recommendation_state_api_degrades_when_agentops_unavailable() -> None:
     assert decision["actual_l5_display_allowed"] is False
     assert "agentops_summary" in decision["missing_evidence"]
     assert "fresh_agentops_quality_summary" in decision["missing_evidence"]
-    assert decision["source_of_truth"]["quality_evidence"] == "agentops_summary_degraded"
+    assert (
+        decision["source_of_truth"]["quality_evidence"] == "agentops_summary_degraded"
+    )
     assert decision["next_best_action"]["action_id"] == "request_agentops_summary"
 
 
