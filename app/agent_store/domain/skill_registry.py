@@ -181,7 +181,12 @@ def build_skill_publish_decision(
             source_of_truth=_source_of_truth(),
         )
 
-    event = _event("skill_published", record, "Skill published after approval.")
+    event = _event(
+        "skill_published",
+        record,
+        "Skill published after approval.",
+        audit_id=audit_id,
+    )
     return SkillRegistryDecision(
         trace_id=trace_id,
         audit_id=audit_id,
@@ -234,7 +239,13 @@ def build_skill_transition_decision(
         registry_status=status,
         skill=updated,
         issues=(),
-        event=_event(event_type, updated, reason, evidence_ref=_evidence_ref(payload)),
+        event=_event(
+            event_type,
+            updated,
+            reason,
+            audit_id=audit_id,
+            evidence_ref=_evidence_ref(payload),
+        ),
         next_action=_next_action(next_action, enabled=True),
         agentops_consumption=_agentops_consumption("notice_required"),
         source_of_truth=_source_of_truth(),
@@ -412,10 +423,11 @@ def _event(
     record: SkillRegistryRecord,
     reason: str,
     *,
+    audit_id: str,
     evidence_ref: str = "",
 ) -> SkillRegistryEvent:
     return SkillRegistryEvent(
-        event_id=f"{event_type}-{record.skill_id}-{record.skill_version}",
+        event_id=f"{event_type}-{record.skill_id}-{record.skill_version}-{audit_id}",
         event_type=event_type,
         skill_id=record.skill_id,
         skill_version=record.skill_version,

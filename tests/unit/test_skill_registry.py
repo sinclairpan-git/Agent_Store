@@ -35,6 +35,8 @@ def test_skill_registry_publish_decision_creates_agentops_consumable_record() ->
 
     assert decision.registry_status == "published"
     assert decision.skill is not None
+    assert decision.event is not None
+    assert decision.event.event_id.endswith("-audit-019")
     assert decision.skill.registry_key == "repo.detect@1.0.0"
     assert decision.next_action["action_id"] == "notify_agentops_consumers"
     assert decision.agentops_consumption["sync_status"] == "ready_for_consumption"
@@ -218,3 +220,42 @@ def test_skill_registry_security_revoke_can_reassert_terminal_status() -> None:
     assert decision.skill.status == "security_revoked"
     assert decision.event is not None
     assert decision.event.evidence_ref == "incident://SEC-019-retry"
+
+
+def test_skill_registry_repeated_security_revoke_emits_distinct_event_ids() -> None:
+    record = SkillRegistryRecord(
+        skill_id="repo.detect",
+        skill_version="1.0.0",
+        schema_ref="schemas/repo.detect.v1.json",
+        risk_level="medium",
+        package_id="pkg-guided-uploader-001",
+        agent_id="agent.guided-uploader",
+        owner_team="Agent Platform",
+        owner_user="owner@example.com",
+        status="security_revoked",
+        status_reason="Unsafe schema",
+    )
+    payload = {
+        "transition_action": "security_revoke",
+        "reason": "Reassert unsafe schema",
+        "evidence_ref": "incident://SEC-019-retry",
+    }
+
+    first = build_skill_transition_decision(
+        record,
+        payload,
+        trace_id="trace-019-a",
+        audit_id="audit-019-a",
+    )
+    second = build_skill_transition_decision(
+        record,
+        payload,
+        trace_id="trace-019-b",
+        audit_id="audit-019-b",
+    )
+
+    assert first.event is not None
+    assert second.event is not None
+    assert first.event.event_id != second.event.event_id
+    assert first.event.event_id.endswith("-audit-019-a")
+    assert second.event.event_id.endswith("-audit-019-b")

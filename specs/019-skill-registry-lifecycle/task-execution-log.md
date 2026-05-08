@@ -22,6 +22,7 @@
 - 修复 Codex Review P2：`security_revoked` 终态 guard 仅阻止降级为 `deprecated`，允许带证据的重复 `security_revoke` 重新确认最强安全状态。
 - 修复 Codex Review P2：缺失 Skill 的 transition 404 标记为 `retryable=True`，与不缓存该可恢复结果的语义一致。
 - 修复 Codex Review P2：OpenAPI `SkillStatusTransitionRequest` 使用条件 schema 要求 `security_revoke` 至少携带一种证据引用。
+- 修复 Codex Review P2：Skill lifecycle event id 纳入 `audit_id`，避免重复合法 transition 被下游按静态 event id 折叠。
 
 ### 双专家对抗评审
 
@@ -48,6 +49,7 @@
 - missing-skill transition response 明确提示客户端可重试，避免 eventually consistent 发布路径中断。
 - `publish_skill` 与 `update_skill_status` 保留各自操作内的 idempotency conflict 保护，但跨操作复用 key 不再互相污染。
 - 已 security_revoked 的 Skill 仍不可降级为 deprecated；重复 security revoke 作为安全状态 reassertion 成功并继续输出 AgentOps notice。
+- 重复 lifecycle transition 在不同 audit context 下生成不同 `event_id`，保留完整审计历史。
 - AgentOps 字段只表达 `consumer`、`contract`、`sync_status` 与 `notify_required`，不成为写入事实源。
 
 ### 本地验证
