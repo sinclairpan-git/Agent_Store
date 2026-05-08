@@ -42,12 +42,21 @@ function responseJson(res, status, body) {
 }
 
 export function resolveRecommendationStateRequest(requestUrl) {
+  let parsed;
   let pathname;
   try {
-    const parsed = new URL(requestUrl, `http://127.0.0.1:${port}`);
+    parsed = new URL(requestUrl, `http://127.0.0.1:${port}`);
     pathname = decodeURIComponent(parsed.pathname);
   } catch {
-    return { status: 400, body: { error_code: "BAD_REQUEST", message: "bad request" } };
+    return {
+      status: 400,
+      body: {
+        schema_version: "agent-store.phase1.v1",
+        trace_id: "trace-bad-recommendation-state-request",
+        error_code: "BAD_REQUEST",
+        message: "bad request"
+      }
+    };
   }
 
   const match = pathname.match(/^\/api\/v1\/agents\/([^/]+)\/recommendation-state$/);
@@ -56,6 +65,8 @@ export function resolveRecommendationStateRequest(requestUrl) {
   }
 
   const agentId = match[1];
+  const requestTraceId = parsed.searchParams.get("trace_id")
+    || "trace-recommendation-state-" + encodeURIComponent(agentId);
   let states;
   try {
     states = JSON.parse(fs.readFileSync(recommendationStatesPath, "utf8"));
@@ -64,6 +75,7 @@ export function resolveRecommendationStateRequest(requestUrl) {
       status: 503,
       body: {
         schema_version: "agent-store.phase1.v1",
+        trace_id: requestTraceId,
         error_code: "RECOMMENDATION_STATE_SOURCE_UNAVAILABLE",
         recommended_action_id: "retry_recommendation_state_fetch"
       }
@@ -75,6 +87,7 @@ export function resolveRecommendationStateRequest(requestUrl) {
       status: 404,
       body: {
         schema_version: "agent-store.phase1.v1",
+        trace_id: requestTraceId,
         error_code: "AGENT_NOT_FOUND",
         recommended_action_id: "adjust_catalog_filters",
         details: { agent_id: agentId }
@@ -82,7 +95,12 @@ export function resolveRecommendationStateRequest(requestUrl) {
     };
   }
 
-  return { status: 200, body: states[agentId] };
+  const body = JSON.parse(JSON.stringify(states[agentId]));
+  body.trace_id = requestTraceId;
+  if (body.recommendation) {
+    body.recommendation.trace_id = requestTraceId;
+  }
+  return { status: 200, body };
 }
 
 function handleRequest(req, res) {

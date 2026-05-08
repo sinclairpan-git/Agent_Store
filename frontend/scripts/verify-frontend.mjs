@@ -393,16 +393,22 @@ const recommendationPath = resolveRecommendationStateRequest(
 assert(recommendationPath.status === 200, "server must resolve recommendation state API");
 assert(
   recommendationPath.body.error_code === "OK"
+    && recommendationPath.body.trace_id === "trace-ui"
     && recommendationPath.body.recommendation.agent_id === "framework.ai-autosdlc",
   "recommendation state API must return a backend-shaped envelope"
 );
+assert(
+  recommendationPath.body.recommendation.trace_id === "trace-ui",
+  "recommendation state API success envelopes must propagate request trace_id"
+);
 
 const missingRecommendationPath = resolveRecommendationStateRequest(
-  "/api/v1/agents/missing.agent/recommendation-state"
+  "/api/v1/agents/missing.agent/recommendation-state?trace_id=trace-missing"
 );
 assert(missingRecommendationPath.status === 404, "server must govern missing recommendation states");
 assert(
-  missingRecommendationPath.body.error_code === "AGENT_NOT_FOUND",
+  missingRecommendationPath.body.error_code === "AGENT_NOT_FOUND"
+    && missingRecommendationPath.body.trace_id === "trace-missing",
   "missing recommendation state API responses must stay envelope-shaped"
 );
 
