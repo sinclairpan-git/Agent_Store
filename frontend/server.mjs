@@ -89,6 +89,9 @@ export function resolveRecommendationStateRequest(requestUrl) {
         schema_version: "agent-store.phase1.v1",
         trace_id: requestTraceId,
         error_code: "AGENT_NOT_FOUND",
+        message_key: "errors.agentNotFound",
+        severity: "error",
+        retryable: false,
         recommended_action_id: "adjust_catalog_filters",
         details: { agent_id: agentId }
       }

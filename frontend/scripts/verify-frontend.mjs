@@ -411,6 +411,13 @@ assert(
     && missingRecommendationPath.body.trace_id === "trace-missing",
   "missing recommendation state API responses must stay envelope-shaped"
 );
+assert(
+  missingRecommendationPath.body.message_key === "errors.agentNotFound"
+    && missingRecommendationPath.body.severity === "error"
+    && missingRecommendationPath.body.retryable === false
+    && missingRecommendationPath.body.recommended_action_id === "adjust_catalog_filters",
+  "missing recommendation state API responses must include governed error fields"
+);
 
 const nonApiPath = resolveRecommendationStateRequest("/src/app.js");
 assert(nonApiPath === null, "recommendation API resolver must ignore static asset paths");
