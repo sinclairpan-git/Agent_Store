@@ -305,6 +305,8 @@ components:
           type: boolean
         reason:
           type: string
+        evidence_ref:
+          type: string
     NextAction:
       type: object
       required: [action_id, target_system, audit_required, enabled]

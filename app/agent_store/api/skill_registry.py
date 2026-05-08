@@ -155,9 +155,7 @@ class SkillRegistryAPI:
         audit_id = str(payload_map.get("audit_id") or f"audit-{uuid4().hex[:12]}")
         existing = self.repository.get(skill_id, skill_version)
         if existing is None:
-            return self._store_and_return(
-                idempotency_key,
-                request_identity,
+            return (
                 404,
                 ErrorResponse(
                     error_code="SKILL_NOT_FOUND",

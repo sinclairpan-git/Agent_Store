@@ -16,6 +16,8 @@
 - 新增单元与合同测试，覆盖 publish、blocked publish、idempotency、duplicate conflict、deprecate、security revoke 和 evidence requirement。
 - 补强边界测试：非对象 request body、重复发布、unknown Skill transition、security_revoked 终态和 security revoke event evidence ref。
 - 修复 Codex Review P1：`security_revoke` 现在接受 OpenAPI `SkillStatusTransitionRequest.evidence_ref` 作为安全证据引用，并保持 `security_evidence_ref` 与 `incident_id` 兼容。
+- 修复 Codex Review P1：`SKILL_NOT_FOUND` transition response 不再写入幂等缓存，避免 Skill 后续发布后同一 transition retry 仍回放 stale 404。
+- 修复 Codex Review P2：OpenAPI `SkillRegistryEvent` 补充响应字段 `evidence_ref`，与 security revoke event 实现保持一致。
 
 ### 双专家对抗评审
 
@@ -37,6 +39,7 @@
 - 高风险 Skill 发布继续要求 `risk_justification`，保持与 Package Validation 一致。
 - security_revoked 要求 incident 或 evidence reference，并作为 terminal safety signal。
 - OpenAPI documented `evidence_ref`、`security_evidence_ref`、`incident_id` 三种证据入口统一归一到 lifecycle event `evidence_ref`。
+- 缺失 Skill 的 transition 404 是可恢复查找结果，不作为幂等事实缓存；真正执行后的 lifecycle transition 继续保持幂等。
 - AgentOps 字段只表达 `consumer`、`contract`、`sync_status` 与 `notify_required`，不成为写入事实源。
 
 ### 本地验证
@@ -54,3 +57,6 @@
 - Codex Review P1 修复后复验：`uv run pytest tests/unit/test_skill_registry.py tests/contract/test_skill_registry_api.py tests/contract/test_contract_files_parse.py -q`：26 passed。
 - Codex Review P1 修复后复验：`uv run pytest -q`：223 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：80 files already formatted。
 - Codex Review P1 修复后复验：`python -m ai_sdlc program truth sync --execute --yes`：ready，source inventory 97/97 mapped；`python -m ai_sdlc program truth audit`：ready / fresh；`python -m ai_sdlc run --dry-run`：PASS；`python -m ai_sdlc run`：PASS。
+- Codex Review stale 404 / OpenAPI evidence response 修复后复验：`uv run pytest tests/contract/test_skill_registry_api.py tests/contract/test_contract_files_parse.py tests/unit/test_skill_registry.py -q`：27 passed。
+- Codex Review stale 404 / OpenAPI evidence response 修复后复验：`uv run pytest -q`：224 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：80 files already formatted。
+- Codex Review stale 404 / OpenAPI evidence response 修复后复验：`python -m ai_sdlc program truth sync --execute --yes`：ready，source inventory 97/97 mapped；`python -m ai_sdlc program truth audit`：ready / fresh；`python -m ai_sdlc run --dry-run`：PASS；`python -m ai_sdlc run`：PASS。

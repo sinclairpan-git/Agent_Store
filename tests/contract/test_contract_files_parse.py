@@ -93,9 +93,8 @@ def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> No
     ]["patch"]
     decision = contract["components"]["schemas"]["SkillRegistryDecision"]
     record = contract["components"]["schemas"]["SkillRegistryRecord"]
-    event_types = contract["components"]["schemas"]["SkillRegistryEvent"]["properties"][
-        "event_type"
-    ]["enum"]
+    event = contract["components"]["schemas"]["SkillRegistryEvent"]
+    event_types = event["properties"]["event_type"]["enum"]
     error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
         "error_code"
     ]["enum"]
@@ -105,6 +104,7 @@ def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> No
     assert "agentops_consumption" in decision["required"]
     assert "registry_key" in record["required"]
     assert "skill_security_revoked" in event_types
+    assert "evidence_ref" in event["properties"]
     assert "SKILL_VERSION_ALREADY_PUBLISHED" in error_codes
     assert "SKILL_NOT_FOUND" in error_codes
 

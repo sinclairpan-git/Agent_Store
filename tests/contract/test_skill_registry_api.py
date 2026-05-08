@@ -165,6 +165,33 @@ def test_transition_returns_not_found_for_unknown_skill_version() -> None:
     assert body["error_code"] == "SKILL_NOT_FOUND"
 
 
+def test_transition_not_found_does_not_poison_idempotent_retry() -> None:
+    api = SkillRegistryAPI()
+    transition = {
+        "transition_action": "deprecate",
+        "reason": "Superseded by v1.1.0",
+    }
+
+    missing_status, missing_body = api.update_skill_status(
+        "repo.detect",
+        "1.0.0",
+        transition,
+        headers={"Idempotency-Key": "skill-019-eventual-transition"},
+    )
+    api.publish_skill(_payload(), headers={"Idempotency-Key": "skill-019-publish"})
+    retry_status, retry_body = api.update_skill_status(
+        "repo.detect",
+        "1.0.0",
+        transition,
+        headers={"Idempotency-Key": "skill-019-eventual-transition"},
+    )
+
+    assert missing_status == 404
+    assert missing_body["error_code"] == "SKILL_NOT_FOUND"
+    assert retry_status == 200
+    assert retry_body["skill_registry"]["registry_status"] == "deprecated"
+
+
 def test_security_revocation_requires_evidence_ref() -> None:
     api = SkillRegistryAPI()
     api.publish_skill(_payload(), headers={"Idempotency-Key": "skill-019-publish"})
