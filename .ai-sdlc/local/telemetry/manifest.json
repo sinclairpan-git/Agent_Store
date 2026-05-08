@@ -19,11 +19,21 @@
     "wr_73770f487b974195": {
       "goal_session_id": "gs_94202fd498cc40dc",
       "path": "sessions/gs_94202fd498cc40dc/runs/wr_73770f487b974195"
+    },
+    "wr_8daa5cefecaa4c62": {
+      "goal_session_id": "gs_20dbfea261ea4a19",
+      "path": "sessions/gs_20dbfea261ea4a19/runs/wr_8daa5cefecaa4c62"
     }
   },
   "sessions": {
     "gs_1acbcc8e01fe42c7": {
       "path": "sessions/gs_1acbcc8e01fe42c7"
+    },
+    "gs_20dbfea261ea4a19": {
+      "path": "sessions/gs_20dbfea261ea4a19"
+    },
+    "gs_2496aaf94fec46fe": {
+      "path": "sessions/gs_2496aaf94fec46fe"
     },
     "gs_5f8f262e677b4566": {
       "path": "sessions/gs_5f8f262e677b4566"
@@ -42,6 +52,11 @@
     }
   },
   "steps": {
+    "st_261bb95d7db84d4b": {
+      "goal_session_id": "gs_20dbfea261ea4a19",
+      "path": "sessions/gs_20dbfea261ea4a19/runs/wr_8daa5cefecaa4c62/steps/st_261bb95d7db84d4b",
+      "workflow_run_id": "wr_8daa5cefecaa4c62"
+    },
     "st_4fa3eb2c1fdf463b": {
       "goal_session_id": "gs_81e201a62b084dd5",
       "path": "sessions/gs_81e201a62b084dd5/runs/wr_49d02a51da3c443e/steps/st_4fa3eb2c1fdf463b",
