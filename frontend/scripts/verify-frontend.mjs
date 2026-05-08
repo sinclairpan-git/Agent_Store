@@ -140,7 +140,7 @@ for (const requiredField of [
 }
 assert(
   mockData.includes("recommendationStates")
-    && mockData.includes("schema_version")
+    && mockData.includes('schema_version: "agent-store.phase1.v1"')
     && mockData.includes("recommendation_state")
     && mockData.includes("actual_l5_display_allowed")
     && mockData.includes("source_of_truth")

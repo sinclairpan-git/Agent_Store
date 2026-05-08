@@ -163,7 +163,7 @@ window.AgentStoreMock = {
   ],
   recommendationStates: {
     "framework.ai-autosdlc": {
-      schema_version: "1.0",
+      schema_version: "agent-store.phase1.v1",
       trace_id: "trace-rec-framework",
       error_code: "OK",
       recommendation: {
@@ -215,7 +215,7 @@ window.AgentStoreMock = {
       }
     },
     "agentops.evidence-reporter": {
-      schema_version: "1.0",
+      schema_version: "agent-store.phase1.v1",
       trace_id: "trace-rec-evidence-reporter",
       error_code: "OK",
       recommendation: {
@@ -266,7 +266,7 @@ window.AgentStoreMock = {
       }
     },
     "security.policy-guard": {
-      schema_version: "1.0",
+      schema_version: "agent-store.phase1.v1",
       trace_id: "trace-rec-policy-guard",
       error_code: "OK",
       recommendation: {
@@ -324,7 +324,7 @@ window.AgentStoreMock = {
       }
     },
     "developer.release-notes": {
-      schema_version: "1.0",
+      schema_version: "agent-store.phase1.v1",
       trace_id: "trace-rec-release-notes",
       error_code: "OK",
       recommendation: {
