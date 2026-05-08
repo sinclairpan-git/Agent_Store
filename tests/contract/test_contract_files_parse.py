@@ -19,6 +19,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
+        "package-validation.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "trusted-evidence-loop.openapi.yaml",
     }
@@ -53,6 +54,30 @@ def test_create_agent_draft_contract_documents_conflict_errors() -> None:
         "$ref": "#/components/schemas/ErrorResponse"
     }
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_package_validation_contract_documents_fix_report_and_conflict_errors() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "package-validation.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/packages/validation-requests"]["post"]
+    responses = operation["responses"]
+    report = contract["components"]["schemas"]["PackageValidationReport"]
+    manifest = contract["components"]["schemas"]["PackageManifestCandidate"]
+    skill = contract["components"]["schemas"]["SkillCandidate"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert "issues" in report["required"]
+    assert "fix_prompts" in report["required"]
+    assert responses["409"]["content"]["application/json"]["schema"] == {
+        "$ref": "#/components/schemas/ErrorResponse"
+    }
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+    assert "required" not in manifest
+    assert "required" not in skill
 
 
 def test_installation_assertion_contract_documents_error_responses() -> None:

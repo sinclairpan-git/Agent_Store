@@ -74,39 +74,43 @@ specs:
   path: specs/017-recommendation-state-api-fetch
   depends_on:
   - 016-recommendation-state-frontend-consumer
+- id: 018-package-validation-report
+  path: specs/018-package-validation-report
+  depends_on:
+  - 017-recommendation-state-api-fetch
 truth_snapshot:
-  generated_at: '2026-05-08T13:48:29Z'
+  generated_at: '2026-05-08T15:04:55Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 6bbe85f
-  authoring_hash: 2912ee2bd7c9cf39ccac69df1f8b9a789b0c6b87edee2481d4717e957037f0e0
+  repo_revision: 9d12d40
+  authoring_hash: 7723ee8285e4df4ee17071850c8834534c2a25039c26052d10ce5f48c9c99ad2
   source_hashes: {}
-  snapshot_hash: 72d70678588d1ec331da9b1bb0919b6a9d19d47140947b664d921d9c30798c9d
+  snapshot_hash: d7ad9d92908969854505c05ce7feb704a1ab77ef4a9ec07f0fbd59f6fcc8b8df
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 87
-    mapped_sources: 87
+    total_sources: 92
+    mapped_sources: 92
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 22
-    deferred_signal_count: 81
-    non_goal_signal_count: 17
+    deferred_signal_count: 84
+    non_goal_signal_count: 18
     layer_totals:
       blueprint: 1
-      spec: 17
-      plan: 17
-      tasks: 17
-      execution: 17
-      close: 17
+      spec: 18
+      plan: 18
+      tasks: 18
+      execution: 18
+      close: 18
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 17
-      plan: 17
-      tasks: 17
-      execution: 17
-      close: 17
+      spec: 18
+      plan: 18
+      tasks: 18
+      execution: 18
+      close: 18
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -880,6 +884,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 017-recommendation-state-api-fetch
+      phase_signal_count: 0
+      deferred_signal_count: 2
+      non_goal_signal_count: 0
+    - path: specs/018-package-validation-report/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 018-package-validation-report
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/018-package-validation-report/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 018-package-validation-report
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/018-package-validation-report/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 018-package-validation-report
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/018-package-validation-report/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 018-package-validation-report
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/018-package-validation-report/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 018-package-validation-report
       phase_signal_count: 0
       deferred_signal_count: 2
       non_goal_signal_count: 0
