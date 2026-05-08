@@ -88,6 +88,26 @@ def test_validate_package_reuses_idempotent_result() -> None:
     assert retry_body == body
 
 
+def test_validate_package_idempotency_ignores_observability_fields() -> None:
+    api = PackageValidationAPI()
+
+    status, body = api.validate_package(
+        _payload(),
+        headers={"Idempotency-Key": "pkg-018"},
+    )
+    retry = _payload()
+    retry["trace_id"] = "trace-package-retry"
+    retry["audit_id"] = "audit-package-retry"
+    retry_status, retry_body = api.validate_package(
+        retry,
+        headers={"Idempotency-Key": "pkg-018"},
+    )
+
+    assert status == 200
+    assert retry_status == 200
+    assert retry_body == body
+
+
 def test_validate_package_rejects_idempotency_conflict() -> None:
     api = PackageValidationAPI()
     api.validate_package(_payload(), headers={"Idempotency-Key": "pkg-018"})

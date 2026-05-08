@@ -13,7 +13,17 @@ def new_trace_id() -> str:
 
 
 def _identity(payload: Mapping[str, object]) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str)
+    idempotent_payload = {
+        key: value
+        for key, value in payload.items()
+        if key not in {"trace_id", "audit_id"}
+    }
+    return json.dumps(
+        idempotent_payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
 
 
 class PackageValidationAPI:

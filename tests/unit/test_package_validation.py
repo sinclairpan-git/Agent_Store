@@ -66,6 +66,36 @@ def test_package_validation_blocks_placeholder_and_missing_owner() -> None:
     )
 
 
+def test_package_validation_placeholder_detection_uses_tokens() -> None:
+    manifest = _manifest()
+    manifest["summary"] = "A methodology assistant for release reviews."
+
+    report = build_package_validation_report(
+        manifest,
+        trace_id="trace-018",
+        audit_id="audit-018",
+    )
+
+    assert report.validation_status == "passed"
+    assert not any(
+        issue.issue_id == "PLACEHOLDER_VALUE_BLOCKED" for issue in report.issues
+    )
+
+
+def test_package_validation_blocks_placeholder_word_token() -> None:
+    manifest = _manifest()
+    manifest["summary"] = "TODO: describe package before review."
+
+    report = build_package_validation_report(
+        manifest,
+        trace_id="trace-018",
+        audit_id="audit-018",
+    )
+
+    assert report.validation_status == "validation_failed"
+    assert any(issue.issue_id == "PLACEHOLDER_VALUE_BLOCKED" for issue in report.issues)
+
+
 def test_package_validation_requires_high_risk_skill_justification() -> None:
     manifest = _manifest()
     manifest["skills"] = [

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -193,7 +194,7 @@ def _placeholder_issues(
     issues: list[PackageValidationIssue] = []
     for field in ("display_name", "summary", "entrypoint", "owner_team", "owner_user"):
         value = _string(manifest.get(field))
-        if value.lower() in PLACEHOLDER_VALUES or "todo" in value.lower():
+        if _contains_placeholder_token(value):
             issues.append(
                 PackageValidationIssue(
                     issue_id="PLACEHOLDER_VALUE_BLOCKED",
@@ -206,6 +207,13 @@ def _placeholder_issues(
                 )
             )
     return tuple(issues)
+
+
+def _contains_placeholder_token(value: str) -> bool:
+    normalized = value.lower().strip()
+    if normalized in PLACEHOLDER_VALUES:
+        return True
+    return bool(set(re.findall(r"[a-z0-9]+", normalized)) & PLACEHOLDER_VALUES)
 
 
 def _skill_issues(manifest: Mapping[str, object]) -> tuple[PackageValidationIssue, ...]:

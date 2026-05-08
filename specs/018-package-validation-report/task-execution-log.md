@@ -35,6 +35,12 @@
 - 新增 `candidate-package` fallback，保证完全不完整候选包仍返回稳定 report shape。
 - 增加测试锁定不完整 manifest / skill 也必须进入 validation report，而不是被 contract 层提前拒绝。
 
+### Codex Review 修复
+
+- 修复 P1：Package Validation idempotency fingerprint 排除 `trace_id` / `audit_id` 等观测字段，同一 `Idempotency-Key` 重试时只要业务 payload 相同即可返回原始 200 response。
+- 修复 P2：placeholder 检测改为 exact / token matching，避免 `methodology` 等合法文本因包含 `todo` 子串被误判为 blocked。
+- 新增回归测试覆盖 trace/audit 变化下的幂等重试、合法文本不误阻断、`TODO:` token 仍阻断。
+
 ### 本地验证
 
 - `uv run pytest tests/unit/test_package_validation.py tests/contract/test_package_validation_api.py tests/contract/test_contract_files_parse.py -q`：15 passed。
@@ -47,3 +53,4 @@
 - `python -m ai_sdlc run --dry-run`：PASS。
 - `python -m ai_sdlc run`：PASS，Stage close。
 - 对抗评审合议优化后专项验证：`uv run pytest tests/unit/test_package_validation.py tests/contract/test_package_validation_api.py tests/contract/test_contract_files_parse.py -q`：17 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：76 files already formatted。
+- Codex Review 修复后专项验证：`uv run pytest tests/unit/test_package_validation.py tests/contract/test_package_validation_api.py -q`：14 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：76 files already formatted。
