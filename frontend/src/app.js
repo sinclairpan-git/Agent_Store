@@ -68,13 +68,24 @@ function recommendationStateApiUrl(agentId) {
     + "/recommendation-state?trace_id=trace-ui-" + safeId(agentId);
 }
 
+function fallbackRecommendationState(agent) {
+  if (agent.installability === "blocked" || agent.trust_state === "blocked") {
+    return "blocked";
+  }
+  if (agent.installability === "activation_required") {
+    return "needs_activation";
+  }
+  return "eligible_pending_verification";
+}
+
 function normalizeRecommendationDecision(envelope, agent, request, bootstrap) {
   var decision = envelope && envelope.error_code === "OK" ? envelope.recommendation : null;
+  var fallbackState = fallbackRecommendationState(agent);
   if (!decision) {
     return {
       agent_id: agent.agent_id,
       agent_version: agent.version,
-      recommendation_state: "eligible_pending_verification",
+      recommendation_state: fallbackState,
       verdict: "缺少后端 recommendation_state envelope，前端只保留目录候选展示。",
       source_of_truth: {
         catalog: "agent_store_catalog",
@@ -89,7 +100,7 @@ function normalizeRecommendationDecision(envelope, agent, request, bootstrap) {
         {
           blocker_id: "recommendation_state_envelope_missing",
           source: "agent_store",
-          severity: "warning",
+          severity: fallbackState === "blocked" ? "blocked" : "warning",
           can_ignore: false
         }
       ],
