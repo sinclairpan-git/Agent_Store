@@ -37,10 +37,21 @@ class PackageValidationAPI:
 
     def validate_package(
         self,
-        payload: Mapping[str, object],
+        payload: object,
         *,
         headers: Mapping[str, str],
     ) -> tuple[int, dict[str, object]]:
+        if not isinstance(payload, Mapping):
+            return 400, ErrorResponse(
+                error_code="VALIDATION_ERROR",
+                message_key="errors.validationError",
+                severity="error",
+                retryable=True,
+                recommended_action_id="send_object_request_body",
+                trace_id=new_trace_id(),
+                details={"reason": "request body must be an object"},
+            ).to_dict()
+
         trace_id = _trace_id(payload)
         idempotency_key = _header_value(headers, "Idempotency-Key")
         if not idempotency_key:

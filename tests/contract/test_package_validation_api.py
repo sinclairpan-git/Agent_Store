@@ -181,3 +181,17 @@ def test_validate_package_requires_manifest_object() -> None:
     assert status == 400
     assert response_envelope_ok(body)
     assert body["error_code"] == "VALIDATION_ERROR"
+
+
+def test_validate_package_rejects_non_object_request_body() -> None:
+    api = PackageValidationAPI()
+
+    status, body = api.validate_package(
+        [],
+        headers={"Idempotency-Key": "pkg-018"},
+    )
+
+    assert status == 400
+    assert response_envelope_ok(body)
+    assert body["error_code"] == "VALIDATION_ERROR"
+    assert body["details"]["reason"] == "request body must be an object"
