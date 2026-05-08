@@ -78,39 +78,43 @@ specs:
   path: specs/018-package-validation-report
   depends_on:
   - 017-recommendation-state-api-fetch
+- id: 019-skill-registry-lifecycle
+  path: specs/019-skill-registry-lifecycle
+  depends_on:
+  - 018-package-validation-report
 truth_snapshot:
-  generated_at: '2026-05-08T16:30:47Z'
+  generated_at: '2026-05-08T18:21:03Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 2c596fc
-  authoring_hash: 7723ee8285e4df4ee17071850c8834534c2a25039c26052d10ce5f48c9c99ad2
+  repo_revision: e989f26
+  authoring_hash: 5fa93641ba99a43a6236cec0cfff772a3f428d720e6827c3e42a76729adc45e3
   source_hashes: {}
-  snapshot_hash: 9ee4c37c3e03da66962947ee565718235470a5378a40d3186a7658125463ca7a
+  snapshot_hash: f8a396d117d14d818026ce8bf353560c6a274cb3f5585b2dd3da75238678d02d
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 92
-    mapped_sources: 92
+    total_sources: 97
+    mapped_sources: 97
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 33
-    deferred_signal_count: 96
-    non_goal_signal_count: 18
+    phase_signal_count: 44
+    deferred_signal_count: 113
+    non_goal_signal_count: 19
     layer_totals:
       blueprint: 1
-      spec: 18
-      plan: 18
-      tasks: 18
-      execution: 18
-      close: 18
+      spec: 19
+      plan: 19
+      tasks: 19
+      execution: 19
+      close: 19
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 18
-      plan: 18
-      tasks: 18
-      execution: 18
-      close: 18
+      spec: 19
+      plan: 19
+      tasks: 19
+      execution: 19
+      close: 19
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -931,6 +935,51 @@ truth_snapshot:
       mapping_ref: 018-package-validation-report
       phase_signal_count: 0
       deferred_signal_count: 2
+      non_goal_signal_count: 0
+    - path: specs/019-skill-registry-lifecycle/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 019-skill-registry-lifecycle
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 1
+    - path: specs/019-skill-registry-lifecycle/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 019-skill-registry-lifecycle
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/019-skill-registry-lifecycle/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 019-skill-registry-lifecycle
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/019-skill-registry-lifecycle/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 019-skill-registry-lifecycle
+      phase_signal_count: 11
+      deferred_signal_count: 13
+      non_goal_signal_count: 0
+    - path: specs/019-skill-registry-lifecycle/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 019-skill-registry-lifecycle
+      phase_signal_count: 0
+      deferred_signal_count: 3
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog

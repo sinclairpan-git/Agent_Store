@@ -1,0 +1,383 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Skill Registry API
+  version: 0.1.0
+paths:
+  /api/v1/skills:
+    post:
+      operationId: publishSkill
+      summary: Publish an approved Package Validation Skill candidate
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillPublishRequest"
+      responses:
+        "201":
+          description: Skill published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillRegistryResponse"
+        "400":
+          description: Invalid publication request or blocked lifecycle transition
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency conflict or duplicate Skill version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /api/v1/skills/{skill_id}/versions/{skill_version}/status:
+    patch:
+      operationId: updateSkillStatus
+      summary: Deprecate or security-revoke a published Skill
+      parameters:
+        - name: skill_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: skill_version
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillStatusTransitionRequest"
+      responses:
+        "200":
+          description: Skill lifecycle status updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillRegistryResponse"
+        "400":
+          description: Invalid transition request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Skill version not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    SkillPublishRequest:
+      type: object
+      required: [approval_status, package_validation, skill]
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        approval_status:
+          type: string
+          enum: [approved, pending_review, rejected]
+        package_validation:
+          type: object
+          required: [validation_status]
+          properties:
+            validation_status:
+              type: string
+              enum: [passed, fixable, validation_failed]
+            draft_status:
+              type: string
+        skill:
+          $ref: "#/components/schemas/SkillPublishCandidate"
+    SkillPublishCandidate:
+      type: object
+      required:
+        - skill_id
+        - skill_version
+        - schema_ref
+        - risk_level
+        - package_id
+        - agent_id
+        - owner_team
+        - owner_user
+      properties:
+        skill_id:
+          type: string
+        skill_version:
+          type: string
+        schema_ref:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        risk_justification:
+          type: string
+        package_id:
+          type: string
+        agent_id:
+          type: string
+        owner_team:
+          type: string
+        owner_user:
+          type: string
+    SkillStatusTransitionRequest:
+      type: object
+      required: [transition_action, reason]
+      allOf:
+        - if:
+            properties:
+              transition_action:
+                const: security_revoke
+          then:
+            anyOf:
+              - required: [evidence_ref]
+              - required: [security_evidence_ref]
+              - required: [incident_id]
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        transition_action:
+          type: string
+          enum: [deprecate, security_revoke]
+        reason:
+          type: string
+        evidence_ref:
+          type: string
+        security_evidence_ref:
+          type: string
+        incident_id:
+          type: string
+    SkillRegistryResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, audit_id, skill_registry]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        skill_registry:
+          $ref: "#/components/schemas/SkillRegistryDecision"
+    SkillRegistryDecision:
+      type: object
+      required:
+        - registry_status
+        - skill
+        - issues
+        - event
+        - next_action
+        - agentops_consumption
+        - source_of_truth
+      properties:
+        registry_status:
+          type: string
+          enum:
+            - published
+            - deprecated
+            - security_revoked
+            - registration_blocked
+            - transition_blocked
+        skill:
+          oneOf:
+            - $ref: "#/components/schemas/SkillRegistryRecord"
+            - type: "null"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/SkillRegistryIssue"
+        event:
+          oneOf:
+            - $ref: "#/components/schemas/SkillRegistryEvent"
+            - type: "null"
+        next_action:
+          $ref: "#/components/schemas/NextAction"
+        agentops_consumption:
+          $ref: "#/components/schemas/AgentOpsConsumption"
+        source_of_truth:
+          type: object
+          additionalProperties:
+            type: string
+    SkillRegistryRecord:
+      type: object
+      required:
+        - skill_id
+        - skill_version
+        - schema_ref
+        - risk_level
+        - package_id
+        - agent_id
+        - owner_team
+        - owner_user
+        - status
+        - status_reason
+        - registry_key
+      properties:
+        skill_id:
+          type: string
+        skill_version:
+          type: string
+        schema_ref:
+          type: string
+        risk_level:
+          type: string
+        package_id:
+          type: string
+        agent_id:
+          type: string
+        owner_team:
+          type: string
+        owner_user:
+          type: string
+        status:
+          type: string
+          enum: [published, deprecated, security_revoked]
+        status_reason:
+          type: string
+        registry_key:
+          type: string
+        risk_justification:
+          type: string
+    SkillRegistryIssue:
+      type: object
+      required:
+        - issue_id
+        - field_path
+        - severity
+        - reason
+        - impact
+        - fix_action_id
+        - message_key
+      properties:
+        issue_id:
+          type: string
+        field_path:
+          type: string
+        severity:
+          type: string
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    SkillRegistryEvent:
+      type: object
+      required:
+        - event_id
+        - event_type
+        - skill_id
+        - skill_version
+        - audit_required
+        - reason
+      properties:
+        event_id:
+          type: string
+        event_type:
+          type: string
+          enum: [skill_published, skill_deprecated, skill_security_revoked]
+        skill_id:
+          type: string
+        skill_version:
+          type: string
+        audit_required:
+          type: boolean
+        reason:
+          type: string
+        evidence_ref:
+          type: string
+    NextAction:
+      type: object
+      required: [action_id, target_system, audit_required, enabled]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+        audit_required:
+          type: boolean
+        enabled:
+          type: boolean
+    AgentOpsConsumption:
+      type: object
+      required: [consumer, contract, sync_status, notify_required]
+      properties:
+        consumer:
+          type: string
+          enum: [agentops]
+        contract:
+          type: string
+        sync_status:
+          type: string
+          enum:
+            - ready_for_consumption
+            - notice_required
+            - not_ready
+            - current_record_retained
+        notify_required:
+          type: boolean
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - IDEMPOTENCY_KEY_CONFLICT
+            - SKILL_VERSION_ALREADY_PUBLISHED
+            - SKILL_NOT_FOUND
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object
