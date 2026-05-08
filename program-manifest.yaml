@@ -59,22 +59,22 @@ specs:
   depends_on:
   - 012-bootstrap-source-of-truth-contract
 truth_snapshot:
-  generated_at: '2026-05-08T04:30:47Z'
+  generated_at: '2026-05-08T05:07:22Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 696f005
+  repo_revision: 36f5953
   authoring_hash: ab15f098f56dab93964f8b1ddd129f6cffdd4f7ee28209a757979889d65f3232
   source_hashes: {}
-  snapshot_hash: b4a8c1ae29e5f00fee35e414891e802a342d25400028cb11506c1ac7287c2a3e
+  snapshot_hash: 3d5ea6c0577847245e334d1a5e6bfb006ee70efbe7627699c91db976efa16d83
   computed_capabilities: []
   source_inventory:
     state: complete
     total_sources: 67
     mapped_sources: 67
     unmapped_sources: 0
-    missing_sources: 6
+    missing_sources: 4
     phase_signal_count: 22
-    deferred_signal_count: 64
+    deferred_signal_count: 65
     non_goal_signal_count: 13
     layer_totals:
       blueprint: 1
@@ -89,8 +89,8 @@ truth_snapshot:
       spec: 13
       plan: 13
       tasks: 13
-      execution: 10
-      close: 10
+      execution: 11
+      close: 11
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -268,7 +268,7 @@ truth_snapshot:
       source_type: execution_log
       truth_layer: execution
       mapped: true
-      exists: false
+      exists: true
       mapping_ref: 004-installation-request-audit-queue
       phase_signal_count: 0
       deferred_signal_count: 0
@@ -277,10 +277,10 @@ truth_snapshot:
       source_type: development_summary
       truth_layer: close
       mapped: true
-      exists: false
+      exists: true
       mapping_ref: 004-installation-request-audit-queue
       phase_signal_count: 0
-      deferred_signal_count: 0
+      deferred_signal_count: 1
       non_goal_signal_count: 0
     - path: specs/005-installation-request-bootstrap-handoff/spec.md
       source_type: spec_doc

@@ -138,6 +138,8 @@ assert(
     && app.includes("selectedInstallationRequest")
     && app.includes("selectedBootstrapHandoff")
     && app.includes("selectedAssertionHandoff")
+    && app.includes("actionFeedback")
+    && app.includes("invokeAction")
     && app.includes("create_installation_from_request")
     && app.includes("issue_installation_assertion")
     && app.includes("device_public_key_thumbprint")
@@ -153,7 +155,9 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
-    && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\""),
+    && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
+    && indexHtml.includes(":action-feedback=\"actionFeedback\"")
+    && indexHtml.includes("@invoke-action=\"invokeAction\""),
   "app must render Agent list cards before the detail view"
 );
 assert(
@@ -170,6 +174,23 @@ assert(
     && componentLibrary.includes("command_preview")
     && indexHtml.includes(":install-workflow=\"selectedInstallWorkflow\""),
   "Agent detail must expose installation workflow preview"
+);
+assert(
+  componentLibrary.includes("DISPLAY_LABELS")
+    && componentLibrary.includes("开始企业激活")
+    && componentLibrary.includes("提交安装申请")
+    && componentLibrary.includes("暂无事实源")
+    && !componentLibrary.includes("<span>{{ action.action_id }}</span>")
+    && !componentLibrary.includes(">trusted</button>")
+    && !componentLibrary.includes(">installable</button>"),
+  "frontend display layer must map machine states/actions to human-readable Chinese labels"
+);
+assert(
+  app.includes("Agent Store 前端只记录预览动作")
+    && app.includes("不本地判定 AgentOps 结果")
+    && !app.includes('signature_state: agent.trust_state === "trusted" ? "verified"')
+    && !app.includes("trusted_loop_verified: this.selectedAgent.trust_state === \"trusted\""),
+  "frontend must not infer AgentOps/package trust facts from catalog fields"
 );
 assert(
   componentLibrary.includes("request-panel")
@@ -213,6 +234,15 @@ assert(
   "Agent detail must expose Agent Store/Ai_AutoSDLC/AgentOps bootstrap timeline"
 );
 assert(
+  componentLibrary.includes("sdlc-action-feedback")
+    && componentLibrary.includes("治理加载")
+    && componentLibrary.includes("凭证已签发不等于完成激活")
+    && mockData.includes("credential_issued_but_signature_test_pending")
+    && mockData.includes("actual_l5_blocked_until_agentops_verification")
+    && mockData.includes("trusted_loop_verified: false"),
+  "frontend must explain action feedback, governance load, and pending L5 boundaries"
+);
+assert(
   componentLibrary.includes("remediation-actions__list")
     && componentLibrary.includes("bootstrap.recommended_actions")
     && mockData.includes("poll_bootstrap_status")
@@ -230,9 +260,19 @@ assert(
 );
 assert(
   componentLibrary.includes("actionHref: function actionHref()")
-    && componentLibrary.includes("return null;")
-    && componentLibrary.includes("@keydown.enter=\"guardDisabled\""),
-  "disabled action links must not expose keyboard-operable hrefs"
+    || (
+      componentLibrary.includes("<button class=\"action-button\"")
+      && componentLibrary.includes(":disabled=\"disabled\"")
+      && componentLibrary.includes("@click=\"invoke\"")
+    ),
+  "disabled action controls must not expose keyboard-operable hash links"
+);
+assert(
+  read("src/styles.css").includes(".action-feedback")
+    && read("src/styles.css").includes(".workflow-steps li,")
+    && read("src/styles.css").includes(".remediation-actions__list li")
+    && read("src/styles.css").includes("grid-template-columns: 1fr;"),
+  "frontend styles must include mobile overflow guards for long action labels"
 );
 
 const indexPath = resolveRequestPath("/");

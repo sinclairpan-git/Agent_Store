@@ -117,6 +117,14 @@ window.AgentStoreMock = {
       hash_match_state: "matched",
       issuer_display: "Agent Store"
     },
+    governance_load: {
+      adapter_state: "materialized",
+      load_verification_method: "agentops_summary_pending_signature_test",
+      verified_at: "",
+      evidence_hash: "",
+      degraded_reason: "credential_issued_but_signature_test_pending",
+      unsupported_reason: ""
+    },
     enterprise_context: {
       integration_mode: "enterprise_managed",
       enterprise_state: "required_unactivated",
@@ -283,9 +291,15 @@ window.AgentStoreMock = {
     ]
   },
   trustedLoop: {
-    trusted_loop_verified: true,
+    trusted_loop_verified: false,
     actual_l5_display_allowed: false,
-    checked_refs: ["inst-1", "sha256:first", "run-1", "session-1", "evidence-1", "event-1"]
+    checked_refs: [
+      "inst-1",
+      "sha256:first",
+      "credential_issued",
+      "pending_signature_test",
+      "actual_l5_blocked_until_agentops_verification"
+    ]
   },
   stateDecision: {
     state: "degraded",
