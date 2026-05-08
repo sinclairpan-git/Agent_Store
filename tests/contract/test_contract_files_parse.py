@@ -19,6 +19,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
+        "recommendation-state.openapi.yaml",
         "trusted-evidence-loop.openapi.yaml",
     }
     validate_all_contracts(default_contracts_dir())

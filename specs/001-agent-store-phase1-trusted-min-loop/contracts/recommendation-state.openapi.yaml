@@ -1,0 +1,176 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Recommendation State API
+  version: 0.1.0
+paths:
+  /api/v1/agents/{agent_id}/recommendation-state:
+    get:
+      operationId: getRecommendationState
+      summary: Get explainable Agent Store recommendation decision state
+      parameters:
+        - name: agent_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: trace_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recommendation state decision
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationStateResponse"
+        "404":
+          description: Agent not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    RecommendationStateResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, recommendation]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        recommendation:
+          $ref: "#/components/schemas/RecommendationDecision"
+    RecommendationDecision:
+      type: object
+      required:
+        - agent_id
+        - agent_version
+        - recommendation_state
+        - verdict
+        - why_recommended
+        - why_not
+        - missing_evidence
+        - trust_blockers
+        - next_best_action
+        - source_of_truth
+        - actual_l5_display_allowed
+        - audit_id
+        - trace_id
+      properties:
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        recommendation_state:
+          type: string
+          enum: [recommended, needs_activation, eligible_pending_verification, blocked]
+        verdict:
+          type: string
+        why_recommended:
+          type: array
+          items:
+            type: string
+        why_not:
+          type: array
+          items:
+            type: string
+        missing_evidence:
+          type: array
+          items:
+            type: string
+        trust_blockers:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrustBlocker"
+        next_best_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+        source_of_truth:
+          $ref: "#/components/schemas/RecommendationSourceOfTruth"
+        actual_l5_display_allowed:
+          type: boolean
+        audit_id:
+          type: string
+        trace_id:
+          type: string
+    RecommendationSourceOfTruth:
+      type: object
+      required: [catalog, package_trust, enterprise_context, quality_evidence, l5_gate]
+      properties:
+        catalog:
+          type: string
+        package_trust:
+          type: string
+        enterprise_context:
+          type: string
+        quality_evidence:
+          type: string
+        l5_gate:
+          type: string
+    TrustBlocker:
+      type: object
+      required: [blocker_id, source, severity, can_ignore]
+      properties:
+        blocker_id:
+          type: string
+        source:
+          type: string
+        severity:
+          type: string
+        can_ignore:
+          type: boolean
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, requires_permission, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [AGENT_NOT_FOUND]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object
