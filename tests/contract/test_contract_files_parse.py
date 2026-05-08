@@ -21,6 +21,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "installation-bootstrap.openapi.yaml",
         "package-validation.openapi.yaml",
         "recommendation-state.openapi.yaml",
+        "skill-registry.openapi.yaml",
         "trusted-evidence-loop.openapi.yaml",
     }
     validate_all_contracts(default_contracts_dir())
@@ -80,6 +81,32 @@ def test_package_validation_contract_documents_fix_report_and_conflict_errors() 
     assert "required" not in manifest
     assert "required" not in field_source
     assert "required" not in skill
+
+
+def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "skill-registry.openapi.yaml"
+    )
+    publish = contract["paths"]["/api/v1/skills"]["post"]
+    transition = contract["paths"][
+        "/api/v1/skills/{skill_id}/versions/{skill_version}/status"
+    ]["patch"]
+    decision = contract["components"]["schemas"]["SkillRegistryDecision"]
+    record = contract["components"]["schemas"]["SkillRegistryRecord"]
+    event_types = contract["components"]["schemas"]["SkillRegistryEvent"]["properties"][
+        "event_type"
+    ]["enum"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"201", "400", "409"}.issubset(publish["responses"].keys())
+    assert {"200", "400", "404", "409"}.issubset(transition["responses"].keys())
+    assert "agentops_consumption" in decision["required"]
+    assert "registry_key" in record["required"]
+    assert "skill_security_revoked" in event_types
+    assert "SKILL_VERSION_ALREADY_PUBLISHED" in error_codes
+    assert "SKILL_NOT_FOUND" in error_codes
 
 
 def test_installation_assertion_contract_documents_error_responses() -> None:
