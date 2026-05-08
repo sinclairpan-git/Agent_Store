@@ -184,6 +184,7 @@ def test_transition_returns_not_found_for_unknown_skill_version() -> None:
     assert status == 404
     assert response_envelope_ok(body)
     assert body["error_code"] == "SKILL_NOT_FOUND"
+    assert body["retryable"] is True
 
 
 def test_transition_not_found_does_not_poison_idempotent_retry() -> None:
@@ -209,6 +210,7 @@ def test_transition_not_found_does_not_poison_idempotent_retry() -> None:
 
     assert missing_status == 404
     assert missing_body["error_code"] == "SKILL_NOT_FOUND"
+    assert missing_body["retryable"] is True
     assert retry_status == 200
     assert retry_body["skill_registry"]["registry_status"] == "deprecated"
 

@@ -20,6 +20,7 @@
 - 修复 Codex Review P2：OpenAPI `SkillRegistryEvent` 补充响应字段 `evidence_ref`，与 security revoke event 实现保持一致。
 - 修复 Codex Review P2：Skill Registry 幂等缓存按 operation 分区，避免 publish 与 status transition 复用同一客户端 key 时误判冲突。
 - 修复 Codex Review P2：`security_revoked` 终态 guard 仅阻止降级为 `deprecated`，允许带证据的重复 `security_revoke` 重新确认最强安全状态。
+- 修复 Codex Review P2：缺失 Skill 的 transition 404 标记为 `retryable=True`，与不缓存该可恢复结果的语义一致。
 
 ### 双专家对抗评审
 
@@ -42,6 +43,7 @@
 - security_revoked 要求 incident 或 evidence reference，并作为 terminal safety signal。
 - OpenAPI documented `evidence_ref`、`security_evidence_ref`、`incident_id` 三种证据入口统一归一到 lifecycle event `evidence_ref`。
 - 缺失 Skill 的 transition 404 是可恢复查找结果，不作为幂等事实缓存；真正执行后的 lifecycle transition 继续保持幂等。
+- missing-skill transition response 明确提示客户端可重试，避免 eventually consistent 发布路径中断。
 - `publish_skill` 与 `update_skill_status` 保留各自操作内的 idempotency conflict 保护，但跨操作复用 key 不再互相污染。
 - 已 security_revoked 的 Skill 仍不可降级为 deprecated；重复 security revoke 作为安全状态 reassertion 成功并继续输出 AgentOps notice。
 - AgentOps 字段只表达 `consumer`、`contract`、`sync_status` 与 `notify_required`，不成为写入事实源。

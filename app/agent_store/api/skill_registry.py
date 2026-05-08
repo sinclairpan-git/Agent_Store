@@ -176,7 +176,7 @@ class SkillRegistryAPI:
                     error_code="SKILL_NOT_FOUND",
                     message_key="errors.skillNotFound",
                     severity="error",
-                    retryable=False,
+                    retryable=True,
                     recommended_action_id="check_skill_registry_key",
                     trace_id=trace_id,
                     audit_id=audit_id,
