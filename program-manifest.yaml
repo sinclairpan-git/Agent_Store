@@ -39,13 +39,13 @@ specs:
   depends_on:
   - 007-cross-project-contract-appendix
 truth_snapshot:
-  generated_at: '2026-05-07T13:23:09Z'
+  generated_at: '2026-05-08T02:24:29Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 711aebf
+  repo_revision: 5960a33
   authoring_hash: df649bd5219b5dfc25f9bba52cefdbdbc0811b1a16821058f302d2ddef90de11
   source_hashes: {}
-  snapshot_hash: 8d091e218cf6099db80786c6d26dfed0d405e356737669b9255b093b06c69d23
+  snapshot_hash: 6b5788026f90548098f8c432408b1fc51cf4916b2e61bc811bc7ede002f3bfc1
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -452,4 +452,4 @@ truth_snapshot:
       deferred_signal_count: 1
       non_goal_signal_count: 0
     unmapped_paths: []
-  state: ready
+  state: migration_pending

@@ -73,7 +73,9 @@ CONFLICT_MARKER = re.compile(rb"^(<<<<<<<|=======|>>>>>>>)", re.MULTILINE)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--root", default=".", help="Repository root or extracted bundle root.")
+    parser.add_argument(
+        "--root", default=".", help="Repository root or extracted bundle root."
+    )
     parser.add_argument("--report", help="Optional JSON report path.")
     return parser.parse_args()
 
@@ -105,7 +107,9 @@ def check_path_portability(files: list[Path], root: Path, errors: list[str]) -> 
         rel = path.relative_to(root).as_posix()
         lowered = rel.lower()
         if lowered in seen_lower and seen_lower[lowered] != rel:
-            errors.append(f"case-insensitive path collision: {seen_lower[lowered]} <-> {rel}")
+            errors.append(
+                f"case-insensitive path collision: {seen_lower[lowered]} <-> {rel}"
+            )
         seen_lower[lowered] = rel
 
         for part in path.relative_to(root).parts:
@@ -160,11 +164,15 @@ def check_ai_sdlc_contract(root: Path, errors: list[str]) -> None:
 
     for needle in ("AI-SDLC", "ai-sdlc run --dry-run", "AGENTS.md"):
         if needle not in agents:
-            errors.append(f"AGENTS.md does not mention required AI-SDLC entry: {needle}")
+            errors.append(
+                f"AGENTS.md does not mention required AI-SDLC entry: {needle}"
+            )
 
     for needle in ("Persist decisions", "contract-level verification", "traceable"):
         if needle not in constitution:
-            errors.append(f"constitution.md does not mention governance principle: {needle}")
+            errors.append(
+                f"constitution.md does not mention governance principle: {needle}"
+            )
 
     for needle in ("current_stage:", "feature:", "completed_stages:"):
         if needle not in checkpoint:
@@ -176,7 +184,9 @@ def check_openapi_contracts(root: Path, errors: list[str]) -> None:
         text = require_text(root / rel, root, errors)
         for needle in ("openapi:", "info:", "paths:"):
             if needle not in text:
-                errors.append(f"{rel} does not look like an OpenAPI contract; missing {needle}")
+                errors.append(
+                    f"{rel} does not look like an OpenAPI contract; missing {needle}"
+                )
 
 
 def main() -> int:
@@ -204,7 +214,9 @@ def main() -> int:
     }
 
     if args.report:
-        Path(args.report).write_text(json.dumps(report, indent=2, sort_keys=True), encoding="utf-8")
+        Path(args.report).write_text(
+            json.dumps(report, indent=2, sort_keys=True), encoding="utf-8"
+        )
 
     if errors:
         print(json.dumps(report, indent=2, sort_keys=True), file=sys.stderr)

@@ -73,7 +73,9 @@ def test_assertion_contains_required_phase1_and_security_fields() -> None:
     assert data["revocation_status"] == "not_revoked"
 
 
-def test_assertion_exports_agentops_handoff_field_names_without_mutating_internal_model() -> None:
+def test_assertion_exports_agentops_handoff_field_names_without_mutating_internal_model() -> (
+    None
+):
     assertion = InstallationAssertionService(secret=TEST_ASSERTION_SECRET).issue(
         _installation(),
         device_public_key_thumbprint="thumb-1",

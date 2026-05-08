@@ -48,7 +48,9 @@ def test_agentops_handoff_fixture_binds_store_assertion_and_device_proof() -> No
     assert assertion["assertion_hash"] == device_proof["assertion_hash"]
 
 
-def test_cct_003_store_consumes_agentops_credential_echo_without_inferring_active() -> None:
+def test_cct_003_store_consumes_agentops_credential_echo_without_inferring_active() -> (
+    None
+):
     response = _load_fixture("credential_issue_response.v1.json")
     summary = CredentialBootstrapSummary.from_agentops_credential_response(response)
     payload = summary.to_dict()
