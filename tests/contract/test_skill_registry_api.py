@@ -204,3 +204,26 @@ def test_security_revocation_emits_agentops_notice() -> None:
     assert registry["event"]["event_type"] == "skill_security_revoked"
     assert registry["event"]["evidence_ref"] == "incident://SEC-019"
     assert registry["next_action"]["action_id"] == "notify_agentops_security_revocation"
+
+
+def test_security_revocation_accepts_contract_evidence_ref() -> None:
+    api = SkillRegistryAPI()
+    api.publish_skill(_payload(), headers={"Idempotency-Key": "skill-019-publish"})
+
+    status, body = api.update_skill_status(
+        "repo.detect",
+        "1.0.0",
+        {
+            "transition_action": "security_revoke",
+            "reason": "Unsafe schema",
+            "evidence_ref": "incident://SEC-019-contract",
+        },
+        headers={"Idempotency-Key": "skill-019-revoke-contract"},
+    )
+    registry = body["skill_registry"]
+
+    assert status == 200
+    assert response_envelope_ok(body)
+    assert registry["registry_status"] == "security_revoked"
+    assert registry["event"]["event_type"] == "skill_security_revoked"
+    assert registry["event"]["evidence_ref"] == "incident://SEC-019-contract"

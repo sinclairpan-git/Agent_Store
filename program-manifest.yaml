@@ -83,13 +83,13 @@ specs:
   depends_on:
   - 018-package-validation-report
 truth_snapshot:
-  generated_at: '2026-05-08T17:08:00Z'
+  generated_at: '2026-05-08T17:19:36Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: fd338c3
+  repo_revision: 987a0d9
   authoring_hash: 5fa93641ba99a43a6236cec0cfff772a3f428d720e6827c3e42a76729adc45e3
   source_hashes: {}
-  snapshot_hash: 5f34d5d60e0cc244799b935611a9274e3a00ef28e5d5b2f0861e89bb88c27b53
+  snapshot_hash: e7ce77bcd2e992ce7e90ba6d2aafde756c0c09992a4473b805db52d5e9b4c9ad
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -97,8 +97,8 @@ truth_snapshot:
     mapped_sources: 97
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 33
-    deferred_signal_count: 101
+    phase_signal_count: 37
+    deferred_signal_count: 105
     non_goal_signal_count: 19
     layer_totals:
       blueprint: 1
@@ -969,8 +969,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 019-skill-registry-lifecycle
-      phase_signal_count: 0
-      deferred_signal_count: 1
+      phase_signal_count: 4
+      deferred_signal_count: 5
       non_goal_signal_count: 0
     - path: specs/019-skill-registry-lifecycle/development-summary.md
       source_type: development_summary

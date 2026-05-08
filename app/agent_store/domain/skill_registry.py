@@ -372,10 +372,7 @@ def _transition_issues(
                 message_key="skillRegistry.transitionReasonRequired",
             )
         )
-    if action == "security_revoke" and not (
-        _string(payload.get("security_evidence_ref"))
-        or _string(payload.get("incident_id"))
-    ):
+    if action == "security_revoke" and not _evidence_ref(payload):
         issues.append(
             SkillRegistryIssue(
                 issue_id="SECURITY_EVIDENCE_REQUIRED",
@@ -429,8 +426,10 @@ def _event(
 
 
 def _evidence_ref(payload: Mapping[str, object]) -> str:
-    return _string(payload.get("security_evidence_ref")) or _string(
-        payload.get("incident_id")
+    return (
+        _string(payload.get("security_evidence_ref"))
+        or _string(payload.get("evidence_ref"))
+        or _string(payload.get("incident_id"))
     )
 
 

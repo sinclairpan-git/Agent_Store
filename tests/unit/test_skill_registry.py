@@ -129,6 +129,37 @@ def test_skill_registry_security_revoke_requires_evidence() -> None:
     )
 
 
+def test_skill_registry_security_revoke_accepts_contract_evidence_ref() -> None:
+    record = SkillRegistryRecord(
+        skill_id="repo.detect",
+        skill_version="1.0.0",
+        schema_ref="schemas/repo.detect.v1.json",
+        risk_level="medium",
+        package_id="pkg-guided-uploader-001",
+        agent_id="agent.guided-uploader",
+        owner_team="Agent Platform",
+        owner_user="owner@example.com",
+        status="published",
+        status_reason="Published after approved Package Validation.",
+    )
+
+    decision = build_skill_transition_decision(
+        record,
+        {
+            "transition_action": "security_revoke",
+            "reason": "Unsafe output schema",
+            "evidence_ref": "incident://SEC-019",
+        },
+        trace_id="trace-019",
+        audit_id="audit-019",
+    )
+
+    assert decision.registry_status == "security_revoked"
+    assert not decision.issues
+    assert decision.event is not None
+    assert decision.event.evidence_ref == "incident://SEC-019"
+
+
 def test_skill_registry_security_revoked_is_terminal() -> None:
     record = SkillRegistryRecord(
         skill_id="repo.detect",
