@@ -367,7 +367,7 @@ def _package_evidence_issues(
 def _validation_status(issues: list[PackageValidationIssue]) -> str:
     if any(issue.severity == "blocked" for issue in issues):
         return "validation_failed"
-    if issues:
+    if any(issue.severity == "error" for issue in issues):
         return "fixable"
     return "passed"
 

@@ -179,6 +179,25 @@ def test_package_validation_reports_incomplete_skill_candidate_fields() -> None:
     }.issubset(issue_ids)
 
 
+def test_package_validation_keeps_warning_only_reports_review_ready() -> None:
+    manifest = _manifest()
+    manifest["manifest_lock"] = ""
+    manifest["sbom_ref"] = ""
+    manifest["scan_report_ref"] = ""
+
+    report = build_package_validation_report(
+        manifest,
+        trace_id="trace-018",
+        audit_id="audit-018",
+    )
+    body = report.to_response()["package_validation"]
+
+    assert report.validation_status == "passed"
+    assert body["draft_status"] == "pending_review"
+    assert body["next_action"]["action_id"] == "submit_for_review"
+    assert {issue.severity for issue in report.issues} == {"warning"}
+
+
 def test_package_validation_preserves_original_skill_indexes_in_field_paths() -> None:
     manifest = _manifest()
     manifest["skills"] = [
