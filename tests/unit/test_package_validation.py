@@ -179,6 +179,26 @@ def test_package_validation_reports_incomplete_skill_candidate_fields() -> None:
     }.issubset(issue_ids)
 
 
+def test_package_validation_preserves_original_skill_indexes_in_field_paths() -> None:
+    manifest = _manifest()
+    manifest["skills"] = [
+        "not-a-skill-object",
+        {"skill_id": "repo.detect"},
+    ]
+
+    report = build_package_validation_report(
+        manifest,
+        trace_id="trace-018",
+        audit_id="audit-018",
+    )
+    field_paths = {issue.field_path for issue in report.issues}
+
+    assert "skills[1].skill_version" in field_paths
+    assert "skills[1].schema_ref" in field_paths
+    assert "skills[1].risk_level" in field_paths
+    assert "skills[0].skill_version" not in field_paths
+
+
 def test_package_validation_marks_ai_generated_fields_as_candidate_until_sourced() -> (
     None
 ):

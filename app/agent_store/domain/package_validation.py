@@ -17,10 +17,12 @@ def _string(value: object) -> str:
     return value.strip() if isinstance(value, str) else ""
 
 
-def _list_of_mappings(value: object) -> tuple[Mapping[str, object], ...]:
+def _indexed_mappings(value: object) -> tuple[tuple[int, Mapping[str, object]], ...]:
     if not isinstance(value, list):
         return ()
-    return tuple(item for item in value if isinstance(item, Mapping))
+    return tuple(
+        (index, item) for index, item in enumerate(value) if isinstance(item, Mapping)
+    )
 
 
 @dataclass(frozen=True)
@@ -219,7 +221,7 @@ def _contains_placeholder_token(value: str) -> bool:
 
 
 def _skill_issues(manifest: Mapping[str, object]) -> tuple[PackageValidationIssue, ...]:
-    skills = _list_of_mappings(manifest.get("skills"))
+    skills = _indexed_mappings(manifest.get("skills"))
     if not skills:
         return (
             PackageValidationIssue(
@@ -234,7 +236,7 @@ def _skill_issues(manifest: Mapping[str, object]) -> tuple[PackageValidationIssu
         )
 
     issues: list[PackageValidationIssue] = []
-    for index, skill in enumerate(skills):
+    for index, skill in skills:
         prefix = f"skills[{index}]"
         if not _string(skill.get("skill_id")):
             issues.append(
