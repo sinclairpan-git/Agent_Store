@@ -32,6 +32,26 @@ function buildRequestIdentity(agentId, actionId) {
   };
 }
 
+function actionMessage(action) {
+  var actionId = action.action_id;
+  if (actionId === "start_install") {
+    return "已提交安装申请预览。当前阶段不会在本机执行安装命令，下一步请在安装申请中创建安装记录。";
+  }
+  if (actionId === "start_enterprise_activation" || actionId === "request_enterprise_activation") {
+    return "已进入企业激活预览。请先确认策略要求，再按页面命令完成凭证和签名测试。";
+  }
+  if (actionId === "open_standalone_readme") {
+    return "已切到本地使用路径。此路径不要求 installation_id、device_id 或 AgentOps credential。";
+  }
+  if (actionId === "send_signature_test_event") {
+    return "签名测试已进入待执行状态。Agent Store 只展示下一步，不本地判定测试结果。";
+  }
+  if (actionId === "copy_diagnostic_ref") {
+    return "诊断编号已准备好，可用于和 Owner 或 AgentOps 对齐当前激活状态。";
+  }
+  return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
+}
+
 new window.Vue({
   el: "#app",
   data: function data() {
@@ -46,7 +66,14 @@ new window.Vue({
       bootstrap: window.AgentStoreMock.bootstrap,
       agentops: window.AgentStoreMock.agentops,
       trustedLoop: window.AgentStoreMock.trustedLoop,
-      stateDecision: window.AgentStoreMock.stateDecision
+      stateDecision: window.AgentStoreMock.stateDecision,
+      actionFeedback: {
+        state: "idle",
+        action_id: "start_enterprise_activation",
+        audit_id: "",
+        boundary: "本阶段只提交可审计预览，不执行真实安装，不本地判定 AgentOps 结果。",
+        message: "选择一个 Agent 后，可查看本地使用或企业激活路径。"
+      }
     };
   },
   computed: {
@@ -121,6 +148,14 @@ new window.Vue({
             hash_match_state: "unknown",
             issuer_display: "Agent Store"
           },
+          governance_load: {
+            adapter_state: "unavailable",
+            load_verification_method: "catalog_filter",
+            verified_at: "",
+            evidence_hash: "",
+            degraded_reason: "catalog_filters_returned_no_agents",
+            unsupported_reason: ""
+          },
           enterprise_context: {
             integration_mode: "standalone",
             enterprise_state: "not_detected",
@@ -143,9 +178,7 @@ new window.Vue({
         use_cases: agent.use_cases,
         capability_type: agent.capability_type,
         actual_l5_display_allowed: false,
-        l5_display_state: agent.evidence_level === "pending"
-          ? "evidence_pending"
-          : "l5_capable_pending_verification",
+        l5_display_state: "l5_unavailable_without_agentops_summary",
         primary_action: agent.primary_action,
         enterprise_activation_action: {
           action_id: "request_enterprise_activation",
@@ -161,10 +194,18 @@ new window.Vue({
         },
         package_trust_summary: {
           package_id: agent.agent_id + "@" + agent.version,
-          trust_state: agent.trust_state,
-          signature_state: agent.trust_state === "trusted" ? "verified" : "missing",
-          hash_match_state: agent.trust_state === "trusted" ? "matched" : "unknown",
+          trust_state: "unavailable",
+          signature_state: "unavailable",
+          hash_match_state: "unavailable",
           issuer_display: "Agent Store"
+        },
+        governance_load: {
+          adapter_state: "unavailable",
+          load_verification_method: "agentops_summary_required",
+          verified_at: "",
+          evidence_hash: "",
+          degraded_reason: "non_official_catalog_item_has_no_agentops_summary",
+          unsupported_reason: ""
         },
         enterprise_context: {
           integration_mode: "enterprise_managed",
@@ -256,22 +297,22 @@ new window.Vue({
       return {
         trace_id: "trace-" + this.selectedAgent.agent_id,
         quality_evidence: {
-          evidence_level: this.selectedAgent.evidence_level,
-          summary_validity_state: this.selectedAgent.evidence_level === "pending" ? "missing" : "fresh",
-          confidence: this.selectedAgent.trust_state === "trusted" ? 0.82 : 0.35,
-          missing_evidence: this.selectedAgent.trust_state === "trusted" ? [] : ["signature", "run_summary"],
-          score_template_id: "agentops-owned"
+          evidence_level: "unavailable",
+          summary_validity_state: "unavailable",
+          confidence: 0,
+          missing_evidence: ["agentops_summary_unavailable"],
+          score_template_id: "agentops-required"
         },
         approval: {
           approval_id: "approval-" + this.selectedAgent.agent_id,
-          status: this.selectedAgent.trust_state === "blocked" ? "blocked" : "pending",
+          status: "unavailable",
           audit_id: "audit-" + this.selectedAgent.agent_id
         },
         runtime_policy: {
           policy_ref: "policy-" + this.selectedAgent.agent_id,
-          fallback_action: "request_review",
-          runtime_risk_level: this.selectedAgent.trust_state === "blocked" ? "high" : "medium",
-          enforcement_mode: this.selectedAgent.trust_state === "trusted" ? "warn" : "block"
+          fallback_action: "request_agentops_summary",
+          runtime_risk_level: "unknown",
+          enforcement_mode: "unavailable"
         },
         links: [
           {
@@ -295,13 +336,13 @@ new window.Vue({
         return this.trustedLoop;
       }
       return {
-        trusted_loop_verified: this.selectedAgent.trust_state === "trusted",
+        trusted_loop_verified: false,
         actual_l5_display_allowed: false,
         checked_refs: [
           this.selectedAgent.agent_id,
           this.selectedAgent.version,
-          this.selectedAgent.trust_state,
-          this.selectedAgent.enterprise_state
+          "agentops_summary_required",
+          "no_frontend_trust_inference"
         ]
       };
     },
@@ -697,6 +738,20 @@ new window.Vue({
     },
     setInstallabilityFilter: function setInstallabilityFilter(value) {
       this.installabilityFilter = value;
+    },
+    invokeAction: function invokeAction(action) {
+      var agent = this.selectedAgent;
+      var identity = buildRequestIdentity(
+        agent ? agent.agent_id : "catalog",
+        action.action_id || "unknown_action"
+      );
+      this.actionFeedback = {
+        state: action.enabled === false ? "blocked" : "submitted",
+        action_id: action.action_id,
+        audit_id: identity.audit_id,
+        boundary: "Agent Store 前端只记录预览动作；可信、L5、credential 与签名测试结果必须来自后端或 AgentOps 回显。",
+        message: actionMessage(action)
+      };
     }
   }
 });

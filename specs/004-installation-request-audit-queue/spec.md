@@ -24,9 +24,15 @@
 - **FR-004-004**：blocked Agent 直接安装必须被拒绝；提交 `request_catalog_review` 时进入 `pending_catalog_review` 状态并包含阻断原因。
 - **FR-004-005**：申请响应必须包含 `schema_version`、`trace_id`、`error_code`、`request_id`、`audit_id`、`request_state`、`queue`、`next_action`。
 - **FR-004-006**：前端必须在安装流程面板旁展示申请快照，且随选中 Agent 联动。
+- **FR-004-007**：前端所有安装、激活、handoff、assertion 主动作必须进入可见反馈状态，展示用户可理解的下一步、审计编号和事实源边界；不得只跳转 hash。
+- **FR-004-008**：前端不得从目录字段本地推导 AgentOps、PackageTrust、Trusted Loop 或实际 L5 结论；缺少真实摘要时必须展示 `unavailable` / 待验证 / 降级解释。
+- **FR-004-009**：前端必须把用户可见的 action、trust、installability、workflow 枚举映射为中文产品文案；机器 ID 只能作为审计或 tooltip 辅助信息。
+- **FR-004-010**：移动端 390px 宽度下不得出现横向溢出；推荐动作、步骤列表和主 CTA 必须在窄屏下纵向折叠。
 
 ## 成功标准
 
 - `uv run pytest tests/unit/test_installation_request.py tests/contract/test_installation_request_api.py -q` 通过。
 - `npm --prefix frontend run verify` 覆盖安装申请面板契约。
+- `node --check frontend/src/app.js` 与 `node --check frontend/src/sdlc-enterprise-vue2.js` 通过。
+- Playwright 本地渲染检查确认主 CTA 点击后反馈状态更新，且 390px 视口 `scrollWidth <= clientWidth`。
 - 全量测试、ruff 和前端验证通过。

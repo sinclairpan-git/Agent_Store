@@ -24,6 +24,85 @@
 
   window.SDLC_ENTERPRISE_VUE2_PROVIDER = ENTERPRISE_VUE2_PROVIDER;
 
+  var DISPLAY_LABELS = {
+    trusted: "可信",
+    warning: "需关注",
+    blocked: "已阻断",
+    installable: "可安装",
+    activation_required: "需企业激活",
+    standalone_only: "仅本地使用",
+    required_unactivated: "企业未激活",
+    detected_optional: "企业接入可选",
+    disabled: "已停用",
+    active: "已激活",
+    pending: "待补充",
+    accepted: "已受理",
+    pending_enterprise_activation: "等待企业激活",
+    pending_catalog_review: "等待目录复核",
+    standalone_ready: "可本地使用",
+    ready_to_install: "可开始安装",
+    ready_to_create: "可创建安装记录",
+    installation_created: "安装记录已创建",
+    ready_to_issue: "可签发安装断言",
+    issued: "已签发",
+    credential_issued: "凭证已签发",
+    pending_signature_test: "等待签名测试",
+    running: "进行中",
+    completed: "已完成",
+    degraded: "降级",
+    unavailable: "暂无事实源",
+    materialized: "已物化，待验证加载",
+    verified_loaded: "已验证加载",
+    degraded_reason: "降级原因",
+    stale: "待刷新",
+    missing: "缺失",
+    matched: "匹配",
+    verified: "已验证",
+    unknown: "未知",
+    "L5-capable": "具备 L5 条件",
+    "L3-summary": "L3 摘要",
+    "L2-static": "L2 静态",
+    l5_capable_pending_verification: "具备 L5 条件，待验证",
+    evidence_pending: "证据待补齐",
+    l5_unavailable_without_agentops_summary: "缺少 AgentOps 摘要，不能展示 L5",
+    agentops_summary_pending_signature_test: "等待 AgentOps 签名测试回显",
+    credential_issued_but_signature_test_pending: "凭证已签发，签名测试未完成",
+    non_official_catalog_item_has_no_agentops_summary: "非官方条目缺少 AgentOps 摘要",
+    agent_store: "Agent Store",
+    agentops: "AgentOps",
+    ai_autosdlc_cli: "Ai_AutoSDLC CLI",
+    evidence_vault: "Evidence Vault",
+    start_enterprise_activation: "开始企业激活",
+    open_standalone_readme: "查看本地使用说明",
+    request_enterprise_activation: "申请企业激活",
+    start_install: "提交安装申请",
+    create_installation: "创建安装记录",
+    create_installation_from_request: "创建安装记录",
+    issue_installation_assertion: "签发安装断言",
+    issue_reporter_credential: "签发 Reporter 凭证",
+    send_signature_test_event: "发送签名测试",
+    poll_bootstrap_status: "刷新激活状态",
+    copy_diagnostic_ref: "复制诊断编号",
+    request_catalog_review: "申请目录复核",
+    review_catalog_blocker: "查看阻断原因",
+    view_policy: "查看策略说明",
+    view_blocking_policy: "查看阻断策略",
+    adjust_catalog_filters: "调整筛选条件"
+  };
+
+  function displayLabel(value) {
+    if (value === true) {
+      return "是";
+    }
+    if (value === false) {
+      return "否";
+    }
+    if (value === null || value === undefined || value === "") {
+      return "暂无";
+    }
+    return DISPLAY_LABELS[value] || value;
+  }
+
   Vue.component("sdlc-enterprise-provider-meta", {
     template: [
       '<div class="provider-meta" data-provider="sdlc-enterprise-vue2">',
@@ -41,10 +120,13 @@
 
   Vue.component("sdlc-status-chip", {
     props: ["label", "tone"],
-    template: '<span class="status-chip" :class="toneClass">{{ label }}</span>',
+    template: '<span class="status-chip" :class="toneClass">{{ displayLabel }}</span>',
     computed: {
       toneClass: function toneClass() {
         return "status-chip--" + (this.tone || "neutral");
+      },
+      displayLabel: function computedDisplayLabel() {
+        return displayLabel(this.label);
       }
     }
   });
@@ -52,25 +134,25 @@
   Vue.component("sdlc-action-button", {
     props: ["action", "kind"],
     template: [
-      '<a class="action-button" :class="kindClass" :href="actionHref"',
-      ' :aria-disabled="disabled" :tabindex="disabled ? -1 : null"',
-      ' @click="guardDisabled" @keydown.enter="guardDisabled">',
+      '<button class="action-button" :class="kindClass" type="button"',
+      ' :disabled="disabled" :title="auditTitle"',
+      ' @click="invoke">',
       '  <span class="action-button__icon" aria-hidden="true">{{ icon }}</span>',
-      '  <span>{{ action.action_id }}</span>',
-      '</a>'
+      '  <span>{{ actionLabel }}</span>',
+      '</button>'
     ].join(""),
     computed: {
       disabled: function disabled() {
         return this.action.enabled === false;
       },
-      actionHref: function actionHref() {
-        if (this.disabled) {
-          return null;
-        }
-        return this.action.href || "#";
-      },
       kindClass: function kindClass() {
         return "action-button--" + (this.kind || "secondary");
+      },
+      actionLabel: function actionLabel() {
+        return displayLabel(this.action.action_id);
+      },
+      auditTitle: function auditTitle() {
+        return displayLabel(this.action.target_system) + " / " + this.action.action_id;
       },
       icon: function icon() {
         if (this.action.target_system === "agentops") {
@@ -83,11 +165,32 @@
       }
     },
     methods: {
-      guardDisabled: function guardDisabled(event) {
-        if (this.disabled) {
-          event.preventDefault();
-          event.stopPropagation();
+      invoke: function invoke() {
+        if (!this.disabled) {
+          this.$emit("invoke", this.action);
         }
+      }
+    }
+  });
+
+  Vue.component("sdlc-action-feedback", {
+    props: ["feedback"],
+    template: [
+      '<section class="action-feedback" :class="\'action-feedback--\' + feedback.state" aria-live="polite">',
+      '  <div>',
+      '    <span class="action-feedback__eyebrow">当前操作</span>',
+      '    <strong>{{ title }}</strong>',
+      '  </div>',
+      '  <p>{{ feedback.message }}</p>',
+      '  <dl v-if="feedback.audit_id" class="action-feedback__meta">',
+      '    <dt>审计编号</dt><dd>{{ feedback.audit_id }}</dd>',
+      '    <dt>事实边界</dt><dd>{{ feedback.boundary }}</dd>',
+      '  </dl>',
+      '</section>'
+    ].join(""),
+    computed: {
+      title: function title() {
+        return displayLabel(this.feedback.action_id || "adjust_catalog_filters");
       }
     }
   });
@@ -103,12 +206,15 @@
       '  <ol class="remediation-actions__list">',
       '    <li v-for="(action, actionIndex) in actions" :key="action.action_id">',
       '      <span class="remediation-actions__order">{{ actionIndex + 1 }}</span>',
-      '      <span class="remediation-actions__target">{{ action.target_system }}</span>',
-      '      <sdlc-action-button :action="action" :kind="actionIndex === 0 ? \'primary\' : \'secondary\'"></sdlc-action-button>',
+      '      <span class="remediation-actions__target">{{ displayLabel(action.target_system) }}</span>',
+      '      <sdlc-action-button :action="action" :kind="actionIndex === 0 ? \'primary\' : \'secondary\'" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '    </li>',
       '  </ol>',
       '</div>'
-    ].join("")
+    ].join(""),
+    methods: {
+      displayLabel: displayLabel
+    }
   });
 
   Vue.component("sdlc-metric-row", {
@@ -148,7 +254,7 @@
       '  </dl>',
       '  <div class="agent-card__footer">',
       '    <span>{{ agent.owner_team }}</span>',
-      '    <sdlc-action-button :action="agent.primary_action" :kind="active ? \'primary\' : \'secondary\'"></sdlc-action-button>',
+      '    <span class="agent-card__intent">{{ displayLabel(agent.installability) }}</span>',
       '  </div>',
       '</article>'
     ].join(""),
@@ -171,6 +277,9 @@
         }
         return "info";
       }
+    },
+    methods: {
+      displayLabel: displayLabel
     }
   });
 
@@ -200,22 +309,22 @@
       '    </label>',
       '    <div class="filter-group" aria-label="类型筛选">',
       '      <button type="button" :class="{ active: typeFilter === \'all\' }" @click="$emit(\'set-type-filter\', \'all\')">全部</button>',
-      '      <button type="button" :class="{ active: typeFilter === \'framework_capability\' }" @click="$emit(\'set-type-filter\', \'framework_capability\')">Framework</button>',
+      '      <button type="button" :class="{ active: typeFilter === \'framework_capability\' }" @click="$emit(\'set-type-filter\', \'framework_capability\')">框架能力</button>',
       '      <button type="button" :class="{ active: typeFilter === \'agent\' }" @click="$emit(\'set-type-filter\', \'agent\')">Agent</button>',
-      '      <button type="button" :class="{ active: typeFilter === \'skill\' }" @click="$emit(\'set-type-filter\', \'skill\')">Skill</button>',
+      '      <button type="button" :class="{ active: typeFilter === \'skill\' }" @click="$emit(\'set-type-filter\', \'skill\')">技能</button>',
       '    </div>',
       '    <div class="filter-group" aria-label="可信状态筛选">',
-      '      <button type="button" :class="{ active: trustFilter === \'all\' }" @click="$emit(\'set-trust-filter\', \'all\')">可信全部</button>',
-      '      <button type="button" :class="{ active: trustFilter === \'trusted\' }" @click="$emit(\'set-trust-filter\', \'trusted\')">trusted</button>',
-      '      <button type="button" :class="{ active: trustFilter === \'warning\' }" @click="$emit(\'set-trust-filter\', \'warning\')">warning</button>',
-      '      <button type="button" :class="{ active: trustFilter === \'blocked\' }" @click="$emit(\'set-trust-filter\', \'blocked\')">blocked</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'all\' }" @click="$emit(\'set-trust-filter\', \'all\')">全部可信</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'trusted\' }" @click="$emit(\'set-trust-filter\', \'trusted\')">可信</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'warning\' }" @click="$emit(\'set-trust-filter\', \'warning\')">需关注</button>',
+      '      <button type="button" :class="{ active: trustFilter === \'blocked\' }" @click="$emit(\'set-trust-filter\', \'blocked\')">已阻断</button>',
       '    </div>',
       '    <div class="filter-group" aria-label="安装状态筛选">',
-      '      <button type="button" :class="{ active: installabilityFilter === \'all\' }" @click="$emit(\'set-installability-filter\', \'all\')">安装全部</button>',
-      '      <button type="button" :class="{ active: installabilityFilter === \'installable\' }" @click="$emit(\'set-installability-filter\', \'installable\')">installable</button>',
-      '      <button type="button" :class="{ active: installabilityFilter === \'activation_required\' }" @click="$emit(\'set-installability-filter\', \'activation_required\')">activation</button>',
-      '      <button type="button" :class="{ active: installabilityFilter === \'standalone_only\' }" @click="$emit(\'set-installability-filter\', \'standalone_only\')">standalone</button>',
-      '      <button type="button" :class="{ active: installabilityFilter === \'blocked\' }" @click="$emit(\'set-installability-filter\', \'blocked\')">blocked</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'all\' }" @click="$emit(\'set-installability-filter\', \'all\')">全部安装</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'installable\' }" @click="$emit(\'set-installability-filter\', \'installable\')">可安装</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'activation_required\' }" @click="$emit(\'set-installability-filter\', \'activation_required\')">需激活</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'standalone_only\' }" @click="$emit(\'set-installability-filter\', \'standalone_only\')">仅本地</button>',
+      '      <button type="button" :class="{ active: installabilityFilter === \'blocked\' }" @click="$emit(\'set-installability-filter\', \'blocked\')">已阻断</button>',
       '    </div>',
       '  </div>',
       '  <div class="catalog-grid">',
@@ -257,8 +366,8 @@
       '  <div class="install-panel__footer">',
       '    <span>audit: {{ workflow.audit_id }}</span>',
       '    <div class="install-panel__actions">',
-      '      <sdlc-action-button :action="workflow.primary_action" kind="primary"></sdlc-action-button>',
-      '      <sdlc-action-button v-if="workflow.recovery_action" :action="workflow.recovery_action"></sdlc-action-button>',
+      '      <sdlc-action-button :action="workflow.primary_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '      <sdlc-action-button v-if="workflow.recovery_action" :action="workflow.recovery_action" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '    </div>',
       '  </div>',
       '</section>'
@@ -306,7 +415,7 @@
       '  </ul>',
       '  <div class="request-panel__footer">',
       '    <span>下一步</span>',
-      '    <sdlc-action-button :action="request.next_action" kind="primary"></sdlc-action-button>',
+      '    <sdlc-action-button :action="request.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '  </div>',
       '</section>'
     ].join(""),
@@ -346,7 +455,7 @@
       '  </div>',
       '  <div class="request-panel__footer">',
       '    <span>Handoff</span>',
-      '    <sdlc-action-button :action="handoff.next_action" kind="primary"></sdlc-action-button>',
+      '    <sdlc-action-button :action="handoff.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '  </div>',
       '</section>'
     ].join(""),
@@ -395,7 +504,7 @@
       '  </div>',
       '  <div class="request-panel__footer">',
       '    <span>Assertion</span>',
-      '    <sdlc-action-button :action="assertion.next_action" kind="primary"></sdlc-action-button>',
+      '    <sdlc-action-button :action="assertion.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '  </div>',
       '</section>'
     ].join(""),
@@ -473,7 +582,8 @@
       "installWorkflow",
       "installRequest",
       "installHandoff",
-      "assertionHandoff"
+      "assertionHandoff",
+      "actionFeedback"
     ],
     template: [
       '<main class="workspace">',
@@ -498,10 +608,11 @@
       '      <h1>{{ view.display_name }}</h1>',
       '    </div>',
       '    <nav class="topbar__actions" aria-label="primary actions">',
-      '      <sdlc-action-button :action="view.primary_action" kind="primary"></sdlc-action-button>',
-      '      <sdlc-action-button :action="view.enterprise_activation_action"></sdlc-action-button>',
+      '      <sdlc-action-button :action="view.primary_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '      <sdlc-action-button :action="view.enterprise_activation_action" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '    </nav>',
       '  </header>',
+      '  <sdlc-action-feedback :feedback="actionFeedback"></sdlc-action-feedback>',
       '  <div class="workspace-grid">',
       '    <sdlc-section title="应用事实">',
       '      <dl class="facts">',
@@ -520,6 +631,15 @@
       '        <sdlc-metric-row label="签名" :value="view.package_trust_summary.signature_state" :tone="signatureTone"></sdlc-metric-row>',
       '        <sdlc-metric-row label="Hash" :value="view.package_trust_summary.hash_match_state" :tone="hashTone"></sdlc-metric-row>',
       '      </dl>',
+      '      <p class="summary">未完成签名测试、违约扫描或 AgentOps 摘要同步时，只能展示待验证状态，不能展示实际 L5。</p>',
+      '    </sdlc-section>',
+      '    <sdlc-section title="治理加载">',
+      '      <dl class="facts">',
+      '        <sdlc-metric-row label="Adapter" :value="view.governance_load.adapter_state" :tone="governanceTone"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="验证方式" :value="view.governance_load.load_verification_method" tone="info"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="证据 Hash" :value="view.governance_load.evidence_hash || \'unavailable\'" tone="neutral"></sdlc-metric-row>',
+      '        <sdlc-metric-row label="降级原因" :value="view.governance_load.degraded_reason || view.governance_load.unsupported_reason || \'unknown\'" tone="warning"></sdlc-metric-row>',
+      '      </dl>',
       '    </sdlc-section>',
       '    <sdlc-section title="企业激活">',
       '      <dl class="facts">',
@@ -529,20 +649,23 @@
       '      </dl>',
       '      <sdlc-bootstrap-timeline v-if="bootstrap.timeline" :timeline="bootstrap.timeline"></sdlc-bootstrap-timeline>',
       '      <sdlc-source-facts :status="bootstrap"></sdlc-source-facts>',
-      '      <sdlc-remediation-actions :actions="bootstrap.recommended_actions"></sdlc-remediation-actions>',
-      '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary"></sdlc-action-button>',
+      '      <sdlc-remediation-actions :actions="bootstrap.recommended_actions" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-remediation-actions>',
+      '      <sdlc-action-button :action="bootstrap.primary_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
       '    </sdlc-section>',
-      '    <sdlc-install-workflow :workflow="installWorkflow"></sdlc-install-workflow>',
-      '    <sdlc-install-request :request="installRequest"></sdlc-install-request>',
-      '    <sdlc-bootstrap-handoff :handoff="installHandoff"></sdlc-bootstrap-handoff>',
-      '    <sdlc-assertion-handoff :assertion="assertionHandoff"></sdlc-assertion-handoff>',
+      '    <sdlc-install-workflow :workflow="installWorkflow" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-install-workflow>',
+      '    <sdlc-install-request :request="installRequest" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-install-request>',
+      '    <sdlc-bootstrap-handoff :handoff="installHandoff" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-bootstrap-handoff>',
+      '    <sdlc-assertion-handoff :assertion="assertionHandoff" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-assertion-handoff>',
       '    <sdlc-section title="AgentOps 摘要">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="证据等级" :value="agentops.quality_evidence.evidence_level" tone="info"></sdlc-metric-row>',
       '        <sdlc-metric-row label="有效性" :value="agentops.quality_evidence.summary_validity_state" tone="warning"></sdlc-metric-row>',
       '        <sdlc-metric-row label="审批" :value="agentops.approval.status" :tone="approvalTone"></sdlc-metric-row>',
       '        <sdlc-metric-row label="策略" :value="agentops.runtime_policy.enforcement_mode" tone="neutral"></sdlc-metric-row>',
+      '        <sdlc-metric-row v-if="agentops.credential_bootstrap" label="凭证" :value="agentops.credential_bootstrap.credential_status" tone="info"></sdlc-metric-row>',
+      '        <sdlc-metric-row v-if="agentops.credential_bootstrap" label="Reporter" :value="agentops.credential_bootstrap.reporter_status" tone="warning"></sdlc-metric-row>',
       '      </dl>',
+      '      <p class="summary" v-if="agentops.credential_bootstrap">凭证已签发不等于完成激活；Reporter 签名测试通过后，才能由 AgentOps 回显实际可信状态。</p>',
       '      <div class="link-row" v-for="link in agentops.links" :key="link.rel">',
       '        <span>{{ link.rel }}</span><a :href="link.href">{{ link.target_system }}</a>',
       '      </div>',
@@ -595,6 +718,15 @@
           return "success";
         }
         if (this.agentops.approval.status === "pending") {
+          return "warning";
+        }
+        return "danger";
+      },
+      governanceTone: function governanceTone() {
+        if (this.view.governance_load.adapter_state === "verified_loaded") {
+          return "success";
+        }
+        if (this.view.governance_load.adapter_state === "materialized") {
           return "warning";
         }
         return "danger";

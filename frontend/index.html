@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Agent Store - Ai_AutoSDLC</title>
+    <link rel="icon" href="data:,">
     <link rel="stylesheet" href="./node_modules/@sxf/sf-theme/dist/brand.css">
     <link rel="stylesheet" href="./node_modules/@sxf/er-components/default.css">
     <link rel="stylesheet" href="./src/styles.css">
@@ -27,11 +28,13 @@
         :install-request="selectedInstallationRequest"
         :install-handoff="selectedBootstrapHandoff"
         :assertion-handoff="selectedAssertionHandoff"
+        :action-feedback="actionFeedback"
         @select-agent="selectAgent"
         @update-search="updateSearch"
         @set-type-filter="setTypeFilter"
         @set-trust-filter="setTrustFilter"
         @set-installability-filter="setInstallabilityFilter"
+        @invoke-action="invokeAction"
       ></sdlc-shell>
     </div>
     <script src="./node_modules/vue/dist/vue.js"></script>
