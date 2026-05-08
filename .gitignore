@@ -9,6 +9,7 @@ __pycache__/
 *.egg-info/
 node_modules/
 .npm/
+.playwright-cli/
 .ai-sdlc/state/*.bak
 .ai-sdlc/local/telemetry/indexes/
 .ai-sdlc/local/telemetry/sessions/

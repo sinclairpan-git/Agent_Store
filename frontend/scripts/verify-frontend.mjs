@@ -124,7 +124,17 @@ for (const requiredField of [
   "trusted_loop_verified",
   "state_source_conflict",
   "evidence_request_access",
-  "accessibility_contract"
+  "accessibility_contract",
+  "discovery_bucket",
+  "audience",
+  "product_tags",
+  "rating_summary",
+  "adoption",
+  "setup_minutes",
+  "recommendation_score",
+  "discovery_reasons",
+  "prerequisites",
+  "expected_outcomes"
 ]) {
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
@@ -136,9 +146,17 @@ assert(
     && app.includes("setTrustFilter")
     && app.includes("selectedInstallWorkflow")
     && app.includes("selectedInstallationRequest")
+    && app.includes("selectedRecommendationDecision")
     && app.includes("selectedBootstrapHandoff")
     && app.includes("selectedAssertionHandoff")
     && app.includes("actionFeedback")
+    && app.includes("discoveryCollection")
+    && app.includes("discoveryCollections")
+    && app.includes("discoveryHighlight")
+    && app.includes("setDiscoveryCollection")
+    && app.includes("recommendationState")
+    && app.includes("recommendationVerdict")
+    && app.includes("trustBlockers")
     && app.includes("invokeAction")
     && app.includes("create_installation_from_request")
     && app.includes("issue_installation_assertion")
@@ -150,23 +168,42 @@ assert(
     && app.includes("activeSelectedAgentId")
     && app.includes("catalog_filters_returned_no_agents")
     && app.includes("shellQuoteToken")
+    && app.includes("catalog_curated_preview")
+    && app.includes("agentops_echo_and_catalog")
     && app.includes("buildRequestIdentity(agent.agent_id, \"start_enterprise_activation\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"open_standalone_readme\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
+    && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
+    && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
     && indexHtml.includes(":action-feedback=\"actionFeedback\"")
+    && indexHtml.includes("@set-discovery-collection=\"setDiscoveryCollection\"")
     && indexHtml.includes("@invoke-action=\"invokeAction\""),
   "app must render Agent list cards before the detail view"
 );
 assert(
   componentLibrary.includes("catalog-toolbar")
+    && componentLibrary.includes("sdlc-discovery-rail")
+    && componentLibrary.includes("collection-tabs")
+    && componentLibrary.includes("discovery-stats")
     && componentLibrary.includes("update-search")
     && componentLibrary.includes("set-installability-filter")
     && componentLibrary.includes("standalone_only")
     && componentLibrary.includes("empty-state"),
   "Agent catalog must support search, filters, and empty state"
+);
+assert(
+  componentLibrary.includes("sdlc-recommendation-decision")
+    && componentLibrary.includes("recommendation_state")
+    && componentLibrary.includes("why_recommended")
+    && componentLibrary.includes("missing_evidence")
+    && componentLibrary.includes("trust_blockers")
+    && componentLibrary.includes("next_best_action")
+    && componentLibrary.includes("推荐决策")
+    && componentLibrary.includes("为什么选"),
+  "Agent detail must expose governed recommendation decision"
 );
 assert(
   componentLibrary.includes("install-panel")
