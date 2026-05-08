@@ -53,7 +53,9 @@ class SkillRegistryRepository:
 class SkillRegistryAPI:
     def __init__(self, repository: SkillRegistryRepository | None = None) -> None:
         self.repository = repository or SkillRegistryRepository()
-        self._idempotency: dict[str, tuple[str, int, dict[str, object]]] = {}
+        self._idempotency: dict[
+            tuple[str, str], tuple[str, int, dict[str, object]]
+        ] = {}
 
     def publish_skill(
         self,
@@ -74,7 +76,12 @@ class SkillRegistryAPI:
         if not idempotency_key:
             return _idempotency_required(trace_id)
         request_identity = _identity(payload_map)
-        cached = self._cached_response(idempotency_key, request_identity, trace_id)
+        cached = self._cached_response(
+            "publish_skill",
+            idempotency_key,
+            request_identity,
+            trace_id,
+        )
         if cached is not None:
             return cached
 
@@ -87,6 +94,7 @@ class SkillRegistryAPI:
         if decision.issues:
             return self._store_and_return(
                 idempotency_key,
+                "publish_skill",
                 request_identity,
                 400,
                 _decision_error(trace_id, audit_id, decision),
@@ -99,6 +107,7 @@ class SkillRegistryAPI:
         if existing is not None:
             return self._store_and_return(
                 idempotency_key,
+                "publish_skill",
                 request_identity,
                 409,
                 ErrorResponse(
@@ -116,6 +125,7 @@ class SkillRegistryAPI:
         self.repository.publish(decision.skill)
         return self._store_and_return(
             idempotency_key,
+            "publish_skill",
             request_identity,
             201,
             decision.to_response(),
@@ -148,7 +158,12 @@ class SkillRegistryAPI:
                 "skill_version": skill_version,
             }
         )
-        cached = self._cached_response(idempotency_key, request_identity, trace_id)
+        cached = self._cached_response(
+            "update_skill_status",
+            idempotency_key,
+            request_identity,
+            trace_id,
+        )
         if cached is not None:
             return cached
 
@@ -178,6 +193,7 @@ class SkillRegistryAPI:
         if decision.issues:
             return self._store_and_return(
                 idempotency_key,
+                "update_skill_status",
                 request_identity,
                 400,
                 _decision_error(trace_id, audit_id, decision),
@@ -187,6 +203,7 @@ class SkillRegistryAPI:
         self.repository.save(decision.skill)
         return self._store_and_return(
             idempotency_key,
+            "update_skill_status",
             request_identity,
             200,
             decision.to_response(),
@@ -194,15 +211,15 @@ class SkillRegistryAPI:
 
     def _cached_response(
         self,
+        operation: str,
         idempotency_key: str,
         request_identity: str,
         trace_id: str,
     ) -> tuple[int, dict[str, object]] | None:
-        if idempotency_key not in self._idempotency:
+        cache_key = (operation, idempotency_key)
+        if cache_key not in self._idempotency:
             return None
-        stored_identity, stored_status, stored_response = self._idempotency[
-            idempotency_key
-        ]
+        stored_identity, stored_status, stored_response = self._idempotency[cache_key]
         if stored_identity != request_identity:
             return 409, ErrorResponse(
                 error_code="IDEMPOTENCY_KEY_CONFLICT",
@@ -217,11 +234,12 @@ class SkillRegistryAPI:
     def _store_and_return(
         self,
         idempotency_key: str,
+        operation: str,
         request_identity: str,
         status_code: int,
         response: Mapping[str, object],
     ) -> tuple[int, dict[str, object]]:
-        self._idempotency[idempotency_key] = (
+        self._idempotency[(operation, idempotency_key)] = (
             request_identity,
             status_code,
             _response_copy(response),

@@ -150,6 +150,27 @@ def test_deprecate_skill_updates_registry_and_emits_notice() -> None:
     assert registry["agentops_consumption"]["sync_status"] == "notice_required"
 
 
+def test_publish_and_transition_idempotency_keys_are_scoped_by_operation() -> None:
+    api = SkillRegistryAPI()
+    shared_key = "skill-019-shared-client-key"
+
+    publish_status, publish_body = api.publish_skill(
+        _payload(),
+        headers={"Idempotency-Key": shared_key},
+    )
+    transition_status, transition_body = api.update_skill_status(
+        "repo.detect",
+        "1.0.0",
+        {"transition_action": "deprecate", "reason": "Superseded by v1.1.0"},
+        headers={"Idempotency-Key": shared_key},
+    )
+
+    assert publish_status == 201
+    assert publish_body["skill_registry"]["registry_status"] == "published"
+    assert transition_status == 200
+    assert transition_body["skill_registry"]["registry_status"] == "deprecated"
+
+
 def test_transition_returns_not_found_for_unknown_skill_version() -> None:
     api = SkillRegistryAPI()
 
