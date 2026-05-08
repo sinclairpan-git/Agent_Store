@@ -138,6 +138,13 @@ for (const requiredField of [
 ]) {
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
+assert(
+  mockData.includes('discovery_bucket: ["recommended", "enterprise", "guarded"]')
+    && mockData.includes('discovery_bucket: ["recommended", "ready", "guarded"]')
+    && !mockData.includes('discovery_bucket: ["recommended", "enterprise", "governed"]')
+    && !mockData.includes('discovery_bucket: ["recommended", "ready", "governed"]'),
+  "governance discovery rows must use the guarded bucket id"
+);
 assert(app.includes("new window.Vue"), "app must instantiate Vue2");
 assert(
   app.includes("selectedAgentId")
