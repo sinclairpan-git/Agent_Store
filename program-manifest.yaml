@@ -38,39 +38,59 @@ specs:
   path: specs/008-agentops-handoff-producer-contract
   depends_on:
   - 007-cross-project-contract-appendix
+- id: 009-agentops-consumer-acceptance-contract
+  path: specs/009-agentops-consumer-acceptance-contract
+  depends_on:
+  - 008-agentops-handoff-producer-contract
+- id: 010-agentops-credential-echo-consumer
+  path: specs/010-agentops-credential-echo-consumer
+  depends_on:
+  - 009-agentops-consumer-acceptance-contract
+- id: 011-installation-bootstrap-status-timeline
+  path: specs/011-installation-bootstrap-status-timeline
+  depends_on:
+  - 010-agentops-credential-echo-consumer
+- id: 012-bootstrap-source-of-truth-contract
+  path: specs/012-bootstrap-source-of-truth-contract
+  depends_on:
+  - 011-installation-bootstrap-status-timeline
+- id: 013-bootstrap-remediation-actions
+  path: specs/013-bootstrap-remediation-actions
+  depends_on:
+  - 012-bootstrap-source-of-truth-contract
 truth_snapshot:
-  generated_at: '2026-05-08T02:24:29Z'
+  generated_at: '2026-05-08T03:50:33Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 5960a33
-  authoring_hash: df649bd5219b5dfc25f9bba52cefdbdbc0811b1a16821058f302d2ddef90de11
+  repo_revision: f4d2535
+  authoring_hash: ab15f098f56dab93964f8b1ddd129f6cffdd4f7ee28209a757979889d65f3232
   source_hashes: {}
-  snapshot_hash: 6b5788026f90548098f8c432408b1fc51cf4916b2e61bc811bc7ede002f3bfc1
+  snapshot_hash: 7cfc4366f9f90dd9540ccd612232de468c60bacb4499d4618398899824463e0d
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 42
-    mapped_sources: 42
+    total_sources: 67
+    mapped_sources: 67
     unmapped_sources: 0
     missing_sources: 10
     phase_signal_count: 22
-    deferred_signal_count: 54
-    non_goal_signal_count: 7
+    deferred_signal_count: 60
+    non_goal_signal_count: 13
     layer_totals:
       blueprint: 1
-      spec: 8
-      plan: 8
-      tasks: 8
-      execution: 8
-      close: 8
+      spec: 13
+      plan: 13
+      tasks: 13
+      execution: 13
+      close: 13
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 8
-      plan: 8
-      tasks: 8
-      execution: 3
-      close: 3
+      spec: 13
+      plan: 13
+      tasks: 13
+      execution: 8
+      close: 8
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -442,6 +462,231 @@ truth_snapshot:
       phase_signal_count: 0
       deferred_signal_count: 1
       non_goal_signal_count: 0
+    - path: specs/009-agentops-consumer-acceptance-contract/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 009-agentops-consumer-acceptance-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 1
+    - path: specs/009-agentops-consumer-acceptance-contract/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 009-agentops-consumer-acceptance-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 1
+    - path: specs/009-agentops-consumer-acceptance-contract/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 009-agentops-consumer-acceptance-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/009-agentops-consumer-acceptance-contract/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 009-agentops-consumer-acceptance-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/009-agentops-consumer-acceptance-contract/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 009-agentops-consumer-acceptance-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/010-agentops-credential-echo-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 010-agentops-credential-echo-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/010-agentops-credential-echo-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 010-agentops-credential-echo-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/010-agentops-credential-echo-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 010-agentops-credential-echo-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/010-agentops-credential-echo-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 010-agentops-credential-echo-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/010-agentops-credential-echo-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 010-agentops-credential-echo-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/011-installation-bootstrap-status-timeline/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 011-installation-bootstrap-status-timeline
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/011-installation-bootstrap-status-timeline/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 011-installation-bootstrap-status-timeline
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/011-installation-bootstrap-status-timeline/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 011-installation-bootstrap-status-timeline
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/011-installation-bootstrap-status-timeline/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 011-installation-bootstrap-status-timeline
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/011-installation-bootstrap-status-timeline/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 011-installation-bootstrap-status-timeline
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/012-bootstrap-source-of-truth-contract/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 012-bootstrap-source-of-truth-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 1
+    - path: specs/012-bootstrap-source-of-truth-contract/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 012-bootstrap-source-of-truth-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/012-bootstrap-source-of-truth-contract/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 012-bootstrap-source-of-truth-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/012-bootstrap-source-of-truth-contract/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 012-bootstrap-source-of-truth-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/012-bootstrap-source-of-truth-contract/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 012-bootstrap-source-of-truth-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/013-bootstrap-remediation-actions/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 013-bootstrap-remediation-actions
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/013-bootstrap-remediation-actions/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 013-bootstrap-remediation-actions
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/013-bootstrap-remediation-actions/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 013-bootstrap-remediation-actions
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/013-bootstrap-remediation-actions/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 013-bootstrap-remediation-actions
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/013-bootstrap-remediation-actions/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 013-bootstrap-remediation-actions
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect
@@ -452,4 +697,4 @@ truth_snapshot:
       deferred_signal_count: 1
       non_goal_signal_count: 0
     unmapped_paths: []
-  state: migration_pending
+  state: ready

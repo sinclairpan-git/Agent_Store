@@ -4,11 +4,11 @@ default_branch_strategy: dual
 max_parallel_agents: 3
 document_locale: zh-CN
 preferred_shell: zsh
-detected_ide: codex
+detected_ide: generic
 agent_target: codex
 adapter_applied: codex
 adapter_version: '1'
-adapter_applied_at: '2026-05-08T02:25:22+00:00'
+adapter_applied_at: '2026-05-08T03:51:15+00:00'
 adapter_activation_state: installed
 adapter_support_tier: soft_installed
 agent_target_source: ''
