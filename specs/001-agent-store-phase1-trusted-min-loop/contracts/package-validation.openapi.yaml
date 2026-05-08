@@ -89,7 +89,6 @@ components:
             $ref: "#/components/schemas/SkillCandidate"
     FieldSource:
       type: object
-      required: [source_id]
       properties:
         source_id:
           type: string

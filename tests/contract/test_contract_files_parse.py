@@ -64,6 +64,7 @@ def test_package_validation_contract_documents_fix_report_and_conflict_errors() 
     responses = operation["responses"]
     report = contract["components"]["schemas"]["PackageValidationReport"]
     manifest = contract["components"]["schemas"]["PackageManifestCandidate"]
+    field_source = contract["components"]["schemas"]["FieldSource"]
     skill = contract["components"]["schemas"]["SkillCandidate"]
     error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
         "error_code"
@@ -77,6 +78,7 @@ def test_package_validation_contract_documents_fix_report_and_conflict_errors() 
     }
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
     assert "required" not in manifest
+    assert "required" not in field_source
     assert "required" not in skill
 
 

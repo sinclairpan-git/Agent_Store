@@ -40,6 +40,8 @@
 - 修复 P1：Package Validation idempotency fingerprint 排除 `trace_id` / `audit_id` 等观测字段，同一 `Idempotency-Key` 重试时只要业务 payload 相同即可返回原始 200 response。
 - 修复 P2：placeholder 检测改为 exact / token matching，避免 `methodology` 等合法文本因包含 `todo` 子串被误判为 blocked。
 - 新增回归测试覆盖 trace/audit 变化下的幂等重试、合法文本不误阻断、`TODO:` token 仍阻断。
+- 修复复审 P1：`Idempotency-Key` 读取改为大小写不敏感，兼容 HTTP header 标准大小写语义。
+- 修复复审 P2：OpenAPI `FieldSource` 移除 `source_id` required，让 incomplete field source 进入 validation report 并返回 `AI_FIELD_SOURCE_REQUIRED`。
 
 ### 本地验证
 

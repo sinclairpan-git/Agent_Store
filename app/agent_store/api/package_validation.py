@@ -37,7 +37,7 @@ class PackageValidationAPI:
         headers: Mapping[str, str],
     ) -> tuple[int, dict[str, object]]:
         trace_id = _trace_id(payload)
-        idempotency_key = headers.get("Idempotency-Key")
+        idempotency_key = _header_value(headers, "Idempotency-Key")
         if not idempotency_key:
             return 400, ErrorResponse(
                 error_code="VALIDATION_ERROR",
@@ -89,3 +89,11 @@ def _trace_id(payload: Mapping[str, object]) -> str:
     if isinstance(value, str) and value.strip():
         return value.strip()
     return new_trace_id()
+
+
+def _header_value(headers: Mapping[str, str], name: str) -> str | None:
+    normalized = name.lower()
+    for key, value in headers.items():
+        if key.lower() == normalized:
+            return value
+    return None

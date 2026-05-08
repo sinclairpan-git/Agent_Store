@@ -45,6 +45,19 @@ def test_validate_package_returns_review_ready_report() -> None:
     assert body["package_validation"]["next_action"]["action_id"] == "submit_for_review"
 
 
+def test_validate_package_accepts_case_insensitive_idempotency_header() -> None:
+    api = PackageValidationAPI()
+
+    status, body = api.validate_package(
+        _payload(),
+        headers={"idempotency-key": "pkg-018"},
+    )
+
+    assert status == 200
+    assert response_envelope_ok(body)
+    assert body["package_validation"]["validation_status"] == "passed"
+
+
 def test_validate_package_returns_field_level_fix_prompts() -> None:
     api = PackageValidationAPI()
     payload = _payload()
