@@ -41,3 +41,14 @@
 - 本地前端服务：`http://127.0.0.1:4173/`。
 - DOM 检查：推荐决策、Actual L5、Agent Store 目录、AgentOps 等待签名测试、开始企业激活均存在。
 - 截图：`specs/017-recommendation-state-api-fetch/recommendation-state-api-fetch.png`。
+
+## Batch B - Close Gate Continuation
+
+- **触发意图**：继续下一阶段，进入 `close` 收尾验收。
+- **接入真值**：`python -m ai_sdlc adapter status`：OK，Codex instructions 已安装并完成宿主验证。
+- **安全预演**：`python -m ai_sdlc run --dry-run`：PASS，阶段路由到 `close`。
+- **全量测试**：`uv run pytest -q`：180 passed。
+- **Lint/format gate**：`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：72 files already formatted。
+- **知识真值刷新**：`python -m ai_sdlc program validate`：PASS；`python -m ai_sdlc program truth sync --execute --yes`：ready，snapshot hash `72d70678588d1ec331da9b1bb0919b6a9d19d47140947b664d921d9c30798c9d`；`python -m ai_sdlc program truth audit`：ready / fresh。
+- **Close gate**：`python -m ai_sdlc run`：PASS，Pipeline completed，Stage: close。
+- **本轮生成证据**：`.ai-sdlc/local/telemetry/manifest.json`、`.ai-sdlc/state/checkpoint.yml`、`program-manifest.yaml`。
