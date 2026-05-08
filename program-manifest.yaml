@@ -62,39 +62,43 @@ specs:
   path: specs/014-agent-store-consumer-productization
   depends_on:
   - 013-bootstrap-remediation-actions
+- id: 015-recommendation-state-contract
+  path: specs/015-recommendation-state-contract
+  depends_on:
+  - 014-agent-store-consumer-productization
 truth_snapshot:
-  generated_at: '2026-05-08T07:56:52Z'
+  generated_at: '2026-05-08T08:27:48Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: e00d6a8
-  authoring_hash: a5215c7a68609210fb964deb9b2a91bef1b9effb5aedb97d4b73118579ab9f14
+  repo_revision: 6e1a333
+  authoring_hash: 334904e9179c1f77ca7e81232aac3a5e74a23ccff54ab524730f622cacd4a6d1
   source_hashes: {}
-  snapshot_hash: 1ab3164dd263a981454b3ee7c55eacb3299bc54d7a391dfca67dd4d214fcdc45
+  snapshot_hash: 3f175ce8a217244c60b8734c38c5a635a84ea69baf45070fcc2a66fb2142f15a
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 72
-    mapped_sources: 72
+    total_sources: 77
+    mapped_sources: 77
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 22
-    deferred_signal_count: 73
-    non_goal_signal_count: 14
+    deferred_signal_count: 75
+    non_goal_signal_count: 15
     layer_totals:
       blueprint: 1
-      spec: 14
-      plan: 14
-      tasks: 14
-      execution: 14
-      close: 14
+      spec: 15
+      plan: 15
+      tasks: 15
+      execution: 15
+      close: 15
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 14
-      plan: 14
-      tasks: 14
-      execution: 14
-      close: 14
+      spec: 15
+      plan: 15
+      tasks: 15
+      execution: 15
+      close: 15
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -733,6 +737,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 014-agent-store-consumer-productization
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/015-recommendation-state-contract/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 015-recommendation-state-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/015-recommendation-state-contract/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 015-recommendation-state-contract
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/015-recommendation-state-contract/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 015-recommendation-state-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/015-recommendation-state-contract/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 015-recommendation-state-contract
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/015-recommendation-state-contract/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 015-recommendation-state-contract
       phase_signal_count: 0
       deferred_signal_count: 1
       non_goal_signal_count: 0
