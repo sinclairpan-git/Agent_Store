@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from dataclasses import replace
+
+from agent_store.domain.agentops_summary import L5GateSummary
 from agent_store.domain.enterprise_context import EnterpriseContext
 from agent_store.domain.models import Agent, AgentVersion, OsCompatibility
 from agent_store.domain.package_trust import PackageTrustSummary
@@ -97,6 +100,41 @@ def test_recommendation_state_without_agentops_summary_never_defaults_l5() -> No
     assert decision["source_of_truth"]["l5_gate"] == "agentops_summary_missing"
     assert {
         "blocker_id": "l5_unavailable_without_agentops_summary",
+        "source": "agentops",
+        "severity": "warning",
+        "can_ignore": False,
+    } in decision["trust_blockers"]
+
+
+def test_recommendation_state_failed_l5_gate_is_not_recommended() -> None:
+    summary = AgentOpsSummaryClient().get_summary(
+        "framework.ai-autosdlc",
+        "1.0.0",
+        trace_id="trace-rec",
+        raw_evidence_allowed=False,
+    )
+    failed_gate_summary = replace(
+        summary,
+        l5_gate=L5GateSummary(
+            l5_gate_result="failed",
+            violation_scan_completed=True,
+            missing_requirements=(),
+        ),
+    )
+
+    response = build_recommendation_state(
+        source=_source(),
+        trace_id="trace-rec",
+        agentops_summary=failed_gate_summary,
+    )
+
+    decision = response["recommendation"]
+    assert decision["recommendation_state"] == "eligible_pending_verification"
+    assert decision["actual_l5_display_allowed"] is False
+    assert "agentops_l5_gate_not_passed" in decision["why_not"]
+    assert decision["next_best_action"]["action_id"] == "request_agentops_summary"
+    assert {
+        "blocker_id": "agentops_l5_gate_not_passed",
         "source": "agentops",
         "severity": "warning",
         "can_ignore": False,

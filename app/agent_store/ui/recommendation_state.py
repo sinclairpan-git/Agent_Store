@@ -45,7 +45,11 @@ class RecommendationStateModel:
             return "blocked"
         if self.source.installability == "activation_required":
             return "needs_activation"
-        if self.missing_evidence or self.source.package_trust_summary.trust_state != "trusted":
+        if (
+            self.missing_evidence
+            or self.l5_gate_blocks_recommendation
+            or self.source.package_trust_summary.trust_state != "trusted"
+        ):
             return "eligible_pending_verification"
         return "recommended"
 
@@ -79,6 +83,8 @@ class RecommendationStateModel:
             risks.append("package_trust_not_verified")
         if self.missing_evidence:
             risks.append("trusted_evidence_incomplete")
+        if self.l5_gate_blocks_recommendation:
+            risks.append("agentops_l5_gate_not_passed")
         if self.is_blocked:
             risks.append("governance_blocked")
         return risks
@@ -129,6 +135,15 @@ class RecommendationStateModel:
                     "can_ignore": False,
                 }
             )
+        if self.l5_gate_blocks_recommendation:
+            blockers.append(
+                {
+                    "blocker_id": "agentops_l5_gate_not_passed",
+                    "source": "agentops",
+                    "severity": "warning",
+                    "can_ignore": False,
+                }
+            )
         return blockers
 
     @property
@@ -153,7 +168,7 @@ class RecommendationStateModel:
                 href=f"/api/v1/agents/{self.source.agent.agent_id}/activate",
                 message_key="recommendation.actions.startActivation",
             )
-        if self.missing_evidence:
+        if self.missing_evidence or self.l5_gate_blocks_recommendation:
             return ActionDescriptor(
                 action_id="request_agentops_summary",
                 target_system="agentops",
@@ -206,6 +221,14 @@ class RecommendationStateModel:
         if self.agentops_summary is None or self.agentops_summary.l5_gate is None:
             return False
         return self.agentops_summary.l5_gate.actual_l5_display_allowed
+
+    @property
+    def l5_gate_blocks_recommendation(self) -> bool:
+        return (
+            self.agentops_summary is not None
+            and self.agentops_summary.l5_gate is not None
+            and not self.agentops_summary.l5_gate.actual_l5_display_allowed
+        )
 
     @property
     def audit_id(self) -> str:
