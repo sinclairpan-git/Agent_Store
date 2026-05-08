@@ -11,12 +11,13 @@
 - 根据 Codex Review 修复 L5 gate 明确未通过但 missing requirements 为空时仍可能返回 `recommended` 的问题。
 - 根据第二轮 Codex Review 修复 `standalone_only` 推荐下一步误落到 `start_install`，改为可执行的 `open_standalone_readme`。
 - 根据第三轮 Codex Review 将 `standalone_only` 下一步动作优先于 AgentOps 证据 fallback，确保缺失/降级证据时仍返回可执行的 `open_standalone_readme`。
+- 根据第四轮 Codex Review 将实际 L5 展示权限绑定到 fresh quality evidence，避免 stale/degraded/expired AgentOps 质量证据下仍放行实际 L5 展示。
 
 ### 本地验证
 
 - `ai-sdlc run --dry-run`：PASS。
-- `uv run pytest tests/unit/test_recommendation_state.py tests/contract/test_recommendation_state_api.py tests/contract/test_contract_files_parse.py -q`：14 passed。
-- `uv run pytest -q`：179 passed。
+- `uv run pytest tests/unit/test_recommendation_state.py tests/contract/test_recommendation_state_api.py tests/contract/test_contract_files_parse.py -q`：15 passed。
+- `uv run pytest -q`：180 passed。
 - `uv run ruff check app tests`：All checks passed。
 - `npm run verify`（`frontend/`）：frontend verification passed。
 - `node --check frontend/src/app.js`：PASS。

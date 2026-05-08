@@ -141,6 +141,34 @@ def test_recommendation_state_failed_l5_gate_is_not_recommended() -> None:
     } in decision["trust_blockers"]
 
 
+def test_recommendation_state_blocks_actual_l5_for_stale_quality_evidence() -> None:
+    summary = AgentOpsSummaryClient().get_summary(
+        "framework.ai-autosdlc",
+        "1.0.0",
+        trace_id="trace-rec",
+        raw_evidence_allowed=False,
+    )
+    stale_quality_summary = replace(
+        summary,
+        quality_evidence=replace(
+            summary.quality_evidence,
+            summary_validity_state="stale",
+        ),
+    )
+
+    response = build_recommendation_state(
+        source=_source(),
+        trace_id="trace-rec",
+        agentops_summary=stale_quality_summary,
+    )
+
+    decision = response["recommendation"]
+    assert decision["recommendation_state"] == "eligible_pending_verification"
+    assert decision["actual_l5_display_allowed"] is False
+    assert "fresh_agentops_quality_summary" in decision["missing_evidence"]
+    assert decision["next_best_action"]["action_id"] == "request_agentops_summary"
+
+
 def test_recommendation_state_standalone_next_action_is_executable() -> None:
     summary = AgentOpsSummaryClient().get_summary(
         "framework.ai-autosdlc",

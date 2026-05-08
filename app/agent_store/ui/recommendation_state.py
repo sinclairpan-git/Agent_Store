@@ -97,7 +97,7 @@ class RecommendationStateModel:
         else:
             quality = self.agentops_summary.quality_evidence
             missing.extend(quality.missing_evidence)
-            if quality.effective_validity_state() in {"degraded", "expired"}:
+            if quality.effective_validity_state() in {"stale", "degraded", "expired"}:
                 missing.append("fresh_agentops_quality_summary")
             if self.agentops_summary.l5_gate is None:
                 missing.append("agentops_l5_gate")
@@ -230,7 +230,12 @@ class RecommendationStateModel:
     def actual_l5_display_allowed(self) -> bool:
         if self.agentops_summary is None or self.agentops_summary.l5_gate is None:
             return False
-        return self.agentops_summary.l5_gate.actual_l5_display_allowed
+        quality = self.agentops_summary.quality_evidence
+        return (
+            quality.effective_validity_state() == "fresh"
+            and not quality.missing_evidence
+            and self.agentops_summary.l5_gate.actual_l5_display_allowed
+        )
 
     @property
     def l5_gate_blocks_recommendation(self) -> bool:
