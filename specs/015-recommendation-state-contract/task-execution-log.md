@@ -9,6 +9,7 @@
 - 新增 `recommendation-state.openapi.yaml`，并更新 contract parser 测试纳入校验。
 - 新增单元与合同测试，覆盖 recommended、needs_activation、blocked、AgentOps unavailable 和 not found。
 - 根据 Codex Review 修复 L5 gate 明确未通过但 missing requirements 为空时仍可能返回 `recommended` 的问题。
+- 根据第二轮 Codex Review 修复 `standalone_only` 推荐下一步误落到 `start_install`，改为可执行的 `open_standalone_readme`。
 
 ### 本地验证
 

@@ -141,6 +141,28 @@ def test_recommendation_state_failed_l5_gate_is_not_recommended() -> None:
     } in decision["trust_blockers"]
 
 
+def test_recommendation_state_standalone_next_action_is_executable() -> None:
+    summary = AgentOpsSummaryClient().get_summary(
+        "framework.ai-autosdlc",
+        "1.0.0",
+        trace_id="trace-rec",
+        raw_evidence_allowed=False,
+    )
+
+    response = build_recommendation_state(
+        source=_source(installability="standalone_only"),
+        trace_id="trace-rec",
+        agentops_summary=summary,
+    )
+
+    action = response["recommendation"]["next_best_action"]
+    assert action["action_id"] == "open_standalone_readme"
+    assert action["target_system"] == "ai_autosdlc_cli"
+    assert action["enabled"] is True
+    assert action["requires_permission"] is False
+    assert action["audit_required"] is False
+
+
 def test_recommendation_state_blocks_catalog_or_package_trust_denials() -> None:
     response = build_recommendation_state(
         source=_source(trust_state="blocked", installability="blocked"),

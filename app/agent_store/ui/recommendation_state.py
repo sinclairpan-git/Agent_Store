@@ -178,6 +178,16 @@ class RecommendationStateModel:
                 href=f"/agentops/summaries/{self.source.agent.agent_id}",
                 message_key="recommendation.actions.requestAgentOpsSummary",
             )
+        if self.source.installability == "standalone_only":
+            return ActionDescriptor(
+                action_id="open_standalone_readme",
+                target_system="ai_autosdlc_cli",
+                enabled=True,
+                requires_permission=False,
+                audit_required=False,
+                href=f"/docs/agents/{self.source.agent.agent_id}/standalone",
+                message_key="recommendation.actions.openStandaloneReadme",
+            )
         return ActionDescriptor(
             action_id="start_install",
             target_system="agent_store",

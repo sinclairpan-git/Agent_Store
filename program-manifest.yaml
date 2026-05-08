@@ -67,13 +67,13 @@ specs:
   depends_on:
   - 014-agent-store-consumer-productization
 truth_snapshot:
-  generated_at: '2026-05-08T08:57:02Z'
+  generated_at: '2026-05-08T09:08:20Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 24c0b6a
+  repo_revision: 1975f6a
   authoring_hash: 334904e9179c1f77ca7e81232aac3a5e74a23ccff54ab524730f622cacd4a6d1
   source_hashes: {}
-  snapshot_hash: 37b3d2cb13b91f9047152d6ca51a20f5826d96d11f78fee82f627358f9af3e5e
+  snapshot_hash: 64dd16c521a4b53f2243b08eca0d76cafab2e41840b48ebded1d2d50827b5bc1
   computed_capabilities: []
   source_inventory:
     state: complete
