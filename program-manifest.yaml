@@ -70,39 +70,43 @@ specs:
   path: specs/016-recommendation-state-frontend-consumer
   depends_on:
   - 015-recommendation-state-contract
+- id: 017-recommendation-state-api-fetch
+  path: specs/017-recommendation-state-api-fetch
+  depends_on:
+  - 016-recommendation-state-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-08T10:02:48Z'
+  generated_at: '2026-05-08T10:15:58Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 476802c
-  authoring_hash: c0d8763b99afd2db513bfbb8eac610ec5151341b487d081e39737599e8b1687a
+  repo_revision: 8a948db
+  authoring_hash: 2912ee2bd7c9cf39ccac69df1f8b9a789b0c6b87edee2481d4717e957037f0e0
   source_hashes: {}
-  snapshot_hash: 28bdd84540a3edcd051998694430a7e99141a7b4581dc0cc3a9e71ce6a34b279
+  snapshot_hash: c4634ade6a503f4d75127eaba67137a8e21d486e8a7d84e1bf6e470c1a900157
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 82
-    mapped_sources: 82
+    total_sources: 87
+    mapped_sources: 87
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 22
-    deferred_signal_count: 78
-    non_goal_signal_count: 16
+    deferred_signal_count: 81
+    non_goal_signal_count: 17
     layer_totals:
       blueprint: 1
-      spec: 16
-      plan: 16
-      tasks: 16
-      execution: 16
-      close: 16
+      spec: 17
+      plan: 17
+      tasks: 17
+      execution: 17
+      close: 17
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 16
-      plan: 16
-      tasks: 16
-      execution: 16
-      close: 16
+      spec: 17
+      plan: 17
+      tasks: 17
+      execution: 17
+      close: 17
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -831,6 +835,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 016-recommendation-state-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 2
+      non_goal_signal_count: 0
+    - path: specs/017-recommendation-state-api-fetch/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 017-recommendation-state-api-fetch
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/017-recommendation-state-api-fetch/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 017-recommendation-state-api-fetch
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/017-recommendation-state-api-fetch/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 017-recommendation-state-api-fetch
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/017-recommendation-state-api-fetch/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 017-recommendation-state-api-fetch
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/017-recommendation-state-api-fetch/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 017-recommendation-state-api-fetch
       phase_signal_count: 0
       deferred_signal_count: 2
       non_goal_signal_count: 0
