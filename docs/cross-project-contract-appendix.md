@@ -230,6 +230,38 @@ score, CapabilityGrant, or AgentOps PolicyDecision replacement. Store may show
 the next action and missing capabilities, but must not claim an Agent ran
 successfully from availability alone.
 
+## HealthSummary Freshness V1
+
+Agent Store consumes AgentOps HealthSummary echo facts and projects them into
+`health_summary_freshness.v1` for Store UI/API consumers. AgentOps remains the
+owner of health state, observed window, evidence summary linkage, and
+`valid_until`. Store owns only the freshness guard projection, next action,
+audit id, and display wording.
+
+The freshness projection must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `health_unavailable` | No AgentOps HealthSummary echo is available. | Route the user to request AgentOps health summary. |
+| `health_invalid` | Required fields such as `valid_until` are missing or malformed. | Route the user to refresh AgentOps HealthSummary. |
+| `health_refresh_required` | `valid_until` is in the past. | Display “待刷新” and do not present an effective health conclusion. |
+| `health_attention_required` | Summary is fresh but `health_state` is `degraded`, `unhealthy`, or `unknown`. | Display AgentOps-owned attention state and route to detail. |
+| `health_fresh` | Summary is within `valid_until` and reports `healthy`. | Display the summary as fresh without using it as recommendation basis. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `health_summary` | `agentops` |
+| `summary_projection` | `agent_store` |
+| `recommendation` | `recommendation_state_excludes_health_summary` |
+| `policy_decision` | `agentops` |
+
+The projection must always expose `recommendation_basis_allowed=false`.
+HealthSummary freshness may explain whether the displayed health summary is
+fresh, expired, or unavailable, but Store must not use it to compute quality
+score, Actual L5, PolicyDecision, CapabilityGrant, or recommendation ranking.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -294,14 +326,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-007 Skill Registry notification | Agent Store | AgentOps | AgentOps accepts `skill_registry_notification.v1` as an immutable Store-owned fact and returns receipt metadata without rewriting Skill fields. |
 | CCT-008 AgentManifest Runtime contract | Agent Store | Agent Runtime | Runtime consumes Store-owned `agent_manifest_runtime_contract.v1`; missing required capabilities produce `runtime_capability_missing`, not a silent runnable state. |
 | CCT-009 Runtime availability summary | Agent Runtime | Agent Store | Store projects Runtime echo/probe into `runtime_availability_summary.v1` and distinguishes missing Runtime, upgrade required, missing capability, and ready states. |
+| CCT-010 HealthSummary freshness guard | AgentOps | Agent Store | Store projects AgentOps HealthSummary freshness into `health_summary_freshness.v1`; expired `valid_until` displays “待刷新” and never becomes a recommendation basis. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, and `runtime_availability_summary.v1`; require external assertion field names, AgentOps credential echo, and Runtime availability projection. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, and Store-consumed `runtime_availability_summary.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, and `health_summary_freshness.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, and HealthSummary freshness guard. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, and Store-consumed `health_summary_freshness.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

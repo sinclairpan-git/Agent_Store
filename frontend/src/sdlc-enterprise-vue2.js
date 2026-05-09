@@ -151,11 +151,25 @@
     runtime_capability_missing: "缺 Runtime 能力",
     runtime_ready: "可运行",
     manifest_incomplete: "Manifest 待补齐",
+    health_unavailable: "摘要不可用",
+    health_invalid: "摘要无效",
+    health_refresh_required: "待刷新",
+    health_attention_required: "健康需关注",
+    health_fresh: "健康摘要新鲜",
+    healthy: "健康",
+    unhealthy: "不健康",
     runtime_availability: "Runtime 可用性",
     runtime_availability_summary: "Runtime 可用性摘要",
+    health_summary: "HealthSummary",
+    health_summary_freshness: "HealthSummary 新鲜度",
     agent_runtime_echo_or_probe: "Agent Runtime Echo/Probe",
     summary_projection: "摘要投影",
-    agent_store_runtime_availability_projection: "Agent Store 可用性投影"
+    agent_store_runtime_availability_projection: "Agent Store 可用性投影",
+    recommendation_state_excludes_health_summary: "推荐决策不使用 HealthSummary",
+    request_agentops_health_summary: "申请 HealthSummary",
+    refresh_agentops_health_summary: "刷新 HealthSummary",
+    view_agentops_health_detail: "查看健康详情",
+    continue_health_review: "继续健康摘要复核"
   };
 
   function displayLabel(value) {
@@ -879,6 +893,86 @@
     }
   });
 
+  Vue.component("sdlc-health-summary-freshness", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section health-panel">',
+      '  <div class="section-heading">',
+      '    <h2>HealthSummary 新鲜度</h2>',
+      '    <sdlc-status-chip :label="summary.freshness_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ summary.reason }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="展示" :value="summary.display_name_zh" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="健康" :value="summary.health_state || \'unknown\'" :tone="healthTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="有效期" :value="summary.valid_until || \'missing\'" :tone="validUntilTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="信号" :value="signalCountLabel" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="推荐依据" :value="summary.recommendation_basis_allowed ? \'allowed\' : \'blocked\'" :tone="summary.recommendation_basis_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="summary.audit_id || \'missing\'" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ issue.issue_id }} / {{ issue.fix_action_id }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ healthFactLabel }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.summary.freshness_state === "health_fresh") {
+          return "success";
+        }
+        if (
+          this.summary.freshness_state === "health_refresh_required"
+          || this.summary.freshness_state === "health_attention_required"
+        ) {
+          return "warning";
+        }
+        return "danger";
+      },
+      healthTone: function healthTone() {
+        if (this.summary.health_state === "healthy") {
+          return "success";
+        }
+        if (
+          this.summary.health_state === "degraded"
+          || this.summary.health_state === "unknown"
+        ) {
+          return "warning";
+        }
+        return "danger";
+      },
+      validUntilTone: function validUntilTone() {
+        if (this.summary.freshness_state === "health_fresh") {
+          return "success";
+        }
+        if (this.summary.valid_until) {
+          return "warning";
+        }
+        return "danger";
+      },
+      signalCountLabel: function signalCountLabel() {
+        return String(this.summary.signal_count || 0);
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      },
+      healthFactLabel: function healthFactLabel() {
+        var facts = this.summary.health_facts || {};
+        return [
+          facts.evidence_summary_id || "evidence-summary-missing",
+          facts.agentops_trace_id || "trace-missing"
+        ].join(" / ");
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -901,6 +995,7 @@
       "installRequest",
       "recommendationDecision",
       "runtimeAvailability",
+      "healthSummaryFreshness",
       "installHandoff",
       "assertionHandoff",
       "actionFeedback"
@@ -943,6 +1038,7 @@
       '  <div class="workspace-grid">',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
+      '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-section title="应用事实">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="类型" :value="view.capability_type" tone="info"></sdlc-metric-row>',

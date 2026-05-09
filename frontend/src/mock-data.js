@@ -399,6 +399,130 @@ window.AgentStoreMock = {
       }
     }
   },
+  healthSummaryFreshness: {
+    "framework.ai-autosdlc": {
+      audit_id: "audit-health-framework.ai-autosdlc",
+      contract_schema_version: "health_summary_freshness.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      health_summary_id: "health-framework-ai-autosdlc-1",
+      freshness_state: "health_refresh_required",
+      display_name_zh: "待刷新",
+      reason: "AgentOps HealthSummary valid_until 已过期，只能展示待刷新。",
+      health_state: "healthy",
+      calculated_at: "2026-05-09T07:30:00Z",
+      valid_until: "2026-05-09T08:00:00Z",
+      observed_window_start: "2026-05-09T07:00:00Z",
+      observed_window_end: "2026-05-09T07:30:00Z",
+      signal_count: 12,
+      recommendation_basis_allowed: false,
+      issues: [
+        {
+          issue_id: "HEALTH_SUMMARY_EXPIRED",
+          field_path: "agentops_health_summary.valid_until",
+          severity: "warning",
+          fix_action_id: "refresh_agentops_health_summary"
+        }
+      ],
+      source_of_truth: {
+        health_summary: "agentops",
+        summary_projection: "agent_store",
+        recommendation: "recommendation_state_excludes_health_summary",
+        policy_decision: "agentops"
+      },
+      health_facts: {
+        health_summary_present: true,
+        agentops_trace_id: "trace-health-framework",
+        evidence_summary_id: "evidence-health-framework"
+      },
+      next_action: {
+        action_id: "refresh_agentops_health_summary",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      audit_id: "audit-health-agentops.evidence-reporter",
+      contract_schema_version: "health_summary_freshness.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      health_summary_id: "health-agentops-evidence-reporter-1",
+      freshness_state: "health_fresh",
+      display_name_zh: "健康摘要新鲜",
+      reason: "AgentOps HealthSummary 在有效期内且报告 healthy。",
+      health_state: "healthy",
+      calculated_at: "2026-05-09T08:04:00Z",
+      valid_until: "2026-05-09T08:34:00Z",
+      observed_window_start: "2026-05-09T07:34:00Z",
+      observed_window_end: "2026-05-09T08:04:00Z",
+      signal_count: 9,
+      recommendation_basis_allowed: false,
+      issues: [],
+      source_of_truth: {
+        health_summary: "agentops",
+        summary_projection: "agent_store",
+        recommendation: "recommendation_state_excludes_health_summary",
+        policy_decision: "agentops"
+      },
+      health_facts: {
+        health_summary_present: true,
+        agentops_trace_id: "trace-health-agentops",
+        evidence_summary_id: "evidence-health-agentops"
+      },
+      next_action: {
+        action_id: "continue_health_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      audit_id: "audit-health-security.policy-guard",
+      contract_schema_version: "health_summary_freshness.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      health_summary_id: "health-security-policy-guard-1",
+      freshness_state: "health_attention_required",
+      display_name_zh: "健康需关注",
+      reason: "AgentOps HealthSummary 仍新鲜，但报告 degraded。",
+      health_state: "degraded",
+      calculated_at: "2026-05-09T08:03:00Z",
+      valid_until: "2026-05-09T08:33:00Z",
+      observed_window_start: "2026-05-09T07:33:00Z",
+      observed_window_end: "2026-05-09T08:03:00Z",
+      signal_count: 5,
+      recommendation_basis_allowed: false,
+      issues: [
+        {
+          issue_id: "AGENTOPS_HEALTH_ATTENTION",
+          field_path: "agentops_health_summary.health_state",
+          severity: "warning",
+          fix_action_id: "view_agentops_health_detail"
+        }
+      ],
+      source_of_truth: {
+        health_summary: "agentops",
+        summary_projection: "agent_store",
+        recommendation: "recommendation_state_excludes_health_summary",
+        policy_decision: "agentops"
+      },
+      health_facts: {
+        health_summary_present: true,
+        agentops_trace_id: "trace-health-security",
+        evidence_summary_id: "evidence-health-security"
+      },
+      next_action: {
+        action_id: "view_agentops_health_detail",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   bootstrap: {
     installation_id: "inst-1",
     bootstrap_status: "credential_issued",
