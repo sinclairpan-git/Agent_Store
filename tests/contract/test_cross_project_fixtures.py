@@ -101,3 +101,25 @@ def test_agentops_016_consumer_acceptance_is_frozen_in_appendix() -> None:
 
     for term in required_terms:
         assert term in appendix
+
+
+def test_cct_008_agent_manifest_runtime_contract_is_frozen_in_appendix() -> None:
+    appendix = Path("docs/cross-project-contract-appendix.md").read_text(
+        encoding="utf-8",
+    )
+
+    required_terms = [
+        "AgentManifest Runtime Contract V1",
+        "agent_manifest_runtime_contract.v1",
+        "`required_runtime_capabilities`",
+        "`observability_contract`",
+        "runtime_compatibility=runtime_capability_missing",
+        "`runtime.capabilities`",
+        "`agent_manifest` | `agent_store`",
+        "`runtime_availability` | `agent_runtime_echo_or_probe`",
+        "Store not computing",
+        "Runtime execution state",
+    ]
+
+    for term in required_terms:
+        assert term in appendix

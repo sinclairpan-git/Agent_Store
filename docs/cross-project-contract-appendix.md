@@ -149,6 +149,56 @@ distinguish "published in Agent Store" from "AgentOps notification accepted".
 For `security_revoked`, downstream views must preserve the strongest security
 status even while delivery is pending.
 
+## AgentManifest Runtime Contract V1
+
+Agent Store owns `AgentManifest` as the supply-side contract consumed by
+Agent Runtime, AgentOps, and Ai_AutoSDLC. Runtime may reject or block execution
+when the manifest is incomplete or incompatible, but Runtime must not rewrite
+manifest facts or silently fill missing permission, Skill, provenance, or
+observability fields.
+
+The contract response is `agent_manifest_runtime_contract.v1` and must include:
+
+| Field | Required | Owner | Notes |
+| --- | --- | --- | --- |
+| `manifest_schema_version` | Yes | Agent Store | Version of the Store-owned manifest schema. |
+| `agent_id` | Yes | Agent Store | Stable Agent registry identity. |
+| `version` | Yes | Agent Store | Immutable Agent version. |
+| `artifact_hash` | Yes | Agent Store | Must bind package, installation, and Runtime execution. |
+| `runtime_contract_version` | Yes | Agent Store + Runtime contract owners | Declares the Runtime contract expected by this Agent version. |
+| `required_runtime_capabilities` | Yes | Agent Store | Non-empty array such as `tool_call`, `policy_check`, `outbox`, `basic_isolation`. |
+| `skills` | Yes | Agent Store | Non-empty Store-owned Skill references, each with `skill_id` and `skill_version`. |
+| `permission_intents` | Yes | Agent Store | Declared intent only; AgentOps still owns PolicyDecision and CapabilityGrant. |
+| `data_scopes` | Yes | Agent Store | Declared data scope for review and policy. |
+| `secret_refs` | Yes | Agent Store | References only; no cleartext secrets. |
+| `network_allowlist` | Yes | Agent Store | Declared external network scope. |
+| `observability_contract` | Yes | Agent Store + Runtime contract owners | Must include minimum TraceSpan kinds Runtime emits. |
+| `guardrail_refs` | Yes | Agent Store / AgentOps policy references | Declares guardrails to bind; Ops owns enforcement facts. |
+| `rollback_policy` | Yes | Agent Store | Describes rollback or force-disable behavior. |
+| `provenance` | Yes | Agent Store | Package source, build source, and signing source. |
+
+When a Runtime capability probe is available, Store validates
+`required_runtime_capabilities` against the Runtime echo. Missing capabilities
+must produce `runtime_compatibility=runtime_capability_missing` and a blocked
+issue at `runtime.capabilities`. Store must not display that Agent version as
+runnable in the current Runtime. If no Runtime echo is available, Store may
+return `runtime_compatibility=runtime_unknown` with the next action
+`check_runtime_capabilities`.
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `agent_manifest` | `agent_store` |
+| `package` | `agent_store` |
+| `skill_registry` | `agent_store` |
+| `runtime_availability` | `agent_runtime_echo_or_probe` |
+| `policy_decision` | `agentops` |
+
+Consumer-driven tests must cover complete manifest compatibility, missing
+required Runtime fields, missing Runtime capabilities, and Store not computing
+PolicyDecision or Runtime execution state.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -211,14 +261,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-005 standalone regression | Ai_AutoSDLC | Agent Store, AgentOps | No Agent Store or AgentOps dependency may block `ai-sdlc run --dry-run` or local reports. |
 | CCT-006 stale schema rejection | All | All | Unknown major schema versions return explainable unsupported-schema errors. |
 | CCT-007 Skill Registry notification | Agent Store | AgentOps | AgentOps accepts `skill_registry_notification.v1` as an immutable Store-owned fact and returns receipt metadata without rewriting Skill fields. |
+| CCT-008 AgentManifest Runtime contract | Agent Store | Agent Runtime | Runtime consumes Store-owned `agent_manifest_runtime_contract.v1`; missing required capabilities produce `runtime_capability_missing`, not a silent runnable state. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`; require external assertion field names and AgentOps credential echo. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1` and `skill_registry_notification.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1` and `agent_manifest_runtime_contract.v1`; require external assertion field names and AgentOps credential echo. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, and `agent_manifest_runtime_contract.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order
