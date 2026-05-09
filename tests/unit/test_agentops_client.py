@@ -321,6 +321,52 @@ def test_skill_registry_notice_rejects_blocked_registry_decision() -> None:
         raise AssertionError("blocked registry decisions should not notify AgentOps")
 
 
+def test_skill_registry_notice_rejects_unsupported_contract() -> None:
+    api = SkillRegistryAPI()
+    _, registry_response = api.publish_skill(
+        _skill_publish_payload(),
+        headers={"Idempotency-Key": "publish-contract"},
+    )
+    assert isinstance(registry_response["skill_registry"], dict)
+    consumption = registry_response["skill_registry"]["agentops_consumption"]
+    assert isinstance(consumption, dict)
+    consumption["contract"] = "skill_registry.v2"
+    client = AgentOpsSkillRegistryNoticeClient()
+
+    try:
+        client.notify_skill_registry(
+            registry_response,
+            headers={"Idempotency-Key": "notice-contract"},
+        )
+    except ValueError as exc:
+        assert "contract must be skill_registry.v1" in str(exc)
+    else:
+        raise AssertionError("unsupported notification contract should fail")
+
+
+def test_skill_registry_notice_rejects_unknown_lifecycle_type() -> None:
+    api = SkillRegistryAPI()
+    _, registry_response = api.publish_skill(
+        _skill_publish_payload(),
+        headers={"Idempotency-Key": "publish-notice-type"},
+    )
+    assert isinstance(registry_response["skill_registry"], dict)
+    event = registry_response["skill_registry"]["event"]
+    assert isinstance(event, dict)
+    event["event_type"] = "skill_archived"
+    client = AgentOpsSkillRegistryNoticeClient()
+
+    try:
+        client.notify_skill_registry(
+            registry_response,
+            headers={"Idempotency-Key": "notice-type"},
+        )
+    except ValueError as exc:
+        assert "unsupported Skill Registry notice type" in str(exc)
+    else:
+        raise AssertionError("unsupported lifecycle notice type should fail")
+
+
 def test_skill_registry_notice_preserves_security_revoke_evidence() -> None:
     api = SkillRegistryAPI()
     api.publish_skill(

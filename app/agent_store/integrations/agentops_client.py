@@ -22,6 +22,15 @@ from agent_store.domain.agentops_summary import (
 )
 from agent_store.domain.models import utc_now
 
+SKILL_REGISTRY_NOTICE_CONTRACT = "skill_registry.v1"
+SKILL_REGISTRY_NOTICE_TYPES = frozenset(
+    {
+        "skill_published",
+        "skill_deprecated",
+        "skill_security_revoked",
+    }
+)
+
 
 class AgentOpsUnavailableError(RuntimeError):
     """Raised by test/provider fakes when AgentOps cannot be reached."""
@@ -183,6 +192,13 @@ class AgentOpsSkillRegistryNoticeClient:
         if source_of_truth.get("skill_registry") != "agent_store":
             raise ValueError("Agent Store must remain the Skill Registry fact owner")
 
+        contract = str(consumption.get("contract") or "")
+        if contract != SKILL_REGISTRY_NOTICE_CONTRACT:
+            raise ValueError("agentops consumption contract must be skill_registry.v1")
+        notice_type = str(event.get("event_type") or "")
+        if notice_type not in SKILL_REGISTRY_NOTICE_TYPES:
+            raise ValueError("unsupported Skill Registry notice type")
+
         trace_id = str(registry_response.get("trace_id") or "")
         audit_id = str(registry_response.get("audit_id") or "")
         event_id = str(event.get("event_id") or "")
@@ -203,9 +219,9 @@ class AgentOpsSkillRegistryNoticeClient:
             "idempotency_key": idempotency_key,
             "source_system": "agent_store",
             "target_system": "agentops",
-            "contract": str(consumption.get("contract") or "skill_registry.v1"),
+            "contract": contract,
             "consumer": "agentops",
-            "notice_type": str(event.get("event_type") or ""),
+            "notice_type": notice_type,
             "registry_key": registry_key,
             "skill": deepcopy(dict(skill)),
             "event": deepcopy(dict(event)),
