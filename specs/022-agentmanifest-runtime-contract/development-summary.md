@@ -12,6 +12,8 @@
 - 复验通过：`uv run pytest -q` 252 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`ai-sdlc run --dry-run` 通过。
 - 修复 Codex Review 第二轮：`runtime_unknown` 不再混用 missing capability 列表；`observability_contract.trace_spans` 会拒绝非字符串或空白项。
 - 复验通过：`uv run pytest -q` 253 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`ai-sdlc run --dry-run` 通过。
+- 修复 Codex Review 第三轮：API 显式区分未提供 Runtime probe 与空 Runtime echo；空 echo 现在按缺能力阻断，未提供 echo 仍返回 `runtime_unknown`。
+- 复验通过：`uv run pytest -q` 255 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`ai-sdlc run --dry-run` 通过。
 
 ## 边界说明
 

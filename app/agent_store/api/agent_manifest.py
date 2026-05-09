@@ -94,6 +94,10 @@ class AgentManifestRuntimeContractAPI:
         response = build_agent_manifest_runtime_contract(
             manifest,
             runtime_capabilities=_runtime_capabilities(payload),
+            runtime_probe_provided=isinstance(
+                payload.get("runtime_capabilities"),
+                list,
+            ),
             trace_id=trace_id,
             audit_id=audit_id,
         ).to_response()

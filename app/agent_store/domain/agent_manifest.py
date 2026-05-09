@@ -134,6 +134,7 @@ def build_agent_manifest_runtime_contract(
     manifest: Mapping[str, object],
     *,
     runtime_capabilities: tuple[str, ...] = (),
+    runtime_probe_provided: bool = False,
     trace_id: str,
     audit_id: str,
 ) -> AgentManifestRuntimeContract:
@@ -147,16 +148,17 @@ def build_agent_manifest_runtime_contract(
 
     required_capabilities = _string_items(manifest.get("required_runtime_capabilities"))
     runtime_capability_set = frozenset(runtime_capabilities)
+    runtime_probe_available = runtime_probe_provided or bool(runtime_capabilities)
     missing_capabilities = (
         tuple(
             capability
             for capability in required_capabilities
             if capability not in runtime_capability_set
         )
-        if runtime_capabilities
+        if runtime_probe_available
         else ()
     )
-    if runtime_capabilities and missing_capabilities:
+    if runtime_probe_available and missing_capabilities:
         issues.append(
             AgentManifestRuntimeIssue(
                 issue_id="RUNTIME_CAPABILITY_MISSING",
@@ -176,7 +178,7 @@ def build_agent_manifest_runtime_contract(
     )
     runtime_compatibility = _runtime_compatibility(
         manifest_status=manifest_status,
-        runtime_capabilities=runtime_capabilities,
+        runtime_probe_available=runtime_probe_available,
         missing_capabilities=missing_capabilities,
     )
     return AgentManifestRuntimeContract(
@@ -204,12 +206,12 @@ def build_agent_manifest_runtime_contract(
 def _runtime_compatibility(
     *,
     manifest_status: str,
-    runtime_capabilities: tuple[str, ...],
+    runtime_probe_available: bool,
     missing_capabilities: tuple[str, ...],
 ) -> str:
     if manifest_status != "complete":
         return "manifest_incomplete"
-    if not runtime_capabilities:
+    if not runtime_probe_available:
         return "runtime_unknown"
     if missing_capabilities:
         return "runtime_capability_missing"

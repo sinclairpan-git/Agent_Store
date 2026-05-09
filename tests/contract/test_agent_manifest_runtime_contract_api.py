@@ -91,6 +91,32 @@ def test_validate_agent_manifest_runtime_contract_returns_missing_capabilities()
     assert report["next_action"]["action_id"] == "view_missing_runtime_capabilities"
 
 
+def test_validate_agent_manifest_runtime_contract_treats_empty_probe_as_mismatch() -> (
+    None
+):
+    api = AgentManifestRuntimeContractAPI()
+    payload = _payload()
+    payload["runtime_capabilities"] = []
+
+    status, body = api.validate_runtime_contract(
+        payload,
+        headers={"Idempotency-Key": "manifest-022"},
+    )
+    report = body["agent_manifest_runtime_contract"]
+
+    assert status == 200
+    assert report["runtime_compatibility"] == "runtime_capability_missing"
+    assert set(report["missing_runtime_capabilities"]) == {
+        "tool_call",
+        "policy_check",
+        "outbox",
+        "basic_isolation",
+    }
+    assert {issue["issue_id"] for issue in report["issues"]} == {
+        "RUNTIME_CAPABILITY_MISSING"
+    }
+
+
 def test_validate_agent_manifest_runtime_contract_reuses_idempotent_result() -> None:
     api = AgentManifestRuntimeContractAPI()
 

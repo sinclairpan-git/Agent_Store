@@ -20,3 +20,5 @@
 - Codex Review P1 修复后复验：`uv run pytest -q`：252 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：84 files already formatted；`ai-sdlc run --dry-run`：PASS。
 - Codex Review 第二轮修复：`runtime_unknown` 时不再把所有 required capabilities 同时列为 missing；`observability_contract.trace_spans` 中非字符串或空白项现在返回 blocked `OBSERVABILITY_TRACE_SPAN_INVALID`。
 - 第二轮复验：`uv run pytest -q`：253 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：84 files already formatted；`ai-sdlc run --dry-run`：PASS。
+- Codex Review 第三轮修复：API 显式区分未提供 Runtime probe 与 Runtime probe 返回空能力列表；空 echo 现在产生 `runtime_capability_missing` 和完整 missing capability 列表，未提供 echo 仍保持 `runtime_unknown`。
+- 第三轮复验：`uv run pytest -q`：255 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：84 files already formatted；`ai-sdlc run --dry-run`：PASS。

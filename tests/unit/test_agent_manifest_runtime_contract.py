@@ -136,6 +136,28 @@ def test_agent_manifest_runtime_contract_keeps_unknown_runtime_not_runnable() ->
     assert report.next_action["action_id"] == "check_runtime_capabilities"
 
 
+def test_agent_manifest_runtime_contract_treats_empty_runtime_echo_as_missing() -> None:
+    report = build_agent_manifest_runtime_contract(
+        _manifest(),
+        runtime_capabilities=(),
+        runtime_probe_provided=True,
+        trace_id="trace-022",
+        audit_id="audit-022",
+    )
+
+    assert report.manifest_status == "complete"
+    assert report.runtime_compatibility == "runtime_capability_missing"
+    assert set(report.missing_runtime_capabilities) == {
+        "tool_call",
+        "policy_check",
+        "outbox",
+        "basic_isolation",
+    }
+    assert any(
+        issue.issue_id == "RUNTIME_CAPABILITY_MISSING" for issue in report.issues
+    )
+
+
 def test_agent_manifest_runtime_contract_rejects_malformed_capabilities() -> None:
     manifest = _manifest()
     manifest["required_runtime_capabilities"] = ["tool_call", 123, " "]
