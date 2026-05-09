@@ -19,6 +19,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-manifest-runtime.openapi.yaml",
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
+        "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
         "package-validation.openapi.yaml",
         "recommendation-state.openapi.yaml",
@@ -163,6 +164,39 @@ def test_runtime_availability_contract_documents_store_summary_states() -> None:
         "agent_runtime_echo_or_probe"
     ]
     assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_health_summary_freshness_contract_documents_refresh_guard() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "health-summary-freshness.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/health-summary-freshness"]["post"]
+    responses = operation["responses"]
+    summary = contract["components"]["schemas"]["HealthSummaryFreshness"]
+    source_of_truth = contract["components"]["schemas"][
+        "HealthSummaryFreshnessSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "health_unavailable",
+        "health_invalid",
+        "health_refresh_required",
+        "health_attention_required",
+        "health_fresh",
+    }.issubset(set(summary["properties"]["freshness_state"]["enum"]))
+    assert "recommendation_basis_allowed" in summary["required"]
+    assert summary["properties"]["recommendation_basis_allowed"]["const"] is False
+    assert source_of_truth["properties"]["health_summary"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["recommendation"]["enum"] == [
+        "recommendation_state_excludes_health_summary"
+    ]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 

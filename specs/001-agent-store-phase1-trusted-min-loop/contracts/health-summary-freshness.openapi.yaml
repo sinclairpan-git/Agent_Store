@@ -1,0 +1,285 @@
+openapi: 3.1.0
+info:
+  title: Agent Store HealthSummary Freshness API
+  version: 0.1.0
+paths:
+  /api/v1/agents/health-summary-freshness:
+    post:
+      operationId: summarizeHealthSummaryFreshness
+      summary: Project AgentOps HealthSummary freshness into a Store-owned display guard
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HealthSummaryFreshnessRequest"
+      responses:
+        "200":
+          description: HealthSummary freshness projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthSummaryFreshnessResponse"
+        "400":
+          description: Malformed health summary freshness request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthSummaryFreshnessRequest:
+      type: object
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        health_summary:
+          $ref: "#/components/schemas/AgentOpsHealthSummaryEcho"
+    AgentOpsHealthSummaryEcho:
+      type: object
+      required:
+        - agent_id
+        - agent_version
+        - health_summary_id
+        - health_state
+        - calculated_at
+        - valid_until
+      properties:
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        health_summary_id:
+          type: string
+        health_state:
+          type: string
+          enum: [healthy, degraded, unhealthy, unknown]
+        calculated_at:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        observed_window_start:
+          type: string
+          format: date-time
+        observed_window_end:
+          type: string
+          format: date-time
+        signal_count:
+          type: integer
+          minimum: 0
+        evidence_summary_id:
+          type: string
+        trace_id:
+          type: string
+    HealthSummaryFreshnessResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - health_summary_freshness
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        health_summary_freshness:
+          $ref: "#/components/schemas/HealthSummaryFreshness"
+    HealthSummaryFreshness:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - agent_version
+        - health_summary_id
+        - freshness_state
+        - display_name_zh
+        - reason_code
+        - reason
+        - health_state
+        - calculated_at
+        - valid_until
+        - observed_window_start
+        - observed_window_end
+        - signal_count
+        - recommendation_basis_allowed
+        - issues
+        - source_of_truth
+        - health_facts
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [health_summary_freshness.v1]
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        health_summary_id:
+          type: string
+        freshness_state:
+          type: string
+          enum:
+            - health_unavailable
+            - health_invalid
+            - health_refresh_required
+            - health_attention_required
+            - health_fresh
+        display_name_zh:
+          type: string
+        reason_code:
+          type: string
+        reason:
+          type: string
+        health_state:
+          type: string
+          enum: [healthy, degraded, unhealthy, unknown]
+        calculated_at:
+          type: string
+        valid_until:
+          type: string
+        observed_window_start:
+          type: string
+        observed_window_end:
+          type: string
+        signal_count:
+          type: integer
+          minimum: 0
+        recommendation_basis_allowed:
+          type: boolean
+          const: false
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/HealthSummaryFreshnessIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/HealthSummaryFreshnessSourceOfTruth"
+        health_facts:
+          $ref: "#/components/schemas/HealthFacts"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    HealthSummaryFreshnessIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    HealthSummaryFreshnessSourceOfTruth:
+      type: object
+      required:
+        - health_summary
+        - summary_projection
+        - recommendation
+        - policy_decision
+      properties:
+        health_summary:
+          type: string
+          enum: [agentops]
+        summary_projection:
+          type: string
+          enum: [agent_store]
+        recommendation:
+          type: string
+          enum: [recommendation_state_excludes_health_summary]
+        policy_decision:
+          type: string
+          enum: [agentops]
+    HealthFacts:
+      type: object
+      required:
+        - health_summary_present
+        - agentops_trace_id
+        - evidence_summary_id
+      properties:
+        health_summary_present:
+          type: boolean
+        agentops_trace_id:
+          type: string
+        evidence_summary_id:
+          type: string
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, requires_permission, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agentops]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object

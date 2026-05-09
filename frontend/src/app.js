@@ -61,6 +61,18 @@ function actionMessage(action) {
   if (actionId === "continue_listing_review") {
     return "Runtime 可用性摘要满足当前 Manifest，可继续上架或安装审核。";
   }
+  if (actionId === "request_agentops_health_summary") {
+    return "已记录 HealthSummary 申请；健康事实必须由 AgentOps 回显，前端不本地推导。";
+  }
+  if (actionId === "refresh_agentops_health_summary") {
+    return "已记录 HealthSummary 刷新动作；过期摘要只能显示待刷新。";
+  }
+  if (actionId === "view_agentops_health_detail") {
+    return "已切到 AgentOps 健康详情路径；Agent Store 只展示摘要和跳转。";
+  }
+  if (actionId === "continue_health_review") {
+    return "HealthSummary 新鲜度可展示，但不会作为推荐或 Actual L5 的依据。";
+  }
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
@@ -137,6 +149,7 @@ new window.Vue({
     return {
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
+      healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
       recommendationStates: {},
       recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
@@ -575,6 +588,81 @@ new window.Vue({
         next_action: {
           action_id: "install_runtime",
           target_system: "agent_runtime",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedHealthSummaryFreshness: function selectedHealthSummaryFreshness() {
+      var agent = this.selectedAgent;
+      var summary;
+      var summaries = this.healthSummaryFreshness || {};
+      if (!agent) {
+        return {
+          audit_id: "audit-empty-filter",
+          freshness_state: "health_unavailable",
+          display_name_zh: "摘要不可用",
+          reason: "当前没有可评估 Agent，HealthSummary freshness 不可用。",
+          health_state: "unknown",
+          calculated_at: "",
+          valid_until: "",
+          signal_count: 0,
+          recommendation_basis_allowed: false,
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            health_summary: "catalog_filter",
+            summary_projection: "agent_store",
+            recommendation: "recommendation_state_excludes_health_summary",
+            policy_decision: "agentops"
+          },
+          health_facts: {
+            health_summary_present: false,
+            agentops_trace_id: "",
+            evidence_summary_id: ""
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      summary = summaries[agent.agent_id];
+      if (summary) {
+        return summary;
+      }
+      return {
+        audit_id: "audit-" + agent.agent_id,
+        freshness_state: "health_unavailable",
+        display_name_zh: "摘要不可用",
+        reason: "缺少后端 health_summary_freshness envelope，前端只展示申请刷新路径。",
+        health_state: "unknown",
+        calculated_at: "",
+        valid_until: "",
+        signal_count: 0,
+        recommendation_basis_allowed: false,
+        issues: [
+          {
+            issue_id: "HEALTH_SUMMARY_UNAVAILABLE",
+            fix_action_id: "request_agentops_health_summary"
+          }
+        ],
+        source_of_truth: {
+          health_summary: "agentops",
+          summary_projection: "frontend_fallback_no_health_summary",
+          recommendation: "recommendation_state_excludes_health_summary",
+          policy_decision: "agentops"
+        },
+        health_facts: {
+          health_summary_present: false,
+          agentops_trace_id: "",
+          evidence_summary_id: ""
+        },
+        next_action: {
+          action_id: "request_agentops_health_summary",
+          target_system: "agentops",
           enabled: true,
           requires_permission: true,
           audit_required: true

@@ -101,6 +101,7 @@ for (const componentName of [
   "sdlc-install-request",
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
+  "sdlc-health-summary-freshness",
   "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
@@ -155,6 +156,18 @@ for (const runtimeTerm of [
 ]) {
   assert(mockData.includes(runtimeTerm), `${runtimeTerm} must be represented`);
 }
+for (const healthTerm of [
+  "healthSummaryFreshness",
+  "health_summary_freshness.v1",
+  "health_refresh_required",
+  "health_attention_required",
+  "health_fresh",
+  "recommendation_state_excludes_health_summary",
+  "recommendation_basis_allowed",
+  "refresh_agentops_health_summary"
+]) {
+  assert(mockData.includes(healthTerm), `${healthTerm} must be represented`);
+}
 assert(
   !mockData.includes("recommendationStates:")
     && recommendationStates["framework.ai-autosdlc"]
@@ -186,6 +199,7 @@ assert(
     && app.includes("selectedInstallationRequest")
     && app.includes("selectedRecommendationDecision")
     && app.includes("selectedRuntimeAvailability")
+    && app.includes("selectedHealthSummaryFreshness")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -228,11 +242,13 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"open_standalone_readme\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("Runtime 可用性摘要满足当前 Manifest")
+    && app.includes("HealthSummary 新鲜度可展示")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
+    && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
     && indexHtml.includes(":action-feedback=\"actionFeedback\"")
     && indexHtml.includes("@set-discovery-collection=\"setDiscoveryCollection\"")
@@ -286,6 +302,18 @@ assert(
     && componentLibrary.includes("view_missing_runtime_capabilities")
     && componentLibrary.includes("continue_listing_review"),
   "Agent detail must expose Runtime availability summary without executing Runtime"
+);
+assert(
+  componentLibrary.includes("sdlc-health-summary-freshness")
+    && componentLibrary.includes("HealthSummary 新鲜度")
+    && componentLibrary.includes("freshness_state")
+    && componentLibrary.includes("recommendation_basis_allowed")
+    && componentLibrary.includes("recommendation_state_excludes_health_summary")
+    && componentLibrary.includes("request_agentops_health_summary")
+    && componentLibrary.includes("refresh_agentops_health_summary")
+    && componentLibrary.includes("view_agentops_health_detail")
+    && componentLibrary.includes("continue_health_review"),
+  "Agent detail must expose HealthSummary freshness without using it as recommendation basis"
 );
 assert(
   componentLibrary.includes("install-panel")
