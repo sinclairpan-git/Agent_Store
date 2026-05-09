@@ -1,0 +1,372 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Draft Review Submission API
+  version: 0.1.0
+paths:
+  /api/v1/agents/draft-review-submissions:
+    post:
+      operationId: submitDraftReview
+      summary: Submit a validated listing wizard draft into pending review
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DraftReviewSubmissionRequest"
+      responses:
+        "200":
+          description: Draft review submission result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DraftReviewSubmissionResponse"
+        "400":
+          description: Malformed draft review submission request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    DraftReviewSubmissionRequest:
+      type: object
+      required: [listing_wizard, owner_confirmation]
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        listing_wizard:
+          $ref: "#/components/schemas/ListingWizardSnapshot"
+        owner_confirmation:
+          $ref: "#/components/schemas/OwnerConfirmation"
+    ListingWizardSnapshot:
+      type: object
+      required:
+        - contract_schema_version
+        - wizard_state
+        - field_confirmation
+        - validation_report
+        - detail_preview
+        - source_of_truth
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [listing_wizard_shell.v1]
+        wizard_state:
+          type: string
+          enum:
+            - preview_ready
+            - runtime_gate_blocked
+            - validation_fix_required
+            - needs_field_confirmation
+        field_confirmation:
+          $ref: "#/components/schemas/FieldConfirmation"
+        validation_report:
+          $ref: "#/components/schemas/ValidationReportSnapshot"
+        detail_preview:
+          $ref: "#/components/schemas/DetailPreviewSnapshot"
+        source_of_truth:
+          type: object
+    FieldConfirmation:
+      type: object
+      required: [step_id, step_state, fields]
+      properties:
+        step_id:
+          type: string
+        step_state:
+          type: string
+          enum: [confirmed, needs_owner_input]
+        fields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfirmedField"
+    ConfirmedField:
+      type: object
+      required: [field_path, value, confirmation_state, source]
+      properties:
+        field_path:
+          type: string
+        value:
+          type: string
+        confirmation_state:
+          type: string
+          enum: [confirmed, needs_owner_input]
+        source:
+          type: string
+    ValidationReportSnapshot:
+      type: object
+      required:
+        - step_id
+        - step_state
+        - package_id
+        - draft_status
+        - issue_count
+        - fix_prompt_count
+      properties:
+        step_id:
+          type: string
+        step_state:
+          type: string
+          enum: [passed, fixable, validation_failed]
+        package_id:
+          type: string
+        draft_status:
+          type: string
+          enum: [pending_review, fixable, validation_failed]
+        issue_count:
+          type: integer
+        fix_prompt_count:
+          type: integer
+    DetailPreviewSnapshot:
+      type: object
+      required:
+        - agent_id
+        - display_name
+        - summary
+        - owner_team
+        - runtime_availability_state
+      properties:
+        agent_id:
+          type: string
+        display_name:
+          type: string
+        summary:
+          type: string
+        owner_team:
+          type: string
+        runtime_availability_state:
+          type: string
+        runtime_display_name_zh:
+          type: string
+    OwnerConfirmation:
+      type: object
+      required: [confirmed, confirmed_by, confirmed_at]
+      properties:
+        confirmed:
+          type: boolean
+        confirmed_by:
+          type: string
+        confirmed_at:
+          type: string
+        confirmation_basis:
+          type: string
+    DraftReviewSubmissionResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, audit_id, draft_review_submission]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        draft_review_submission:
+          $ref: "#/components/schemas/DraftReviewSubmission"
+    DraftReviewSubmission:
+      type: object
+      required:
+        - contract_schema_version
+        - submission_id
+        - package_id
+        - agent_id
+        - submission_state
+        - draft_status
+        - review_queue_entry
+        - owner_confirmation
+        - validation_summary
+        - runtime_gate
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [draft_review_submission.v1]
+        submission_id:
+          type: string
+        package_id:
+          type: string
+        agent_id:
+          type: string
+        submission_state:
+          type: string
+          enum:
+            - pending_review
+            - validation_blocked
+            - runtime_gate_blocked
+            - owner_confirmation_required
+        draft_status:
+          type: string
+          enum: [pending_review, draft_review_blocked]
+        review_queue_entry:
+          $ref: "#/components/schemas/ReviewQueueEntry"
+        owner_confirmation:
+          $ref: "#/components/schemas/OwnerConfirmation"
+        validation_summary:
+          $ref: "#/components/schemas/ValidationSummary"
+        runtime_gate:
+          $ref: "#/components/schemas/RuntimeGate"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/DraftReviewSubmissionIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/DraftReviewSubmissionSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    ReviewQueueEntry:
+      type: object
+      required: [queue_state, review_status]
+      properties:
+        queue_state:
+          type: string
+          enum: [enqueued, not_enqueued]
+        review_status:
+          type: string
+          enum: [pending_review, not_submitted]
+        review_queue_id:
+          type: string
+    ValidationSummary:
+      type: object
+      required:
+        - validation_status
+        - draft_status_before_submission
+        - issue_count
+        - fix_prompt_count
+      properties:
+        validation_status:
+          type: string
+          enum: [passed, fixable, validation_failed, ""]
+        draft_status_before_submission:
+          type: string
+        issue_count:
+          type: integer
+        fix_prompt_count:
+          type: integer
+    RuntimeGate:
+      type: object
+      required: [runtime_availability_state, runtime_display_name_zh]
+      properties:
+        runtime_availability_state:
+          type: string
+        runtime_display_name_zh:
+          type: string
+    DraftReviewSubmissionIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - PACKAGE_VALIDATION_NOT_PASSED
+            - PLACEHOLDER_VALUE_BLOCKED
+            - RUNTIME_GATE_NOT_READY
+            - OWNER_CONFIRMATION_REQUIRED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    DraftReviewSubmissionSourceOfTruth:
+      type: object
+      required:
+        - package_manifest
+        - package_validation
+        - owner_confirmation
+        - runtime_availability
+        - draft_review_queue
+        - policy_decision
+      properties:
+        package_manifest:
+          type: string
+          enum: [agent_store_upload_candidate]
+        package_validation:
+          type: string
+          enum: [agent_store_package_validation]
+        owner_confirmation:
+          type: string
+          enum: [agent_store_owner_explicit_confirmation]
+        runtime_availability:
+          type: string
+          enum: [agent_runtime_echo_or_probe]
+        draft_review_queue:
+          type: string
+          enum: [agent_store]
+        policy_decision:
+          type: string
+          enum: [agentops_not_evaluated_until_review]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agent_runtime, agentops, ai_autosdlc_cli, evidence_vault]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object

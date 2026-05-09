@@ -19,6 +19,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-manifest-runtime.openapi.yaml",
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
+        "draft-review-submission.openapi.yaml",
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
         "installation-runtime-handoff.openapi.yaml",
@@ -238,6 +239,50 @@ def test_installation_runtime_handoff_contract_documents_runtime_binding() -> No
             "properties"
         ]["issue_id"]["enum"]
     )
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_draft_review_submission_contract_documents_final_review_gate() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "draft-review-submission.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/draft-review-submissions"]["post"]
+    responses = operation["responses"]
+    submission = contract["components"]["schemas"]["DraftReviewSubmission"]
+    issue = contract["components"]["schemas"]["DraftReviewSubmissionIssue"]
+    source_of_truth = contract["components"]["schemas"][
+        "DraftReviewSubmissionSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "pending_review",
+        "validation_blocked",
+        "runtime_gate_blocked",
+        "owner_confirmation_required",
+    }.issubset(set(submission["properties"]["submission_state"]["enum"]))
+    assert submission["properties"]["draft_status"]["enum"] == [
+        "pending_review",
+        "draft_review_blocked",
+    ]
+    assert "review_queue_entry" in submission["required"]
+    assert {
+        "PACKAGE_VALIDATION_NOT_PASSED",
+        "PLACEHOLDER_VALUE_BLOCKED",
+        "RUNTIME_GATE_NOT_READY",
+        "OWNER_CONFIRMATION_REQUIRED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["owner_confirmation"]["enum"] == [
+        "agent_store_owner_explicit_confirmation"
+    ]
+    assert source_of_truth["properties"]["draft_review_queue"]["enum"] == [
+        "agent_store"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 

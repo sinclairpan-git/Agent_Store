@@ -295,6 +295,39 @@ CapabilityGrant, issue credentials, or infer execution success from this
 projection. `artifact_hash` mismatch is a blocked state with the next action
 `regenerate_activation_command`, not a warning that Runtime may ignore.
 
+## Draft Review Submission V1
+
+Agent Store owns `draft_review_submission.v1` as the final gate between Listing
+Wizard preview and formal review queue. Package Validation owns validation
+facts, Agent Runtime owns runtime availability facts, and Owner confirmation is
+an explicit Store audit fact. AgentOps remains the future owner of policy
+decision after the draft is already pending review.
+
+The submission must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `pending_review` | Validation passed, Owner confirmation is explicit, Runtime is ready, and no placeholder values remain. | Enqueue the draft for review and track review status. |
+| `validation_blocked` | Package validation failed, is fixable, or placeholder values are still present. | Keep the draft out of review and return to validation report. |
+| `runtime_gate_blocked` | Runtime availability is not `runtime_ready`. | Keep the draft out of review and route to Runtime Gate remediation. |
+| `owner_confirmation_required` | Owner confirmation is missing, incomplete, or fields are not confirmed. | Keep the draft out of review and request Owner confirmation. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `package_manifest` | `agent_store_upload_candidate` |
+| `package_validation` | `agent_store_package_validation` |
+| `owner_confirmation` | `agent_store_owner_explicit_confirmation` |
+| `runtime_availability` | `agent_runtime_echo_or_probe` |
+| `draft_review_queue` | `agent_store` |
+| `policy_decision` | `agentops_not_evaluated_until_review` |
+
+`draft_status=pending_review` is allowed only when all final gates pass. Store
+must not treat Package Validation's earlier suggested `pending_review` status as
+review queue entry, and must recheck TODO/unknown/TBD/N/A placeholders before
+submission.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -361,14 +394,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-009 Runtime availability summary | Agent Runtime | Agent Store | Store projects Runtime echo/probe into `runtime_availability_summary.v1` and distinguishes missing Runtime, upgrade required, missing capability, and ready states. |
 | CCT-010 HealthSummary freshness guard | AgentOps | Agent Store | Store projects AgentOps HealthSummary freshness into `health_summary_freshness.v1`; expired `valid_until` displays “待刷新” and never becomes a recommendation basis. |
 | CCT-011 Installation Runtime handoff | Agent Store | Agent Runtime | Runtime consumes `installation_runtime_handoff.v1`; `artifact_hash` mismatch blocks consumption and returns `regenerate_activation_command`. |
+| CCT-012 Draft Review submission | Agent Store | AgentOps | Store emits `draft_review_submission.v1`; only full final-gate pass may set `pending_review`, while validation, Runtime, Owner, or placeholder blockers remain `not_enqueued`. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, and `installation_runtime_handoff.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, and Runtime handoff artifact-hash binding. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, and Runtime-consumed `installation_runtime_handoff.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, and `draft_review_submission.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, and explicit Owner-confirmed draft review submission. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, and Store-produced `draft_review_submission.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order
