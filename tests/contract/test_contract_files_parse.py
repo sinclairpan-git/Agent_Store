@@ -23,6 +23,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
         "installation-runtime-handoff.openapi.yaml",
+        "managed-installer-preview.openapi.yaml",
         "package-validation.openapi.yaml",
         "policy-approval-echo.openapi.yaml",
         "recommendation-state.openapi.yaml",
@@ -321,6 +322,56 @@ def test_policy_approval_echo_contract_documents_agentops_authority() -> None:
     ]
     assert "AGENTOPS_APPROVAL_EXPIRED" in issue["properties"]["issue_id"]["enum"]
     assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_managed_installer_preview_contract_documents_preview_only_state_machine() -> (
+    None
+):
+    contract = load_openapi_contract(
+        default_contracts_dir() / "managed-installer-preview.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/managed-installer-previews"]["post"]
+    responses = operation["responses"]
+    preview = contract["components"]["schemas"]["ManagedInstallerPreview"]
+    step = contract["components"]["schemas"]["ManagedInstallerStep"]
+    issue = contract["components"]["schemas"]["ManagedInstallerIssue"]
+    source_of_truth = contract["components"]["schemas"]["ManagedInstallerSourceOfTruth"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "ready_to_install_preview",
+        "preview_passed",
+        "download_blocked",
+        "signature_blocked",
+        "policy_blocked",
+        "runtime_handoff_blocked",
+        "smoke_test_failed",
+    }.issubset(set(preview["properties"]["installer_state"]["enum"]))
+    assert preview["properties"]["execution_mode"]["enum"] == ["preview_only"]
+    assert preview["properties"]["real_install_started"]["const"] is False
+    assert {
+        "download_artifact",
+        "verify_signature",
+        "create_isolated_install",
+        "smoke_test",
+        "failure_diagnostics",
+    }.issubset(set(step["properties"]["step_id"]["enum"]))
+    assert {
+        "DOWNLOAD_SOURCE_UNAVAILABLE",
+        "SIGNATURE_OR_HASH_UNTRUSTED",
+        "POLICY_APPROVAL_NOT_ALLOWED",
+        "RUNTIME_HANDOFF_NOT_READY",
+        "SMOKE_TEST_FAILED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["installer_execution"]["enum"] == [
+        "not_started_preview_only"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 

@@ -360,6 +360,42 @@ The Store projection must always expose `store_decision_authority=none`,
 continue only when AgentOps echo is `policy_allowed`; it must not rewrite unknown
 AgentOps decisions into allow, deny, or approval-required.
 
+## Managed Installer Preview V1
+
+Agent Store projects package trust, Policy Approval echo, and Installation
+Runtime handoff facts into `managed_installer_preview.v1` for installer UX.
+This projection is preview-only: it does not download packages, create
+sandboxes, run smoke tests, or issue CapabilityGrant. Agent Runtime remains the
+owner of execution and isolation; AgentOps remains policy and grant authority.
+
+The preview must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `ready_to_install_preview` | Download source, signature/hash, policy echo, and Runtime handoff are ready; smoke test has not run. | Prepare managed install without starting it. |
+| `preview_passed` | Installer probe reports smoke test passed. | Keep install preparation available and display smoke evidence reference. |
+| `download_blocked` | Package download source is missing or failed. | Refresh package download metadata. |
+| `signature_blocked` | Signature or artifact hash is untrusted. | Regenerate or re-verify package signature facts. |
+| `policy_blocked` | AgentOps policy/approval echo does not allow Store to continue. | Route to AgentOps approval or blocking policy. |
+| `runtime_handoff_blocked` | Installation Runtime handoff is not consumable by Runtime. | Resolve Runtime Gate / handoff mismatch. |
+| `smoke_test_failed` | Installer probe reports smoke test failure. | Copy diagnostic reference for remediation. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `package` | `agent_store_package_trust` |
+| `policy_approval` | `agentops_via_policy_approval_echo` |
+| `runtime_handoff` | `agent_store_installation_runtime_handoff` |
+| `installer_execution` | `not_started_preview_only` |
+| `diagnostics` | `agent_store_preview` |
+
+The preview must always expose `execution_mode=preview_only` and
+`real_install_started=false`. The required steps are `download_artifact`,
+`verify_signature`, `create_isolated_install`, `smoke_test`, and
+`failure_diagnostics`; a passing preview never proves Runtime execution beyond
+the supplied installer probe.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -428,14 +464,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-011 Installation Runtime handoff | Agent Store | Agent Runtime | Runtime consumes `installation_runtime_handoff.v1`; `artifact_hash` mismatch blocks consumption and returns `regenerate_activation_command`. |
 | CCT-012 Draft Review submission | Agent Store | AgentOps | Store emits `draft_review_submission.v1`; only full final-gate pass may set `pending_review`, while validation, Runtime, Owner, or placeholder blockers remain `not_enqueued`. |
 | CCT-013 Policy approval echo | AgentOps | Agent Store | Store consumes `policy_approval_echo.v1` as echo-only; `store_decision_authority=none`, no Store override, and no Store-issued CapabilityGrant. |
+| CCT-014 Managed installer preview | Agent Store | Agent Runtime, AgentOps | Store emits `managed_installer_preview.v1` with `execution_mode=preview_only`; signature/hash, policy echo, Runtime handoff, and smoke diagnostics must remain distinct facts. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, and `policy_approval_echo.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, and AgentOps-only policy/approval authority. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, and Store-consumed `policy_approval_echo.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, and `managed_installer_preview.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, and preview-only installer diagnostics. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, and Store-produced `managed_installer_preview.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

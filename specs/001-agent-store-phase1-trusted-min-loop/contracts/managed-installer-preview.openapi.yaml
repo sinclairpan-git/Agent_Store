@@ -1,0 +1,444 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Managed Installer Preview API
+  version: 0.1.0
+paths:
+  /api/v1/agents/managed-installer-previews:
+    post:
+      operationId: previewManagedInstaller
+      summary: Preview managed installer state machine without executing installation
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedInstallerPreviewRequest"
+      responses:
+        "200":
+          description: Managed installer preview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagedInstallerPreviewResponse"
+        "400":
+          description: Malformed managed installer preview request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    ManagedInstallerPreviewRequest:
+      type: object
+      required:
+        - agent_id
+        - agent_version
+        - package
+        - policy_approval_echo
+        - installation_runtime_handoff
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        package:
+          $ref: "#/components/schemas/InstallerPackageInput"
+        policy_approval_echo:
+          $ref: "#/components/schemas/PolicyApprovalEchoInput"
+        installation_runtime_handoff:
+          $ref: "#/components/schemas/InstallationRuntimeHandoffInput"
+        installer_probe:
+          $ref: "#/components/schemas/InstallerProbe"
+    InstallerPackageInput:
+      type: object
+      required:
+        - package_id
+        - artifact_hash
+        - artifact_url
+        - signature_state
+        - hash_match_state
+      properties:
+        package_id:
+          type: string
+        artifact_hash:
+          type: string
+        artifact_url:
+          type: string
+        download_state:
+          type: string
+          enum: [available, missing, failed]
+        signature_state:
+          type: string
+          enum: [verified, expired, mismatch, missing]
+        hash_match_state:
+          type: string
+          enum: [matched, mismatched, unknown]
+    PolicyApprovalEchoInput:
+      type: object
+      required: [echo_state, store_projection]
+      properties:
+        echo_state:
+          type: string
+          enum:
+            - policy_allowed
+            - approval_pending
+            - approval_expired
+            - policy_denied
+            - agentops_echo_unavailable
+        store_projection:
+          type: object
+          required:
+            - store_may_continue
+            - store_override_allowed
+            - capability_grant_issued
+          properties:
+            store_may_continue:
+              type: boolean
+            store_override_allowed:
+              type: boolean
+            capability_grant_issued:
+              type: boolean
+    InstallationRuntimeHandoffInput:
+      type: object
+      required: [handoff_state, runtime_consumption_allowed]
+      properties:
+        handoff_state:
+          type: string
+          enum:
+            - runtime_handoff_ready
+            - artifact_hash_mismatch
+            - device_binding_mismatch
+            - installation_not_ready
+        runtime_consumption_allowed:
+          type: boolean
+        installation:
+          type: object
+          properties:
+            installation_id:
+              type: string
+            device_id:
+              type: string
+    InstallerProbe:
+      type: object
+      properties:
+        smoke_test_state:
+          type: string
+          enum: [not_run, passed, failed]
+        smoke_test_ref:
+          type: string
+        diagnostic_ref:
+          type: string
+        isolation_profile:
+          type: string
+        network_mode:
+          type: string
+        filesystem_mode:
+          type: string
+    ManagedInstallerPreviewResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, audit_id, managed_installer_preview]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        managed_installer_preview:
+          $ref: "#/components/schemas/ManagedInstallerPreview"
+    ManagedInstallerPreview:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - agent_version
+        - installer_state
+        - execution_mode
+        - real_install_started
+        - package
+        - policy_gate
+        - runtime_gate
+        - isolation
+        - smoke_test
+        - steps
+        - issues
+        - diagnostics
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [managed_installer_preview.v1]
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        installer_state:
+          type: string
+          enum:
+            - ready_to_install_preview
+            - preview_passed
+            - download_blocked
+            - signature_blocked
+            - policy_blocked
+            - runtime_handoff_blocked
+            - smoke_test_failed
+        execution_mode:
+          type: string
+          enum: [preview_only]
+        real_install_started:
+          type: boolean
+          const: false
+        package:
+          $ref: "#/components/schemas/InstallerPackage"
+        policy_gate:
+          $ref: "#/components/schemas/PolicyGate"
+        runtime_gate:
+          $ref: "#/components/schemas/RuntimeGate"
+        isolation:
+          $ref: "#/components/schemas/IsolationPreview"
+        smoke_test:
+          $ref: "#/components/schemas/SmokeTestPreview"
+        steps:
+          type: array
+          items:
+            $ref: "#/components/schemas/ManagedInstallerStep"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ManagedInstallerIssue"
+        diagnostics:
+          $ref: "#/components/schemas/InstallerDiagnostics"
+        source_of_truth:
+          $ref: "#/components/schemas/ManagedInstallerSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    InstallerPackage:
+      type: object
+      required:
+        - package_id
+        - artifact_hash
+        - artifact_url
+        - download_state
+        - signature_state
+        - hash_match_state
+      properties:
+        package_id:
+          type: string
+        artifact_hash:
+          type: string
+        artifact_url:
+          type: string
+        download_state:
+          type: string
+          enum: [available, missing, failed]
+        signature_state:
+          type: string
+        hash_match_state:
+          type: string
+    PolicyGate:
+      type: object
+      required:
+        - echo_state
+        - store_may_continue
+        - store_override_allowed
+        - capability_grant_issued
+      properties:
+        echo_state:
+          type: string
+        store_may_continue:
+          type: boolean
+        store_override_allowed:
+          type: boolean
+        capability_grant_issued:
+          type: boolean
+    RuntimeGate:
+      type: object
+      required:
+        - handoff_state
+        - runtime_consumption_allowed
+        - installation_id
+        - device_id
+      properties:
+        handoff_state:
+          type: string
+        runtime_consumption_allowed:
+          type: boolean
+        installation_id:
+          type: string
+        device_id:
+          type: string
+    IsolationPreview:
+      type: object
+      required: [isolation_profile, network_mode, filesystem_mode]
+      properties:
+        isolation_profile:
+          type: string
+        network_mode:
+          type: string
+        filesystem_mode:
+          type: string
+    SmokeTestPreview:
+      type: object
+      required: [smoke_test_state, smoke_test_ref]
+      properties:
+        smoke_test_state:
+          type: string
+          enum: [not_run, passed, failed]
+        smoke_test_ref:
+          type: string
+    ManagedInstallerStep:
+      type: object
+      required: [step_id, label, step_state, owner_system, diagnostic_ref]
+      properties:
+        step_id:
+          type: string
+          enum:
+            - download_artifact
+            - verify_signature
+            - create_isolated_install
+            - smoke_test
+            - failure_diagnostics
+        label:
+          type: string
+        step_state:
+          type: string
+          enum: [completed, ready, pending, passed, failed, blocked, not_required]
+        owner_system:
+          type: string
+          enum: [agent_store, agent_runtime, agentops]
+        diagnostic_ref:
+          type: string
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    ManagedInstallerIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - DOWNLOAD_SOURCE_UNAVAILABLE
+            - SIGNATURE_OR_HASH_UNTRUSTED
+            - POLICY_APPROVAL_NOT_ALLOWED
+            - RUNTIME_HANDOFF_NOT_READY
+            - SMOKE_TEST_FAILED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    InstallerDiagnostics:
+      type: object
+      required: [diagnostic_ref, failure_stage, reason_code, copyable]
+      properties:
+        diagnostic_ref:
+          type: string
+        failure_stage:
+          type: string
+        reason_code:
+          type: string
+        copyable:
+          type: boolean
+    ManagedInstallerSourceOfTruth:
+      type: object
+      required:
+        - package
+        - policy_approval
+        - runtime_handoff
+        - installer_execution
+        - diagnostics
+      properties:
+        package:
+          type: string
+          enum: [agent_store_package_trust]
+        policy_approval:
+          type: string
+          enum: [agentops_via_policy_approval_echo]
+        runtime_handoff:
+          type: string
+          enum: [agent_store_installation_runtime_handoff]
+        installer_execution:
+          type: string
+          enum: [not_started_preview_only]
+        diagnostics:
+          type: string
+          enum: [agent_store_preview]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agent_runtime, agentops, ai_autosdlc_cli, evidence_vault]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object
