@@ -79,6 +79,7 @@ Agent Store 后续规划归档为一个主线：
 | 030 | Feedback and owner response loop | 阶段 4 | 产品闭环 | submitted -> triaged -> owner_replied -> planned/fixed/rejected -> released |
 | 031 | Lifecycle governance baseline | 阶段 5 | 生命周期治理 | 升级、回退、deprecated、disabled、security_revoked、替代版本影响范围 |
 | 032 | Contract Registry traceability | Runtime 分层 P0-E | 治理追踪 | 每个 OpenAPI contract 可反查 Producer、Consumer、Owner、appendix anchor 和 contract test |
+| 033 | Policy approval request | 阶段 3 | 跨项目请求契约 | Store 只发起 AgentOps 审批请求；不本地裁决、不签发 CapabilityGrant |
 
 ## 6. 不进入近期规划
 

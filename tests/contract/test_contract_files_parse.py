@@ -29,6 +29,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "managed-installer-preview.openapi.yaml",
         "package-validation.openapi.yaml",
         "policy-approval-echo.openapi.yaml",
+        "policy-approval-request.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "runtime-availability.openapi.yaml",
         "skill-registry-notification.openapi.yaml",
@@ -324,6 +325,52 @@ def test_policy_approval_echo_contract_documents_agentops_authority() -> None:
         "agentops_not_issued_by_store"
     ]
     assert "AGENTOPS_APPROVAL_EXPIRED" in issue["properties"]["issue_id"]["enum"]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_policy_approval_request_contract_documents_agentops_request_boundary() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "policy-approval-request.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/policy-approval-requests"]["post"]
+    responses = operation["responses"]
+    request = contract["components"]["schemas"]["PolicyApprovalRequest"]
+    agentops_request = contract["components"]["schemas"]["AgentOpsApprovalRequest"]
+    projection = contract["components"]["schemas"]["StoreProjection"]
+    issue = contract["components"]["schemas"]["PolicyApprovalRequestIssue"]
+    source_of_truth = contract["components"]["schemas"][
+        "PolicyApprovalRequestSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert request["properties"]["contract_schema_version"]["enum"] == [
+        "policy_approval_request.v1"
+    ]
+    assert {
+        "approval_request_ready",
+        "requester_required",
+        "policy_context_incomplete",
+        "justification_required",
+    }.issubset(set(request["properties"]["request_state"]["enum"]))
+    assert agentops_request["properties"]["target_system"]["enum"] == ["agentops"]
+    assert agentops_request["properties"]["request_contract"]["enum"] == [
+        "policy_approval_request.v1"
+    ]
+    assert projection["properties"]["store_decision_authority"]["enum"] == ["none"]
+    assert projection["properties"]["store_override_allowed"]["const"] is False
+    assert projection["properties"]["capability_grant_issued"]["const"] is False
+    assert {
+        "REQUESTER_ROLE_UNAUTHORIZED",
+        "POLICY_CONTEXT_INCOMPLETE",
+        "JUSTIFICATION_REQUIRED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["approval_request"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["approval"]["enum"] == ["agentops"]
     assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 

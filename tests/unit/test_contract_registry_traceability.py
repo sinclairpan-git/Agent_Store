@@ -21,10 +21,10 @@ def test_contract_registry_traceability_is_complete() -> None:
     )
     assert traceability["registry_status"] == "complete"
     assert traceability["coverage_summary"] == {
-        "total_contracts": 18,
-        "contracts_with_cct": 11,
-        "contracts_with_contract_tests": 18,
-        "complete_traceability": 18,
+        "total_contracts": 19,
+        "contracts_with_cct": 12,
+        "contracts_with_contract_tests": 19,
+        "complete_traceability": 19,
         "unmapped_contracts": 0,
     }
     assert traceability["next_action"]["action_id"] == (

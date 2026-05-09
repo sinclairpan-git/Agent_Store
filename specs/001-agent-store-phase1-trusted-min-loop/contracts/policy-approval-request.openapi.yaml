@@ -1,0 +1,382 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Policy Approval Request API
+  version: 0.1.0
+paths:
+  /api/v1/agents/policy-approval-requests:
+    post:
+      operationId: submitPolicyApprovalRequest
+      summary: Submit a Store-originated approval request for AgentOps evaluation
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyApprovalRequestInput"
+      responses:
+        "200":
+          description: Policy approval request projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PolicyApprovalRequestResponse"
+        "400":
+          description: Malformed policy approval request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    PolicyApprovalRequestInput:
+      type: object
+      required:
+        - agent_id
+        - agent_version
+        - requested_action
+        - requester
+        - policy_context
+        - justification
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_action:
+          type: string
+          enum:
+            - install_agent
+            - publish_agent
+            - upgrade_agent
+            - enable_agent
+        requester:
+          $ref: "#/components/schemas/ApprovalRequester"
+        policy_context:
+          $ref: "#/components/schemas/ApprovalPolicyContext"
+        justification:
+          type: string
+    ApprovalRequester:
+      type: object
+      required:
+        - actor_id
+        - actor_role
+        - tenant_id
+      properties:
+        actor_id:
+          type: string
+        actor_role:
+          type: string
+          enum:
+            - owner
+            - security
+            - agentops_admin
+        tenant_id:
+          type: string
+    ApprovalPolicyContext:
+      type: object
+      required:
+        - policy_ref
+        - risk_level
+        - runtime_contract_version
+        - permission_intents
+        - data_scopes
+      properties:
+        policy_ref:
+          type: string
+        risk_level:
+          type: string
+        runtime_contract_version:
+          type: string
+        permission_intents:
+          type: array
+          items:
+            type: string
+        data_scopes:
+          type: array
+          items:
+            type: string
+    PolicyApprovalRequestResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - policy_approval_request
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum:
+            - OK
+        audit_id:
+          type: string
+        policy_approval_request:
+          $ref: "#/components/schemas/PolicyApprovalRequest"
+    PolicyApprovalRequest:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - agent_version
+        - requested_action
+        - request_state
+        - requester
+        - policy_context
+        - justification
+        - agentops_request
+        - store_projection
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum:
+            - policy_approval_request.v1
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_action:
+          type: string
+          enum:
+            - install_agent
+            - publish_agent
+            - upgrade_agent
+            - enable_agent
+        request_state:
+          type: string
+          enum:
+            - approval_request_ready
+            - requester_required
+            - policy_context_incomplete
+            - justification_required
+            - approval_request_blocked
+        requester:
+          $ref: "#/components/schemas/ApprovalRequester"
+        policy_context:
+          $ref: "#/components/schemas/ApprovalPolicyContext"
+        justification:
+          type: string
+        agentops_request:
+          $ref: "#/components/schemas/AgentOpsApprovalRequest"
+        store_projection:
+          $ref: "#/components/schemas/StoreProjection"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/PolicyApprovalRequestIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/PolicyApprovalRequestSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    AgentOpsApprovalRequest:
+      type: object
+      required:
+        - target_system
+        - request_contract
+        - agent_id
+        - agent_version
+        - requested_action
+        - requester
+        - policy_context
+        - justification
+        - store_audit_id
+        - dispatch_allowed
+      properties:
+        target_system:
+          type: string
+          enum:
+            - agentops
+        request_contract:
+          type: string
+          enum:
+            - policy_approval_request.v1
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_action:
+          type: string
+        requester:
+          $ref: "#/components/schemas/ApprovalRequester"
+        policy_context:
+          $ref: "#/components/schemas/ApprovalPolicyContext"
+        justification:
+          type: string
+        store_audit_id:
+          type: string
+        dispatch_allowed:
+          type: boolean
+    StoreProjection:
+      type: object
+      required:
+        - store_decision_authority
+        - store_override_allowed
+        - capability_grant_issued
+        - agentops_approval_required
+        - dispatch_allowed
+      properties:
+        store_decision_authority:
+          type: string
+          enum:
+            - none
+        store_override_allowed:
+          type: boolean
+          const: false
+        capability_grant_issued:
+          type: boolean
+          const: false
+        agentops_approval_required:
+          type: boolean
+          const: true
+        dispatch_allowed:
+          type: boolean
+    PolicyApprovalRequestIssue:
+      type: object
+      required:
+        - issue_id
+        - field_path
+        - severity
+        - reason
+        - impact
+        - fix_action_id
+        - message_key
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - AGENT_VERSION_IDENTITY_REQUIRED
+            - REQUESTED_ACTION_UNSUPPORTED
+            - REQUESTER_REQUIRED
+            - REQUESTER_ROLE_UNAUTHORIZED
+            - POLICY_CONTEXT_INCOMPLETE
+            - JUSTIFICATION_REQUIRED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - blocked
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    PolicyApprovalRequestSourceOfTruth:
+      type: object
+      required:
+        - approval_request
+        - policy_decision
+        - approval
+        - capability_grant
+        - request_audit
+      properties:
+        approval_request:
+          type: string
+          enum:
+            - agent_store
+        policy_decision:
+          type: string
+          enum:
+            - agentops
+        approval:
+          type: string
+          enum:
+            - agentops
+        capability_grant:
+          type: string
+          enum:
+            - agentops_not_issued_by_store
+        request_audit:
+          type: string
+          enum:
+            - agent_store
+    ActionDescriptor:
+      type: object
+      required:
+        - action_id
+        - target_system
+        - enabled
+        - requires_permission
+        - audit_required
+        - message_key
+      properties:
+        action_id:
+          type: string
+          enum:
+            - submit_agentops_approval_request
+            - complete_policy_context
+            - add_approval_justification
+            - assign_authorized_requester
+        target_system:
+          type: string
+          enum:
+            - agent_store
+            - agentops
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - IDEMPOTENCY_KEY_CONFLICT
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum:
+            - error
+            - blocked
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        details:
+          type: object
