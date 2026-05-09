@@ -10,6 +10,8 @@
 - 验证通过：`uv run pytest -q` 251 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`ai-sdlc run --dry-run` 通过。
 - 修复 Codex Review P1：`required_runtime_capabilities` 中非字符串或空白项会返回 blocked issue，不再被 `_string_items` 静默丢弃。
 - 复验通过：`uv run pytest -q` 252 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`ai-sdlc run --dry-run` 通过。
+- 修复 Codex Review 第二轮：`runtime_unknown` 不再混用 missing capability 列表；`observability_contract.trace_spans` 会拒绝非字符串或空白项。
+- 复验通过：`uv run pytest -q` 253 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`ai-sdlc run --dry-run` 通过。
 
 ## 边界说明
 

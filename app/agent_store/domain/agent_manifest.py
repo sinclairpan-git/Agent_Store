@@ -147,10 +147,14 @@ def build_agent_manifest_runtime_contract(
 
     required_capabilities = _string_items(manifest.get("required_runtime_capabilities"))
     runtime_capability_set = frozenset(runtime_capabilities)
-    missing_capabilities = tuple(
-        capability
-        for capability in required_capabilities
-        if capability not in runtime_capability_set
+    missing_capabilities = (
+        tuple(
+            capability
+            for capability in required_capabilities
+            if capability not in runtime_capability_set
+        )
+        if runtime_capabilities
+        else ()
     )
     if runtime_capabilities and missing_capabilities:
         issues.append(
@@ -362,4 +366,20 @@ def _observability_contract_issues(
                 message_key="agentManifest.observabilityTraceSpansRequired",
             ),
         )
-    return ()
+    issues: list[AgentManifestRuntimeIssue] = []
+    for index, span in enumerate(trace_spans):
+        if not _string(span):
+            issues.append(
+                AgentManifestRuntimeIssue(
+                    issue_id="OBSERVABILITY_TRACE_SPAN_INVALID",
+                    field_path=(
+                        f"agent_manifest.observability_contract.trace_spans[{index}]"
+                    ),
+                    severity="blocked",
+                    reason="TraceSpan entries must be non-empty strings.",
+                    impact="Runtime and AgentOps cannot consume malformed observability contracts.",
+                    fix_action_id="replace_observability_trace_span",
+                    message_key="agentManifest.observabilityTraceSpanInvalid",
+                )
+            )
+    return tuple(issues)
