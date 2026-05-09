@@ -133,3 +133,27 @@ def test_agent_manifest_runtime_contract_keeps_unknown_runtime_not_runnable() ->
     assert report.manifest_status == "complete"
     assert report.runtime_compatibility == "runtime_unknown"
     assert report.next_action["action_id"] == "check_runtime_capabilities"
+
+
+def test_agent_manifest_runtime_contract_rejects_malformed_capabilities() -> None:
+    manifest = _manifest()
+    manifest["required_runtime_capabilities"] = ["tool_call", 123, " "]
+
+    report = build_agent_manifest_runtime_contract(
+        manifest,
+        runtime_capabilities=("tool_call",),
+        trace_id="trace-022",
+        audit_id="audit-022",
+    )
+    field_paths = {
+        issue.field_path
+        for issue in report.issues
+        if issue.issue_id == "RUNTIME_CAPABILITY_INVALID"
+    }
+
+    assert report.manifest_status == "incomplete"
+    assert report.runtime_compatibility == "manifest_incomplete"
+    assert field_paths == {
+        "agent_manifest.required_runtime_capabilities[1]",
+        "agent_manifest.required_runtime_capabilities[2]",
+    }

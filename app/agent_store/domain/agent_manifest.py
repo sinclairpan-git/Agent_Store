@@ -142,6 +142,7 @@ def build_agent_manifest_runtime_contract(
     issues.extend(_required_array_issues(manifest))
     issues.extend(_required_object_issues(manifest))
     issues.extend(_skill_reference_issues(manifest))
+    issues.extend(_runtime_capability_item_issues(manifest))
     issues.extend(_observability_contract_issues(manifest))
 
     required_capabilities = _string_items(manifest.get("required_runtime_capabilities"))
@@ -314,6 +315,31 @@ def _skill_reference_issues(
                         message_key="agentManifest.skillIdentityRequired",
                     )
                 )
+    return tuple(issues)
+
+
+def _runtime_capability_item_issues(
+    manifest: Mapping[str, object],
+) -> tuple[AgentManifestRuntimeIssue, ...]:
+    capabilities = manifest.get("required_runtime_capabilities")
+    if not isinstance(capabilities, list):
+        return ()
+    issues: list[AgentManifestRuntimeIssue] = []
+    for index, capability in enumerate(capabilities):
+        if not _string(capability):
+            issues.append(
+                AgentManifestRuntimeIssue(
+                    issue_id="RUNTIME_CAPABILITY_INVALID",
+                    field_path=(
+                        f"agent_manifest.required_runtime_capabilities[{index}]"
+                    ),
+                    severity="blocked",
+                    reason="Runtime capability entries must be non-empty strings.",
+                    impact="Runtime cannot safely match malformed capability requirements.",
+                    fix_action_id="replace_runtime_capability",
+                    message_key="agentManifest.runtimeCapabilityInvalid",
+                )
+            )
     return tuple(issues)
 
 

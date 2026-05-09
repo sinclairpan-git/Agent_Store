@@ -16,3 +16,5 @@
 - 已执行 `uv run ruff check app tests`：All checks passed。
 - 已执行 `uv run ruff format app tests`：5 files reformatted，随后 `uv run ruff format --check app tests`：84 files already formatted。
 - 已执行 `ai-sdlc run --dry-run`：Stage close PASS。
+- Codex Review P1 修复：`required_runtime_capabilities` 中非字符串或空白项现在返回 blocked `RUNTIME_CAPABILITY_INVALID`，避免被静默忽略后错误展示为 runtime compatible。
+- Codex Review P1 修复后复验：`uv run pytest -q`：252 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：84 files already formatted；`ai-sdlc run --dry-run`：PASS。
