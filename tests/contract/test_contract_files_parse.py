@@ -16,6 +16,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
     contract_files = list(iter_contract_files(default_contracts_dir()))
 
     assert {path.name for path in contract_files} == {
+        "agent-manifest-runtime.openapi.yaml",
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
@@ -82,6 +83,53 @@ def test_package_validation_contract_documents_fix_report_and_conflict_errors() 
     assert "required" not in manifest
     assert "required" not in field_source
     assert "required" not in skill
+
+
+def test_agent_manifest_runtime_contract_documents_runtime_mismatch() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "agent-manifest-runtime.openapi.yaml"
+    )
+    operation = contract["paths"][
+        "/api/v1/agent-manifests/runtime-contract-validations"
+    ]["post"]
+    responses = operation["responses"]
+    manifest = contract["components"]["schemas"]["AgentManifest"]
+    result = contract["components"]["schemas"]["AgentManifestRuntimeContract"]
+    source_of_truth = contract["components"]["schemas"][
+        "AgentManifestRuntimeSourceOfTruth"
+    ]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "manifest_schema_version",
+        "agent_id",
+        "version",
+        "artifact_hash",
+        "runtime_contract_version",
+        "required_runtime_capabilities",
+        "skills",
+        "permission_intents",
+        "data_scopes",
+        "secret_refs",
+        "network_allowlist",
+        "observability_contract",
+        "guardrail_refs",
+        "rollback_policy",
+        "provenance",
+    }.issubset(manifest["required"])
+    assert (
+        "runtime_capability_missing"
+        in result["properties"]["runtime_compatibility"]["enum"]
+    )
+    assert "missing_runtime_capabilities" in result["required"]
+    assert source_of_truth["properties"]["agent_manifest"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["runtime_availability"]["enum"] == [
+        "agent_runtime_echo_or_probe"
+    ]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
 def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> None:
