@@ -11,6 +11,8 @@
 - 验证通过：`uv run pytest -q` 268 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`node frontend/scripts/verify-frontend.mjs` 通过；`ai-sdlc run --dry-run` 通过。
 - 修复 Codex Review P1：Runtime contract version 比较现在要求相同 contract family，并比较 `.v` 后的 major version，不再让 `other-contract.v99` 或 `runtime-contract.v1.99` 满足 `runtime-contract.v2`。
 - 复验通过：`uv run pytest -q` 271 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`node frontend/scripts/verify-frontend.mjs` 通过；`ai-sdlc run --dry-run` 通过。
+- 修复 Codex Review P2：前端 runtime summary 缺失降级路径不再硬编码 `runtime-contract.v1`，改为保持未知，避免把缺失事实源误写成低版本要求。
+- 复验通过：`uv run pytest -q` 271 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`node frontend/scripts/verify-frontend.mjs` 通过；`ai-sdlc run --dry-run` 通过。
 
 ## 边界说明
 

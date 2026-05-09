@@ -554,7 +554,7 @@ new window.Vue({
         availability_state: "runtime_missing",
         display_name_zh: "缺 Runtime",
         reason: "缺少后端 runtime_availability_summary envelope，前端只展示缺 Runtime 的保守状态。",
-        required_runtime_contract_version: "runtime-contract.v1",
+        required_runtime_contract_version: "",
         runtime_contract_version: "",
         missing_runtime_capabilities: [],
         issues: [
