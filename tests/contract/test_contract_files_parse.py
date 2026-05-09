@@ -20,6 +20,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
         "draft-review-submission.openapi.yaml",
+        "feedback-owner-response-loop.openapi.yaml",
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
         "installation-runtime-handoff.openapi.yaml",
@@ -372,6 +373,55 @@ def test_managed_installer_preview_contract_documents_preview_only_state_machine
         "not_started_preview_only"
     ]
     assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_feedback_owner_response_loop_contract_documents_lifecycle() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "feedback-owner-response-loop.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/feedback-owner-response-loops"][
+        "post"
+    ]
+    responses = operation["responses"]
+    loop = contract["components"]["schemas"]["FeedbackOwnerResponseLoop"]
+    transition = contract["components"]["schemas"]["FeedbackTransition"]
+    issue = contract["components"]["schemas"]["FeedbackLoopIssue"]
+    source_of_truth = contract["components"]["schemas"]["FeedbackLoopSourceOfTruth"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "submitted",
+        "triaged",
+        "owner_replied",
+        "planned",
+        "fixed",
+        "rejected",
+        "released",
+    }.issubset(set(loop["properties"]["feedback_state"]["enum"]))
+    assert {
+        "submit",
+        "triage",
+        "owner_reply",
+        "plan",
+        "fix",
+        "reject",
+        "release",
+    }.issubset(set(transition["properties"]["transition_action"]["enum"]))
+    assert {
+        "OWNER_RESPONSE_REQUIRED",
+        "RELEASE_LINK_REQUIRED",
+        "INVALID_FEEDBACK_TRANSITION",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["owner_response"]["enum"] == [
+        "agent_store_owner_response"
+    ]
+    assert source_of_truth["properties"]["release_linkage"]["enum"] == [
+        "agent_store_release_linkage"
+    ]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 

@@ -396,6 +396,38 @@ The preview must always expose `execution_mode=preview_only` and
 `failure_diagnostics`; a passing preview never proves Runtime execution beyond
 the supplied installer probe.
 
+## Feedback Owner Response Loop V1
+
+Agent Store owns `feedback_owner_response_loop.v1` as the product feedback
+lifecycle projection for submitted user feedback and Owner responses. This is a
+Store product loop, not an AgentOps policy decision or Runtime evidence fact.
+
+The loop must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `submitted` | User feedback has been captured. | Triage feedback. |
+| `triaged` | Store triage accepted the feedback for Owner attention. | Request Owner response. |
+| `owner_replied` | Owner has responded with an accountable message. | Plan or reject the feedback. |
+| `planned` | Owner committed to a planned fix or improvement. | Mark fixed when work is complete. |
+| `fixed` | Owner marks the feedback fixed but not yet released. | Attach release linkage. |
+| `rejected` | Owner rejected the feedback with an explanation. | Display the decision. |
+| `released` | Fixed feedback is linked to a release. | Display release notes or release reference. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `feedback` | `agent_store_feedback` |
+| `owner_response` | `agent_store_owner_response` |
+| `release_linkage` | `agent_store_release_linkage` |
+| `notifications` | `agent_store_notification_queue` |
+
+Owner lifecycle actions (`owner_reply`, `plan`, `fix`, `reject`, and `release`)
+must require `actor_role=owner`. `release` may only follow `fixed` and must
+include a `release_ref`. Every transition must carry actor id, actor role,
+message, audit id, trace id, and a timeline event.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -465,13 +497,14 @@ Each project must implement contract tests against the same fixture set:
 | CCT-012 Draft Review submission | Agent Store | AgentOps | Store emits `draft_review_submission.v1`; only full final-gate pass may set `pending_review`, while validation, Runtime, Owner, or placeholder blockers remain `not_enqueued`. |
 | CCT-013 Policy approval echo | AgentOps | Agent Store | Store consumes `policy_approval_echo.v1` as echo-only; `store_decision_authority=none`, no Store override, and no Store-issued CapabilityGrant. |
 | CCT-014 Managed installer preview | Agent Store | Agent Runtime, AgentOps | Store emits `managed_installer_preview.v1` with `execution_mode=preview_only`; signature/hash, policy echo, Runtime handoff, and smoke diagnostics must remain distinct facts. |
+| CCT-015 Feedback owner response loop | Agent Store | Agent Store UI | Store emits `feedback_owner_response_loop.v1`; Owner actions require owner actor role and released feedback requires release linkage. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, and `managed_installer_preview.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, and preview-only installer diagnostics. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `managed_installer_preview.v1`, and `feedback_owner_response_loop.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, and audited Owner feedback responses. |
 | AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, and Store-produced `managed_installer_preview.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
