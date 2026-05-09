@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import Mapping
 
@@ -297,18 +296,23 @@ def _runtime_contract_satisfies(runtime_version: str, required_version: str) -> 
         return False
     if runtime_version == required_version:
         return True
-    runtime_major = _version_number(runtime_version)
-    required_major = _version_number(required_version)
-    if runtime_major is None or required_major is None:
+    runtime_contract = _contract_family_and_major(runtime_version)
+    required_contract = _contract_family_and_major(required_version)
+    if runtime_contract is None or required_contract is None:
         return False
-    return runtime_major >= required_major
+    runtime_family, runtime_major = runtime_contract
+    required_family, required_major = required_contract
+    return runtime_family == required_family and runtime_major >= required_major
 
 
-def _version_number(value: str) -> int | None:
-    numbers = re.findall(r"(?<!\d)(\d+)(?!\d)", value)
-    if not numbers:
+def _contract_family_and_major(value: str) -> tuple[str, int] | None:
+    family, separator, version = value.rpartition(".v")
+    if not separator or not family or not version:
         return None
-    return int(numbers[-1])
+    major_text = version.split(".", maxsplit=1)[0]
+    if not major_text.isdigit():
+        return None
+    return family, int(major_text)
 
 
 def _availability_issue(
