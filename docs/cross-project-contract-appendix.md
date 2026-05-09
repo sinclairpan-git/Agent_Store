@@ -428,6 +428,41 @@ must require `actor_role=owner`. `release` may only follow `fixed` and must
 include a `release_ref`. Every transition must carry actor id, actor role,
 message, audit id, trace id, and a timeline event.
 
+## Lifecycle Governance Baseline V1
+
+Agent Store owns `lifecycle_governance_baseline.v1` as the Agent/version
+lifecycle governance projection. This is separate from Skill Registry lifecycle:
+Skill Registry governs Skill records, while this contract governs Agent version
+upgrade, rollback, deprecation, disablement, security revocation, replacement
+mapping, and affected installation scope.
+
+The lifecycle projection must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `active` | Current version remains the active baseline. | Continue normal Store flow. |
+| `upgrade_available` | Owner has designated a replacement version. | Notify affected users/installations of the upgrade path. |
+| `rollback_available` | Owner has designated a rollback version. | Notify affected users/installations of rollback path. |
+| `deprecated` | Version remains visible but should move to replacement. | Show replacement mapping and deprecation reason. |
+| `disabled` | Version is disabled for governance reasons. | Notify AgentOps and affected installations. |
+| `security_revoked` | Version is terminally revoked by security authority. | Notify AgentOps and preserve strongest security signal. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `agent_version` | `agent_store_agent_version` |
+| `lifecycle_decision` | `agent_store_lifecycle_governance` |
+| `replacement` | `agent_store_replacement_mapping` |
+| `impact_scope` | `agent_store_installation_inventory` |
+| `agentops_notification` | `agent_store_notification_queue` |
+
+`upgrade` and `deprecate` require replacement version. `rollback` requires
+rollback version. `disable` and `security_revoke` require affected installation
+count. `security_revoke` must be performed by `actor_role=security` and include
+evidence or incident reference. `security_revoked` is terminal and must not be
+downgraded to weaker lifecycle states.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -498,13 +533,14 @@ Each project must implement contract tests against the same fixture set:
 | CCT-013 Policy approval echo | AgentOps | Agent Store | Store consumes `policy_approval_echo.v1` as echo-only; `store_decision_authority=none`, no Store override, and no Store-issued CapabilityGrant. |
 | CCT-014 Managed installer preview | Agent Store | Agent Runtime, AgentOps | Store emits `managed_installer_preview.v1` with `execution_mode=preview_only`; signature/hash, policy echo, Runtime handoff, and smoke diagnostics must remain distinct facts. |
 | CCT-015 Feedback owner response loop | Agent Store | Agent Store UI | Store emits `feedback_owner_response_loop.v1`; Owner actions require owner actor role and released feedback requires release linkage. |
+| CCT-016 Lifecycle governance baseline | Agent Store | AgentOps, Agent Store UI | Store emits `lifecycle_governance_baseline.v1`; security revocation is terminal, replacement/rollback mappings are explicit, and affected installation scope is disclosed. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `managed_installer_preview.v1`, and `feedback_owner_response_loop.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, and audited Owner feedback responses. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `managed_installer_preview.v1`, `feedback_owner_response_loop.v1`, and `lifecycle_governance_baseline.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, audited Owner feedback responses, and Agent/version lifecycle governance. |
 | AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, and Store-produced `managed_installer_preview.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 

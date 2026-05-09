@@ -24,6 +24,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
         "installation-runtime-handoff.openapi.yaml",
+        "lifecycle-governance-baseline.openapi.yaml",
         "managed-installer-preview.openapi.yaml",
         "package-validation.openapi.yaml",
         "policy-approval-echo.openapi.yaml",
@@ -422,6 +423,55 @@ def test_feedback_owner_response_loop_contract_documents_lifecycle() -> None:
     assert source_of_truth["properties"]["release_linkage"]["enum"] == [
         "agent_store_release_linkage"
     ]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_lifecycle_governance_contract_documents_version_lifecycle() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "lifecycle-governance-baseline.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/lifecycle-governance"]["post"]
+    responses = operation["responses"]
+    lifecycle = contract["components"]["schemas"]["LifecycleGovernance"]
+    issue = contract["components"]["schemas"]["LifecycleGovernanceIssue"]
+    source_of_truth = contract["components"]["schemas"]["LifecycleSourceOfTruth"]
+    impact = contract["components"]["schemas"]["ImpactScope"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "active",
+        "upgrade_available",
+        "rollback_available",
+        "deprecated",
+        "disabled",
+        "security_revoked",
+    }.issubset(set(lifecycle["properties"]["lifecycle_state"]["enum"]))
+    assert {
+        "upgrade",
+        "rollback",
+        "deprecate",
+        "disable",
+        "security_revoke",
+    }.issubset(set(lifecycle["properties"]["transition_action"]["enum"]))
+    assert {
+        "SECURITY_EVIDENCE_REQUIRED",
+        "SECURITY_REVOKED_TERMINAL",
+        "REPLACEMENT_VERSION_REQUIRED",
+        "ROLLBACK_VERSION_REQUIRED",
+        "IMPACT_SCOPE_REQUIRED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert "affected_installation_count" in impact["required"]
+    assert source_of_truth["properties"]["replacement"]["enum"] == [
+        "agent_store_replacement_mapping"
+    ]
+    assert source_of_truth["properties"]["impact_scope"]["enum"] == [
+        "agent_store_installation_inventory"
+    ]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
