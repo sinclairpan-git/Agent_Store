@@ -328,6 +328,38 @@ must not treat Package Validation's earlier suggested `pending_review` status as
 review queue entry, and must recheck TODO/unknown/TBD/N/A placeholders before
 submission.
 
+## Policy Approval Echo V1
+
+Agent Store consumes AgentOps-owned PolicyDecision and Approval echo facts and
+projects them into `policy_approval_echo.v1` for Store display and routing.
+AgentOps remains the sole owner of policy decisions, approval status, and
+CapabilityGrant issuance. Store owns only the echo projection wording, audit
+id, and next action.
+
+The echo must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `policy_allowed` | AgentOps policy allows the action and approval is approved or not required. | Continue the Store flow while preserving AgentOps as decision source. |
+| `approval_pending` | AgentOps requires approval or approval is still pending. | Route to AgentOps approval center. |
+| `approval_expired` | AgentOps approval echo is past its valid window. | Request a fresh AgentOps approval echo. |
+| `policy_denied` | AgentOps denied policy or approval was rejected/revoked. | Show blocking policy and keep Store action blocked. |
+| `agentops_echo_unavailable` | AgentOps echo is missing, incomplete, or unsupported. | Refresh AgentOps policy echo; do not locally interpret it. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `policy_decision` | `agentops` |
+| `approval` | `agentops` |
+| `capability_grant` | `agentops_not_issued_by_store` |
+| `store_projection` | `agent_store_echo_only` |
+
+The Store projection must always expose `store_decision_authority=none`,
+`store_override_allowed=false`, and `capability_grant_issued=false`. Store may
+continue only when AgentOps echo is `policy_allowed`; it must not rewrite unknown
+AgentOps decisions into allow, deny, or approval-required.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -395,14 +427,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-010 HealthSummary freshness guard | AgentOps | Agent Store | Store projects AgentOps HealthSummary freshness into `health_summary_freshness.v1`; expired `valid_until` displays “待刷新” and never becomes a recommendation basis. |
 | CCT-011 Installation Runtime handoff | Agent Store | Agent Runtime | Runtime consumes `installation_runtime_handoff.v1`; `artifact_hash` mismatch blocks consumption and returns `regenerate_activation_command`. |
 | CCT-012 Draft Review submission | Agent Store | AgentOps | Store emits `draft_review_submission.v1`; only full final-gate pass may set `pending_review`, while validation, Runtime, Owner, or placeholder blockers remain `not_enqueued`. |
+| CCT-013 Policy approval echo | AgentOps | Agent Store | Store consumes `policy_approval_echo.v1` as echo-only; `store_decision_authority=none`, no Store override, and no Store-issued CapabilityGrant. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, and `draft_review_submission.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, and explicit Owner-confirmed draft review submission. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, and Store-produced `draft_review_submission.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, and `policy_approval_echo.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, and AgentOps-only policy/approval authority. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, and Store-consumed `policy_approval_echo.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

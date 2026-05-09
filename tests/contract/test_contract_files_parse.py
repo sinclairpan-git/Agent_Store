@@ -24,6 +24,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "installation-bootstrap.openapi.yaml",
         "installation-runtime-handoff.openapi.yaml",
         "package-validation.openapi.yaml",
+        "policy-approval-echo.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "runtime-availability.openapi.yaml",
         "skill-registry-notification.openapi.yaml",
@@ -283,6 +284,43 @@ def test_draft_review_submission_contract_documents_final_review_gate() -> None:
         "agent_store"
     ]
     assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_policy_approval_echo_contract_documents_agentops_authority() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "policy-approval-echo.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/policy-approval-echoes"]["post"]
+    responses = operation["responses"]
+    echo = contract["components"]["schemas"]["PolicyApprovalEcho"]
+    projection = contract["components"]["schemas"]["StoreProjection"]
+    source_of_truth = contract["components"]["schemas"]["PolicyApprovalSourceOfTruth"]
+    issue = contract["components"]["schemas"]["PolicyApprovalEchoIssue"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "policy_allowed",
+        "approval_pending",
+        "approval_expired",
+        "policy_denied",
+        "agentops_echo_unavailable",
+    }.issubset(set(echo["properties"]["echo_state"]["enum"]))
+    assert projection["properties"]["projection_mode"]["enum"] == ["agentops_echo_only"]
+    assert projection["properties"]["store_decision_authority"]["enum"] == ["none"]
+    assert projection["properties"]["store_override_allowed"]["const"] is False
+    assert projection["properties"]["capability_grant_issued"]["const"] is False
+    assert source_of_truth["properties"]["policy_decision"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["approval"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["capability_grant"]["enum"] == [
+        "agentops_not_issued_by_store"
+    ]
+    assert "AGENTOPS_APPROVAL_EXPIRED" in issue["properties"]["issue_id"]["enum"]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
