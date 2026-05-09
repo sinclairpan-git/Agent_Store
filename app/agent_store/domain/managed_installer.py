@@ -275,12 +275,7 @@ def _signature_issues(
 def _policy_issues(
     policy_approval_echo: Mapping[str, object],
 ) -> tuple[ManagedInstallerIssue, ...]:
-    projection = _mapping(policy_approval_echo.get("store_projection"))
-    if (
-        _string(policy_approval_echo.get("echo_state")) == "policy_allowed"
-        and projection.get("store_may_continue") is True
-        and projection.get("capability_grant_issued") is False
-    ):
+    if _policy_gate_ready(policy_approval_echo):
         return ()
     return (
         ManagedInstallerIssue(
@@ -369,7 +364,7 @@ def _steps(
         _string(package.get("signature_state")) == "verified"
         and _string(package.get("hash_match_state")) == "matched"
     )
-    policy_ok = _string(policy_approval_echo.get("echo_state")) == "policy_allowed"
+    policy_ok = _policy_gate_ready(policy_approval_echo)
     runtime_ok = (
         _string(installation_runtime_handoff.get("handoff_state"))
         == "runtime_handoff_ready"
@@ -480,6 +475,15 @@ def _policy_gate(policy_approval_echo: Mapping[str, object]) -> dict[str, object
         "store_override_allowed": projection.get("store_override_allowed") is True,
         "capability_grant_issued": projection.get("capability_grant_issued") is True,
     }
+
+
+def _policy_gate_ready(policy_approval_echo: Mapping[str, object]) -> bool:
+    projection = _mapping(policy_approval_echo.get("store_projection"))
+    return (
+        _string(policy_approval_echo.get("echo_state")) == "policy_allowed"
+        and projection.get("store_may_continue") is True
+        and projection.get("capability_grant_issued") is False
+    )
 
 
 def _runtime_gate(

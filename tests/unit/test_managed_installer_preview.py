@@ -117,6 +117,22 @@ def test_managed_installer_preview_blocks_policy_until_agentops_allows() -> None
     assert preview["next_action"]["target_system"] == "agentops"
 
 
+def test_managed_installer_preview_blocks_steps_when_policy_projection_disallows() -> (
+    None
+):
+    policy = _policy("policy_allowed")
+    policy["store_projection"]["store_may_continue"] = False
+
+    preview = _preview(policy=policy)
+
+    assert preview["installer_state"] == "policy_blocked"
+    assert preview["issues"][0]["issue_id"] == "POLICY_APPROVAL_NOT_ALLOWED"
+    assert preview["steps"][2]["step_id"] == "create_isolated_install"
+    assert preview["steps"][2]["step_state"] == "blocked"
+    assert preview["steps"][3]["step_id"] == "smoke_test"
+    assert preview["steps"][3]["step_state"] == "blocked"
+
+
 def test_managed_installer_preview_blocks_runtime_handoff_mismatch() -> None:
     preview = _preview(handoff=_handoff("artifact_hash_mismatch", False))
 
