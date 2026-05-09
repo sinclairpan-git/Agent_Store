@@ -1,0 +1,266 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Skill Registry Notification Contract
+  version: 0.1.0
+paths:
+  /api/v1/agentops/skill-registry-notices:
+    post:
+      operationId: acceptSkillRegistryNotice
+      summary: Accept an Agent Store owned Skill Registry lifecycle notice
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillRegistryNotification"
+      responses:
+        "202":
+          description: AgentOps accepted the immutable Skill Registry notice
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillRegistryNotificationAck"
+        "400":
+          description: Invalid notification payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    SkillRegistryNotification:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - audit_id
+        - idempotency_key
+        - source_system
+        - target_system
+        - contract
+        - consumer
+        - notice_type
+        - registry_key
+        - skill
+        - event
+        - source_of_truth
+        - payload_hash
+      properties:
+        schema_version:
+          type: string
+          enum: [skill_registry_notification.v1]
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        idempotency_key:
+          type: string
+        source_system:
+          type: string
+          enum: [agent_store]
+        target_system:
+          type: string
+          enum: [agentops]
+        contract:
+          type: string
+          enum: [skill_registry.v1]
+        consumer:
+          type: string
+          enum: [agentops]
+        notice_type:
+          type: string
+          enum: [skill_published, skill_deprecated, skill_security_revoked]
+        registry_key:
+          type: string
+        skill:
+          $ref: "#/components/schemas/SkillRegistryRecord"
+        event:
+          $ref: "#/components/schemas/SkillRegistryEvent"
+        source_of_truth:
+          $ref: "#/components/schemas/SourceOfTruth"
+        payload_hash:
+          type: string
+    SkillRegistryNotificationAck:
+      type: object
+      required: [schema_version, trace_id, error_code, audit_id, agentops_notification]
+      properties:
+        schema_version:
+          type: string
+          enum: [skill_registry_notification_ack.v1]
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        agentops_notification:
+          $ref: "#/components/schemas/AgentOpsNotificationReceipt"
+    AgentOpsNotificationReceipt:
+      type: object
+      required:
+        - notification_id
+        - agentops_ack_id
+        - delivery_attempt_id
+        - delivery_state
+        - sent_at
+        - target_system
+        - consumer
+        - contract
+        - received_event_id
+        - registry_key
+        - source_system
+        - source_of_truth
+        - request_payload_hash
+        - response_payload_hash
+      properties:
+        notification_id:
+          type: string
+        agentops_ack_id:
+          type: string
+        delivery_attempt_id:
+          type: string
+        delivery_state:
+          type: string
+          enum: [accepted]
+        sent_at:
+          type: string
+          format: date-time
+        target_system:
+          type: string
+          enum: [agentops]
+        consumer:
+          type: string
+          enum: [agentops]
+        contract:
+          type: string
+          enum: [skill_registry.v1]
+        received_event_id:
+          type: string
+        registry_key:
+          type: string
+        source_system:
+          type: string
+          enum: [agent_store]
+        source_of_truth:
+          $ref: "#/components/schemas/SourceOfTruth"
+        request_payload_hash:
+          type: string
+        response_payload_hash:
+          type: string
+    SkillRegistryRecord:
+      type: object
+      required:
+        - skill_id
+        - skill_version
+        - schema_ref
+        - risk_level
+        - package_id
+        - agent_id
+        - owner_team
+        - owner_user
+        - status
+        - status_reason
+        - registry_key
+      properties:
+        skill_id:
+          type: string
+        skill_version:
+          type: string
+        schema_ref:
+          type: string
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+        package_id:
+          type: string
+        agent_id:
+          type: string
+        owner_team:
+          type: string
+        owner_user:
+          type: string
+        status:
+          type: string
+          enum: [published, deprecated, security_revoked]
+        status_reason:
+          type: string
+        registry_key:
+          type: string
+        risk_justification:
+          type: string
+    SkillRegistryEvent:
+      type: object
+      required:
+        - event_id
+        - event_type
+        - skill_id
+        - skill_version
+        - audit_required
+        - reason
+      properties:
+        event_id:
+          type: string
+        event_type:
+          type: string
+          enum: [skill_published, skill_deprecated, skill_security_revoked]
+        skill_id:
+          type: string
+        skill_version:
+          type: string
+        audit_required:
+          type: boolean
+        reason:
+          type: string
+        evidence_ref:
+          type: string
+    SourceOfTruth:
+      type: object
+      required: [skill_registry, package_validation, agentops_consumption]
+      properties:
+        skill_registry:
+          type: string
+          enum: [agent_store]
+        package_validation:
+          type: string
+          enum: [agent_store_package_validation]
+        agentops_consumption:
+          type: string
+          enum: [agentops_consumes_agent_store_registry]
+    ErrorResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, message_key, severity, retryable, recommended_action_id]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
