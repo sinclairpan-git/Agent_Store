@@ -19,6 +19,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-manifest-runtime.openapi.yaml",
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
+        "contract-registry-traceability.openapi.yaml",
         "draft-review-submission.openapi.yaml",
         "feedback-owner-response-loop.openapi.yaml",
         "health-summary-freshness.openapi.yaml",
@@ -473,6 +474,59 @@ def test_lifecycle_governance_contract_documents_version_lifecycle() -> None:
     ]
     assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_contract_registry_traceability_contract_documents_registry_axes() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "contract-registry-traceability.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/contracts/traceability"]["get"]
+    responses = operation["responses"]
+    registry = contract["components"]["schemas"]["ContractRegistryTraceability"]
+    entry = contract["components"]["schemas"]["ContractTraceabilityEntry"]
+    summary = contract["components"]["schemas"]["ContractCoverageSummary"]
+    source_of_truth = contract["components"]["schemas"]["ContractRegistrySourceOfTruth"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+
+    assert {"200"}.issubset(responses.keys())
+    assert registry["properties"]["contract_schema_version"]["enum"] == [
+        "contract_registry_traceability.v1"
+    ]
+    assert {"complete", "incomplete"}.issubset(
+        set(registry["properties"]["registry_status"]["enum"])
+    )
+    assert {
+        "contract_id",
+        "contract_file",
+        "primary_schema",
+        "owner",
+        "producer",
+        "consumers",
+        "cct_ids",
+        "contract_test_files",
+        "appendix_anchor",
+    }.issubset(entry["required"])
+    assert (
+        "contract_registry_traceability.v1"
+        in entry["properties"]["contract_id"]["enum"]
+    )
+    assert {
+        "Agent Store",
+        "AgentOps",
+        "Agent Runtime",
+    }.issubset(set(entry["properties"]["producer"]["enum"]))
+    assert "Ai_AutoSDLC" in entry["properties"]["consumers"]["items"]["enum"]
+    assert {
+        "total_contracts",
+        "contracts_with_cct",
+        "contracts_with_contract_tests",
+        "complete_traceability",
+        "unmapped_contracts",
+    }.issubset(summary["required"])
+    assert source_of_truth["properties"]["appendix"]["enum"] == [
+        "docs/cross-project-contract-appendix.md"
+    ]
+    assert "complete_contract_traceability" in action["properties"]["action_id"]["enum"]
 
 
 def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> None:

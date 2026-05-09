@@ -463,6 +463,31 @@ count. `security_revoke` must be performed by `actor_role=security` and include
 evidence or incident reference. `security_revoked` is terminal and must not be
 downgraded to weaker lifecycle states.
 
+## Contract Registry Traceability V1
+
+Agent Store owns `contract_registry_traceability.v1` as the read-only projection
+that lets Store, AgentOps, Agent Runtime, Ai_AutoSDLC, and Store UI trace every
+OpenAPI contract back to its governance metadata.
+
+Each registry entry must include:
+
+| Field | Required | Owner | Notes |
+| --- | --- | --- | --- |
+| `contract_id` | Yes | Agent Store | Stable schema identifier, usually the payload contract version. |
+| `contract_file` | Yes | Agent Store | File under `specs/001-agent-store-phase1-trusted-min-loop/contracts`. |
+| `primary_schema` | Yes | Agent Store | Main OpenAPI component schema for review. |
+| `owner` | Yes | Domain owner | System accountable for the fact boundary. |
+| `producer` | Yes | Producing system | System emitting the contract payload or projection. |
+| `consumers` | Yes | Consuming systems | One or more downstream systems/UI surfaces. |
+| `cct_ids` | Yes | Agent Store | Appendix CCT rows that cover this contract; may be empty for local-only contracts. |
+| `contract_test_files` | Yes | Agent Store | Test files that parse or exercise the contract. |
+| `appendix_anchor` | Yes | Agent Store | Human-review anchor in this appendix. |
+
+Coverage summary must expose `total_contracts`, `contracts_with_cct`,
+`contracts_with_contract_tests`, `complete_traceability`, and
+`unmapped_contracts`. A contract change is not review-ready if any OpenAPI file
+is missing owner, producer, consumer, test file, or appendix traceability.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -534,14 +559,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-014 Managed installer preview | Agent Store | Agent Runtime, AgentOps | Store emits `managed_installer_preview.v1` with `execution_mode=preview_only`; signature/hash, policy echo, Runtime handoff, and smoke diagnostics must remain distinct facts. |
 | CCT-015 Feedback owner response loop | Agent Store | Agent Store UI | Store emits `feedback_owner_response_loop.v1`; Owner actions require owner actor role and released feedback requires release linkage. |
 | CCT-016 Lifecycle governance baseline | Agent Store | AgentOps, Agent Store UI | Store emits `lifecycle_governance_baseline.v1`; security revocation is terminal, replacement/rollback mappings are explicit, and affected installation scope is disclosed. |
+| CCT-017 Contract Registry traceability | Agent Store | AgentOps, Agent Runtime, Ai_AutoSDLC, Agent Store UI | Store emits `contract_registry_traceability.v1`; every OpenAPI contract must map to owner, producer, consumers, appendix anchor, and contract tests. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `managed_installer_preview.v1`, `feedback_owner_response_loop.v1`, and `lifecycle_governance_baseline.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, audited Owner feedback responses, and Agent/version lifecycle governance. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, and Store-produced `managed_installer_preview.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `managed_installer_preview.v1`, `feedback_owner_response_loop.v1`, `lifecycle_governance_baseline.v1`, and `contract_registry_traceability.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, audited Owner feedback responses, Agent/version lifecycle governance, and contract registry traceability. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, Store-produced `managed_installer_preview.v1`, and Store-produced `contract_registry_traceability.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order
