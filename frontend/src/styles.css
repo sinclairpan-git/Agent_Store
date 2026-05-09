@@ -511,6 +511,115 @@ h2 {
   font-weight: 720;
 }
 
+.listing-wizard {
+  min-height: 360px;
+}
+
+.wizard-steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 14px;
+  list-style: none;
+}
+
+.wizard-steps li {
+  display: grid;
+  gap: 5px;
+  min-height: 74px;
+  padding: 10px;
+  border: 1px solid #e5ebef;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.wizard-steps span,
+.wizard-pane span {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 740;
+}
+
+.wizard-steps strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.wizard-steps small {
+  color: #60707d;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.wizard-step--completed,
+.wizard-step--confirmed,
+.wizard-step--passed,
+.wizard-step--ready,
+.wizard-step--runtime_ready {
+  border-color: #b7dfc5;
+  background: #f2fbf6;
+}
+
+.wizard-step--needs_owner_input,
+.wizard-step--validation_failed,
+.wizard-step--runtime_capability_missing,
+.wizard-step--blocked {
+  border-color: #ffc9c3;
+  background: #fff6f5;
+}
+
+.wizard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wizard-pane {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #e5ebef;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.wizard-pane strong,
+.wizard-pane code,
+.wizard-pane p,
+.compact-facts dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.wizard-pane code {
+  color: #16202a;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 12px;
+}
+
+.wizard-pane ul {
+  display: grid;
+  gap: 6px;
+  padding-left: 18px;
+  margin: 0;
+  color: #3d4b56;
+  font-size: 12px;
+}
+
+.compact-facts {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.7fr) minmax(0, 1fr);
+  gap: 6px 8px;
+  color: #3d4b56;
+  font-size: 12px;
+}
+
+.compact-facts dt {
+  color: #60707d;
+}
+
 .command-preview {
   display: grid;
   gap: 8px;
@@ -947,7 +1056,9 @@ h2 {
 
   .discovery-stats,
   .collection-tabs,
-  .decision-grid {
+  .decision-grid,
+  .wizard-grid,
+  .wizard-steps {
     grid-template-columns: 1fr;
   }
 

@@ -102,6 +102,7 @@ for (const componentName of [
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
   "sdlc-health-summary-freshness",
+  "sdlc-listing-wizard",
   "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
@@ -168,6 +169,18 @@ for (const healthTerm of [
 ]) {
   assert(mockData.includes(healthTerm), `${healthTerm} must be represented`);
 }
+for (const wizardTerm of [
+  "listingWizard",
+  "listing_wizard_shell.v1",
+  "source_selection",
+  "field_confirmation",
+  "validation_report",
+  "detail_preview",
+  "prepare_draft_review_submission",
+  "not_submitted_until_027"
+]) {
+  assert(mockData.includes(wizardTerm), `${wizardTerm} must be represented`);
+}
 assert(
   !mockData.includes("recommendationStates:")
     && recommendationStates["framework.ai-autosdlc"]
@@ -200,6 +213,7 @@ assert(
     && app.includes("selectedRecommendationDecision")
     && app.includes("selectedRuntimeAvailability")
     && app.includes("selectedHealthSummaryFreshness")
+    && app.includes("selectedListingWizard")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -243,10 +257,12 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("Runtime 可用性摘要满足当前 Manifest")
     && app.includes("HealthSummary 新鲜度可展示")
+    && app.includes("上架向导已准备好草案提交材料")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
+    && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
@@ -278,6 +294,13 @@ assert(
 );
 assert(
   componentLibrary.includes("sdlc-recommendation-decision")
+    && componentLibrary.includes("sdlc-listing-wizard")
+    && componentLibrary.includes("listing-wizard")
+    && componentLibrary.includes("wizard-steps")
+    && componentLibrary.includes("来源选择")
+    && componentLibrary.includes("字段确认")
+    && componentLibrary.includes("校验报告")
+    && componentLibrary.includes("详情预览")
     && componentLibrary.includes("recommendation_state")
     && componentLibrary.includes("formatSourceOfTruth")
     && componentLibrary.includes("formatTrustBlocker")
