@@ -29,6 +29,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "managed-installer-preview.openapi.yaml",
         "package-validation.openapi.yaml",
         "policy-approval-echo.openapi.yaml",
+        "policy-approval-receipt.openapi.yaml",
         "policy-approval-request.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "runtime-availability.openapi.yaml",
@@ -371,6 +372,56 @@ def test_policy_approval_request_contract_documents_agentops_request_boundary() 
     }.issubset(set(issue["properties"]["issue_id"]["enum"]))
     assert source_of_truth["properties"]["approval_request"]["enum"] == ["agent_store"]
     assert source_of_truth["properties"]["approval"]["enum"] == ["agentops"]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_policy_approval_receipt_contract_documents_agentops_receipt_boundary() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "policy-approval-receipt.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/policy-approval-receipts"]["post"]
+    responses = operation["responses"]
+    receipt = contract["components"]["schemas"]["PolicyApprovalReceipt"]
+    agentops_receipt = contract["components"]["schemas"]["AgentOpsApprovalReceiptInput"]
+    projection = contract["components"]["schemas"]["StoreReceiptProjection"]
+    issue = contract["components"]["schemas"]["PolicyApprovalReceiptIssue"]
+    source_of_truth = contract["components"]["schemas"][
+        "PolicyApprovalReceiptSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert receipt["properties"]["contract_schema_version"]["enum"] == [
+        "policy_approval_receipt.v1"
+    ]
+    assert {
+        "approval_receipt_accepted",
+        "approval_receipt_pending",
+        "approval_receipt_rejected",
+        "approval_receipt_unavailable",
+    }.issubset(set(receipt["properties"]["receipt_state"]["enum"]))
+    assert agentops_receipt["properties"]["receipt_contract"]["enum"] == [
+        "policy_approval_receipt.v1"
+    ]
+    assert projection["properties"]["projection_mode"]["enum"] == [
+        "agentops_receipt_only"
+    ]
+    assert projection["properties"]["store_decision_authority"]["enum"] == ["none"]
+    assert projection["properties"]["capability_grant_issued"]["const"] is False
+    assert projection["properties"]["approval_decision_final"]["const"] is False
+    assert {
+        "AGENTOPS_RECEIPT_CONTRACT_UNSUPPORTED",
+        "AGENTOPS_RECEIPT_INCOMPLETE",
+        "APPROVAL_RECEIPT_REQUEST_MISMATCH",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["approval_receipt"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["policy_decision"]["enum"] == [
+        "agentops_not_decided_by_receipt"
+    ]
     assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 

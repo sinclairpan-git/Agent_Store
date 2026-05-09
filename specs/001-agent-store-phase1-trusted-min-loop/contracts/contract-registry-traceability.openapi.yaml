@@ -97,6 +97,7 @@ components:
             - managed_installer_preview.v1
             - package_validation_report.v1
             - policy_approval_echo.v1
+            - policy_approval_receipt.v1
             - policy_approval_request.v1
             - recommendation_state.v1
             - runtime_availability_summary.v1

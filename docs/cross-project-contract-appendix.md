@@ -383,6 +383,27 @@ The Store projection must expose `store_decision_authority=none`,
 request may set `agentops_request.dispatch_allowed=true`; no other state may be
 dispatched to AgentOps.
 
+## Policy Approval Receipt V1
+
+AgentOps produces `policy_approval_receipt.v1` after it accepts, queues, or
+rejects a Store-originated `policy_approval_request.v1`. Agent Store consumes
+this receipt only to link the approval flow and route the user to AgentOps. A
+receipt is not a final policy decision, not an approval decision, and not a
+CapabilityGrant.
+
+The receipt projection must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `approval_receipt_accepted` | AgentOps accepted the approval request and returned an approval id. | Link to AgentOps approval center. |
+| `approval_receipt_pending` | AgentOps has queued receipt processing. | Poll or refresh AgentOps receipt. |
+| `approval_receipt_rejected` | AgentOps rejected the request envelope before approval review. | Fix and resubmit the Store request. |
+| `approval_receipt_unavailable` | Receipt is missing, unsupported, incomplete, or mismatched. | Refresh AgentOps receipt and do not link approval flow. |
+
+The Store projection must expose `projection_mode=agentops_receipt_only`,
+`store_decision_authority=none`, `capability_grant_issued=false`, and
+`approval_decision_final=false`.
+
 ## Managed Installer Preview V1
 
 Agent Store projects package trust, Policy Approval echo, and Installation
@@ -584,14 +605,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-016 Lifecycle governance baseline | Agent Store | AgentOps, Agent Store UI | Store emits `lifecycle_governance_baseline.v1`; security revocation is terminal, replacement/rollback mappings are explicit, and affected installation scope is disclosed. |
 | CCT-017 Contract Registry traceability | Agent Store | AgentOps, Agent Runtime, Ai_AutoSDLC, Agent Store UI | Store emits `contract_registry_traceability.v1`; every OpenAPI contract must map to owner, producer, consumers, appendix anchor, and contract tests. |
 | CCT-018 Policy approval request | Agent Store | AgentOps, Agent Store UI | Store emits `policy_approval_request.v1` only when requester, policy context, and justification are complete; Store still has no decision authority and issues no CapabilityGrant. |
+| CCT-019 Policy approval receipt | AgentOps | Agent Store, Agent Store UI | Store consumes `policy_approval_receipt.v1` only as an AgentOps receipt; receipt links approval flow but never means approved and never issues CapabilityGrant. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `policy_approval_request.v1`, `managed_installer_preview.v1`, `feedback_owner_response_loop.v1`, `lifecycle_governance_baseline.v1`, and `contract_registry_traceability.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, audited Owner feedback responses, Agent/version lifecycle governance, and contract registry traceability. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, Store-produced `policy_approval_request.v1`, Store-produced `managed_installer_preview.v1`, and Store-produced `contract_registry_traceability.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `policy_approval_request.v1`, `policy_approval_receipt.v1`, `managed_installer_preview.v1`, `feedback_owner_response_loop.v1`, `lifecycle_governance_baseline.v1`, and `contract_registry_traceability.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, audited Owner feedback responses, Agent/version lifecycle governance, and contract registry traceability. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, Store-produced `policy_approval_request.v1`, AgentOps-produced `policy_approval_receipt.v1`, Store-produced `managed_installer_preview.v1`, and Store-produced `contract_registry_traceability.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

@@ -342,6 +342,20 @@ def _traceability_entries() -> Iterable[ContractTraceabilityEntry]:
             "Policy Approval Request V1",
         ),
         (
+            "policy_approval_receipt.v1",
+            "policy-approval-receipt.openapi.yaml",
+            "PolicyApprovalReceipt",
+            "AgentOps",
+            "AgentOps",
+            ("Agent Store", "Agent Store UI"),
+            ("CCT-019",),
+            (
+                "tests/contract/test_policy_approval_receipt_api.py",
+                "tests/contract/test_contract_files_parse.py",
+            ),
+            "Policy Approval Receipt V1",
+        ),
+        (
             "recommendation_state.v1",
             "recommendation-state.openapi.yaml",
             "RecommendationStateResponse",
