@@ -106,6 +106,20 @@ def test_runtime_availability_requires_runtime_upgrade_for_old_contract() -> Non
     assert summary.next_action.action_id == "upgrade_runtime"
 
 
+def test_runtime_availability_treats_contract_version_as_runtime_presence() -> None:
+    summary = build_runtime_availability_summary(
+        _manifest(),
+        runtime_echo={"runtime_contract_version": "runtime-contract.v1"},
+        trace_id="trace-023",
+        audit_id="audit-023",
+    )
+
+    assert summary.availability_state == "runtime_upgrade_required"
+    assert summary.runtime_facts["runtime_present"] is True
+    assert summary.runtime_facts["availability_echo_state"] == "available"
+    assert summary.issues[0].issue_id == "RUNTIME_UPGRADE_REQUIRED"
+
+
 def test_runtime_availability_rejects_different_contract_family() -> None:
     summary = build_runtime_availability_summary(
         _manifest(),

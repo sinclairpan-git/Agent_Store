@@ -275,10 +275,11 @@ def _runtime_present(runtime_echo: Mapping[str, object] | None) -> bool:
     ).lower()
     if state in _RUNTIME_PRESENT_STATES:
         return True
-    if state in _RUNTIME_MISSING_STATES:
+    if state and state in _RUNTIME_MISSING_STATES:
         return False
     return bool(
         _string(runtime_echo.get("runtime_id"))
+        or _string(runtime_echo.get("runtime_contract_version"))
         or _string_items(runtime_echo.get("capabilities"))
     )
 

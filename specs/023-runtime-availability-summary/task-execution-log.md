@@ -8,3 +8,4 @@
 | 2026-05-09 | Verification | `uv run pytest -q` 268 passed；`uv run ruff check app tests` 通过；`uv run ruff format --check app tests` 通过；`node frontend/scripts/verify-frontend.mjs` 通过；`ai-sdlc run --dry-run` 通过。 |
 | 2026-05-09 | Codex Review fix | 修复 Runtime contract version family/major 比较，防止跨 contract family 或 `v1.99` 被误判兼容；复验 `uv run pytest -q` 271 passed，ruff、frontend verify、AI-SDLC dry-run 均通过。 |
 | 2026-05-09 | Codex Review fix | 修复前端缺失 runtime summary 降级路径，移除硬编码 `runtime-contract.v1`；复验 `uv run pytest -q` 271 passed，ruff、frontend verify、AI-SDLC dry-run 均通过。 |
+| 2026-05-09 | Codex Review fix | 修复 Runtime echo 仅提供 `runtime_contract_version` 时被误判为缺 Runtime；复验 `uv run pytest -q` 272 passed，ruff、frontend verify、AI-SDLC dry-run 均通过。 |
