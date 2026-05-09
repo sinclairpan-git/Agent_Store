@@ -367,6 +367,29 @@ def test_skill_registry_notice_rejects_unknown_lifecycle_type() -> None:
         raise AssertionError("unsupported lifecycle notice type should fail")
 
 
+def test_skill_registry_notice_rejects_drifted_source_of_truth() -> None:
+    api = SkillRegistryAPI()
+    _, registry_response = api.publish_skill(
+        _skill_publish_payload(),
+        headers={"Idempotency-Key": "publish-source-of-truth"},
+    )
+    assert isinstance(registry_response["skill_registry"], dict)
+    source_of_truth = registry_response["skill_registry"]["source_of_truth"]
+    assert isinstance(source_of_truth, dict)
+    source_of_truth["package_validation"] = "agentops_package_validation"
+    client = AgentOpsSkillRegistryNoticeClient()
+
+    try:
+        client.notify_skill_registry(
+            registry_response,
+            headers={"Idempotency-Key": "notice-source-of-truth"},
+        )
+    except ValueError as exc:
+        assert "source_of_truth must match Skill Registry contract" in str(exc)
+    else:
+        raise AssertionError("drifted source_of_truth should fail")
+
+
 def test_skill_registry_notice_preserves_security_revoke_evidence() -> None:
     api = SkillRegistryAPI()
     api.publish_skill(

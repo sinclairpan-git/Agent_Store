@@ -30,6 +30,11 @@ SKILL_REGISTRY_NOTICE_TYPES = frozenset(
         "skill_security_revoked",
     }
 )
+SKILL_REGISTRY_SOURCE_OF_TRUTH = {
+    "skill_registry": "agent_store",
+    "package_validation": "agent_store_package_validation",
+    "agentops_consumption": "agentops_consumes_agent_store_registry",
+}
 
 
 class AgentOpsUnavailableError(RuntimeError):
@@ -189,8 +194,11 @@ class AgentOpsSkillRegistryNoticeClient:
             raise ValueError("agentops consumption must require notification")
         if not isinstance(source_of_truth, Mapping):
             raise ValueError("source_of_truth is required")
-        if source_of_truth.get("skill_registry") != "agent_store":
-            raise ValueError("Agent Store must remain the Skill Registry fact owner")
+        if any(
+            source_of_truth.get(name) != value
+            for name, value in SKILL_REGISTRY_SOURCE_OF_TRUTH.items()
+        ):
+            raise ValueError("source_of_truth must match Skill Registry contract")
 
         contract = str(consumption.get("contract") or "")
         if contract != SKILL_REGISTRY_NOTICE_CONTRACT:

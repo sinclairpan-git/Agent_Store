@@ -87,13 +87,13 @@ specs:
   depends_on:
   - 019-skill-registry-lifecycle
 truth_snapshot:
-  generated_at: '2026-05-09T03:53:36Z'
+  generated_at: '2026-05-09T04:13:08Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 851aa8d
+  repo_revision: cb516d0
   authoring_hash: 61e886c79e3c7e7e1bd922a791979468a91adb04c9a1d91f6a4528af3bcf0f3a
   source_hashes: {}
-  snapshot_hash: dd9e7a88c5e6827f657119151983aed2242ab03cf8ff34b9a2b92d554d62c9db
+  snapshot_hash: bde2b2bc3e2ac4853641d2c61f52e5c859722419e37d7604499e2bab02b11e94
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -101,8 +101,8 @@ truth_snapshot:
     mapped_sources: 102
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 49
-    deferred_signal_count: 118
+    phase_signal_count: 51
+    deferred_signal_count: 120
     non_goal_signal_count: 19
     layer_totals:
       blueprint: 1
@@ -1018,8 +1018,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 020-skill-registry-agentops-notification
-      phase_signal_count: 5
-      deferred_signal_count: 5
+      phase_signal_count: 7
+      deferred_signal_count: 7
       non_goal_signal_count: 0
     - path: specs/020-skill-registry-agentops-notification/development-summary.md
       source_type: development_summary

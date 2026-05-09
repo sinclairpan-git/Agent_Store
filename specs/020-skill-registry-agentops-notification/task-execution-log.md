@@ -9,6 +9,7 @@
 - 根据两位对抗评审合议，补齐 deprecate 覆盖、hash/receipt 审计字段、cross-project appendix 与 020 阶段文档。
 - 修复 Codex Review P1：AgentOps notice consumer 现在硬性校验 `agentops_consumption.contract == skill_registry.v1`，拒绝 producer contract drift。
 - 修复 Codex Review P1：AgentOps notice consumer 现在硬性校验 lifecycle notice type 仅允许 `skill_published`、`skill_deprecated`、`skill_security_revoked`。
+- 修复 Codex Review P2：AgentOps notice consumer 现在校验完整 `source_of_truth` 三元组，拒绝 package_validation / agentops_consumption 事实源漂移。
 
 ## Validation
 
@@ -23,3 +24,4 @@
 - Codex Review P1 修复后复验：`uv run pytest tests/unit/test_agentops_client.py tests/contract/test_contract_files_parse.py -q`：25 passed。
 - Codex Review P1 修复后复验：`uv run pytest -q`：237 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：80 files already formatted。
 - Codex Review P1 修复后复验：`python -m ai_sdlc program truth audit`：ready / fresh；`python -m ai_sdlc run --dry-run`：PASS；`python -m ai_sdlc run`：PASS。
+- Codex Review P2 修复后复验：`uv run pytest tests/unit/test_agentops_client.py tests/contract/test_contract_files_parse.py -q`：26 passed。
