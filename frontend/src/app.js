@@ -49,6 +49,18 @@ function actionMessage(action) {
   if (actionId === "copy_diagnostic_ref") {
     return "诊断编号已准备好，可用于和 Owner 或 AgentOps 对齐当前激活状态。";
   }
+  if (actionId === "install_runtime") {
+    return "Runtime 安装动作已进入预览；Agent Store 只展示下一步，不执行 Agent 或 Runtime。";
+  }
+  if (actionId === "upgrade_runtime") {
+    return "Runtime 升级动作已记录。是否满足能力要求仍需后端 Runtime echo/probe 回显。";
+  }
+  if (actionId === "view_missing_runtime_capabilities") {
+    return "已定位缺失 Runtime 能力；需要 Runtime Owner 补齐或选择兼容版本。";
+  }
+  if (actionId === "continue_listing_review") {
+    return "Runtime 可用性摘要满足当前 Manifest，可继续上架或安装审核。";
+  }
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
@@ -124,6 +136,7 @@ new window.Vue({
   data: function data() {
     return {
       catalog: window.AgentStoreMock.agentCatalog,
+      runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       recommendationStates: {},
       recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
@@ -499,6 +512,73 @@ new window.Vue({
       return {
         state: this.selectedAgent.installability === "blocked" ? "blocked" : "degraded",
         degraded_reason: "catalog_summary_requires_runtime_verification"
+      };
+    },
+    selectedRuntimeAvailability: function selectedRuntimeAvailability() {
+      var agent = this.selectedAgent;
+      var summary;
+      var summaries = this.runtimeAvailability || {};
+      if (!agent) {
+        return {
+          audit_id: "audit-empty-filter",
+          availability_state: "manifest_incomplete",
+          display_name_zh: "Manifest 待补齐",
+          reason: "当前没有可评估 Agent，Runtime 可用性摘要不可用。",
+          required_runtime_contract_version: "",
+          runtime_contract_version: "",
+          missing_runtime_capabilities: [],
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            agent_manifest: "catalog_filter",
+            runtime_availability: "not_applicable",
+            summary_projection: "agent_store"
+          },
+          runtime_facts: {
+            runtime_id: "",
+            availability_echo_state: "missing"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      summary = summaries[agent.agent_id];
+      if (summary) {
+        return summary;
+      }
+      return {
+        audit_id: "audit-" + agent.agent_id,
+        availability_state: "runtime_missing",
+        display_name_zh: "缺 Runtime",
+        reason: "缺少后端 runtime_availability_summary envelope，前端只展示缺 Runtime 的保守状态。",
+        required_runtime_contract_version: "runtime-contract.v1",
+        runtime_contract_version: "",
+        missing_runtime_capabilities: [],
+        issues: [
+          {
+            issue_id: "RUNTIME_AVAILABILITY_SUMMARY_MISSING",
+            fix_action_id: "request_runtime_probe"
+          }
+        ],
+        source_of_truth: {
+          agent_manifest: "agent_store",
+          runtime_availability: "agent_runtime_echo_or_probe",
+          summary_projection: "frontend_fallback_no_runtime_summary"
+        },
+        runtime_facts: {
+          runtime_id: "",
+          availability_echo_state: "missing"
+        },
+        next_action: {
+          action_id: "install_runtime",
+          target_system: "agent_runtime",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
       };
     },
     selectedRecommendationDecision: function selectedRecommendationDecision() {

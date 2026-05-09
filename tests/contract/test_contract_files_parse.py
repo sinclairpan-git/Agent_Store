@@ -22,6 +22,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "installation-bootstrap.openapi.yaml",
         "package-validation.openapi.yaml",
         "recommendation-state.openapi.yaml",
+        "runtime-availability.openapi.yaml",
         "skill-registry-notification.openapi.yaml",
         "skill-registry.openapi.yaml",
         "trusted-evidence-loop.openapi.yaml",
@@ -129,6 +130,39 @@ def test_agent_manifest_runtime_contract_documents_runtime_mismatch() -> None:
     assert source_of_truth["properties"]["runtime_availability"]["enum"] == [
         "agent_runtime_echo_or_probe"
     ]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_runtime_availability_contract_documents_store_summary_states() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "runtime-availability.openapi.yaml"
+    )
+    operation = contract["paths"][
+        "/api/v1/agent-manifests/runtime-availability-summaries"
+    ]["post"]
+    responses = operation["responses"]
+    summary = contract["components"]["schemas"]["RuntimeAvailabilitySummary"]
+    source_of_truth = contract["components"]["schemas"][
+        "RuntimeAvailabilitySourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "runtime_missing",
+        "runtime_upgrade_required",
+        "runtime_capability_missing",
+        "runtime_ready",
+    }.issubset(set(summary["properties"]["availability_state"]["enum"]))
+    assert "missing_runtime_capabilities" in summary["required"]
+    assert source_of_truth["properties"]["agent_manifest"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["runtime_availability"]["enum"] == [
+        "agent_runtime_echo_or_probe"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 

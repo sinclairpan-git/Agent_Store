@@ -199,6 +199,37 @@ Consumer-driven tests must cover complete manifest compatibility, missing
 required Runtime fields, missing Runtime capabilities, and Store not computing
 PolicyDecision or Runtime execution state.
 
+## Runtime Availability Summary V1
+
+Agent Store consumes Runtime echo/probe facts and projects them into
+`runtime_availability_summary.v1` for Store UI/API consumers. Runtime remains
+the owner of runtime presence, contract version, and capability echo facts.
+Store owns only the projection, next action, audit id, and display wording.
+
+The summary must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `runtime_missing` | No Runtime echo/probe proves that a compatible Runtime exists. | Route the user to install or configure Runtime. |
+| `runtime_upgrade_required` | Runtime exists but its `runtime_contract_version` is lower than the AgentManifest requirement. | Route the user to Runtime upgrade. |
+| `runtime_capability_missing` | Runtime exists and version is acceptable, but required capabilities are missing. | Show `missing_runtime_capabilities` and remediation. |
+| `runtime_ready` | Runtime version and capabilities satisfy the Store-owned AgentManifest. | Continue listing review or installation gating. |
+| `manifest_incomplete` | Store-owned AgentManifest is missing Runtime-facing required fields. | Return to AgentManifest completion before Runtime availability can be trusted. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `agent_manifest` | `agent_store` |
+| `runtime_availability` | `agent_runtime_echo_or_probe` |
+| `summary_projection` | `agent_store` |
+| `policy_decision` | `agentops` |
+
+The summary must not include full Trace, Runtime execution result, quality
+score, CapabilityGrant, or AgentOps PolicyDecision replacement. Store may show
+the next action and missing capabilities, but must not claim an Agent ran
+successfully from availability alone.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -262,14 +293,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-006 stale schema rejection | All | All | Unknown major schema versions return explainable unsupported-schema errors. |
 | CCT-007 Skill Registry notification | Agent Store | AgentOps | AgentOps accepts `skill_registry_notification.v1` as an immutable Store-owned fact and returns receipt metadata without rewriting Skill fields. |
 | CCT-008 AgentManifest Runtime contract | Agent Store | Agent Runtime | Runtime consumes Store-owned `agent_manifest_runtime_contract.v1`; missing required capabilities produce `runtime_capability_missing`, not a silent runnable state. |
+| CCT-009 Runtime availability summary | Agent Runtime | Agent Store | Store projects Runtime echo/probe into `runtime_availability_summary.v1` and distinguishes missing Runtime, upgrade required, missing capability, and ready states. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1` and `agent_manifest_runtime_contract.v1`; require external assertion field names and AgentOps credential echo. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, and `agent_manifest_runtime_contract.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, and `runtime_availability_summary.v1`; require external assertion field names, AgentOps credential echo, and Runtime availability projection. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, and Store-consumed `runtime_availability_summary.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

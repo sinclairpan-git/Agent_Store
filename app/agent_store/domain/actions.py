@@ -4,7 +4,14 @@ from dataclasses import dataclass
 
 
 TARGET_SYSTEMS = frozenset(
-    {"agent_store", "agentops", "evidence_vault", "ai_autosdlc_cli", "external"}
+    {
+        "agent_store",
+        "agent_runtime",
+        "agentops",
+        "evidence_vault",
+        "ai_autosdlc_cli",
+        "external",
+    }
 )
 
 
