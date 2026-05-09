@@ -143,6 +143,18 @@ for (const requiredField of [
 ]) {
   assert(mockData.includes(requiredField), `${requiredField} must be represented`);
 }
+for (const runtimeTerm of [
+  "runtimeAvailability",
+  "runtime_availability_summary.v1",
+  "runtime_missing",
+  "runtime_upgrade_required",
+  "runtime_capability_missing",
+  "runtime_ready",
+  "agent_runtime_echo_or_probe",
+  "missing_runtime_capabilities"
+]) {
+  assert(mockData.includes(runtimeTerm), `${runtimeTerm} must be represented`);
+}
 assert(
   !mockData.includes("recommendationStates:")
     && recommendationStates["framework.ai-autosdlc"]
@@ -173,6 +185,7 @@ assert(
     && app.includes("selectedInstallWorkflow")
     && app.includes("selectedInstallationRequest")
     && app.includes("selectedRecommendationDecision")
+    && app.includes("selectedRuntimeAvailability")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -214,10 +227,12 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"start_enterprise_activation\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"open_standalone_readme\")")
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
+    && app.includes("Runtime 可用性摘要满足当前 Manifest")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
+    && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
     && indexHtml.includes(":action-feedback=\"actionFeedback\"")
     && indexHtml.includes("@set-discovery-collection=\"setDiscoveryCollection\"")
@@ -258,6 +273,19 @@ assert(
     && componentLibrary.includes("推荐决策")
     && componentLibrary.includes("为什么选"),
   "Agent detail must expose governed recommendation decision"
+);
+assert(
+  componentLibrary.includes("sdlc-runtime-availability")
+    && componentLibrary.includes("Runtime 可用性")
+    && componentLibrary.includes("availability_state")
+    && componentLibrary.includes("missing_runtime_capabilities")
+    && componentLibrary.includes("runtimeVersionTone")
+    && componentLibrary.includes("agent_runtime")
+    && componentLibrary.includes("install_runtime")
+    && componentLibrary.includes("upgrade_runtime")
+    && componentLibrary.includes("view_missing_runtime_capabilities")
+    && componentLibrary.includes("continue_listing_review"),
+  "Agent detail must expose Runtime availability summary without executing Runtime"
 );
 assert(
   componentLibrary.includes("install-panel")

@@ -78,6 +78,7 @@
     credential_issued_but_signature_test_pending: "凭证已签发，签名测试未完成",
     non_official_catalog_item_has_no_agentops_summary: "非官方条目缺少 AgentOps 摘要",
     agent_store: "Agent Store",
+    agent_runtime: "Agent Runtime",
     agentops: "AgentOps",
     ai_autosdlc: "Ai_AutoSDLC",
     ai_autosdlc_cli: "Ai_AutoSDLC CLI",
@@ -99,6 +100,11 @@
     copy_diagnostic_ref: "复制诊断编号",
     request_catalog_review: "申请目录复核",
     request_agentops_summary: "申请 AgentOps 摘要",
+    install_runtime: "安装 Runtime",
+    upgrade_runtime: "升级 Runtime",
+    view_missing_runtime_capabilities: "查看缺失能力",
+    continue_listing_review: "继续上架审核",
+    complete_agent_manifest: "补齐 Manifest",
     review_catalog_blocker: "查看阻断原因",
     view_policy: "查看策略说明",
     view_blocking_policy: "查看阻断策略",
@@ -139,7 +145,17 @@
     installability_blocked: "安装状态阻断",
     l5_unavailable_without_agentops_summary: "缺少 AgentOps 摘要，不能展示 L5",
     fresh_agentops_quality_summary: "新鲜 AgentOps 质量摘要",
-    agentops_l5_gate: "AgentOps L5 门禁"
+    agentops_l5_gate: "AgentOps L5 门禁",
+    runtime_missing: "缺 Runtime",
+    runtime_upgrade_required: "需升级 Runtime",
+    runtime_capability_missing: "缺 Runtime 能力",
+    runtime_ready: "可运行",
+    manifest_incomplete: "Manifest 待补齐",
+    runtime_availability: "Runtime 可用性",
+    runtime_availability_summary: "Runtime 可用性摘要",
+    agent_runtime_echo_or_probe: "Agent Runtime Echo/Probe",
+    summary_projection: "摘要投影",
+    agent_store_runtime_availability_projection: "Agent Store 可用性投影"
   };
 
   function displayLabel(value) {
@@ -783,6 +799,86 @@
     }
   });
 
+  Vue.component("sdlc-runtime-availability", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section runtime-panel">',
+      '  <div class="section-heading">',
+      '    <h2>Runtime 可用性</h2>',
+      '    <sdlc-status-chip :label="summary.availability_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ summary.reason }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="展示" :value="summary.display_name_zh" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="要求版本" :value="summary.required_runtime_contract_version || \'missing\'" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime 版本" :value="summary.runtime_contract_version || \'missing\'" :tone="runtimeVersionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="缺失能力" :value="missingCountLabel" :tone="missingCapabilities.length ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="summary.audit_id || \'missing\'" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <ul class="tag-list runtime-panel__capabilities" v-if="missingCapabilities.length">',
+      '    <li v-for="capability in missingCapabilities" :key="capability">{{ capability }}</li>',
+      '  </ul>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ issue.issue_id }} / {{ issue.fix_action_id }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ runtimeFactLabel }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.summary.availability_state === "runtime_ready") {
+          return "success";
+        }
+        if (this.summary.availability_state === "runtime_upgrade_required") {
+          return "warning";
+        }
+        if (this.summary.availability_state === "runtime_missing") {
+          return "danger";
+        }
+        if (this.summary.availability_state === "runtime_capability_missing") {
+          return "danger";
+        }
+        return "warning";
+      },
+      runtimeVersionTone: function runtimeVersionTone() {
+        if (this.summary.availability_state === "runtime_upgrade_required") {
+          return "danger";
+        }
+        if (this.summary.runtime_contract_version) {
+          return "success";
+        }
+        return "warning";
+      },
+      missingCapabilities: function missingCapabilities() {
+        return Array.isArray(this.summary.missing_runtime_capabilities)
+          ? this.summary.missing_runtime_capabilities
+          : [];
+      },
+      missingCountLabel: function missingCountLabel() {
+        return this.missingCapabilities.length
+          ? this.missingCapabilities.length + " 项"
+          : "0 项";
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      },
+      runtimeFactLabel: function runtimeFactLabel() {
+        var facts = this.summary.runtime_facts || {};
+        return [
+          facts.runtime_id || "runtime-not-detected",
+          facts.availability_echo_state || "missing"
+        ].join(" / ");
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -804,6 +900,7 @@
       "installWorkflow",
       "installRequest",
       "recommendationDecision",
+      "runtimeAvailability",
       "installHandoff",
       "assertionHandoff",
       "actionFeedback"
@@ -845,6 +942,7 @@
       '  <sdlc-action-feedback :feedback="actionFeedback"></sdlc-action-feedback>',
       '  <div class="workspace-grid">',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
+      '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-section title="应用事实">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="类型" :value="view.capability_type" tone="info"></sdlc-metric-row>',

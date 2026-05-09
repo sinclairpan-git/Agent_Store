@@ -123,3 +123,24 @@ def test_cct_008_agent_manifest_runtime_contract_is_frozen_in_appendix() -> None
 
     for term in required_terms:
         assert term in appendix
+
+
+def test_cct_009_runtime_availability_summary_is_frozen_in_appendix() -> None:
+    appendix = Path("docs/cross-project-contract-appendix.md").read_text(
+        encoding="utf-8",
+    )
+
+    required_terms = [
+        "Runtime Availability Summary V1",
+        "runtime_availability_summary.v1",
+        "`runtime_missing`",
+        "`runtime_upgrade_required`",
+        "`runtime_capability_missing`",
+        "`runtime_ready`",
+        "`summary_projection` | `agent_store`",
+        "availability alone",
+        "CCT-009 Runtime availability summary",
+    ]
+
+    for term in required_terms:
+        assert term in appendix

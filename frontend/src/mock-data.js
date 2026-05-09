@@ -227,6 +227,178 @@ window.AgentStoreMock = {
       }
     }
   },
+  runtimeAvailability: {
+    "framework.ai-autosdlc": {
+      audit_id: "audit-runtime-framework.ai-autosdlc",
+      contract_schema_version: "runtime_availability_summary.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      artifact_hash: "sha256:framework",
+      availability_state: "runtime_capability_missing",
+      display_name_zh: "缺 Runtime 能力",
+      reason: "Runtime echo 缺少 policy_check 与 outbox，不能把该版本展示为可运行。",
+      required_runtime_contract_version: "runtime-contract.v2",
+      runtime_contract_version: "runtime-contract.v2",
+      required_runtime_capabilities: [
+        "tool_call",
+        "policy_check",
+        "outbox",
+        "basic_isolation"
+      ],
+      runtime_capabilities: ["tool_call", "basic_isolation"],
+      missing_runtime_capabilities: ["policy_check", "outbox"],
+      issues: [
+        {
+          issue_id: "RUNTIME_CAPABILITY_MISSING",
+          field_path: "runtime_availability.capabilities",
+          severity: "blocked",
+          fix_action_id: "view_missing_runtime_capabilities"
+        }
+      ],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        summary_projection: "agent_store",
+        policy_decision: "agentops"
+      },
+      runtime_facts: {
+        runtime_present: true,
+        runtime_id: "runtime.local",
+        availability_echo_state: "available",
+        probe_ref: "runtime-probe-framework",
+        observed_at: "2026-05-09T08:00:00Z"
+      },
+      next_action: {
+        action_id: "view_missing_runtime_capabilities",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      audit_id: "audit-runtime-agentops.evidence-reporter",
+      contract_schema_version: "runtime_availability_summary.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      artifact_hash: "sha256:evidence-reporter",
+      availability_state: "runtime_ready",
+      display_name_zh: "可运行",
+      reason: "Runtime echo 满足 Manifest 版本与能力要求，可继续安装审核。",
+      required_runtime_contract_version: "runtime-contract.v2",
+      runtime_contract_version: "runtime-contract.v2",
+      required_runtime_capabilities: ["tool_call", "outbox", "basic_isolation"],
+      runtime_capabilities: ["tool_call", "outbox", "basic_isolation"],
+      missing_runtime_capabilities: [],
+      issues: [],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        summary_projection: "agent_store",
+        policy_decision: "agentops"
+      },
+      runtime_facts: {
+        runtime_present: true,
+        runtime_id: "runtime.enterprise",
+        availability_echo_state: "available",
+        probe_ref: "runtime-probe-agentops",
+        observed_at: "2026-05-09T08:02:00Z"
+      },
+      next_action: {
+        action_id: "continue_listing_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      audit_id: "audit-runtime-security.policy-guard",
+      contract_schema_version: "runtime_availability_summary.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      artifact_hash: "sha256:policy-guard",
+      availability_state: "runtime_upgrade_required",
+      display_name_zh: "需升级 Runtime",
+      reason: "Runtime contract 版本低于 Manifest 要求，不能展示为可运行。",
+      required_runtime_contract_version: "runtime-contract.v2",
+      runtime_contract_version: "runtime-contract.v1",
+      required_runtime_capabilities: ["policy_check", "basic_isolation"],
+      runtime_capabilities: ["policy_check", "basic_isolation"],
+      missing_runtime_capabilities: [],
+      issues: [
+        {
+          issue_id: "RUNTIME_UPGRADE_REQUIRED",
+          field_path: "runtime_availability.runtime_contract_version",
+          severity: "blocked",
+          fix_action_id: "upgrade_runtime"
+        }
+      ],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        summary_projection: "agent_store",
+        policy_decision: "agentops"
+      },
+      runtime_facts: {
+        runtime_present: true,
+        runtime_id: "runtime.security-preview",
+        availability_echo_state: "available",
+        probe_ref: "runtime-probe-security",
+        observed_at: "2026-05-09T08:03:00Z"
+      },
+      next_action: {
+        action_id: "upgrade_runtime",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      audit_id: "audit-runtime-developer.release-notes",
+      contract_schema_version: "runtime_availability_summary.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      artifact_hash: "sha256:release-notes",
+      availability_state: "runtime_missing",
+      display_name_zh: "缺 Runtime",
+      reason: "没有 Runtime echo/probe 可证明当前环境具备可运行 Runtime。",
+      required_runtime_contract_version: "runtime-contract.v1",
+      runtime_contract_version: "",
+      required_runtime_capabilities: ["tool_call"],
+      runtime_capabilities: [],
+      missing_runtime_capabilities: [],
+      issues: [
+        {
+          issue_id: "RUNTIME_MISSING",
+          field_path: "runtime_availability.runtime_present",
+          severity: "blocked",
+          fix_action_id: "install_runtime"
+        }
+      ],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        summary_projection: "agent_store",
+        policy_decision: "agentops"
+      },
+      runtime_facts: {
+        runtime_present: false,
+        runtime_id: "",
+        availability_echo_state: "missing",
+        probe_ref: "",
+        observed_at: ""
+      },
+      next_action: {
+        action_id: "install_runtime",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   bootstrap: {
     installation_id: "inst-1",
     bootstrap_status: "credential_issued",

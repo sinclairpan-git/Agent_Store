@@ -500,6 +500,17 @@ h2 {
   min-height: 312px;
 }
 
+.runtime-panel {
+  min-height: 312px;
+}
+
+.runtime-panel__capabilities li {
+  border-color: #ffc9c3;
+  background: #fff6f5;
+  color: #7f271e;
+  font-weight: 720;
+}
+
 .command-preview {
   display: grid;
   gap: 8px;
