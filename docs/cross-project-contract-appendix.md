@@ -109,6 +109,46 @@ replace the current mock signing boundary with a real key management system.
 
 Agent Store may keep an internal assertion model with local names, but the cross-project handoff must use the external names above.
 
+## Skill Registry Notification V1
+
+After Agent Store publishes, deprecates, or security-revokes a Skill Registry
+record, Agent Store may notify AgentOps with `skill_registry_notification.v1`.
+This notification is downstream of the Skill Registry lifecycle decision. It
+must not create a second path to publish Skills, bypass Package Validation, or
+let AgentOps rewrite Skill Registry facts.
+
+The notification request must include:
+
+| Field | Required | Owner | Notes |
+| --- | --- | --- | --- |
+| `schema_version` | Yes | Agent Store | Must be `skill_registry_notification.v1`. |
+| `trace_id` | Yes | Agent Store | Correlates the lifecycle decision and delivery attempt. |
+| `audit_id` | Yes | Agent Store | Audit id from the Skill Registry lifecycle decision. |
+| `idempotency_key` | Yes | Agent Store | Outbound delivery key; same payload must replay, changed payload must conflict. |
+| `source_system` | Yes | Agent Store | Must be `agent_store`. |
+| `target_system` | Yes | Agent Store | Must be `agentops`; Agent Store executes delivery, AgentOps consumes it. |
+| `contract` | Yes | Agent Store | Must be `skill_registry.v1`. |
+| `consumer` | Yes | Agent Store | Must be `agentops`. |
+| `notice_type` | Yes | Agent Store | `skill_published`, `skill_deprecated`, or `skill_security_revoked`. |
+| `registry_key` | Yes | Agent Store | Stable `skill_id@skill_version`. |
+| `skill` | Yes | Agent Store | Full immutable Skill Registry record, including `agent_id`, `package_id`, `schema_ref`, `risk_level`, `status`, and `registry_key`. |
+| `event` | Yes | Agent Store | Lifecycle event emitted by Agent Store. Security revocation must preserve `evidence_ref`. |
+| `source_of_truth` | Yes | Agent Store | Must state `skill_registry=agent_store` and `agentops_consumption=agentops_consumes_agent_store_registry`. |
+| `payload_hash` | Yes | Agent Store | Hash of the outbound notice excluding transport idempotency. |
+
+AgentOps may respond with `skill_registry_notification_ack.v1`. The ack is a
+receipt only and may include delivery metadata such as `delivery_attempt_id`,
+`sent_at`, `agentops_ack_id`, `request_payload_hash`, and
+`response_payload_hash`. It must not include a replacement Skill record or
+change `skill.status`, `risk_level`, `schema_ref`, `package_id`, or
+`source_of_truth`.
+
+If AgentOps is unavailable, Agent Store keeps the Skill Registry decision as the
+authoritative fact and treats delivery as pending/retryable. UI copy must
+distinguish "published in Agent Store" from "AgentOps notification accepted".
+For `security_revoked`, downstream views must preserve the strongest security
+status even while delivery is pending.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -170,6 +210,7 @@ Each project must implement contract tests against the same fixture set:
 | CCT-004 signed test event | Ai_AutoSDLC | AgentOps | Enterprise managed event requires active credential, active device key, installation id, signature, sequence number, and idempotency key. |
 | CCT-005 standalone regression | Ai_AutoSDLC | Agent Store, AgentOps | No Agent Store or AgentOps dependency may block `ai-sdlc run --dry-run` or local reports. |
 | CCT-006 stale schema rejection | All | All | Unknown major schema versions return explainable unsupported-schema errors. |
+| CCT-007 Skill Registry notification | Agent Store | AgentOps | AgentOps accepts `skill_registry_notification.v1` as an immutable Store-owned fact and returns receipt metadata without rewriting Skill fields. |
 
 ## Project PRD Updates Required
 
@@ -177,7 +218,7 @@ Each project must implement contract tests against the same fixture set:
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
 | Agent Store PRD | Reference `agentops_credential_handoff.v1`; require external assertion field names and AgentOps credential echo. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1` and `skill_registry_notification.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

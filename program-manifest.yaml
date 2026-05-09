@@ -82,39 +82,43 @@ specs:
   path: specs/019-skill-registry-lifecycle
   depends_on:
   - 018-package-validation-report
+- id: 020-skill-registry-agentops-notification
+  path: specs/020-skill-registry-agentops-notification
+  depends_on:
+  - 019-skill-registry-lifecycle
 truth_snapshot:
-  generated_at: '2026-05-08T18:21:03Z'
+  generated_at: '2026-05-09T04:13:08Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: e989f26
-  authoring_hash: 5fa93641ba99a43a6236cec0cfff772a3f428d720e6827c3e42a76729adc45e3
+  repo_revision: cb516d0
+  authoring_hash: 61e886c79e3c7e7e1bd922a791979468a91adb04c9a1d91f6a4528af3bcf0f3a
   source_hashes: {}
-  snapshot_hash: f8a396d117d14d818026ce8bf353560c6a274cb3f5585b2dd3da75238678d02d
+  snapshot_hash: bde2b2bc3e2ac4853641d2c61f52e5c859722419e37d7604499e2bab02b11e94
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 97
-    mapped_sources: 97
+    total_sources: 102
+    mapped_sources: 102
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 44
-    deferred_signal_count: 113
+    phase_signal_count: 51
+    deferred_signal_count: 120
     non_goal_signal_count: 19
     layer_totals:
       blueprint: 1
-      spec: 19
-      plan: 19
-      tasks: 19
-      execution: 19
-      close: 19
+      spec: 20
+      plan: 20
+      tasks: 20
+      execution: 20
+      close: 20
       defect: 1
     layer_materialized:
       blueprint: 1
-      spec: 19
-      plan: 19
-      tasks: 19
-      execution: 19
-      close: 19
+      spec: 20
+      plan: 20
+      tasks: 20
+      execution: 20
+      close: 20
       defect: 1
     entries:
     - path: /Users/sinclairpan/project/AI-Native底座开发文档/Agent_Store_项目_PRD.md
@@ -980,6 +984,51 @@ truth_snapshot:
       mapping_ref: 019-skill-registry-lifecycle
       phase_signal_count: 0
       deferred_signal_count: 3
+      non_goal_signal_count: 0
+    - path: specs/020-skill-registry-agentops-notification/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 020-skill-registry-agentops-notification
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/020-skill-registry-agentops-notification/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 020-skill-registry-agentops-notification
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/020-skill-registry-agentops-notification/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 020-skill-registry-agentops-notification
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/020-skill-registry-agentops-notification/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 020-skill-registry-agentops-notification
+      phase_signal_count: 7
+      deferred_signal_count: 7
+      non_goal_signal_count: 0
+    - path: specs/020-skill-registry-agentops-notification/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 020-skill-registry-agentops-notification
+      phase_signal_count: 0
+      deferred_signal_count: 0
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog

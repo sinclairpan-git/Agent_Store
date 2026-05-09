@@ -21,6 +21,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "installation-bootstrap.openapi.yaml",
         "package-validation.openapi.yaml",
         "recommendation-state.openapi.yaml",
+        "skill-registry-notification.openapi.yaml",
         "skill-registry.openapi.yaml",
         "trusted-evidence-loop.openapi.yaml",
     }
@@ -123,6 +124,44 @@ def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> No
     assert "evidence_ref" in event["properties"]
     assert "SKILL_VERSION_ALREADY_PUBLISHED" in error_codes
     assert "SKILL_NOT_FOUND" in error_codes
+
+
+def test_skill_registry_notification_contract_freezes_agentops_consumption() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "skill-registry-notification.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agentops/skill-registry-notices"]["post"]
+    notice = contract["components"]["schemas"]["SkillRegistryNotification"]
+    ack = contract["components"]["schemas"]["AgentOpsNotificationReceipt"]
+    record = contract["components"]["schemas"]["SkillRegistryRecord"]
+    source_of_truth = contract["components"]["schemas"]["SourceOfTruth"]
+
+    assert {"202", "400", "409"}.issubset(operation["responses"].keys())
+    assert {
+        "schema_version",
+        "trace_id",
+        "audit_id",
+        "idempotency_key",
+        "target_system",
+        "registry_key",
+        "skill",
+        "event",
+        "source_of_truth",
+        "payload_hash",
+    }.issubset(notice["required"])
+    assert notice["properties"]["schema_version"]["enum"] == [
+        "skill_registry_notification.v1"
+    ]
+    assert "package_id" in record["required"]
+    assert "schema_ref" in record["required"]
+    assert "risk_level" in record["required"]
+    assert {
+        "delivery_attempt_id",
+        "agentops_ack_id",
+        "request_payload_hash",
+        "response_payload_hash",
+    }.issubset(ack["required"])
+    assert source_of_truth["properties"]["skill_registry"]["enum"] == ["agent_store"]
 
 
 def test_installation_assertion_contract_documents_error_responses() -> None:
