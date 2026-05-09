@@ -262,6 +262,39 @@ HealthSummary freshness may explain whether the displayed health summary is
 fresh, expired, or unavailable, but Store must not use it to compute quality
 score, Actual L5, PolicyDecision, CapabilityGrant, or recommendation ranking.
 
+## Installation Runtime Handoff V1
+
+Agent Store projects Store-owned installation and device binding facts into
+`installation_runtime_handoff.v1` for Agent Runtime consumption. Runtime remains
+the owner of execution, process lifecycle, local isolation, and runtime echo
+facts. Store owns only the installation, device binding, package hash, projection
+wording, audit id, and next action.
+
+The handoff must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `runtime_handoff_ready` | Installation, device binding, and Runtime echo identity are bound to the same package hash. | Allow Runtime consumption and route to Runtime activation. |
+| `artifact_hash_mismatch` | Runtime echo or device binding artifact hash differs from the Store installation fact. | Block Runtime consumption and regenerate the activation command. |
+| `device_binding_mismatch` | Runtime echo references a different installation or device. | Block Runtime consumption and restart activation. |
+| `installation_not_ready` | Installation or device binding is failed, revoked, expired, or otherwise not active enough for Runtime. | Keep Runtime consumption blocked and review Store installation status. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `installation` | `agent_store` |
+| `device_binding` | `agent_store` |
+| `package` | `agent_store` |
+| `runtime_consumption` | `agent_runtime_echo_or_request` |
+| `policy_decision` | `agentops` |
+
+The handoff must expose `runtime_consumption_allowed=false` whenever any
+mismatch or not-ready state is present. Store must not start the Runtime, sign a
+CapabilityGrant, issue credentials, or infer execution success from this
+projection. `artifact_hash` mismatch is a blocked state with the next action
+`regenerate_activation_command`, not a warning that Runtime may ignore.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -327,14 +360,15 @@ Each project must implement contract tests against the same fixture set:
 | CCT-008 AgentManifest Runtime contract | Agent Store | Agent Runtime | Runtime consumes Store-owned `agent_manifest_runtime_contract.v1`; missing required capabilities produce `runtime_capability_missing`, not a silent runnable state. |
 | CCT-009 Runtime availability summary | Agent Runtime | Agent Store | Store projects Runtime echo/probe into `runtime_availability_summary.v1` and distinguishes missing Runtime, upgrade required, missing capability, and ready states. |
 | CCT-010 HealthSummary freshness guard | AgentOps | Agent Store | Store projects AgentOps HealthSummary freshness into `health_summary_freshness.v1`; expired `valid_until` displays “待刷新” and never becomes a recommendation basis. |
+| CCT-011 Installation Runtime handoff | Agent Store | Agent Runtime | Runtime consumes `installation_runtime_handoff.v1`; `artifact_hash` mismatch blocks consumption and returns `regenerate_activation_command`. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, and `health_summary_freshness.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, and HealthSummary freshness guard. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, and Store-consumed `health_summary_freshness.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, and `installation_runtime_handoff.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, and Runtime handoff artifact-hash binding. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, and Runtime-consumed `installation_runtime_handoff.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

@@ -21,6 +21,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agentops-summary.openapi.yaml",
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
+        "installation-runtime-handoff.openapi.yaml",
         "package-validation.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "runtime-availability.openapi.yaml",
@@ -197,6 +198,46 @@ def test_health_summary_freshness_contract_documents_refresh_guard() -> None:
         "recommendation_state_excludes_health_summary"
     ]
     assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_installation_runtime_handoff_contract_documents_runtime_binding() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "installation-runtime-handoff.openapi.yaml"
+    )
+    operation = contract["paths"][
+        "/api/v1/installations/{installation_id}/runtime-handoff"
+    ]["post"]
+    responses = operation["responses"]
+    handoff = contract["components"]["schemas"]["InstallationRuntimeHandoff"]
+    source_of_truth = contract["components"]["schemas"][
+        "InstallationRuntimeSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "403", "404", "409"}.issubset(responses.keys())
+    assert {
+        "runtime_handoff_ready",
+        "artifact_hash_mismatch",
+        "device_binding_mismatch",
+        "installation_not_ready",
+    }.issubset(set(handoff["properties"]["handoff_state"]["enum"]))
+    assert "runtime_consumption_allowed" in handoff["required"]
+    assert source_of_truth["properties"]["installation"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["device_binding"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["runtime_consumption"]["enum"] == [
+        "agent_runtime_echo_or_request"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert (
+        "ARTIFACT_HASH_MISMATCH"
+        in contract["components"]["schemas"]["InstallationRuntimeHandoffIssue"][
+            "properties"
+        ]["issue_id"]["enum"]
+    )
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
