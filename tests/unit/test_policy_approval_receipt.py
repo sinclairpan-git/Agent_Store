@@ -87,6 +87,14 @@ def test_policy_approval_receipt_blocks_request_mismatch() -> None:
     assert receipt["issues"][0]["issue_id"] == "APPROVAL_RECEIPT_REQUEST_MISMATCH"
 
 
+def test_policy_approval_receipt_requires_receipt_agent_binding() -> None:
+    receipt = _projection(agentops_receipt=_agentops_receipt(agent_id=""))
+
+    assert receipt["receipt_state"] == "approval_receipt_unavailable"
+    assert receipt["issues"][0]["issue_id"] == "AGENTOPS_RECEIPT_INCOMPLETE"
+    assert receipt["store_projection"]["approval_flow_linked"] is False
+
+
 def test_policy_approval_receipt_requires_originating_request() -> None:
     receipt = _projection(approval_request=_approval_request(agent_id=""))
 

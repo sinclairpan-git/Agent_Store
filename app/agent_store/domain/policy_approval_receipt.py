@@ -253,6 +253,9 @@ def _receipt_issues(
     required = (
         "approval_request_id",
         "approval_id",
+        "agent_id",
+        "agent_version",
+        "requested_action",
         "agentops_audit_id",
         "received_at",
     )
