@@ -193,7 +193,9 @@ def build_quality_evidence_access_summary(
 ) -> QualityEvidenceAccessSummary:
     summary = agentops_summary if isinstance(agentops_summary, Mapping) else {}
     viewer = viewer_context if isinstance(viewer_context, Mapping) else {}
-    captured_now = now or utc_now()
+    captured_now = _parse_datetime(now) if now is not None else utc_now()
+    if captured_now is None:
+        captured_now = utc_now()
     quality = _mapping(summary.get("quality_evidence")) or _mapping(
         summary.get("quality_summary")
     )

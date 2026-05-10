@@ -203,6 +203,27 @@ def test_quality_evidence_access_handles_naive_valid_until_without_crashing() ->
     assert summary["display"]["summary_validity_state"] == "fresh"
 
 
+def test_quality_evidence_access_handles_naive_now_without_crashing() -> None:
+    now = utc_now()
+    agentops_summary = _agentops_summary(
+        quality_evidence={
+            **_agentops_summary()["quality_evidence"],
+            "valid_until": (now + timedelta(hours=1)).isoformat(),
+        }
+    )
+
+    summary = build_quality_evidence_access_summary(
+        agentops_summary=agentops_summary,
+        viewer_context=_viewer(),
+        trace_id="trace-037",
+        audit_id="audit-037",
+        now=now.replace(tzinfo=None),
+    ).to_response()["quality_evidence_access_summary"]
+
+    assert summary["summary_state"] == "summary_ready"
+    assert summary["display"]["summary_validity_state"] == "fresh"
+
+
 def test_quality_evidence_access_degrades_unknown_score_template() -> None:
     agentops_summary = _agentops_summary(
         quality_evidence={
