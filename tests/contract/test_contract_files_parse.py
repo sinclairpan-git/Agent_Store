@@ -35,6 +35,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "runtime-availability.openapi.yaml",
         "skill-registry-notification.openapi.yaml",
         "skill-registry.openapi.yaml",
+        "store-ops-deep-link.openapi.yaml",
         "trusted-evidence-loop.openapi.yaml",
     }
     validate_all_contracts(default_contracts_dir())
@@ -246,6 +247,36 @@ def test_installation_runtime_handoff_contract_documents_runtime_binding() -> No
             "properties"
         ]["issue_id"]["enum"]
     )
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_store_ops_deep_link_contract_documents_sanitized_ops_navigation() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "store-ops-deep-link.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/store-ops-deep-links"]["post"]
+    responses = operation["responses"]
+    link = contract["components"]["schemas"]["StoreOpsDeepLink"]
+    target = contract["components"]["schemas"]["AgentOpsDeepLinkTarget"]
+    source_of_truth = contract["components"]["schemas"]["StoreOpsDeepLinkSourceOfTruth"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "deep_link_ready",
+        "permission_required",
+        "link_unavailable",
+        "link_sanitized",
+    }.issubset(set(link["properties"]["link_state"]["enum"]))
+    assert link["properties"]["raw_trace_exposed"]["const"] is False
+    assert link["properties"]["raw_evidence_exposed"]["const"] is False
+    assert target["properties"]["raw_trace_url"]["enum"] == [""]
+    assert target["properties"]["raw_evidence_url"]["enum"] == [""]
+    assert source_of_truth["properties"]["raw_trace"]["enum"] == ["evidence_vault"]
+    assert "evidence_vault" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
