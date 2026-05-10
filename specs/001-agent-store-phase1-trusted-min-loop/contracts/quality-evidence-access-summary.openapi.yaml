@@ -1,0 +1,397 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Quality Evidence Access Summary API
+  version: 0.1.0
+paths:
+  /api/v1/agents/quality-evidence-access-summaries:
+    post:
+      operationId: summarizeQualityEvidenceAccess
+      summary: Project AgentOps quality evidence into a Store-safe access summary
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QualityEvidenceAccessRequest"
+      responses:
+        "200":
+          description: Quality evidence access summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualityEvidenceAccessResponse"
+        "400":
+          description: Malformed quality evidence access request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    QualityEvidenceAccessRequest:
+      type: object
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        agentops_summary:
+          $ref: "#/components/schemas/AgentOpsQualitySummaryEcho"
+        viewer_context:
+          $ref: "#/components/schemas/ViewerContext"
+        accepted_score_template_ids:
+          type: array
+          items:
+            type: string
+    AgentOpsQualitySummaryEcho:
+      type: object
+      required:
+        - agent_id
+        - agent_version
+        - quality_evidence
+        - run_evidence
+      properties:
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        quality_evidence:
+          $ref: "#/components/schemas/QualityEvidenceEcho"
+        run_evidence:
+          $ref: "#/components/schemas/RunEvidenceEcho"
+        raw_trace_url:
+          type: string
+        raw_evidence_url:
+          type: string
+    QualityEvidenceEcho:
+      type: object
+      required:
+        - evidence_level
+        - confidence
+        - missing_evidence
+        - score_template_id
+        - calculated_at
+        - valid_until
+        - summary_validity_state
+      properties:
+        evidence_level:
+          type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        identity_confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        missing_evidence:
+          type: array
+          items:
+            type: string
+        score_template_id:
+          type: string
+        calculated_at:
+          type: string
+          format: date-time
+        valid_until:
+          type: string
+          format: date-time
+        summary_validity_state:
+          type: string
+          enum: [fresh, stale, expired, degraded]
+    RunEvidenceEcho:
+      type: object
+      properties:
+        run_id:
+          type: string
+        session_id:
+          type: string
+        evidence_summary_id:
+          type: string
+        source_event_ids:
+          type: array
+          items:
+            type: string
+        source_event_count:
+          type: integer
+          minimum: 0
+    ViewerContext:
+      type: object
+      properties:
+        viewer_id:
+          type: string
+        can_view_quality_summary:
+          type: boolean
+        can_view_raw_evidence:
+          type: boolean
+        request_access_url:
+          type: string
+    QualityEvidenceAccessResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - quality_evidence_access_summary
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        quality_evidence_access_summary:
+          $ref: "#/components/schemas/QualityEvidenceAccessSummary"
+    QualityEvidenceAccessSummary:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - agent_version
+        - summary_state
+        - permission_state
+        - display
+        - run_binding
+        - access
+        - raw_trace_exposed
+        - raw_evidence_exposed
+        - recommendation_basis_allowed
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [quality_evidence_access_summary.v1]
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        summary_state:
+          type: string
+          enum:
+            - summary_ready
+            - summary_redacted
+            - summary_expired
+            - summary_unavailable
+            - template_deprecated
+        permission_state:
+          type: string
+          enum: [allowed, summary_redacted, unavailable]
+        display:
+          $ref: "#/components/schemas/QualityEvidenceDisplay"
+        run_binding:
+          $ref: "#/components/schemas/RunEvidenceBinding"
+        access:
+          $ref: "#/components/schemas/QualityEvidenceAccess"
+        raw_trace_exposed:
+          type: boolean
+          const: false
+        raw_evidence_exposed:
+          type: boolean
+          const: false
+        recommendation_basis_allowed:
+          type: boolean
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/QualityEvidenceAccessIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/QualityEvidenceAccessSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    QualityEvidenceDisplay:
+      type: object
+      required:
+        - evidence_level
+        - confidence
+        - identity_confidence
+        - missing_evidence
+        - score_template_id
+        - calculated_at
+        - valid_until
+        - summary_validity_state
+        - display_label
+        - redacted
+      properties:
+        evidence_level:
+          type: string
+        confidence:
+          type: [number, "null"]
+        identity_confidence:
+          type: [number, "null"]
+        missing_evidence:
+          type: array
+          items:
+            type: string
+        score_template_id:
+          type: string
+        calculated_at:
+          type: string
+        valid_until:
+          type: string
+        summary_validity_state:
+          type: string
+          enum: [fresh, stale, expired, degraded]
+        display_label:
+          type: string
+          enum: [可展示, 待刷新]
+        redacted:
+          type: boolean
+    RunEvidenceBinding:
+      type: object
+      required: [run_id, session_id, evidence_summary_id, source_event_count]
+      properties:
+        run_id:
+          type: string
+        session_id:
+          type: string
+        evidence_summary_id:
+          type: string
+        source_event_count:
+          type: integer
+          minimum: 0
+    QualityEvidenceAccess:
+      type: object
+      required:
+        - can_view_quality_summary
+        - can_view_raw_evidence
+        - evidence_vault_request_required
+        - request_access_url
+        - raw_trace_url
+        - raw_evidence_url
+      properties:
+        can_view_quality_summary:
+          type: boolean
+        can_view_raw_evidence:
+          type: boolean
+        evidence_vault_request_required:
+          type: boolean
+        request_access_url:
+          type: string
+        raw_trace_url:
+          type: string
+          enum: [""]
+        raw_evidence_url:
+          type: string
+          enum: [""]
+    QualityEvidenceAccessIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - AGENTOPS_QUALITY_SUMMARY_REQUIRED
+            - QUALITY_SUMMARY_REDACTED
+            - QUALITY_SUMMARY_EXPIRED
+            - SCORE_TEMPLATE_DEPRECATED
+            - RAW_EVIDENCE_LINK_STRIPPED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    QualityEvidenceAccessSourceOfTruth:
+      type: object
+      required:
+        - quality_summary
+        - run_evidence
+        - raw_evidence
+        - raw_trace
+        - permission
+        - projection
+      properties:
+        quality_summary:
+          type: string
+          enum: [agentops]
+        run_evidence:
+          type: string
+          enum: [agentops]
+        raw_evidence:
+          type: string
+          enum: [evidence_vault]
+        raw_trace:
+          type: string
+          enum: [evidence_vault]
+        permission:
+          type: string
+          enum: [agent_store_viewer_context]
+        projection:
+          type: string
+          enum: [agent_store]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, requires_permission, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agentops, evidence_vault]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object

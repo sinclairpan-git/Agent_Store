@@ -21,10 +21,10 @@ def test_contract_registry_traceability_is_complete() -> None:
     )
     assert traceability["registry_status"] == "complete"
     assert traceability["coverage_summary"] == {
-        "total_contracts": 22,
-        "contracts_with_cct": 15,
-        "contracts_with_contract_tests": 22,
-        "complete_traceability": 22,
+        "total_contracts": 23,
+        "contracts_with_cct": 16,
+        "contracts_with_contract_tests": 23,
+        "complete_traceability": 23,
         "unmapped_contracts": 0,
     }
     assert traceability["next_action"]["action_id"] == (
@@ -70,3 +70,9 @@ def test_contract_registry_entry_documents_producer_consumer_owner_and_tests() -
     assert distribution["producer"] == "Agent Store"
     assert "Agent Store UI" in distribution["consumers"]
     assert distribution["cct_ids"] == ["CCT-021"]
+
+    quality_evidence = entries["quality_evidence_access_summary.v1"]
+    assert quality_evidence["owner"] == "AgentOps"
+    assert quality_evidence["producer"] == "AgentOps"
+    assert "Evidence Vault" in quality_evidence["consumers"]
+    assert quality_evidence["cct_ids"] == ["CCT-022"]

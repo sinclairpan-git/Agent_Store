@@ -153,40 +153,44 @@ specs:
   path: specs/036-installation-distribution-summary
   depends_on:
   - 035-store-ops-deep-link
+- id: 037-quality-evidence-access-summary
+  path: specs/037-quality-evidence-access-summary
+  depends_on:
+  - 036-installation-distribution-summary
 truth_snapshot:
-  generated_at: '2026-05-10T09:00:34Z'
+  generated_at: '2026-05-10T09:52:31Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 661223c
-  authoring_hash: bee74d028490b8f37f3600f8366505b3ac96fe622ca43631bd03a1843be2c331
+  repo_revision: 92ddb0d
+  authoring_hash: 7fea72ad828c5392b17f3f8cba9557b783cb2597ccdc3c2b8b025597fe1af3f0
   source_hashes: {}
-  snapshot_hash: dd67772d1f64e9a7e9d246eacd4408cdbef617cc3004c72af08c9ec619b84533
+  snapshot_hash: cd6f205f0d3c37aa3422db2c090534fa2d6d9023d6df821cefbd3ed4ca9871e1
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 183
-    mapped_sources: 183
+    total_sources: 188
+    mapped_sources: 188
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 58
-    deferred_signal_count: 157
+    phase_signal_count: 62
+    deferred_signal_count: 161
     non_goal_signal_count: 26
     layer_totals:
       blueprint: 1
-      spec: 36
-      plan: 36
-      tasks: 36
-      execution: 36
-      close: 36
+      spec: 37
+      plan: 37
+      tasks: 37
+      execution: 37
+      close: 37
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 36
-      plan: 36
-      tasks: 36
-      execution: 36
-      close: 36
+      spec: 37
+      plan: 37
+      tasks: 37
+      execution: 37
+      close: 37
       defect: 1
       release: 1
     entries:
@@ -1818,6 +1822,51 @@ truth_snapshot:
       mapping_ref: 036-installation-distribution-summary
       phase_signal_count: 0
       deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/037-quality-evidence-access-summary/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 037-quality-evidence-access-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/037-quality-evidence-access-summary/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 037-quality-evidence-access-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/037-quality-evidence-access-summary/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 037-quality-evidence-access-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/037-quality-evidence-access-summary/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 037-quality-evidence-access-summary
+      phase_signal_count: 2
+      deferred_signal_count: 2
+      non_goal_signal_count: 0
+    - path: specs/037-quality-evidence-access-summary/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 037-quality-evidence-access-summary
+      phase_signal_count: 2
+      deferred_signal_count: 2
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
