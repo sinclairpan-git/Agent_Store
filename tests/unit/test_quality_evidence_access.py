@@ -130,6 +130,35 @@ def test_quality_evidence_access_marks_expired_summary_pending_refresh() -> None
     assert summary["next_action"]["action_id"] == "refresh_agentops_quality_summary"
 
 
+def test_quality_evidence_access_uses_one_captured_now_for_expiry() -> None:
+    now = utc_now()
+    agentops_summary = _agentops_summary(
+        quality_evidence={
+            "evidence_level": "L4",
+            "confidence": 0.7,
+            "missing_evidence": [],
+            "score_template_id": "agentops-owned",
+            "calculated_at": (now - timedelta(hours=1)).isoformat(),
+            "valid_until": now.isoformat(),
+            "summary_validity_state": "fresh",
+        }
+    )
+
+    summary = build_quality_evidence_access_summary(
+        agentops_summary=agentops_summary,
+        viewer_context=_viewer(),
+        trace_id="trace-037",
+        audit_id="audit-037",
+        now=now,
+    ).to_response()["quality_evidence_access_summary"]
+
+    assert summary["summary_state"] == "summary_expired"
+    assert summary["display"]["summary_validity_state"] == "expired"
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "QUALITY_SUMMARY_EXPIRED"
+    }
+
+
 def test_quality_evidence_access_handles_naive_valid_until_without_crashing() -> None:
     now = utc_now()
     naive_valid_until = (now + timedelta(hours=1)).replace(tzinfo=None).isoformat()

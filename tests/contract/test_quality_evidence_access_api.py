@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import timedelta
 
 from agent_store.api.agent_registry import response_envelope_ok
@@ -68,6 +69,26 @@ def test_quality_evidence_access_api_reuses_idempotent_result() -> None:
     retry_status, retry = api.summarize_access(
         payload,
         headers={"idempotency-key": "quality-evidence-access-037"},
+    )
+
+    assert retry_status == 200
+    assert retry == first
+
+
+def test_quality_evidence_access_api_canonicalizes_template_idempotency() -> None:
+    api = QualityEvidenceAccessAPI()
+    first_payload = _payload()
+    first_payload["accepted_score_template_ids"] = [" agentops-owned ", "legacy"]
+    second_payload = deepcopy(first_payload)
+    second_payload["accepted_score_template_ids"] = ["legacy", "agentops-owned"]
+
+    _, first = api.summarize_access(
+        first_payload,
+        headers={"Idempotency-Key": "quality-evidence-template-order-037"},
+    )
+    retry_status, retry = api.summarize_access(
+        second_payload,
+        headers={"Idempotency-Key": "quality-evidence-template-order-037"},
     )
 
     assert retry_status == 200

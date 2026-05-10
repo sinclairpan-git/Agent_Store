@@ -24,3 +24,4 @@
 - Codex Review P1 修复后：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：13 passed；`uv run pytest -q`：442 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。
 - Codex Review 第二轮 P2 修复后：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：15 passed；`uv run pytest -q`：444 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。
 - Codex Review 第三轮修复后：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：16 passed；`uv run pytest -q`：445 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。
+- Codex Review 第四轮修复后：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：18 passed；`uv run pytest -q`：447 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。

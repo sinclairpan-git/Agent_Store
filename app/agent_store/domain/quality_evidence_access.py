@@ -189,9 +189,11 @@ def build_quality_evidence_access_summary(
     trace_id: str,
     audit_id: str,
     accepted_score_template_ids: Sequence[str] = DEFAULT_ACCEPTED_SCORE_TEMPLATE_IDS,
+    now: datetime | None = None,
 ) -> QualityEvidenceAccessSummary:
     summary = agentops_summary if isinstance(agentops_summary, Mapping) else {}
     viewer = viewer_context if isinstance(viewer_context, Mapping) else {}
+    captured_now = now or utc_now()
     quality = _mapping(summary.get("quality_evidence")) or _mapping(
         summary.get("quality_summary")
     )
@@ -212,12 +214,14 @@ def build_quality_evidence_access_summary(
             quality=quality,
             can_view_summary=can_view_summary,
             accepted_score_template_ids=accepted_templates,
+            now=captured_now,
         )
     )
     summary_state = _summary_state(
         quality=quality,
         can_view_summary=can_view_summary,
         accepted_score_template_ids=accepted_templates,
+        now=captured_now,
     )
     permission_state = (
         "summary_redacted"
@@ -236,6 +240,7 @@ def build_quality_evidence_access_summary(
         display=_display(
             quality,
             redacted=not can_view_summary,
+            now=captured_now,
         ),
         run_binding={
             "run_id": _string(run.get("run_id")),
@@ -275,29 +280,31 @@ def _summary_state(
     quality: Mapping[str, object] | None,
     can_view_summary: bool,
     accepted_score_template_ids: set[str],
+    now: datetime,
 ) -> str:
     if not can_view_summary:
         return "summary_redacted"
     if not quality:
         return "summary_unavailable"
-    if _quality_expired(quality):
+    if _quality_expired(quality, now=now):
         return "summary_expired"
     if _string(quality.get("score_template_id")) not in accepted_score_template_ids:
         return "template_deprecated"
     return "summary_ready"
 
 
-def _quality_expired(quality: Mapping[str, object]) -> bool:
+def _quality_expired(quality: Mapping[str, object], *, now: datetime) -> bool:
     if _string(quality.get("summary_validity_state")) == "expired":
         return True
     valid_until = _parse_datetime(quality.get("valid_until"))
-    return valid_until is not None and valid_until <= utc_now()
+    return valid_until is not None and valid_until <= now
 
 
 def _display(
     quality: Mapping[str, object] | None,
     *,
     redacted: bool,
+    now: datetime,
 ) -> dict[str, object]:
     if not quality:
         return {
@@ -315,7 +322,7 @@ def _display(
     valid_until = _string(quality.get("valid_until"))
     validity = (
         "expired"
-        if _quality_expired(quality)
+        if _quality_expired(quality, now=now)
         else _string(quality.get("summary_validity_state")) or "fresh"
     )
     return {
@@ -349,6 +356,7 @@ def _issues(
     quality: Mapping[str, object] | None,
     can_view_summary: bool,
     accepted_score_template_ids: set[str],
+    now: datetime,
 ) -> list[QualityEvidenceAccessIssue]:
     issues: list[QualityEvidenceAccessIssue] = []
     if not quality:
@@ -361,7 +369,7 @@ def _issues(
         return issues
     if not can_view_summary:
         issues.append(_issue("QUALITY_SUMMARY_REDACTED", "viewer_context"))
-    if _quality_expired(quality):
+    if _quality_expired(quality, now=now):
         issues.append(_issue("QUALITY_SUMMARY_EXPIRED", "quality_evidence.valid_until"))
     if _string(quality.get("score_template_id")) not in accepted_score_template_ids:
         issues.append(

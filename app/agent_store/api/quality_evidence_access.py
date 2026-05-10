@@ -18,7 +18,7 @@ def new_trace_id() -> str:
 
 def _identity(payload: Mapping[str, object]) -> str:
     idempotent_payload = {
-        key: value
+        key: _canonical_identity_value(key, value)
         for key, value in payload.items()
         if key not in {"trace_id", "audit_id"}
     }
@@ -28,6 +28,12 @@ def _identity(payload: Mapping[str, object]) -> str:
         separators=(",", ":"),
         default=str,
     )
+
+
+def _canonical_identity_value(key: str, value: object) -> object:
+    if key == "accepted_score_template_ids" and _string_sequence(value):
+        return sorted({_string(item) for item in value if _string(item)})
+    return value
 
 
 def _response_copy(response: Mapping[str, object]) -> dict[str, object]:
