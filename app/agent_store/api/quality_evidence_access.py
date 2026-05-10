@@ -22,6 +22,11 @@ def _identity(payload: Mapping[str, object]) -> str:
         for key, value in payload.items()
         if key not in {"trace_id", "audit_id"}
     }
+    if "accepted_score_template_ids" not in idempotent_payload:
+        idempotent_payload["accepted_score_template_ids"] = _canonical_identity_value(
+            "accepted_score_template_ids",
+            DEFAULT_ACCEPTED_SCORE_TEMPLATE_IDS,
+        )
     return json.dumps(
         idempotent_payload,
         sort_keys=True,

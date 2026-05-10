@@ -95,6 +95,25 @@ def test_quality_evidence_access_api_canonicalizes_template_idempotency() -> Non
     assert retry == first
 
 
+def test_quality_evidence_access_api_canonicalizes_omitted_default_templates() -> None:
+    api = QualityEvidenceAccessAPI()
+    first_payload = _payload()
+    second_payload = deepcopy(first_payload)
+    second_payload["accepted_score_template_ids"] = ["agentops-owned"]
+
+    _, first = api.summarize_access(
+        first_payload,
+        headers={"Idempotency-Key": "quality-evidence-default-template-037"},
+    )
+    retry_status, retry = api.summarize_access(
+        second_payload,
+        headers={"Idempotency-Key": "quality-evidence-default-template-037"},
+    )
+
+    assert retry_status == 200
+    assert retry == first
+
+
 def test_quality_evidence_access_api_rejects_idempotency_conflict() -> None:
     api = QualityEvidenceAccessAPI()
     api.summarize_access(
