@@ -244,6 +244,20 @@ def _traceability_entries() -> Iterable[ContractTraceabilityEntry]:
             "HealthSummary Freshness V1",
         ),
         (
+            "store_ops_deep_link.v1",
+            "store-ops-deep-link.openapi.yaml",
+            "StoreOpsDeepLink",
+            "AgentOps",
+            "AgentOps",
+            ("Agent Store", "Agent Store UI", "Evidence Vault"),
+            ("CCT-020",),
+            (
+                "tests/contract/test_store_ops_deep_link_api.py",
+                "tests/contract/test_contract_files_parse.py",
+            ),
+            "Store Ops Deep Link V1",
+        ),
+        (
             "installation_bootstrap.v1",
             "installation-bootstrap.openapi.yaml",
             "InstallationResponse",

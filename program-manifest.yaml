@@ -145,19 +145,23 @@ specs:
   path: specs/034-policy-approval-receipt
   depends_on:
   - 033-policy-approval-request
+- id: 035-store-ops-deep-link
+  path: specs/035-store-ops-deep-link
+  depends_on:
+  - 034-policy-approval-receipt
 truth_snapshot:
-  generated_at: '2026-05-10T08:16:11Z'
+  generated_at: '2026-05-10T08:46:31Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: ddecb0b
-  authoring_hash: 41d84c811cf211043885922678f8e77097cdf811e16bcdec3720055d483e3245
+  repo_revision: f76c159
+  authoring_hash: 949519a9046181713057d036db559d8eff60f446f1539985fcfdc822bdc5cdd1
   source_hashes: {}
-  snapshot_hash: c9bd890b98a122d0da10e825bfab8e6633b85cf1e220ee9d7d52ed33cdda7ca3
+  snapshot_hash: 198ab21c87723a2463a36685fbf6d9325f64ac654ce7433e1c0783abe1442efb
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 173
-    mapped_sources: 173
+    total_sources: 178
+    mapped_sources: 178
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 58
@@ -165,20 +169,20 @@ truth_snapshot:
     non_goal_signal_count: 26
     layer_totals:
       blueprint: 1
-      spec: 34
-      plan: 34
-      tasks: 34
-      execution: 34
-      close: 34
+      spec: 35
+      plan: 35
+      tasks: 35
+      execution: 35
+      close: 35
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 34
-      plan: 34
-      tasks: 34
-      execution: 34
-      close: 34
+      spec: 35
+      plan: 35
+      tasks: 35
+      execution: 35
+      close: 35
       defect: 1
       release: 1
     entries:
@@ -1718,6 +1722,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 034-policy-approval-receipt
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/035-store-ops-deep-link/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 035-store-ops-deep-link
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/035-store-ops-deep-link/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 035-store-ops-deep-link
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/035-store-ops-deep-link/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 035-store-ops-deep-link
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/035-store-ops-deep-link/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 035-store-ops-deep-link
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/035-store-ops-deep-link/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 035-store-ops-deep-link
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
