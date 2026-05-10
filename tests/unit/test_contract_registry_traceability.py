@@ -21,10 +21,10 @@ def test_contract_registry_traceability_is_complete() -> None:
     )
     assert traceability["registry_status"] == "complete"
     assert traceability["coverage_summary"] == {
-        "total_contracts": 24,
-        "contracts_with_cct": 17,
-        "contracts_with_contract_tests": 24,
-        "complete_traceability": 24,
+        "total_contracts": 25,
+        "contracts_with_cct": 18,
+        "contracts_with_contract_tests": 25,
+        "complete_traceability": 25,
         "unmapped_contracts": 0,
     }
     assert traceability["next_action"]["action_id"] == (
@@ -82,3 +82,10 @@ def test_contract_registry_entry_documents_producer_consumer_owner_and_tests() -
     assert permission_denial["producer"] == "Agent Store"
     assert "Evidence Vault" in permission_denial["consumers"]
     assert permission_denial["cct_ids"] == ["CCT-023"]
+
+    notification_routing = entries["notification_routing_summary.v1"]
+    assert notification_routing["owner"] == "Agent Store"
+    assert notification_routing["producer"] == "Agent Store"
+    assert "Notification Center" in notification_routing["consumers"]
+    assert "Risk Center" in notification_routing["consumers"]
+    assert notification_routing["cct_ids"] == ["CCT-024"]

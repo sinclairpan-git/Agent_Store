@@ -216,6 +216,20 @@ def _traceability_entries() -> Iterable[ContractTraceabilityEntry]:
             "Permission Denial Action Summary V1",
         ),
         (
+            "notification_routing_summary.v1",
+            "notification-routing-summary.openapi.yaml",
+            "NotificationRoutingSummary",
+            "Agent Store",
+            "Agent Store",
+            ("Agent Store UI", "AgentOps", "Notification Center", "Risk Center"),
+            ("CCT-024",),
+            (
+                "tests/contract/test_notification_routing_api.py",
+                "tests/contract/test_contract_files_parse.py",
+            ),
+            "Notification Routing Summary V1",
+        ),
+        (
             "contract_registry_traceability.v1",
             "contract-registry-traceability.openapi.yaml",
             "ContractRegistryTraceability",

@@ -1,0 +1,330 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Notification Routing Summary API
+  version: 0.1.0
+paths:
+  /api/v1/agents/notification-routing-summaries:
+    post:
+      operationId: summarizeNotificationRoute
+      summary: Project Store events into auditable notification routing summaries
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationRoutingRequest"
+      responses:
+        "200":
+          description: Notification routing summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationRoutingResponse"
+        "400":
+          description: Malformed notification routing request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    NotificationRoutingRequest:
+      type: object
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        event_context:
+          $ref: "#/components/schemas/NotificationEventContext"
+        audience_context:
+          $ref: "#/components/schemas/NotificationAudienceContext"
+    NotificationEventContext:
+      type: object
+      properties:
+        event_id:
+          type: string
+        event_type:
+          type: string
+          enum:
+            - installation_failed
+            - approval_required
+            - feedback_owner_replied
+            - lifecycle_replacement_available
+            - security_revoked
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_channels:
+          type: array
+          items:
+            type: string
+    NotificationAudienceContext:
+      type: object
+      properties:
+        user_ids:
+          type: array
+          items:
+            type: string
+        owner_team_ids:
+          type: array
+          items:
+            type: string
+        security_group_ids:
+          type: array
+          items:
+            type: string
+        audience_source:
+          type: string
+    NotificationRoutingResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - notification_routing_summary
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        notification_routing_summary:
+          $ref: "#/components/schemas/NotificationRoutingSummary"
+    NotificationRoutingSummary:
+      type: object
+      required:
+        - contract_schema_version
+        - event_id
+        - event_type
+        - agent_id
+        - agent_version
+        - routing_state
+        - delivery_status
+        - channels
+        - audience
+        - routing_rule
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [notification_routing_summary.v1]
+        event_id:
+          type: string
+        event_type:
+          type: string
+          enum:
+            - installation_failed
+            - approval_required
+            - feedback_owner_replied
+            - lifecycle_replacement_available
+            - security_revoked
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        routing_state:
+          type: string
+          enum: [routing_ready, routing_degraded, routing_blocked]
+        delivery_status:
+          type: string
+          enum: [not_sent]
+        channels:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationChannelRoute"
+        audience:
+          $ref: "#/components/schemas/NotificationAudience"
+        routing_rule:
+          $ref: "#/components/schemas/NotificationRoutingRule"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/NotificationRoutingIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/NotificationRoutingSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    NotificationChannelRoute:
+      type: object
+      required: [channel, enabled, delivery_status, target_system]
+      properties:
+        channel:
+          type: string
+          enum:
+            - notification_center
+            - task_center
+            - wecom
+            - risk_list
+            - owner_dashboard
+            - audit_log
+        enabled:
+          type: boolean
+        delivery_status:
+          type: string
+          enum: [not_sent]
+        target_system:
+          type: string
+          enum: [notification_center, agentops, risk_center, agent_store]
+    NotificationAudience:
+      type: object
+      required:
+        - trusted_audience
+        - user_ids
+        - owner_team_ids
+        - security_group_ids
+        - audience_source
+      properties:
+        trusted_audience:
+          type: boolean
+        user_ids:
+          type: array
+          items:
+            type: string
+        owner_team_ids:
+          type: array
+          items:
+            type: string
+        security_group_ids:
+          type: array
+          items:
+            type: string
+        audience_source:
+          type: string
+    NotificationRoutingRule:
+      type: object
+      required:
+        - rule_id
+        - sla
+        - requires_audit
+        - delivery_confirmation_required
+        - delivery_allowed
+      properties:
+        rule_id:
+          type: string
+        sla:
+          type: string
+          enum: [immediate, best_effort, daily_digest]
+        requires_audit:
+          type: boolean
+        delivery_confirmation_required:
+          type: boolean
+        delivery_allowed:
+          type: boolean
+    NotificationRoutingIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - NOTIFICATION_EVENT_UNSUPPORTED
+            - NOTIFICATION_EVENT_ID_REQUIRED
+            - AGENT_ID_REQUIRED
+            - AUDIT_ID_REQUIRED
+            - TRUSTED_AUDIENCE_REQUIRED
+            - NOTIFICATION_CHANNEL_UNSUPPORTED
+            - NOTIFICATION_CHANNEL_REQUIRED
+            - RISK_LIST_CHANNEL_FORCED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    NotificationRoutingSourceOfTruth:
+      type: object
+      required:
+        - event
+        - audience
+        - delivery
+        - policy
+        - projection
+      properties:
+        event:
+          type: string
+          enum: [agent_store_event]
+        audience:
+          type: string
+          enum: [trusted_iam_or_owner_directory]
+        delivery:
+          type: string
+          enum: [notification_center_not_sent_by_store]
+        policy:
+          type: string
+          enum: [agentops_not_overridden]
+        projection:
+          type: string
+          enum: [agent_store]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, requires_permission, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, message_key, severity, retryable]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object

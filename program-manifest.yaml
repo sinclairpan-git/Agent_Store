@@ -161,19 +161,23 @@ specs:
   path: specs/038-permission-denial-action-summary
   depends_on:
   - 037-quality-evidence-access-summary
+- id: 039-notification-routing-summary
+  path: specs/039-notification-routing-summary
+  depends_on:
+  - 038-permission-denial-action-summary
 truth_snapshot:
-  generated_at: '2026-05-10T10:49:19Z'
+  generated_at: '2026-05-10T16:27:00Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: '8854781'
-  authoring_hash: 928cb4ac89b27b96713026333845f4049b15786847a56ace6fd2ec1ab6c59424
+  repo_revision: b9a4e81
+  authoring_hash: 69aa7caf69d47715892fca76cb80ebcf539d149efa842a285122a934ec005adb
   source_hashes: {}
-  snapshot_hash: 18c78c4c0a19edc6d8529eff2e7d5b5023255a2d6a7c9d7451269fa7f2c1cf3b
+  snapshot_hash: 612dcf23f79119e0e7a85386bb1c2b6914000e7a6424366ed0a341d1135fe612
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 193
-    mapped_sources: 193
+    total_sources: 198
+    mapped_sources: 198
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -181,20 +185,20 @@ truth_snapshot:
     non_goal_signal_count: 27
     layer_totals:
       blueprint: 1
-      spec: 38
-      plan: 38
-      tasks: 38
-      execution: 38
-      close: 38
+      spec: 39
+      plan: 39
+      tasks: 39
+      execution: 39
+      close: 39
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 38
-      plan: 38
-      tasks: 38
-      execution: 38
-      close: 38
+      spec: 39
+      plan: 39
+      tasks: 39
+      execution: 39
+      close: 39
       defect: 1
       release: 1
     entries:
@@ -1917,6 +1921,51 @@ truth_snapshot:
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 1
+    - path: specs/039-notification-routing-summary/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 039-notification-routing-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/039-notification-routing-summary/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 039-notification-routing-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/039-notification-routing-summary/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 039-notification-routing-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/039-notification-routing-summary/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 039-notification-routing-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/039-notification-routing-summary/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 039-notification-routing-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect
