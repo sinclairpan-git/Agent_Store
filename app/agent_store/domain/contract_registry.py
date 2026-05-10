@@ -188,6 +188,20 @@ def _traceability_entries() -> Iterable[ContractTraceabilityEntry]:
             "AgentOps Summary Echo",
         ),
         (
+            "quality_evidence_access_summary.v1",
+            "quality-evidence-access-summary.openapi.yaml",
+            "QualityEvidenceAccessSummary",
+            "AgentOps",
+            "AgentOps",
+            ("Agent Store", "Agent Store UI", "Evidence Vault"),
+            ("CCT-022",),
+            (
+                "tests/contract/test_quality_evidence_access_api.py",
+                "tests/contract/test_contract_files_parse.py",
+            ),
+            "Quality Evidence Access Summary V1",
+        ),
+        (
             "contract_registry_traceability.v1",
             "contract-registry-traceability.openapi.yaml",
             "ContractRegistryTraceability",

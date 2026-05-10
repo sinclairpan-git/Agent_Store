@@ -32,6 +32,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "policy-approval-echo.openapi.yaml",
         "policy-approval-receipt.openapi.yaml",
         "policy-approval-request.openapi.yaml",
+        "quality-evidence-access-summary.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "runtime-availability.openapi.yaml",
         "skill-registry-notification.openapi.yaml",
@@ -284,6 +285,48 @@ def test_installation_distribution_contract_documents_aggregate_owner_summary() 
     assert source_of_truth["properties"]["quality"]["enum"] == [
         "agentops_not_computed_here"
     ]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_quality_evidence_access_contract_documents_store_safe_projection() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "quality-evidence-access-summary.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/quality-evidence-access-summaries"][
+        "post"
+    ]
+    responses = operation["responses"]
+    summary = contract["components"]["schemas"]["QualityEvidenceAccessSummary"]
+    access = contract["components"]["schemas"]["QualityEvidenceAccess"]
+    source_of_truth = contract["components"]["schemas"][
+        "QualityEvidenceAccessSourceOfTruth"
+    ]
+    issue = contract["components"]["schemas"]["QualityEvidenceAccessIssue"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "summary_ready",
+        "summary_redacted",
+        "summary_expired",
+        "summary_unavailable",
+        "template_deprecated",
+    }.issubset(set(summary["properties"]["summary_state"]["enum"]))
+    assert summary["properties"]["raw_trace_exposed"]["const"] is False
+    assert summary["properties"]["raw_evidence_exposed"]["const"] is False
+    assert access["properties"]["raw_trace_url"]["enum"] == [""]
+    assert access["properties"]["raw_evidence_url"]["enum"] == [""]
+    assert source_of_truth["properties"]["quality_summary"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["raw_evidence"]["enum"] == ["evidence_vault"]
+    assert source_of_truth["properties"]["raw_trace"]["enum"] == ["evidence_vault"]
+    assert {
+        "QUALITY_SUMMARY_REDACTED",
+        "QUALITY_SUMMARY_EXPIRED",
+        "SCORE_TEMPLATE_DEPRECATED",
+        "RAW_EVIDENCE_LINK_STRIPPED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
