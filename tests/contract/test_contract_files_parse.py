@@ -24,6 +24,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "feedback-owner-response-loop.openapi.yaml",
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
+        "installation-distribution-summary.openapi.yaml",
         "installation-runtime-handoff.openapi.yaml",
         "lifecycle-governance-baseline.openapi.yaml",
         "managed-installer-preview.openapi.yaml",
@@ -247,6 +248,42 @@ def test_installation_runtime_handoff_contract_documents_runtime_binding() -> No
             "properties"
         ]["issue_id"]["enum"]
     )
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_installation_distribution_contract_documents_aggregate_owner_summary() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "installation-distribution-summary.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/installation-distribution-summaries"][
+        "post"
+    ]
+    responses = operation["responses"]
+    summary = contract["components"]["schemas"]["InstallationDistributionSummary"]
+    privacy = contract["components"]["schemas"]["InstallationDistributionPrivacy"]
+    source_of_truth = contract["components"]["schemas"][
+        "InstallationDistributionSourceOfTruth"
+    ]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "distribution_ready",
+        "distribution_unavailable",
+        "empty_distribution",
+        "permission_required",
+    }.issubset(set(summary["properties"]["distribution_state"]["enum"]))
+    assert privacy["properties"]["individual_users_exposed"]["const"] is False
+    assert privacy["properties"]["device_ids_exposed"]["const"] is False
+    assert privacy["properties"]["aggregation_only"]["const"] is True
+    assert source_of_truth["properties"]["installation_inventory"]["enum"] == [
+        "agent_store"
+    ]
+    assert source_of_truth["properties"]["quality"]["enum"] == [
+        "agentops_not_computed_here"
+    ]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 

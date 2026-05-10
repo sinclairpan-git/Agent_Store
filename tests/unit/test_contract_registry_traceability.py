@@ -21,10 +21,10 @@ def test_contract_registry_traceability_is_complete() -> None:
     )
     assert traceability["registry_status"] == "complete"
     assert traceability["coverage_summary"] == {
-        "total_contracts": 21,
-        "contracts_with_cct": 14,
-        "contracts_with_contract_tests": 21,
-        "complete_traceability": 21,
+        "total_contracts": 22,
+        "contracts_with_cct": 15,
+        "contracts_with_contract_tests": 22,
+        "complete_traceability": 22,
         "unmapped_contracts": 0,
     }
     assert traceability["next_action"]["action_id"] == (
@@ -64,3 +64,9 @@ def test_contract_registry_entry_documents_producer_consumer_owner_and_tests() -
     assert deep_link["owner"] == "AgentOps"
     assert "Evidence Vault" in deep_link["consumers"]
     assert deep_link["cct_ids"] == ["CCT-020"]
+
+    distribution = entries["installation_distribution_summary.v1"]
+    assert distribution["owner"] == "Agent Store"
+    assert distribution["producer"] == "Agent Store"
+    assert "Agent Store UI" in distribution["consumers"]
+    assert distribution["cct_ids"] == ["CCT-021"]

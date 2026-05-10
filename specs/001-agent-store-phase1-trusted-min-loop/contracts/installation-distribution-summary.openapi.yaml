@@ -1,0 +1,351 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Installation Distribution Summary API
+  version: 0.1.0
+paths:
+  /api/v1/agents/installation-distribution-summaries:
+    post:
+      operationId: summarizeInstallationDistribution
+      summary: Project Store-owned installation inventory into an aggregate Owner distribution summary
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InstallationDistributionRequest"
+      responses:
+        "200":
+          description: Installation distribution summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstallationDistributionResponse"
+        "400":
+          description: Malformed installation distribution request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    InstallationDistributionRequest:
+      type: object
+      required:
+        - agent_id
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        agent_id:
+          type: string
+        requested_version:
+          type: string
+        installation_facts:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstallationFact"
+        viewer_context:
+          $ref: "#/components/schemas/ViewerContext"
+    InstallationFact:
+      type: object
+      required:
+        - agent_id
+        - agent_version
+        - status
+        - device_os
+        - enterprise_state
+      properties:
+        installation_id:
+          type: string
+        device_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        status:
+          type: string
+          enum:
+            - not_installed
+            - activation_required
+            - reporter_pending
+            - failed
+            - revoked
+        enterprise_state:
+          type: string
+          enum:
+            - detected_optional
+            - required_unactivated
+            - activating
+            - active
+            - degraded
+            - disabled
+        device_os:
+          type: string
+          enum: [macOS, Windows, Linux]
+        user:
+          type: string
+    ViewerContext:
+      type: object
+      required:
+        - can_view_installation_distribution
+      properties:
+        viewer_id:
+          type: string
+        viewer_role:
+          type: string
+        can_view_installation_distribution:
+          type: boolean
+    InstallationDistributionResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - installation_distribution_summary
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        installation_distribution_summary:
+          $ref: "#/components/schemas/InstallationDistributionSummary"
+    InstallationDistributionSummary:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - requested_version
+        - distribution_state
+        - permission_state
+        - total_installations
+        - active_installations
+        - revoked_installations
+        - failed_installations
+        - status_counts
+        - os_counts
+        - version_counts
+        - enterprise_state_counts
+        - notification
+        - privacy
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [installation_distribution_summary.v1]
+        agent_id:
+          type: string
+        requested_version:
+          type: string
+        distribution_state:
+          type: string
+          enum:
+            - distribution_ready
+            - distribution_unavailable
+            - empty_distribution
+            - permission_required
+        permission_state:
+          type: string
+          enum: [allowed, permission_required]
+        total_installations:
+          type: integer
+          minimum: 0
+        active_installations:
+          type: integer
+          minimum: 0
+        revoked_installations:
+          type: integer
+          minimum: 0
+        failed_installations:
+          type: integer
+          minimum: 0
+        status_counts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+        os_counts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+        version_counts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+        enterprise_state_counts:
+          type: object
+          additionalProperties:
+            type: integer
+            minimum: 0
+        notification:
+          $ref: "#/components/schemas/InstallationDistributionNotification"
+        privacy:
+          $ref: "#/components/schemas/InstallationDistributionPrivacy"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/InstallationDistributionIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/InstallationDistributionSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    InstallationDistributionNotification:
+      type: object
+      required:
+        - notification_required
+        - affected_installation_count
+        - reason_code
+        - target_version
+      properties:
+        notification_required:
+          type: boolean
+        affected_installation_count:
+          type: integer
+          minimum: 0
+        reason_code:
+          type: string
+        target_version:
+          type: string
+    InstallationDistributionPrivacy:
+      type: object
+      required:
+        - individual_users_exposed
+        - device_ids_exposed
+        - minimum_role
+        - aggregation_only
+      properties:
+        individual_users_exposed:
+          type: boolean
+          const: false
+        device_ids_exposed:
+          type: boolean
+          const: false
+        minimum_role:
+          type: string
+          enum: [owner]
+        aggregation_only:
+          type: boolean
+          const: true
+    InstallationDistributionIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - OWNER_DISTRIBUTION_PERMISSION_REQUIRED
+            - INSTALLATION_INVENTORY_REQUIRED
+            - INDIVIDUAL_IDENTIFIERS_STRIPPED
+            - AGENT_INSTALLATION_SCOPE_EMPTY
+            - VERSION_INSTALLATION_SCOPE_EMPTY
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    InstallationDistributionSourceOfTruth:
+      type: object
+      required:
+        - installation_inventory
+        - device_binding
+        - permission
+        - quality
+        - projection
+      properties:
+        installation_inventory:
+          type: string
+          enum: [agent_store]
+        device_binding:
+          type: string
+          enum: [agent_store]
+        permission:
+          type: string
+          enum: [agent_store_viewer_context]
+        quality:
+          type: string
+          enum: [agentops_not_computed_here]
+        projection:
+          type: string
+          enum: [agent_store]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, requires_permission, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object
