@@ -28,6 +28,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "installation-runtime-handoff.openapi.yaml",
         "lifecycle-governance-baseline.openapi.yaml",
         "managed-installer-preview.openapi.yaml",
+        "notification-routing-summary.openapi.yaml",
         "package-validation.openapi.yaml",
         "permission-denial-action-summary.openapi.yaml",
         "policy-approval-echo.openapi.yaml",
@@ -373,6 +374,58 @@ def test_permission_denial_action_contract_documents_prd_failure_pages() -> None
         "TRUSTED_AUTH_CONTEXT_REQUIRED",
         "RAW_PERMISSION_LINK_STRIPPED",
     }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_notification_routing_contract_documents_event_routes() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "notification-routing-summary.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/notification-routing-summaries"][
+        "post"
+    ]
+    responses = operation["responses"]
+    summary = contract["components"]["schemas"]["NotificationRoutingSummary"]
+    channel = contract["components"]["schemas"]["NotificationChannelRoute"]
+    rule = contract["components"]["schemas"]["NotificationRoutingRule"]
+    source_of_truth = contract["components"]["schemas"][
+        "NotificationRoutingSourceOfTruth"
+    ]
+    issue = contract["components"]["schemas"]["NotificationRoutingIssue"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "installation_failed",
+        "approval_required",
+        "feedback_owner_replied",
+        "lifecycle_replacement_available",
+        "security_revoked",
+    }.issubset(set(summary["properties"]["event_type"]["enum"]))
+    assert {
+        "routing_ready",
+        "routing_degraded",
+        "routing_blocked",
+    }.issubset(set(summary["properties"]["routing_state"]["enum"]))
+    assert summary["properties"]["delivery_status"]["enum"] == ["not_sent"]
+    assert "risk_list" in channel["properties"]["channel"]["enum"]
+    assert "risk_center" in channel["properties"]["target_system"]["enum"]
+    assert rule["properties"]["delivery_allowed"]["type"] == "boolean"
+    assert source_of_truth["properties"]["delivery"]["enum"] == [
+        "notification_center_not_sent_by_store"
+    ]
+    assert source_of_truth["properties"]["policy"]["enum"] == [
+        "agentops_not_overridden"
+    ]
+    assert {
+        "TRUSTED_AUDIENCE_REQUIRED",
+        "RISK_LIST_CHANNEL_FORCED",
+        "NOTIFICATION_EVENT_UNSUPPORTED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert action["properties"]["target_system"]["enum"] == ["agent_store"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 
 
