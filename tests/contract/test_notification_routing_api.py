@@ -120,3 +120,23 @@ def test_notification_routing_api_preserves_missing_audit_blocker() -> None:
         "AUDIT_ID_REQUIRED",
         "RISK_LIST_CHANNEL_FORCED",
     }
+
+
+def test_notification_routing_api_treats_changed_audit_as_idempotency_conflict() -> (
+    None
+):
+    api = NotificationRoutingAPI()
+    missing_audit = _payload()
+    missing_audit.pop("audit_id")
+    api.summarize_notification_route(
+        missing_audit,
+        headers={"Idempotency-Key": "notification-route-6"},
+    )
+
+    status, body = api.summarize_notification_route(
+        _payload(audit_id="audit-fixed"),
+        headers={"Idempotency-Key": "notification-route-6"},
+    )
+
+    assert status == 409
+    assert body["error_code"] == "IDEMPOTENCY_KEY_CONFLICT"

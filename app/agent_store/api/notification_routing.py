@@ -17,9 +17,7 @@ def new_trace_id() -> str:
 
 def _identity(payload: Mapping[str, object]) -> str:
     idempotent_payload = {
-        key: value
-        for key, value in payload.items()
-        if key not in {"trace_id", "audit_id"}
+        key: value for key, value in payload.items() if key not in {"trace_id"}
     }
     return json.dumps(
         idempotent_payload,
