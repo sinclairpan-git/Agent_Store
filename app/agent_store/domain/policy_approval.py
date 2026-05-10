@@ -231,7 +231,20 @@ def _approval_issues(
                 message_key="policyApproval.approvalStatusUnsupported",
             ),
         )
-    expires_at = _parse_datetime(approval.get("expires_at"))
+    expires_at_raw = _string(approval.get("expires_at"))
+    expires_at = _parse_datetime(expires_at_raw)
+    if expires_at_raw and expires_at is None:
+        return (
+            PolicyApprovalEchoIssue(
+                issue_id="AGENTOPS_APPROVAL_EXPIRES_AT_INVALID",
+                field_path="agentops_policy_echo.approval.expires_at",
+                severity="blocked",
+                reason="AgentOps approval expiration timestamp is not valid ISO-8601.",
+                impact="Store must not route approval state from an unparsable AgentOps timestamp.",
+                fix_action_id="refresh_agentops_policy_echo",
+                message_key="policyApproval.approvalExpiresAtInvalid",
+            ),
+        )
     if expires_at is not None and expires_at <= now:
         return (
             PolicyApprovalEchoIssue(
@@ -320,7 +333,10 @@ def _parse_datetime(value: object) -> datetime | None:
     raw = _string(value)
     if not raw:
         return None
-    parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=UTC)
     return parsed

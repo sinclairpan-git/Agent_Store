@@ -98,6 +98,15 @@ def test_policy_approval_echo_marks_expired_approval_as_refresh_required() -> No
     assert echo["next_action"]["action_id"] == "request_approval_refresh"
 
 
+def test_policy_approval_echo_blocks_invalid_approval_expiry() -> None:
+    echo = _projection(_agentops_echo(approval_expires_at="not-a-timestamp"))
+
+    assert echo["echo_state"] == "agentops_echo_unavailable"
+    assert echo["store_projection"]["store_may_continue"] is False
+    assert echo["issues"][0]["issue_id"] == "AGENTOPS_APPROVAL_EXPIRES_AT_INVALID"
+    assert echo["next_action"]["action_id"] == "refresh_agentops_policy_echo"
+
+
 def test_policy_approval_echo_blocks_unknown_agentops_decision() -> None:
     echo = _projection(_agentops_echo(decision="locally_allowed"))
 

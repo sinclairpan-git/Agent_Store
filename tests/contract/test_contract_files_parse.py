@@ -326,6 +326,10 @@ def test_policy_approval_echo_contract_documents_agentops_authority() -> None:
         "agentops_not_issued_by_store"
     ]
     assert "AGENTOPS_APPROVAL_EXPIRED" in issue["properties"]["issue_id"]["enum"]
+    assert (
+        "AGENTOPS_APPROVAL_EXPIRES_AT_INVALID"
+        in issue["properties"]["issue_id"]["enum"]
+    )
     assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 

@@ -250,6 +250,7 @@ components:
             - AGENTOPS_POLICY_ECHO_INCOMPLETE
             - AGENTOPS_POLICY_DECISION_UNSUPPORTED
             - AGENTOPS_APPROVAL_STATUS_UNSUPPORTED
+            - AGENTOPS_APPROVAL_EXPIRES_AT_INVALID
             - AGENTOPS_APPROVAL_EXPIRED
         field_path:
           type: string
