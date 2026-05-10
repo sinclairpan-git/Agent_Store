@@ -101,3 +101,22 @@ def test_notification_routing_api_validates_nested_objects() -> None:
     assert status == 400
     assert body["error_code"] == "VALIDATION_ERROR"
     assert body["recommended_action_id"] == "attach_audience_context"
+
+
+def test_notification_routing_api_preserves_missing_audit_blocker() -> None:
+    payload = _payload()
+    payload.pop("audit_id")
+
+    status, body = NotificationRoutingAPI().summarize_notification_route(
+        payload,
+        headers={"Idempotency-Key": "notification-route-5"},
+    )
+
+    assert status == 200
+    assert body["audit_id"] == ""
+    summary = body["notification_routing_summary"]
+    assert summary["routing_state"] == "routing_blocked"
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "AUDIT_ID_REQUIRED",
+        "RISK_LIST_CHANNEL_FORCED",
+    }

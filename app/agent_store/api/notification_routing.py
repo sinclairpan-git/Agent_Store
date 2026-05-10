@@ -87,7 +87,7 @@ class NotificationRoutingAPI:
         if isinstance(audience_context, ErrorResponse):
             return 400, audience_context.to_dict()
 
-        audit_id = _string(payload.get("audit_id")) or f"audit-{uuid4().hex[:12]}"
+        audit_id = _string(payload.get("audit_id"))
         response = build_notification_routing_summary(
             event_context=event_context,
             audience_context=audience_context,
