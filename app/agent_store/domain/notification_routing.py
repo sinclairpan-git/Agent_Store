@@ -212,11 +212,7 @@ def _channels(event: Mapping[str, object], event_type: str) -> tuple[str, ...]:
     for value in values:
         if value in SUPPORTED_CHANNELS and value not in deduped:
             deduped.append(value)
-    if (
-        event_type == "security_revoked"
-        and "risk_list" not in deduped
-        and (requested or not has_requested_channels)
-    ):
+    if event_type == "security_revoked" and "risk_list" not in deduped:
         deduped.insert(0, "risk_list")
     return tuple(deduped)
 
@@ -261,7 +257,7 @@ def _issues(
     if (
         event_type == "security_revoked"
         and "risk_list" not in requested_channels
-        and requested_channels
+        and "requested_channels" in event
     ):
         issues.append(
             _issue("RISK_LIST_CHANNEL_FORCED", "event_context.requested_channels")

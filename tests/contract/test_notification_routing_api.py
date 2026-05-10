@@ -145,6 +145,7 @@ def test_notification_routing_api_treats_changed_audit_as_idempotency_conflict()
 def test_notification_routing_api_honors_explicit_empty_requested_channels() -> None:
     payload = _payload()
     event_context = dict(payload["event_context"])
+    event_context["event_type"] = "installation_failed"
     event_context["requested_channels"] = []
     payload["event_context"] = event_context
 
@@ -159,4 +160,26 @@ def test_notification_routing_api_honors_explicit_empty_requested_channels() -> 
     assert summary["channels"] == []
     assert {issue["issue_id"] for issue in summary["issues"]} == {
         "NOTIFICATION_CHANNEL_REQUIRED"
+    }
+
+
+def test_notification_routing_api_forces_risk_list_for_empty_revocation_channels() -> (
+    None
+):
+    payload = _payload()
+    event_context = dict(payload["event_context"])
+    event_context["requested_channels"] = []
+    payload["event_context"] = event_context
+
+    status, body = NotificationRoutingAPI().summarize_notification_route(
+        payload,
+        headers={"Idempotency-Key": "notification-route-8"},
+    )
+
+    assert status == 200
+    summary = body["notification_routing_summary"]
+    assert summary["routing_state"] == "routing_degraded"
+    assert [channel["channel"] for channel in summary["channels"]] == ["risk_list"]
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "RISK_LIST_CHANNEL_FORCED"
     }

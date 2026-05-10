@@ -91,6 +91,21 @@ def test_notification_routing_security_revoked_forces_risk_list() -> None:
     assert summary["issues"][0]["issue_id"] == "RISK_LIST_CHANNEL_FORCED"
 
 
+def test_notification_routing_security_revoked_forces_risk_list_for_empty_channels() -> (
+    None
+):
+    summary = _summary(
+        "security_revoked",
+        event_overrides={"requested_channels": []},
+    )
+
+    assert summary["routing_state"] == "routing_degraded"
+    assert [channel["channel"] for channel in summary["channels"]] == ["risk_list"]
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "RISK_LIST_CHANNEL_FORCED"
+    }
+
+
 def test_notification_routing_blocks_missing_trusted_audience() -> None:
     summary = _summary(
         "approval_required",
