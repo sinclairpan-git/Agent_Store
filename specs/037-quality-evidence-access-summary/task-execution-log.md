@@ -18,3 +18,6 @@
 - Codex Review 第二轮 P2 修复：`accepted_score_template_ids` 入集合前先 trim；boolean `source_event_count` 不再当作 int 事件数。
 - 第二轮修复后专项验证：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：15 passed。
 - 第二轮修复后全量验证：`uv run pytest -q`：444 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。
+- Codex Review 第三轮修复：无权限优先返回 redacted，即使 AgentOps summary 缺失；empty quality display 保留 `redacted=true`。
+- 第三轮修复后专项验证：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：16 passed。
+- 第三轮修复后全量验证：`uv run pytest -q`：445 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。

@@ -276,10 +276,10 @@ def _summary_state(
     can_view_summary: bool,
     accepted_score_template_ids: set[str],
 ) -> str:
-    if not quality:
-        return "summary_unavailable"
     if not can_view_summary:
         return "summary_redacted"
+    if not quality:
+        return "summary_unavailable"
     if _quality_expired(quality):
         return "summary_expired"
     if _string(quality.get("score_template_id")) not in accepted_score_template_ids:
@@ -310,7 +310,7 @@ def _display(
             "valid_until": "",
             "summary_validity_state": "degraded",
             "display_label": "待刷新",
-            "redacted": False,
+            "redacted": redacted,
         }
     valid_until = _string(quality.get("valid_until"))
     validity = (

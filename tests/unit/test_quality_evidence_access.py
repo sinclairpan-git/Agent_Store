@@ -218,3 +218,17 @@ def test_quality_evidence_access_handles_missing_agentops_summary() -> None:
     assert summary["display"]["evidence_level"] == "unavailable"
     assert summary["display"]["missing_evidence"] == ["agentops_quality_summary"]
     assert summary["next_action"]["action_id"] == "refresh_agentops_quality_summary"
+
+
+def test_quality_evidence_access_prioritizes_redaction_when_summary_missing() -> None:
+    summary = build_quality_evidence_access_summary(
+        agentops_summary={},
+        viewer_context={},
+        trace_id="trace-037",
+        audit_id="audit-037",
+    ).to_response()["quality_evidence_access_summary"]
+
+    assert summary["summary_state"] == "summary_redacted"
+    assert summary["permission_state"] == "summary_redacted"
+    assert summary["display"]["redacted"] is True
+    assert summary["next_action"]["action_id"] == "request_evidence_access"

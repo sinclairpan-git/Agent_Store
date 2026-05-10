@@ -158,13 +158,13 @@ specs:
   depends_on:
   - 036-installation-distribution-summary
 truth_snapshot:
-  generated_at: '2026-05-10T09:40:56Z'
+  generated_at: '2026-05-10T09:46:04Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: be45ea4
+  repo_revision: 95c82ef
   authoring_hash: 7fea72ad828c5392b17f3f8cba9557b783cb2597ccdc3c2b8b025597fe1af3f0
   source_hashes: {}
-  snapshot_hash: 053bb032ab2d42dc8b47094d930c6711733c80ca102441c49176074b62a98434
+  snapshot_hash: 5a39b5c627300827415abecc8a4c5c2b0a45ad4d71124061e89ec7af7414c29a
   computed_capabilities: []
   source_inventory:
     state: complete
