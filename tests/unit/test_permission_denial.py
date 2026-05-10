@@ -117,6 +117,7 @@ def test_permission_denial_policy_blocked_with_ref_is_actionable() -> None:
 def test_permission_denial_unsupported_scenario_degrades_to_refresh_identity() -> None:
     summary = _summary("unknown_denial")
 
+    assert summary["denial_scenario"] == "not_visible"
     assert summary["denial_state"] == "denial_unavailable"
     assert summary["permission_state"] == "permission_unknown"
     assert summary["primary_action"]["action_id"] == "refresh_identity"

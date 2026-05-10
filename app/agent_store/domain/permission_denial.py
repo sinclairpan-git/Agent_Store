@@ -140,6 +140,7 @@ def build_permission_denial_action_summary(
         issue.issue_id == "TRUSTED_AUTH_CONTEXT_REQUIRED" for issue in issues
     )
     supported_scenario = scenario in DENIAL_SCENARIOS
+    response_scenario = scenario if supported_scenario else "not_visible"
     denial_state = (
         SCENARIO_STATES[scenario]
         if trusted_identity and supported_scenario
@@ -157,7 +158,7 @@ def build_permission_denial_action_summary(
         audit_id=audit_id,
         agent_id=_string(context.get("agent_id")),
         agent_version=_string(context.get("agent_version")),
-        denial_scenario=scenario,
+        denial_scenario=response_scenario,
         denial_state=denial_state,
         permission_state=_permission_state(scenario, denial_state),
         page=_page(scenario, context=context, viewer=viewer, state=denial_state),
