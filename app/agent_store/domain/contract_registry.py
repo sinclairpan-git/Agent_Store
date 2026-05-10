@@ -272,6 +272,20 @@ def _traceability_entries() -> Iterable[ContractTraceabilityEntry]:
             "Installation Bootstrap",
         ),
         (
+            "installation_distribution_summary.v1",
+            "installation-distribution-summary.openapi.yaml",
+            "InstallationDistributionSummary",
+            "Agent Store",
+            "Agent Store",
+            ("Agent Store UI", "AgentOps"),
+            ("CCT-021",),
+            (
+                "tests/contract/test_installation_distribution_api.py",
+                "tests/contract/test_contract_files_parse.py",
+            ),
+            "Installation Distribution Summary V1",
+        ),
+        (
             "installation_runtime_handoff.v1",
             "installation-runtime-handoff.openapi.yaml",
             "InstallationRuntimeHandoff",

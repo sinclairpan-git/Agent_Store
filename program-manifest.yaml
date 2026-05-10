@@ -149,40 +149,44 @@ specs:
   path: specs/035-store-ops-deep-link
   depends_on:
   - 034-policy-approval-receipt
+- id: 036-installation-distribution-summary
+  path: specs/036-installation-distribution-summary
+  depends_on:
+  - 035-store-ops-deep-link
 truth_snapshot:
-  generated_at: '2026-05-10T08:46:31Z'
+  generated_at: '2026-05-10T09:00:34Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: f76c159
-  authoring_hash: 949519a9046181713057d036db559d8eff60f446f1539985fcfdc822bdc5cdd1
+  repo_revision: 661223c
+  authoring_hash: bee74d028490b8f37f3600f8366505b3ac96fe622ca43631bd03a1843be2c331
   source_hashes: {}
-  snapshot_hash: 198ab21c87723a2463a36685fbf6d9325f64ac654ce7433e1c0783abe1442efb
+  snapshot_hash: dd67772d1f64e9a7e9d246eacd4408cdbef617cc3004c72af08c9ec619b84533
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 178
-    mapped_sources: 178
+    total_sources: 183
+    mapped_sources: 183
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 58
-    deferred_signal_count: 156
+    deferred_signal_count: 157
     non_goal_signal_count: 26
     layer_totals:
       blueprint: 1
-      spec: 35
-      plan: 35
-      tasks: 35
-      execution: 35
-      close: 35
+      spec: 36
+      plan: 36
+      tasks: 36
+      execution: 36
+      close: 36
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 35
-      plan: 35
-      tasks: 35
-      execution: 35
-      close: 35
+      spec: 36
+      plan: 36
+      tasks: 36
+      execution: 36
+      close: 36
       defect: 1
       release: 1
     entries:
@@ -1767,6 +1771,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 035-store-ops-deep-link
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/036-installation-distribution-summary/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 036-installation-distribution-summary
+      phase_signal_count: 0
+      deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/036-installation-distribution-summary/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 036-installation-distribution-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/036-installation-distribution-summary/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 036-installation-distribution-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/036-installation-distribution-summary/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 036-installation-distribution-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/036-installation-distribution-summary/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 036-installation-distribution-summary
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
