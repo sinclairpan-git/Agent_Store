@@ -234,7 +234,7 @@ def _transition_issues(
         issues.append(
             _issue("ROLLBACK_VERSION_REQUIRED", "transition.rollback_version")
         )
-    if action in {"disable", "security_revoke"} and not _impact_count(transition):
+    if action in {"disable", "security_revoke"} and not _has_impact_count(transition):
         issues.append(
             _issue("IMPACT_SCOPE_REQUIRED", "transition.affected_installation_count")
         )
@@ -385,6 +385,11 @@ def _replacement_version(transition: Mapping[str, object]) -> str:
 
 def _impact_count(transition: Mapping[str, object]) -> int:
     return _int_value(transition.get("affected_installation_count"))
+
+
+def _has_impact_count(transition: Mapping[str, object]) -> bool:
+    value = transition.get("affected_installation_count")
+    return isinstance(value, int) and value >= 0
 
 
 def _int_value(value: object) -> int:
