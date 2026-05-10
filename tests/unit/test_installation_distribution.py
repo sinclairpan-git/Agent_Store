@@ -69,6 +69,7 @@ def test_installation_distribution_counts_status_os_version_and_enterprise_state
     assert summary["os_counts"] == {"Linux": 1, "Windows": 1, "macOS": 1}
     assert summary["version_counts"] == {"0.2.0": 3}
     assert summary["notification"]["notification_required"] is True
+    assert summary["notification"]["affected_installation_count"] == 1
     assert summary["privacy"]["individual_users_exposed"] is False
     assert summary["privacy"]["device_ids_exposed"] is False
 
@@ -102,6 +103,21 @@ def test_installation_distribution_strips_individual_identifiers() -> None:
     assert {issue["issue_id"] for issue in summary["issues"]} == {
         "INDIVIDUAL_IDENTIFIERS_STRIPPED"
     }
+
+
+def test_installation_distribution_reports_zero_affected_when_no_attention_status() -> (
+    None
+):
+    summary = _summary(
+        [
+            _fact(status="activation_required", user="user-1"),
+            _fact(status="reporter_pending", user="user-2"),
+        ]
+    )
+
+    assert summary["notification"]["notification_required"] is False
+    assert summary["notification"]["affected_installation_count"] == 0
+    assert summary["notification"]["reason_code"] == "none"
 
 
 def test_installation_distribution_reports_empty_version_scope() -> None:

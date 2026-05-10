@@ -268,10 +268,11 @@ def _notification(
     failed: int,
     requested_version: str,
 ) -> dict[str, object]:
+    impacted = revoked + failed
     return {
-        "notification_required": revoked > 0 or failed > 0,
-        "affected_installation_count": total,
-        "reason_code": "attention_required" if revoked > 0 or failed > 0 else "none",
+        "notification_required": impacted > 0,
+        "affected_installation_count": impacted,
+        "reason_code": "attention_required" if impacted > 0 else "none",
         "target_version": requested_version,
     }
 
