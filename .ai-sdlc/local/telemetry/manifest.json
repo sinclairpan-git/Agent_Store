@@ -68,6 +68,10 @@
       "goal_session_id": "gs_1565b610d627482d",
       "path": "sessions/gs_1565b610d627482d/runs/wr_b5eb18dc6e39487f"
     },
+    "wr_cf7f6ce59d954187": {
+      "goal_session_id": "gs_88a76513278d4d4a",
+      "path": "sessions/gs_88a76513278d4d4a/runs/wr_cf7f6ce59d954187"
+    },
     "wr_e3a156b704b64250": {
       "goal_session_id": "gs_9e645a219eed4313",
       "path": "sessions/gs_9e645a219eed4313/runs/wr_e3a156b704b64250"
@@ -123,6 +127,9 @@
     },
     "gs_81e201a62b084dd5": {
       "path": "sessions/gs_81e201a62b084dd5"
+    },
+    "gs_88a76513278d4d4a": {
+      "path": "sessions/gs_88a76513278d4d4a"
     },
     "gs_8d937f9d42bd4716": {
       "path": "sessions/gs_8d937f9d42bd4716"
@@ -192,6 +199,11 @@
       "goal_session_id": "gs_9e645a219eed4313",
       "path": "sessions/gs_9e645a219eed4313/runs/wr_e3a156b704b64250/steps/st_2b655d30c2b543a5",
       "workflow_run_id": "wr_e3a156b704b64250"
+    },
+    "st_30138e175f284540": {
+      "goal_session_id": "gs_88a76513278d4d4a",
+      "path": "sessions/gs_88a76513278d4d4a/runs/wr_cf7f6ce59d954187/steps/st_30138e175f284540",
+      "workflow_run_id": "wr_cf7f6ce59d954187"
     },
     "st_3df20090313f4b27": {
       "goal_session_id": "gs_b069aecdd4d547bf",

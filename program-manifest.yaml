@@ -87,13 +87,13 @@ specs:
   depends_on:
   - 019-skill-registry-lifecycle
 truth_snapshot:
-  generated_at: '2026-05-09T04:13:08Z'
+  generated_at: '2026-05-10T05:23:18Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: cb516d0
+  repo_revision: 9caae85
   authoring_hash: 61e886c79e3c7e7e1bd922a791979468a91adb04c9a1d91f6a4528af3bcf0f3a
   source_hashes: {}
-  snapshot_hash: bde2b2bc3e2ac4853641d2c61f52e5c859722419e37d7604499e2bab02b11e94
+  snapshot_hash: 0fc250535cb034918c8d4aace634618023c36bd15fe0e178a886de0e962af707
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -102,7 +102,7 @@ truth_snapshot:
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 51
-    deferred_signal_count: 120
+    deferred_signal_count: 121
     non_goal_signal_count: 19
     layer_totals:
       blueprint: 1
@@ -128,7 +128,7 @@ truth_snapshot:
       exists: true
       mapping_ref: prd_path
       phase_signal_count: 0
-      deferred_signal_count: 2
+      deferred_signal_count: 3
       non_goal_signal_count: 2
     - path: specs/001-agent-store-phase1-trusted-min-loop/spec.md
       source_type: spec_doc
@@ -1040,4 +1040,4 @@ truth_snapshot:
       deferred_signal_count: 1
       non_goal_signal_count: 0
     unmapped_paths: []
-  state: ready
+  state: migration_pending
