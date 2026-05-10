@@ -29,6 +29,7 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "lifecycle-governance-baseline.openapi.yaml",
         "managed-installer-preview.openapi.yaml",
         "package-validation.openapi.yaml",
+        "permission-denial-action-summary.openapi.yaml",
         "policy-approval-echo.openapi.yaml",
         "policy-approval-receipt.openapi.yaml",
         "policy-approval-request.openapi.yaml",
@@ -326,6 +327,51 @@ def test_quality_evidence_access_contract_documents_store_safe_projection() -> N
         "QUALITY_SUMMARY_EXPIRED",
         "SCORE_TEMPLATE_DEPRECATED",
         "RAW_EVIDENCE_LINK_STRIPPED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_permission_denial_action_contract_documents_prd_failure_pages() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "permission-denial-action-summary.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/permission-denial-action-summaries"][
+        "post"
+    ]
+    responses = operation["responses"]
+    summary = contract["components"]["schemas"]["PermissionDenialActionSummary"]
+    permission = contract["components"]["schemas"]["PermissionProjection"]
+    source_of_truth = contract["components"]["schemas"]["PermissionDenialSourceOfTruth"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    issue = contract["components"]["schemas"]["PermissionDenialIssue"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "visibility_denied",
+        "install_permission_required",
+        "raw_evidence_access_required",
+        "agentops_approval_required",
+        "agentops_policy_blocked",
+    }.issubset(set(summary["properties"]["denial_state"]["enum"]))
+    assert summary["properties"]["raw_trace_exposed"]["const"] is False
+    assert summary["properties"]["raw_evidence_exposed"]["const"] is False
+    assert summary["properties"]["store_grant_issued"]["const"] is False
+    assert summary["properties"]["store_policy_override_allowed"]["const"] is False
+    assert permission["properties"]["raw_trace_url"]["enum"] == [""]
+    assert permission["properties"]["raw_evidence_url"]["enum"] == [""]
+    assert source_of_truth["properties"]["identity"]["enum"] == [
+        "trusted_iam_auth_context"
+    ]
+    assert source_of_truth["properties"]["policy"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["raw_evidence"]["enum"] == ["evidence_vault"]
+    assert "evidence_vault" in action["properties"]["target_system"]["enum"]
+    assert {
+        "DENIAL_SCENARIO_UNSUPPORTED",
+        "TRUSTED_AUTH_CONTEXT_REQUIRED",
+        "RAW_PERMISSION_LINK_STRIPPED",
     }.issubset(set(issue["properties"]["issue_id"]["enum"]))
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
 

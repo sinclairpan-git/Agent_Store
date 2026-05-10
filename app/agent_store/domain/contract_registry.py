@@ -202,6 +202,20 @@ def _traceability_entries() -> Iterable[ContractTraceabilityEntry]:
             "Quality Evidence Access Summary V1",
         ),
         (
+            "permission_denial_action_summary.v1",
+            "permission-denial-action-summary.openapi.yaml",
+            "PermissionDenialActionSummary",
+            "Agent Store",
+            "Agent Store",
+            ("Agent Store UI", "AgentOps", "Evidence Vault"),
+            ("CCT-023",),
+            (
+                "tests/contract/test_permission_denial_api.py",
+                "tests/contract/test_contract_files_parse.py",
+            ),
+            "Permission Denial Action Summary V1",
+        ),
+        (
             "contract_registry_traceability.v1",
             "contract-registry-traceability.openapi.yaml",
             "ContractRegistryTraceability",
