@@ -203,6 +203,7 @@ def build_quality_evidence_access_summary(
     request_access_url = (
         _string(viewer.get("request_access_url")) or DEFAULT_EVIDENCE_VAULT_REQUEST_URL
     )
+    evidence_vault_request_required = not can_view_summary or not can_view_raw_evidence
     accepted_templates = {
         normalized
         for template in accepted_score_template_ids
@@ -251,8 +252,10 @@ def build_quality_evidence_access_summary(
         access={
             "can_view_quality_summary": can_view_summary,
             "can_view_raw_evidence": can_view_raw_evidence,
-            "evidence_vault_request_required": not can_view_raw_evidence,
-            "request_access_url": "" if can_view_raw_evidence else request_access_url,
+            "evidence_vault_request_required": evidence_vault_request_required,
+            "request_access_url": (
+                request_access_url if evidence_vault_request_required else ""
+            ),
             "raw_trace_url": "",
             "raw_evidence_url": "",
         },

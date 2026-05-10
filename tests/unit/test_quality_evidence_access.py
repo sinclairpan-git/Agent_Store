@@ -107,6 +107,26 @@ def test_quality_evidence_access_redacts_when_viewer_permission_is_absent() -> N
     assert summary["next_action"]["action_id"] == "request_evidence_access"
 
 
+def test_quality_evidence_access_keeps_request_target_for_redacted_summary() -> None:
+    summary = _summary(
+        viewer=_viewer(
+            can_view_quality_summary=False,
+            can_view_raw_evidence=True,
+            request_access_url="/evidence-vault/requests/summary-access",
+        )
+    )
+
+    assert summary["summary_state"] == "summary_redacted"
+    assert summary["access"]["can_view_raw_evidence"] is True
+    assert summary["access"]["evidence_vault_request_required"] is True
+    assert (
+        summary["access"]["request_access_url"]
+        == "/evidence-vault/requests/summary-access"
+    )
+    assert summary["next_action"]["action_id"] == "request_evidence_access"
+    assert summary["next_action"]["href"] == "/evidence-vault/requests/summary-access"
+
+
 def test_quality_evidence_access_marks_expired_summary_pending_refresh() -> None:
     now = utc_now()
     agentops_summary = _agentops_summary(
