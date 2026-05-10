@@ -21,3 +21,4 @@
 - `python -m ai_sdlc program truth audit`：ready / fresh。
 - `python -m ai_sdlc run --dry-run`：Stage close PASS。
 - `python -m ai_sdlc run`：Stage close PASS。
+- Codex Review P1 修复后：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：13 passed；`uv run pytest -q`：442 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。

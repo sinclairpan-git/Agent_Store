@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 from agent_store import SCHEMA_VERSION
 
@@ -44,14 +44,16 @@ def _float_or_none(value: object) -> float | None:
 
 def _parse_datetime(value: object) -> datetime | None:
     if isinstance(value, datetime):
-        return value
+        parsed = value
+        return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=UTC)
     text = _string(value)
     if not text:
         return None
     try:
-        return datetime.fromisoformat(text)
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
         return None
+    return parsed if parsed.tzinfo is not None else parsed.replace(tzinfo=UTC)
 
 
 @dataclass(frozen=True)
@@ -194,7 +196,7 @@ def build_quality_evidence_access_summary(
         summary.get("quality_summary")
     )
     run = _mapping(summary.get("run_evidence")) or {}
-    can_view_summary = viewer.get("can_view_quality_summary") is not False
+    can_view_summary = viewer.get("can_view_quality_summary") is True
     can_view_raw_evidence = _bool(viewer.get("can_view_raw_evidence"))
     request_access_url = (
         _string(viewer.get("request_access_url")) or DEFAULT_EVIDENCE_VAULT_REQUEST_URL

@@ -93,6 +93,20 @@ def test_quality_evidence_access_redacts_unauthorized_summary() -> None:
     }
 
 
+def test_quality_evidence_access_redacts_when_viewer_permission_is_absent() -> None:
+    summary = build_quality_evidence_access_summary(
+        agentops_summary=_agentops_summary(),
+        viewer_context={},
+        trace_id="trace-037",
+        audit_id="audit-037",
+    ).to_response()["quality_evidence_access_summary"]
+
+    assert summary["summary_state"] == "summary_redacted"
+    assert summary["display"]["confidence"] is None
+    assert summary["access"]["evidence_vault_request_required"] is True
+    assert summary["next_action"]["action_id"] == "request_evidence_access"
+
+
 def test_quality_evidence_access_marks_expired_summary_pending_refresh() -> None:
     now = utc_now()
     agentops_summary = _agentops_summary(
@@ -114,6 +128,22 @@ def test_quality_evidence_access_marks_expired_summary_pending_refresh() -> None
     assert summary["display"]["display_label"] == "待刷新"
     assert summary["recommendation_basis_allowed"] is False
     assert summary["next_action"]["action_id"] == "refresh_agentops_quality_summary"
+
+
+def test_quality_evidence_access_handles_naive_valid_until_without_crashing() -> None:
+    now = utc_now()
+    naive_valid_until = (now + timedelta(hours=1)).replace(tzinfo=None).isoformat()
+    agentops_summary = _agentops_summary(
+        quality_evidence={
+            **_agentops_summary()["quality_evidence"],
+            "valid_until": naive_valid_until,
+        }
+    )
+
+    summary = _summary(agentops_summary)
+
+    assert summary["summary_state"] == "summary_ready"
+    assert summary["display"]["summary_validity_state"] == "fresh"
 
 
 def test_quality_evidence_access_degrades_unknown_score_template() -> None:
