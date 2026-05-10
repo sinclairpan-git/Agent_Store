@@ -262,6 +262,276 @@ HealthSummary freshness may explain whether the displayed health summary is
 fresh, expired, or unavailable, but Store must not use it to compute quality
 score, Actual L5, PolicyDecision, CapabilityGrant, or recommendation ranking.
 
+## Installation Runtime Handoff V1
+
+Agent Store projects Store-owned installation and device binding facts into
+`installation_runtime_handoff.v1` for Agent Runtime consumption. Runtime remains
+the owner of execution, process lifecycle, local isolation, and runtime echo
+facts. Store owns only the installation, device binding, package hash, projection
+wording, audit id, and next action.
+
+The handoff must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `runtime_handoff_ready` | Installation, device binding, and Runtime echo identity are bound to the same package hash. | Allow Runtime consumption and route to Runtime activation. |
+| `artifact_hash_mismatch` | Runtime echo or device binding artifact hash differs from the Store installation fact. | Block Runtime consumption and regenerate the activation command. |
+| `device_binding_mismatch` | Runtime echo references a different installation or device. | Block Runtime consumption and restart activation. |
+| `installation_not_ready` | Installation or device binding is failed, revoked, expired, or otherwise not active enough for Runtime. | Keep Runtime consumption blocked and review Store installation status. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `installation` | `agent_store` |
+| `device_binding` | `agent_store` |
+| `package` | `agent_store` |
+| `runtime_consumption` | `agent_runtime_echo_or_request` |
+| `policy_decision` | `agentops` |
+
+The handoff must expose `runtime_consumption_allowed=false` whenever any
+mismatch or not-ready state is present. Store must not start the Runtime, sign a
+CapabilityGrant, issue credentials, or infer execution success from this
+projection. `artifact_hash` mismatch is a blocked state with the next action
+`regenerate_activation_command`, not a warning that Runtime may ignore.
+
+## Draft Review Submission V1
+
+Agent Store owns `draft_review_submission.v1` as the final gate between Listing
+Wizard preview and formal review queue. Package Validation owns validation
+facts, Agent Runtime owns runtime availability facts, and Owner confirmation is
+an explicit Store audit fact. AgentOps remains the future owner of policy
+decision after the draft is already pending review.
+
+The submission must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `pending_review` | Validation passed, Owner confirmation is explicit, Runtime is ready, and no placeholder values remain. | Enqueue the draft for review and track review status. |
+| `validation_blocked` | Package validation failed, is fixable, or placeholder values are still present. | Keep the draft out of review and return to validation report. |
+| `runtime_gate_blocked` | Runtime availability is not `runtime_ready`. | Keep the draft out of review and route to Runtime Gate remediation. |
+| `owner_confirmation_required` | Owner confirmation is missing, incomplete, or fields are not confirmed. | Keep the draft out of review and request Owner confirmation. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `package_manifest` | `agent_store_upload_candidate` |
+| `package_validation` | `agent_store_package_validation` |
+| `owner_confirmation` | `agent_store_owner_explicit_confirmation` |
+| `runtime_availability` | `agent_runtime_echo_or_probe` |
+| `draft_review_queue` | `agent_store` |
+| `policy_decision` | `agentops_not_evaluated_until_review` |
+
+`draft_status=pending_review` is allowed only when all final gates pass. Store
+must not treat Package Validation's earlier suggested `pending_review` status as
+review queue entry, and must recheck TODO/unknown/TBD/N/A placeholders before
+submission.
+
+## Policy Approval Echo V1
+
+Agent Store consumes AgentOps-owned PolicyDecision and Approval echo facts and
+projects them into `policy_approval_echo.v1` for Store display and routing.
+AgentOps remains the sole owner of policy decisions, approval status, and
+CapabilityGrant issuance. Store owns only the echo projection wording, audit
+id, and next action.
+
+The echo must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `policy_allowed` | AgentOps policy allows the action and approval is approved or not required. | Continue the Store flow while preserving AgentOps as decision source. |
+| `approval_pending` | AgentOps requires approval or approval is still pending. | Route to AgentOps approval center. |
+| `approval_expired` | AgentOps approval echo is past its valid window. | Request a fresh AgentOps approval echo. |
+| `policy_denied` | AgentOps denied policy or approval was rejected/revoked. | Show blocking policy and keep Store action blocked. |
+| `agentops_echo_unavailable` | AgentOps echo is missing, incomplete, or unsupported. | Refresh AgentOps policy echo; do not locally interpret it. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `policy_decision` | `agentops` |
+| `approval` | `agentops` |
+| `capability_grant` | `agentops_not_issued_by_store` |
+| `store_projection` | `agent_store_echo_only` |
+
+The Store projection must always expose `store_decision_authority=none`,
+`store_override_allowed=false`, and `capability_grant_issued=false`. Store may
+continue only when AgentOps echo is `policy_allowed`; it must not rewrite unknown
+AgentOps decisions into allow, deny, or approval-required.
+
+## Policy Approval Request V1
+
+Agent Store may initiate `policy_approval_request.v1` to ask AgentOps to evaluate
+an install, publish, upgrade, or enable action. This contract is the upstream
+request half of Policy Approval Echo: Store owns the request audit and payload
+assembly, while AgentOps remains the only owner of policy decisions, approval
+status, and CapabilityGrant issuance.
+
+The request must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `approval_request_ready` | Requester, policy context, and justification are complete. | Submit request to AgentOps. |
+| `requester_required` | Requester is missing or unauthorized. | Assign an authorized requester. |
+| `policy_context_incomplete` | Policy ref, risk, runtime contract, or permission context is incomplete. | Complete policy context before dispatch. |
+| `justification_required` | Auditable business justification is missing. | Add justification before dispatch. |
+| `approval_request_blocked` | Agent identity or requested action is unsupported. | Fix request identity/action. |
+
+The Store projection must expose `store_decision_authority=none`,
+`store_override_allowed=false`, and `capability_grant_issued=false`. A ready
+request may set `agentops_request.dispatch_allowed=true`; no other state may be
+dispatched to AgentOps.
+
+## Policy Approval Receipt V1
+
+AgentOps produces `policy_approval_receipt.v1` after it accepts, queues, or
+rejects a Store-originated `policy_approval_request.v1`. Agent Store consumes
+this receipt only to link the approval flow and route the user to AgentOps. A
+receipt is not a final policy decision, not an approval decision, and not a
+CapabilityGrant.
+
+The receipt projection must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `approval_receipt_accepted` | AgentOps accepted the approval request and returned an approval id. | Link to AgentOps approval center. |
+| `approval_receipt_pending` | AgentOps has queued receipt processing. | Poll or refresh AgentOps receipt. |
+| `approval_receipt_rejected` | AgentOps rejected the request envelope before approval review. | Fix and resubmit the Store request. |
+| `approval_receipt_unavailable` | Receipt is missing, unsupported, incomplete, or mismatched. | Refresh AgentOps receipt and do not link approval flow. |
+
+The Store projection must expose `projection_mode=agentops_receipt_only`,
+`store_decision_authority=none`, `capability_grant_issued=false`, and
+`approval_decision_final=false`.
+
+## Managed Installer Preview V1
+
+Agent Store projects package trust, Policy Approval echo, and Installation
+Runtime handoff facts into `managed_installer_preview.v1` for installer UX.
+This projection is preview-only: it does not download packages, create
+sandboxes, run smoke tests, or issue CapabilityGrant. Agent Runtime remains the
+owner of execution and isolation; AgentOps remains policy and grant authority.
+
+The preview must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `ready_to_install_preview` | Download source, signature/hash, policy echo, and Runtime handoff are ready; smoke test has not run. | Prepare managed install without starting it. |
+| `preview_passed` | Installer probe reports smoke test passed. | Keep install preparation available and display smoke evidence reference. |
+| `download_blocked` | Package download source is missing or failed. | Refresh package download metadata. |
+| `signature_blocked` | Signature or artifact hash is untrusted. | Regenerate or re-verify package signature facts. |
+| `policy_blocked` | AgentOps policy/approval echo does not allow Store to continue. | Route to AgentOps approval or blocking policy. |
+| `runtime_handoff_blocked` | Installation Runtime handoff is not consumable by Runtime. | Resolve Runtime Gate / handoff mismatch. |
+| `smoke_test_failed` | Installer probe reports smoke test failure. | Copy diagnostic reference for remediation. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `package` | `agent_store_package_trust` |
+| `policy_approval` | `agentops_via_policy_approval_echo` |
+| `runtime_handoff` | `agent_store_installation_runtime_handoff` |
+| `installer_execution` | `not_started_preview_only` |
+| `diagnostics` | `agent_store_preview` |
+
+The preview must always expose `execution_mode=preview_only` and
+`real_install_started=false`. The required steps are `download_artifact`,
+`verify_signature`, `create_isolated_install`, `smoke_test`, and
+`failure_diagnostics`; a passing preview never proves Runtime execution beyond
+the supplied installer probe.
+
+## Feedback Owner Response Loop V1
+
+Agent Store owns `feedback_owner_response_loop.v1` as the product feedback
+lifecycle projection for submitted user feedback and Owner responses. This is a
+Store product loop, not an AgentOps policy decision or Runtime evidence fact.
+
+The loop must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `submitted` | User feedback has been captured. | Triage feedback. |
+| `triaged` | Store triage accepted the feedback for Owner attention. | Request Owner response. |
+| `owner_replied` | Owner has responded with an accountable message. | Plan or reject the feedback. |
+| `planned` | Owner committed to a planned fix or improvement. | Mark fixed when work is complete. |
+| `fixed` | Owner marks the feedback fixed but not yet released. | Attach release linkage. |
+| `rejected` | Owner rejected the feedback with an explanation. | Display the decision. |
+| `released` | Fixed feedback is linked to a release. | Display release notes or release reference. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `feedback` | `agent_store_feedback` |
+| `owner_response` | `agent_store_owner_response` |
+| `release_linkage` | `agent_store_release_linkage` |
+| `notifications` | `agent_store_notification_queue` |
+
+Owner lifecycle actions (`owner_reply`, `plan`, `fix`, `reject`, and `release`)
+must require `actor_role=owner`. `release` may only follow `fixed` and must
+include a `release_ref`. Every transition must carry actor id, actor role,
+message, audit id, trace id, and a timeline event.
+
+## Lifecycle Governance Baseline V1
+
+Agent Store owns `lifecycle_governance_baseline.v1` as the Agent/version
+lifecycle governance projection. This is separate from Skill Registry lifecycle:
+Skill Registry governs Skill records, while this contract governs Agent version
+upgrade, rollback, deprecation, disablement, security revocation, replacement
+mapping, and affected installation scope.
+
+The lifecycle projection must distinguish these states:
+
+| State | Meaning | Store action |
+| --- | --- | --- |
+| `active` | Current version remains the active baseline. | Continue normal Store flow. |
+| `upgrade_available` | Owner has designated a replacement version. | Notify affected users/installations of the upgrade path. |
+| `rollback_available` | Owner has designated a rollback version. | Notify affected users/installations of rollback path. |
+| `deprecated` | Version remains visible but should move to replacement. | Show replacement mapping and deprecation reason. |
+| `disabled` | Version is disabled for governance reasons. | Notify AgentOps and affected installations. |
+| `security_revoked` | Version is terminally revoked by security authority. | Notify AgentOps and preserve strongest security signal. |
+
+Source-of-truth fields are fixed:
+
+| Fact | Source of truth |
+| --- | --- |
+| `agent_version` | `agent_store_agent_version` |
+| `lifecycle_decision` | `agent_store_lifecycle_governance` |
+| `replacement` | `agent_store_replacement_mapping` |
+| `impact_scope` | `agent_store_installation_inventory` |
+| `agentops_notification` | `agent_store_notification_queue` |
+
+`upgrade` and `deprecate` require replacement version. `rollback` requires
+rollback version. `disable` and `security_revoke` require affected installation
+count. `security_revoke` must be performed by `actor_role=security` and include
+evidence or incident reference. `security_revoked` is terminal and must not be
+downgraded to weaker lifecycle states.
+
+## Contract Registry Traceability V1
+
+Agent Store owns `contract_registry_traceability.v1` as the read-only projection
+that lets Store, AgentOps, Agent Runtime, Ai_AutoSDLC, and Store UI trace every
+OpenAPI contract back to its governance metadata.
+
+Each registry entry must include:
+
+| Field | Required | Owner | Notes |
+| --- | --- | --- | --- |
+| `contract_id` | Yes | Agent Store | Stable schema identifier, usually the payload contract version. |
+| `contract_file` | Yes | Agent Store | File under `specs/001-agent-store-phase1-trusted-min-loop/contracts`. |
+| `primary_schema` | Yes | Agent Store | Main OpenAPI component schema for review. |
+| `owner` | Yes | Domain owner | System accountable for the fact boundary. |
+| `producer` | Yes | Producing system | System emitting the contract payload or projection. |
+| `consumers` | Yes | Consuming systems | One or more downstream systems/UI surfaces. |
+| `cct_ids` | Yes | Agent Store | Appendix CCT rows that cover this contract; may be empty for local-only contracts. |
+| `contract_test_files` | Yes | Agent Store | Test files that parse or exercise the contract. |
+| `appendix_anchor` | Yes | Agent Store | Human-review anchor in this appendix. |
+
+Coverage summary must expose `total_contracts`, `contracts_with_cct`,
+`contracts_with_contract_tests`, `complete_traceability`, and
+`unmapped_contracts`. A contract change is not review-ready if any OpenAPI file
+is missing owner, producer, consumer, test file, or appendix traceability.
+
 ### Device Proof
 
 `device_proof` must bind the local device to the same installation:
@@ -327,14 +597,23 @@ Each project must implement contract tests against the same fixture set:
 | CCT-008 AgentManifest Runtime contract | Agent Store | Agent Runtime | Runtime consumes Store-owned `agent_manifest_runtime_contract.v1`; missing required capabilities produce `runtime_capability_missing`, not a silent runnable state. |
 | CCT-009 Runtime availability summary | Agent Runtime | Agent Store | Store projects Runtime echo/probe into `runtime_availability_summary.v1` and distinguishes missing Runtime, upgrade required, missing capability, and ready states. |
 | CCT-010 HealthSummary freshness guard | AgentOps | Agent Store | Store projects AgentOps HealthSummary freshness into `health_summary_freshness.v1`; expired `valid_until` displays “待刷新” and never becomes a recommendation basis. |
+| CCT-011 Installation Runtime handoff | Agent Store | Agent Runtime | Runtime consumes `installation_runtime_handoff.v1`; `artifact_hash` mismatch blocks consumption and returns `regenerate_activation_command`. |
+| CCT-012 Draft Review submission | Agent Store | AgentOps | Store emits `draft_review_submission.v1`; only full final-gate pass may set `pending_review`, while validation, Runtime, Owner, or placeholder blockers remain `not_enqueued`. |
+| CCT-013 Policy approval echo | AgentOps | Agent Store | Store consumes `policy_approval_echo.v1` as echo-only; `store_decision_authority=none`, no Store override, and no Store-issued CapabilityGrant. |
+| CCT-014 Managed installer preview | Agent Store | Agent Runtime, AgentOps | Store emits `managed_installer_preview.v1` with `execution_mode=preview_only`; signature/hash, policy echo, Runtime handoff, and smoke diagnostics must remain distinct facts. |
+| CCT-015 Feedback owner response loop | Agent Store | Agent Store UI | Store emits `feedback_owner_response_loop.v1`; Owner actions require owner actor role and released feedback requires release linkage. |
+| CCT-016 Lifecycle governance baseline | Agent Store | AgentOps, Agent Store UI | Store emits `lifecycle_governance_baseline.v1`; security revocation is terminal, replacement/rollback mappings are explicit, and affected installation scope is disclosed. |
+| CCT-017 Contract Registry traceability | Agent Store | AgentOps, Agent Runtime, Ai_AutoSDLC, Agent Store UI | Store emits `contract_registry_traceability.v1`; every OpenAPI contract must map to owner, producer, consumers, appendix anchor, and contract tests. |
+| CCT-018 Policy approval request | Agent Store | AgentOps, Agent Store UI | Store emits `policy_approval_request.v1` only when requester, policy context, and justification are complete; Store still has no decision authority and issues no CapabilityGrant. |
+| CCT-019 Policy approval receipt | AgentOps | Agent Store, Agent Store UI | Store consumes `policy_approval_receipt.v1` only as an AgentOps receipt; receipt links approval flow but never means approved and never issues CapabilityGrant. |
 
 ## Project PRD Updates Required
 
 | Project | Required PRD/spec update |
 | --- | --- |
 | Top-level PRD | Add this appendix as the normative cross-project contract for bootstrap, credential, and status crosswalk. |
-| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, and `health_summary_freshness.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, and HealthSummary freshness guard. |
-| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, and Store-consumed `health_summary_freshness.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
+| Agent Store PRD | Reference `agentops_credential_handoff.v1`, `agent_manifest_runtime_contract.v1`, `runtime_availability_summary.v1`, `health_summary_freshness.v1`, `installation_runtime_handoff.v1`, `draft_review_submission.v1`, `policy_approval_echo.v1`, `policy_approval_request.v1`, `policy_approval_receipt.v1`, `managed_installer_preview.v1`, `feedback_owner_response_loop.v1`, `lifecycle_governance_baseline.v1`, and `contract_registry_traceability.v1`; require external assertion field names, AgentOps credential echo, Runtime availability projection, HealthSummary freshness guard, Runtime handoff artifact-hash binding, explicit Owner-confirmed draft review submission, AgentOps-only policy/approval authority, preview-only installer diagnostics, audited Owner feedback responses, Agent/version lifecycle governance, and contract registry traceability. |
+| AgentOps PRD | Reference `signed_installation_assertion.v1`, `skill_registry_notification.v1`, `agent_manifest_runtime_contract.v1`, Store-consumed `runtime_availability_summary.v1`, Store-consumed `health_summary_freshness.v1`, Runtime-consumed `installation_runtime_handoff.v1`, Store-produced `draft_review_submission.v1`, Store-consumed `policy_approval_echo.v1`, Store-produced `policy_approval_request.v1`, AgentOps-produced `policy_approval_receipt.v1`, Store-produced `managed_installer_preview.v1`, and Store-produced `contract_registry_traceability.v1`; credential issue must validate this schema and must not require assertion and device proof algorithms to be equal. |
 | Ai_AutoSDLC PRD | Activation CLI must generate `device_proof.v1`, call AgentOps Credential Issue, store credentials securely, and send a signed test event. |
 
 ## Implementation Order

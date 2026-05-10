@@ -104,6 +104,10 @@
     upgrade_runtime: "升级 Runtime",
     view_missing_runtime_capabilities: "查看缺失能力",
     continue_listing_review: "继续上架审核",
+    confirm_listing_fields: "确认上架字段",
+    prepare_draft_review_submission: "准备草案提交",
+    resolve_runtime_gate: "处理 Runtime Gate",
+    return_to_field_confirmation: "返回字段确认",
     complete_agent_manifest: "补齐 Manifest",
     review_catalog_blocker: "查看阻断原因",
     view_policy: "查看策略说明",
@@ -162,6 +166,21 @@
     runtime_availability_summary: "Runtime 可用性摘要",
     health_summary: "HealthSummary",
     health_summary_freshness: "HealthSummary 新鲜度",
+    listing_wizard_shell: "上架向导",
+    preview_ready: "预览就绪",
+    needs_field_confirmation: "需确认字段",
+    validation_fix_required: "需修复校验",
+    runtime_gate_blocked: "Runtime Gate 阻断",
+    source_selection: "来源选择",
+    field_confirmation: "字段确认",
+    validation_report: "校验报告",
+    detail_preview: "详情预览",
+    selected: "已选择",
+    confirmed: "已确认",
+    needs_owner_input: "需 Owner 确认",
+    validation_failed: "校验失败",
+    passed: "已通过",
+    not_submitted_until_027: "026 不提交审核",
     agent_runtime_echo_or_probe: "Agent Runtime Echo/Probe",
     summary_projection: "摘要投影",
     agent_store_runtime_availability_projection: "Agent Store 可用性投影",
@@ -973,6 +992,93 @@
     }
   });
 
+  Vue.component("sdlc-listing-wizard", {
+    props: ["wizard"],
+    template: [
+      '<section class="workspace-section workspace-section--wide listing-wizard">',
+      '  <div class="section-heading">',
+      '    <h2>上架向导</h2>',
+      '    <sdlc-status-chip :label="wizard.wizard_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <ol class="wizard-steps" aria-label="listing wizard steps">',
+      '    <li v-for="step in steps" :key="step.step_id" :class="\'wizard-step--\' + step.step_state">',
+      '      <span>{{ step.label }}</span>',
+      '      <strong>{{ displayLabel(step.step_state) }}</strong>',
+      '      <small>{{ displayLabel(step.owner_system) }}</small>',
+      '    </li>',
+      '  </ol>',
+      '  <div class="wizard-grid">',
+      '    <div class="wizard-pane">',
+      '      <span>来源选择</span>',
+      '      <strong>{{ wizard.source_step.source_type }}</strong>',
+      '      <code>{{ wizard.source_step.source_ref || wizard.source_step.source_id }}</code>',
+      '    </div>',
+      '    <div class="wizard-pane">',
+      '      <span>字段确认</span>',
+      '      <strong>{{ displayLabel(wizard.field_confirmation.step_state) }}</strong>',
+      '      <ul><li v-for="field in visibleFields" :key="field.field_path">{{ field.field_path }} · {{ displayLabel(field.confirmation_state) }}</li></ul>',
+      '    </div>',
+      '    <div class="wizard-pane">',
+      '      <span>校验报告</span>',
+      '      <strong>{{ displayLabel(wizard.validation_report.step_state) }}</strong>',
+      '      <dl class="compact-facts">',
+      '        <dt>Package</dt><dd>{{ wizard.validation_report.package_id }}</dd>',
+      '        <dt>Issues</dt><dd>{{ wizard.validation_report.issue_count }}</dd>',
+      '        <dt>Fix Prompts</dt><dd>{{ wizard.validation_report.fix_prompt_count }}</dd>',
+      '      </dl>',
+      '    </div>',
+      '    <div class="wizard-pane">',
+      '      <span>详情预览</span>',
+      '      <strong>{{ wizard.detail_preview.display_name }}</strong>',
+      '      <p>{{ wizard.detail_preview.summary }}</p>',
+      '      <dl class="compact-facts">',
+      '        <dt>Runtime</dt><dd>{{ displayLabel(wizard.detail_preview.runtime_availability_state) }}</dd>',
+      '        <dt>Health</dt><dd>{{ displayLabel(wizard.detail_preview.health_freshness_state) }}</dd>',
+      '      </dl>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ issue.issue_id }} / {{ issue.fix_action_id }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ sourceTruthSummary }}</span>',
+      '    <sdlc-action-button :action="wizard.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.wizard.wizard_state === "preview_ready") {
+          return "success";
+        }
+        if (this.wizard.wizard_state === "runtime_gate_blocked") {
+          return "danger";
+        }
+        if (this.wizard.wizard_state === "empty") {
+          return "neutral";
+        }
+        return "warning";
+      },
+      steps: function steps() {
+        return Array.isArray(this.wizard.steps) ? this.wizard.steps : [];
+      },
+      visibleFields: function visibleFields() {
+        var confirmation = this.wizard.field_confirmation || {};
+        return Array.isArray(confirmation.fields) ? confirmation.fields.slice(0, 4) : [];
+      },
+      issues: function issues() {
+        var report = this.wizard.validation_report || {};
+        return Array.isArray(report.issues) ? report.issues : [];
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.wizard.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -994,6 +1100,7 @@
       "installWorkflow",
       "installRequest",
       "recommendationDecision",
+      "listingWizard",
       "runtimeAvailability",
       "healthSummaryFreshness",
       "installHandoff",
@@ -1037,6 +1144,7 @@
       '  <sdlc-action-feedback :feedback="actionFeedback"></sdlc-action-feedback>',
       '  <div class="workspace-grid">',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
+      '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-section title="应用事实">',

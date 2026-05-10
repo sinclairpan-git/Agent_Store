@@ -523,6 +523,242 @@ window.AgentStoreMock = {
       }
     }
   },
+  listingWizard: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "listing_wizard_shell.v1",
+      wizard_state: "runtime_gate_blocked",
+      source_step: {
+        step_id: "source_selection",
+        step_state: "selected",
+        source_id: "official-framework-registry",
+        source_type: "registry_import",
+        source_ref: "agent-store://official/framework.ai-autosdlc",
+        next_action: {
+          action_id: "confirm_listing_fields",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      },
+      field_confirmation: {
+        step_id: "field_confirmation",
+        step_state: "confirmed",
+        fields: [
+          {
+            field_path: "agent_id",
+            value: "framework.ai-autosdlc",
+            confirmation_state: "confirmed",
+            source: "package_manifest_candidate"
+          },
+          {
+            field_path: "owner_team",
+            value: "SDLC Platform",
+            confirmation_state: "confirmed",
+            source: "package_manifest_candidate"
+          },
+          {
+            field_path: "runtime_contract_version",
+            value: "runtime-contract.v2",
+            confirmation_state: "confirmed",
+            source: "agent_manifest_runtime_contract.v1"
+          }
+        ]
+      },
+      validation_report: {
+        step_id: "validation_report",
+        step_state: "passed",
+        package_id: "framework.ai-autosdlc@1.0.0",
+        draft_status: "pending_review",
+        issue_count: 0,
+        fix_prompt_count: 0,
+        issues: [],
+        next_action: {
+          action_id: "continue_listing_review",
+          target_system: "agent_store",
+          enabled: true,
+          audit_required: true
+        }
+      },
+      detail_preview: {
+        step_id: "detail_preview",
+        step_state: "blocked",
+        agent_id: "framework.ai-autosdlc",
+        display_name: "Ai_AutoSDLC",
+        summary: "官方 SDLC Framework Capability，等待 Runtime 能力补齐后可继续上架预览。",
+        owner_team: "SDLC Platform",
+        version: "1.0.0",
+        runtime_availability_state: "runtime_capability_missing",
+        runtime_display_name_zh: "缺 Runtime 能力",
+        health_freshness_state: "health_refresh_required",
+        health_recommendation_basis_allowed: false
+      },
+      steps: [
+        {
+          step_id: "source_selection",
+          label: "来源选择",
+          step_state: "completed",
+          owner_system: "agent_store"
+        },
+        {
+          step_id: "field_confirmation",
+          label: "字段确认",
+          step_state: "confirmed",
+          owner_system: "agent_store"
+        },
+        {
+          step_id: "validation_report",
+          label: "校验报告",
+          step_state: "passed",
+          owner_system: "agent_store"
+        },
+        {
+          step_id: "runtime_gate",
+          label: "Runtime Gate",
+          step_state: "runtime_capability_missing",
+          owner_system: "agent_runtime"
+        },
+        {
+          step_id: "detail_preview",
+          label: "详情预览",
+          step_state: "blocked",
+          owner_system: "agent_store"
+        }
+      ],
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        field_confirmation: "owner_confirmed_before_review",
+        package_validation: "agent_store_package_validation",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        health_summary: "agentops",
+        draft_review: "not_submitted_until_027"
+      },
+      next_action: {
+        action_id: "resolve_runtime_gate",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "listing_wizard_shell.v1",
+      wizard_state: "preview_ready",
+      source_step: {
+        step_id: "source_selection",
+        step_state: "selected",
+        source_id: "agentops-reporter-package",
+        source_type: "package_upload",
+        source_ref: "agentops/evidence-reporter-0.4.0.tgz",
+        next_action: {
+          action_id: "confirm_listing_fields",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      },
+      field_confirmation: {
+        step_id: "field_confirmation",
+        step_state: "confirmed",
+        fields: [
+          {
+            field_path: "agent_id",
+            value: "agentops.evidence-reporter",
+            confirmation_state: "confirmed",
+            source: "package_manifest_candidate"
+          },
+          {
+            field_path: "owner_team",
+            value: "AgentOps",
+            confirmation_state: "confirmed",
+            source: "package_manifest_candidate"
+          },
+          {
+            field_path: "skills[0].risk_level",
+            value: "medium",
+            confirmation_state: "confirmed",
+            source: "package_validation_report.v1"
+          }
+        ]
+      },
+      validation_report: {
+        step_id: "validation_report",
+        step_state: "passed",
+        package_id: "agentops.evidence-reporter@0.4.0",
+        draft_status: "pending_review",
+        issue_count: 0,
+        fix_prompt_count: 0,
+        issues: [],
+        next_action: {
+          action_id: "continue_listing_review",
+          target_system: "agent_store",
+          enabled: true,
+          audit_required: true
+        }
+      },
+      detail_preview: {
+        step_id: "detail_preview",
+        step_state: "ready",
+        agent_id: "agentops.evidence-reporter",
+        display_name: "Evidence Reporter",
+        summary: "负责把运行证据、签名事件和诊断摘要回传到 AgentOps。",
+        owner_team: "AgentOps",
+        version: "0.4.0",
+        runtime_availability_state: "runtime_ready",
+        runtime_display_name_zh: "可运行",
+        health_freshness_state: "health_fresh",
+        health_recommendation_basis_allowed: false
+      },
+      steps: [
+        {
+          step_id: "source_selection",
+          label: "来源选择",
+          step_state: "completed",
+          owner_system: "agent_store"
+        },
+        {
+          step_id: "field_confirmation",
+          label: "字段确认",
+          step_state: "confirmed",
+          owner_system: "agent_store"
+        },
+        {
+          step_id: "validation_report",
+          label: "校验报告",
+          step_state: "passed",
+          owner_system: "agent_store"
+        },
+        {
+          step_id: "runtime_gate",
+          label: "Runtime Gate",
+          step_state: "runtime_ready",
+          owner_system: "agent_runtime"
+        },
+        {
+          step_id: "detail_preview",
+          label: "详情预览",
+          step_state: "ready",
+          owner_system: "agent_store"
+        }
+      ],
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        field_confirmation: "owner_confirmed_before_review",
+        package_validation: "agent_store_package_validation",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        health_summary: "agentops",
+        draft_review: "not_submitted_until_027"
+      },
+      next_action: {
+        action_id: "prepare_draft_review_submission",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   bootstrap: {
     installation_id: "inst-1",
     bootstrap_status: "credential_issued",

@@ -1,0 +1,355 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Policy Approval Receipt API
+  version: 0.1.0
+paths:
+  /api/v1/agents/policy-approval-receipts:
+    post:
+      operationId: projectPolicyApprovalReceipt
+      summary: Project an AgentOps approval request receipt for Store routing
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PolicyApprovalReceiptInput"
+      responses:
+        "200":
+          description: Policy approval receipt projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PolicyApprovalReceiptResponse"
+        "400":
+          description: Malformed policy approval receipt request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    PolicyApprovalReceiptInput:
+      type: object
+      required:
+        - approval_request
+        - agentops_receipt
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        approval_request:
+          $ref: "#/components/schemas/ApprovalRequestRef"
+        agentops_receipt:
+          $ref: "#/components/schemas/AgentOpsApprovalReceiptInput"
+    ApprovalRequestRef:
+      type: object
+      required:
+        - request_contract
+        - agent_id
+        - agent_version
+        - requested_action
+        - store_audit_id
+      properties:
+        request_contract:
+          type: string
+          enum:
+            - policy_approval_request.v1
+        contract_schema_version:
+          type: string
+          enum:
+            - policy_approval_request.v1
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_action:
+          type: string
+        store_audit_id:
+          type: string
+        audit_id:
+          type: string
+    AgentOpsApprovalReceiptInput:
+      type: object
+      required:
+        - receipt_contract
+        - approval_request_id
+        - approval_id
+        - receipt_status
+        - agent_id
+        - agent_version
+        - requested_action
+        - agentops_audit_id
+        - received_at
+      properties:
+        receipt_contract:
+          type: string
+          enum:
+            - policy_approval_receipt.v1
+        approval_request_id:
+          type: string
+        approval_id:
+          type: string
+        receipt_status:
+          type: string
+          enum:
+            - accepted
+            - pending
+            - rejected
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_action:
+          type: string
+        request_access_url:
+          type: string
+        agentops_audit_id:
+          type: string
+        received_at:
+          type: string
+          format: date-time
+        rejection_reason:
+          type: string
+    PolicyApprovalReceiptResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - policy_approval_receipt
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum:
+            - OK
+        audit_id:
+          type: string
+        policy_approval_receipt:
+          $ref: "#/components/schemas/PolicyApprovalReceipt"
+    PolicyApprovalReceipt:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - agent_version
+        - requested_action
+        - receipt_state
+        - approval_request_ref
+        - agentops_receipt
+        - store_projection
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum:
+            - policy_approval_receipt.v1
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        requested_action:
+          type: string
+        receipt_state:
+          type: string
+          enum:
+            - approval_receipt_accepted
+            - approval_receipt_pending
+            - approval_receipt_rejected
+            - approval_receipt_unavailable
+        approval_request_ref:
+          $ref: "#/components/schemas/ApprovalRequestRef"
+        agentops_receipt:
+          $ref: "#/components/schemas/AgentOpsApprovalReceiptInput"
+        store_projection:
+          $ref: "#/components/schemas/StoreReceiptProjection"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/PolicyApprovalReceiptIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/PolicyApprovalReceiptSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    StoreReceiptProjection:
+      type: object
+      required:
+        - projection_mode
+        - store_decision_authority
+        - store_override_allowed
+        - capability_grant_issued
+        - approval_decision_final
+        - approval_flow_linked
+      properties:
+        projection_mode:
+          type: string
+          enum:
+            - agentops_receipt_only
+        store_decision_authority:
+          type: string
+          enum:
+            - none
+        store_override_allowed:
+          type: boolean
+          const: false
+        capability_grant_issued:
+          type: boolean
+          const: false
+        approval_decision_final:
+          type: boolean
+          const: false
+        approval_flow_linked:
+          type: boolean
+    PolicyApprovalReceiptIssue:
+      type: object
+      required:
+        - issue_id
+        - field_path
+        - severity
+        - reason
+        - impact
+        - fix_action_id
+        - message_key
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - APPROVAL_REQUEST_REF_INVALID
+            - AGENTOPS_RECEIPT_CONTRACT_UNSUPPORTED
+            - AGENTOPS_RECEIPT_STATUS_UNSUPPORTED
+            - AGENTOPS_RECEIPT_INCOMPLETE
+            - APPROVAL_RECEIPT_REQUEST_MISMATCH
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum:
+            - info
+            - warning
+            - blocked
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    PolicyApprovalReceiptSourceOfTruth:
+      type: object
+      required:
+        - approval_request
+        - approval_receipt
+        - policy_decision
+        - approval
+        - capability_grant
+        - store_projection
+      properties:
+        approval_request:
+          type: string
+          enum:
+            - agent_store
+        approval_receipt:
+          type: string
+          enum:
+            - agentops
+        policy_decision:
+          type: string
+          enum:
+            - agentops_not_decided_by_receipt
+        approval:
+          type: string
+          enum:
+            - agentops
+        capability_grant:
+          type: string
+          enum:
+            - agentops_not_issued_by_store
+        store_projection:
+          type: string
+          enum:
+            - agent_store_receipt_only
+    ActionDescriptor:
+      type: object
+      required:
+        - action_id
+        - target_system
+        - enabled
+        - requires_permission
+        - audit_required
+        - message_key
+      properties:
+        action_id:
+          type: string
+          enum:
+            - view_agentops_approval
+            - poll_agentops_approval_receipt
+            - fix_agentops_approval_request
+            - refresh_agentops_approval_receipt
+        target_system:
+          type: string
+          enum:
+            - agent_store
+            - agentops
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - IDEMPOTENCY_KEY_CONFLICT
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum:
+            - error
+            - blocked
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        details:
+          type: object

@@ -1,0 +1,331 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Feedback Owner Response Loop API
+  version: 0.1.0
+paths:
+  /api/v1/agents/feedback-owner-response-loops:
+    post:
+      operationId: transitionFeedbackOwnerResponseLoop
+      summary: Apply an audited feedback lifecycle transition
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeedbackOwnerResponseLoopRequest"
+      responses:
+        "200":
+          description: Feedback owner response loop projection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeedbackOwnerResponseLoopResponse"
+        "400":
+          description: Malformed feedback transition request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    FeedbackOwnerResponseLoopRequest:
+      type: object
+      required: [feedback, transition]
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        feedback:
+          $ref: "#/components/schemas/FeedbackSnapshot"
+        transition:
+          $ref: "#/components/schemas/FeedbackTransition"
+    FeedbackSnapshot:
+      type: object
+      required: [feedback_id, agent_id, agent_version, feedback_state]
+      properties:
+        feedback_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        feedback_state:
+          type: string
+          enum: [new, submitted, triaged, owner_replied, planned, fixed, rejected, released]
+        title:
+          type: string
+        feedback_type:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        submitted_by:
+          type: string
+        timeline:
+          type: array
+          items:
+            type: object
+    FeedbackTransition:
+      type: object
+      required: [transition_action, actor_id, actor_role, message]
+      properties:
+        feedback_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        transition_action:
+          type: string
+          enum: [submit, triage, owner_reply, plan, fix, reject, release]
+        actor_id:
+          type: string
+        actor_role:
+          type: string
+          enum: [submitter, triage, owner]
+        message:
+          type: string
+        commitment:
+          type: string
+        occurred_at:
+          type: string
+          format: date-time
+        release_ref:
+          type: string
+        release_version:
+          type: string
+        released_at:
+          type: string
+          format: date-time
+    FeedbackOwnerResponseLoopResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, audit_id, feedback_owner_response_loop]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        feedback_owner_response_loop:
+          $ref: "#/components/schemas/FeedbackOwnerResponseLoop"
+    FeedbackOwnerResponseLoop:
+      type: object
+      required:
+        - contract_schema_version
+        - feedback_id
+        - agent_id
+        - agent_version
+        - feedback_state
+        - previous_state
+        - transition_action
+        - feedback
+        - owner_response
+        - release_linkage
+        - timeline
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [feedback_owner_response_loop.v1]
+        feedback_id:
+          type: string
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        feedback_state:
+          type: string
+          enum: [submitted, triaged, owner_replied, planned, fixed, rejected, released]
+        previous_state:
+          type: string
+        transition_action:
+          type: string
+          enum: [submit, triage, owner_reply, plan, fix, reject, release]
+        feedback:
+          $ref: "#/components/schemas/FeedbackSnapshot"
+        owner_response:
+          $ref: "#/components/schemas/OwnerResponseSnapshot"
+        release_linkage:
+          $ref: "#/components/schemas/ReleaseLinkage"
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedbackTimelineEvent"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/FeedbackLoopIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/FeedbackLoopSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    OwnerResponseSnapshot:
+      type: object
+      required: [owner_response_required, actor_id, actor_role, message, commitment]
+      properties:
+        owner_response_required:
+          type: boolean
+        actor_id:
+          type: string
+        actor_role:
+          type: string
+        message:
+          type: string
+        commitment:
+          type: string
+    ReleaseLinkage:
+      type: object
+      required: [release_required, release_ref, release_version, released_at]
+      properties:
+        release_required:
+          type: boolean
+        release_ref:
+          type: string
+        release_version:
+          type: string
+        released_at:
+          type: string
+    FeedbackTimelineEvent:
+      type: object
+      required:
+        - event_id
+        - transition_action
+        - result_state
+        - actor_id
+        - actor_role
+        - message
+        - occurred_at
+        - audit_id
+        - trace_id
+      properties:
+        event_id:
+          type: string
+        transition_action:
+          type: string
+        result_state:
+          type: string
+        actor_id:
+          type: string
+        actor_role:
+          type: string
+        message:
+          type: string
+        occurred_at:
+          type: string
+        audit_id:
+          type: string
+        trace_id:
+          type: string
+    FeedbackLoopIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - INVALID_TRANSITION_ACTION
+            - INVALID_FEEDBACK_TRANSITION
+            - FEEDBACK_IDENTITY_REQUIRED
+            - ACTOR_REQUIRED
+            - TRANSITION_MESSAGE_REQUIRED
+            - OWNER_RESPONSE_REQUIRED
+            - RELEASE_LINK_REQUIRED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    FeedbackLoopSourceOfTruth:
+      type: object
+      required: [feedback, owner_response, release_linkage, notifications]
+      properties:
+        feedback:
+          type: string
+          enum: [agent_store_feedback]
+        owner_response:
+          type: string
+          enum: [agent_store_owner_response]
+        release_linkage:
+          type: string
+          enum: [agent_store_release_linkage]
+        notifications:
+          type: string
+          enum: [agent_store_notification_queue]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agent_runtime, agentops, ai_autosdlc_cli, evidence_vault]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - message_key
+        - severity
+        - retryable
+        - recommended_action_id
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object

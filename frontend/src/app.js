@@ -73,6 +73,18 @@ function actionMessage(action) {
   if (actionId === "continue_health_review") {
     return "HealthSummary 新鲜度可展示，但不会作为推荐或 Actual L5 的依据。";
   }
+  if (actionId === "confirm_listing_fields") {
+    return "字段确认已进入预览；Owner 确认前不会把候选字段写成治理事实。";
+  }
+  if (actionId === "prepare_draft_review_submission") {
+    return "上架向导已准备好草案提交材料；进入 pending_review 留给后续提交阶段。";
+  }
+  if (actionId === "resolve_runtime_gate") {
+    return "Runtime Gate 仍阻断上架预览，需要先处理 Runtime 版本或能力问题。";
+  }
+  if (actionId === "return_to_field_confirmation") {
+    return "已返回字段确认；TODO、unknown 或缺 Owner 不能进入草案审核。";
+  }
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
@@ -150,6 +162,7 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
+      listingWizard: window.AgentStoreMock.listingWizard,
       recommendationStates: {},
       recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
@@ -663,6 +676,171 @@ new window.Vue({
         next_action: {
           action_id: "request_agentops_health_summary",
           target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedListingWizard: function selectedListingWizard() {
+      var agent = this.selectedAgent;
+      var wizard;
+      var wizards = this.listingWizard || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "listing_wizard_shell.v1",
+          wizard_state: "empty",
+          source_step: {
+            step_state: "empty",
+            source_id: "catalog-empty-filter",
+            source_type: "not_applicable",
+            source_ref: "",
+            next_action: this.selectedView.primary_action
+          },
+          field_confirmation: {
+            step_state: "empty",
+            fields: []
+          },
+          validation_report: {
+            step_state: "empty",
+            package_id: "not-applicable",
+            draft_status: "not_applicable",
+            issue_count: 0,
+            fix_prompt_count: 0,
+            issues: [],
+            next_action: this.selectedView.primary_action
+          },
+          detail_preview: {
+            step_state: "blocked",
+            display_name: "未选择 Agent",
+            runtime_availability_state: "manifest_incomplete",
+            runtime_display_name_zh: "Manifest 待补齐",
+            health_freshness_state: "health_unavailable",
+            health_recommendation_basis_allowed: false
+          },
+          steps: [
+            {
+              step_id: "source_selection",
+              label: "来源选择",
+              step_state: "empty",
+              owner_system: "agent_store"
+            }
+          ],
+          source_of_truth: {
+            package_manifest: "catalog_filter",
+            draft_review: "not_submitted_until_027"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      wizard = wizards[agent.agent_id];
+      if (wizard) {
+        return wizard;
+      }
+      return {
+        contract_schema_version: "listing_wizard_shell.v1",
+        wizard_state: "needs_field_confirmation",
+        source_step: {
+          step_state: "selected",
+          source_id: "catalog-" + safeId(agent.agent_id),
+          source_type: "catalog_candidate",
+          source_ref: agent.agent_id + "@" + agent.version,
+          next_action: {
+            action_id: "confirm_listing_fields",
+            target_system: "agent_store",
+            enabled: true,
+            requires_permission: true,
+            audit_required: true
+          }
+        },
+        field_confirmation: {
+          step_state: "needs_owner_input",
+          fields: [
+            {
+              field_path: "owner_team",
+              value: agent.owner_team,
+              confirmation_state: "confirmed",
+              source: "catalog_candidate"
+            },
+            {
+              field_path: "runtime_contract_version",
+              value: this.selectedRuntimeAvailability.required_runtime_contract_version || "",
+              confirmation_state: "needs_owner_input",
+              source: "runtime_availability_summary.v1"
+            }
+          ]
+        },
+        validation_report: {
+          step_state: "validation_failed",
+          package_id: agent.agent_id + "@" + agent.version,
+          draft_status: "validation_failed",
+          issue_count: 1,
+          fix_prompt_count: 1,
+          issues: [
+            {
+              issue_id: "LISTING_WIZARD_FIXTURE_MISSING",
+              field_path: "runtime_contract_version",
+              severity: "blocked",
+              fix_action_id: "confirm_listing_fields"
+            }
+          ],
+          next_action: {
+            action_id: "return_to_field_confirmation",
+            target_system: "agent_store",
+            enabled: true,
+            requires_permission: true,
+            audit_required: true
+          }
+        },
+        detail_preview: {
+          step_state: "blocked",
+          agent_id: agent.agent_id,
+          display_name: agent.display_name,
+          summary: agent.summary,
+          owner_team: agent.owner_team,
+          version: agent.version,
+          runtime_availability_state: this.selectedRuntimeAvailability.availability_state,
+          runtime_display_name_zh: this.selectedRuntimeAvailability.display_name_zh,
+          health_freshness_state: this.selectedHealthSummaryFreshness.freshness_state,
+          health_recommendation_basis_allowed: false
+        },
+        steps: [
+          {
+            step_id: "source_selection",
+            label: "来源选择",
+            step_state: "completed",
+            owner_system: "agent_store"
+          },
+          {
+            step_id: "field_confirmation",
+            label: "字段确认",
+            step_state: "needs_owner_input",
+            owner_system: "agent_store"
+          },
+          {
+            step_id: "validation_report",
+            label: "校验报告",
+            step_state: "validation_failed",
+            owner_system: "agent_store"
+          },
+          {
+            step_id: "detail_preview",
+            label: "详情预览",
+            step_state: "blocked",
+            owner_system: "agent_store"
+          }
+        ],
+        source_of_truth: {
+          package_manifest: "agent_store_upload_candidate",
+          field_confirmation: "owner_confirmed_before_review",
+          package_validation: "agent_store_package_validation",
+          runtime_availability: "agent_runtime_echo_or_probe",
+          health_summary: "agentops",
+          draft_review: "not_submitted_until_027"
+        },
+        next_action: {
+          action_id: "return_to_field_confirmation",
+          target_system: "agent_store",
           enabled: true,
           requires_permission: true,
           audit_required: true

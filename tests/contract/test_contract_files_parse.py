@@ -19,9 +19,18 @@ def test_all_openapi_contracts_parse_and_have_response_envelopes() -> None:
         "agent-manifest-runtime.openapi.yaml",
         "agent-registry.openapi.yaml",
         "agentops-summary.openapi.yaml",
+        "contract-registry-traceability.openapi.yaml",
+        "draft-review-submission.openapi.yaml",
+        "feedback-owner-response-loop.openapi.yaml",
         "health-summary-freshness.openapi.yaml",
         "installation-bootstrap.openapi.yaml",
+        "installation-runtime-handoff.openapi.yaml",
+        "lifecycle-governance-baseline.openapi.yaml",
+        "managed-installer-preview.openapi.yaml",
         "package-validation.openapi.yaml",
+        "policy-approval-echo.openapi.yaml",
+        "policy-approval-receipt.openapi.yaml",
+        "policy-approval-request.openapi.yaml",
         "recommendation-state.openapi.yaml",
         "runtime-availability.openapi.yaml",
         "skill-registry-notification.openapi.yaml",
@@ -198,6 +207,428 @@ def test_health_summary_freshness_contract_documents_refresh_guard() -> None:
     ]
     assert "agentops" in action["properties"]["target_system"]["enum"]
     assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_installation_runtime_handoff_contract_documents_runtime_binding() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "installation-runtime-handoff.openapi.yaml"
+    )
+    operation = contract["paths"][
+        "/api/v1/installations/{installation_id}/runtime-handoff"
+    ]["post"]
+    responses = operation["responses"]
+    handoff = contract["components"]["schemas"]["InstallationRuntimeHandoff"]
+    source_of_truth = contract["components"]["schemas"][
+        "InstallationRuntimeSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "403", "404", "409"}.issubset(responses.keys())
+    assert {
+        "runtime_handoff_ready",
+        "artifact_hash_mismatch",
+        "device_binding_mismatch",
+        "installation_not_ready",
+    }.issubset(set(handoff["properties"]["handoff_state"]["enum"]))
+    assert "runtime_consumption_allowed" in handoff["required"]
+    assert source_of_truth["properties"]["installation"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["device_binding"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["runtime_consumption"]["enum"] == [
+        "agent_runtime_echo_or_request"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert (
+        "ARTIFACT_HASH_MISMATCH"
+        in contract["components"]["schemas"]["InstallationRuntimeHandoffIssue"][
+            "properties"
+        ]["issue_id"]["enum"]
+    )
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_draft_review_submission_contract_documents_final_review_gate() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "draft-review-submission.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/draft-review-submissions"]["post"]
+    responses = operation["responses"]
+    submission = contract["components"]["schemas"]["DraftReviewSubmission"]
+    issue = contract["components"]["schemas"]["DraftReviewSubmissionIssue"]
+    source_of_truth = contract["components"]["schemas"][
+        "DraftReviewSubmissionSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "pending_review",
+        "validation_blocked",
+        "runtime_gate_blocked",
+        "owner_confirmation_required",
+    }.issubset(set(submission["properties"]["submission_state"]["enum"]))
+    assert submission["properties"]["draft_status"]["enum"] == [
+        "pending_review",
+        "draft_review_blocked",
+    ]
+    assert "review_queue_entry" in submission["required"]
+    assert {
+        "PACKAGE_VALIDATION_NOT_PASSED",
+        "PLACEHOLDER_VALUE_BLOCKED",
+        "RUNTIME_GATE_NOT_READY",
+        "OWNER_CONFIRMATION_REQUIRED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["owner_confirmation"]["enum"] == [
+        "agent_store_owner_explicit_confirmation"
+    ]
+    assert source_of_truth["properties"]["draft_review_queue"]["enum"] == [
+        "agent_store"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_policy_approval_echo_contract_documents_agentops_authority() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "policy-approval-echo.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/policy-approval-echoes"]["post"]
+    responses = operation["responses"]
+    echo = contract["components"]["schemas"]["PolicyApprovalEcho"]
+    projection = contract["components"]["schemas"]["StoreProjection"]
+    source_of_truth = contract["components"]["schemas"]["PolicyApprovalSourceOfTruth"]
+    issue = contract["components"]["schemas"]["PolicyApprovalEchoIssue"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "policy_allowed",
+        "approval_pending",
+        "approval_expired",
+        "policy_denied",
+        "agentops_echo_unavailable",
+    }.issubset(set(echo["properties"]["echo_state"]["enum"]))
+    assert projection["properties"]["projection_mode"]["enum"] == ["agentops_echo_only"]
+    assert projection["properties"]["store_decision_authority"]["enum"] == ["none"]
+    assert projection["properties"]["store_override_allowed"]["const"] is False
+    assert projection["properties"]["capability_grant_issued"]["const"] is False
+    assert source_of_truth["properties"]["policy_decision"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["approval"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["capability_grant"]["enum"] == [
+        "agentops_not_issued_by_store"
+    ]
+    assert "AGENTOPS_APPROVAL_EXPIRED" in issue["properties"]["issue_id"]["enum"]
+    assert (
+        "AGENTOPS_APPROVAL_EXPIRES_AT_INVALID"
+        in issue["properties"]["issue_id"]["enum"]
+    )
+    assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_policy_approval_request_contract_documents_agentops_request_boundary() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "policy-approval-request.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/policy-approval-requests"]["post"]
+    responses = operation["responses"]
+    request = contract["components"]["schemas"]["PolicyApprovalRequest"]
+    agentops_request = contract["components"]["schemas"]["AgentOpsApprovalRequest"]
+    projection = contract["components"]["schemas"]["StoreProjection"]
+    issue = contract["components"]["schemas"]["PolicyApprovalRequestIssue"]
+    source_of_truth = contract["components"]["schemas"][
+        "PolicyApprovalRequestSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert request["properties"]["contract_schema_version"]["enum"] == [
+        "policy_approval_request.v1"
+    ]
+    assert {
+        "approval_request_ready",
+        "requester_required",
+        "policy_context_incomplete",
+        "justification_required",
+    }.issubset(set(request["properties"]["request_state"]["enum"]))
+    assert agentops_request["properties"]["target_system"]["enum"] == ["agentops"]
+    assert agentops_request["properties"]["request_contract"]["enum"] == [
+        "policy_approval_request.v1"
+    ]
+    assert projection["properties"]["store_decision_authority"]["enum"] == ["none"]
+    assert projection["properties"]["store_override_allowed"]["const"] is False
+    assert projection["properties"]["capability_grant_issued"]["const"] is False
+    assert {
+        "REQUESTER_ROLE_UNAUTHORIZED",
+        "POLICY_CONTEXT_INCOMPLETE",
+        "JUSTIFICATION_REQUIRED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["approval_request"]["enum"] == ["agent_store"]
+    assert source_of_truth["properties"]["approval"]["enum"] == ["agentops"]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_policy_approval_receipt_contract_documents_agentops_receipt_boundary() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "policy-approval-receipt.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/policy-approval-receipts"]["post"]
+    responses = operation["responses"]
+    receipt = contract["components"]["schemas"]["PolicyApprovalReceipt"]
+    agentops_receipt = contract["components"]["schemas"]["AgentOpsApprovalReceiptInput"]
+    projection = contract["components"]["schemas"]["StoreReceiptProjection"]
+    issue = contract["components"]["schemas"]["PolicyApprovalReceiptIssue"]
+    source_of_truth = contract["components"]["schemas"][
+        "PolicyApprovalReceiptSourceOfTruth"
+    ]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert receipt["properties"]["contract_schema_version"]["enum"] == [
+        "policy_approval_receipt.v1"
+    ]
+    assert {
+        "approval_receipt_accepted",
+        "approval_receipt_pending",
+        "approval_receipt_rejected",
+        "approval_receipt_unavailable",
+    }.issubset(set(receipt["properties"]["receipt_state"]["enum"]))
+    assert agentops_receipt["properties"]["receipt_contract"]["enum"] == [
+        "policy_approval_receipt.v1"
+    ]
+    assert projection["properties"]["projection_mode"]["enum"] == [
+        "agentops_receipt_only"
+    ]
+    assert projection["properties"]["store_decision_authority"]["enum"] == ["none"]
+    assert projection["properties"]["capability_grant_issued"]["const"] is False
+    assert projection["properties"]["approval_decision_final"]["const"] is False
+    assert {
+        "AGENTOPS_RECEIPT_CONTRACT_UNSUPPORTED",
+        "AGENTOPS_RECEIPT_INCOMPLETE",
+        "APPROVAL_RECEIPT_REQUEST_MISMATCH",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["approval_receipt"]["enum"] == ["agentops"]
+    assert source_of_truth["properties"]["policy_decision"]["enum"] == [
+        "agentops_not_decided_by_receipt"
+    ]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_managed_installer_preview_contract_documents_preview_only_state_machine() -> (
+    None
+):
+    contract = load_openapi_contract(
+        default_contracts_dir() / "managed-installer-preview.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/managed-installer-previews"]["post"]
+    responses = operation["responses"]
+    preview = contract["components"]["schemas"]["ManagedInstallerPreview"]
+    step = contract["components"]["schemas"]["ManagedInstallerStep"]
+    issue = contract["components"]["schemas"]["ManagedInstallerIssue"]
+    source_of_truth = contract["components"]["schemas"]["ManagedInstallerSourceOfTruth"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "ready_to_install_preview",
+        "preview_passed",
+        "download_blocked",
+        "signature_blocked",
+        "policy_blocked",
+        "runtime_handoff_blocked",
+        "smoke_test_failed",
+    }.issubset(set(preview["properties"]["installer_state"]["enum"]))
+    assert preview["properties"]["execution_mode"]["enum"] == ["preview_only"]
+    assert preview["properties"]["real_install_started"]["const"] is False
+    assert {
+        "download_artifact",
+        "verify_signature",
+        "create_isolated_install",
+        "smoke_test",
+        "failure_diagnostics",
+    }.issubset(set(step["properties"]["step_id"]["enum"]))
+    assert {
+        "DOWNLOAD_SOURCE_UNAVAILABLE",
+        "SIGNATURE_OR_HASH_UNTRUSTED",
+        "POLICY_APPROVAL_NOT_ALLOWED",
+        "RUNTIME_HANDOFF_NOT_READY",
+        "SMOKE_TEST_FAILED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["installer_execution"]["enum"] == [
+        "not_started_preview_only"
+    ]
+    assert "agent_runtime" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_feedback_owner_response_loop_contract_documents_lifecycle() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "feedback-owner-response-loop.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/feedback-owner-response-loops"][
+        "post"
+    ]
+    responses = operation["responses"]
+    loop = contract["components"]["schemas"]["FeedbackOwnerResponseLoop"]
+    transition = contract["components"]["schemas"]["FeedbackTransition"]
+    issue = contract["components"]["schemas"]["FeedbackLoopIssue"]
+    source_of_truth = contract["components"]["schemas"]["FeedbackLoopSourceOfTruth"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "submitted",
+        "triaged",
+        "owner_replied",
+        "planned",
+        "fixed",
+        "rejected",
+        "released",
+    }.issubset(set(loop["properties"]["feedback_state"]["enum"]))
+    assert {
+        "submit",
+        "triage",
+        "owner_reply",
+        "plan",
+        "fix",
+        "reject",
+        "release",
+    }.issubset(set(transition["properties"]["transition_action"]["enum"]))
+    assert {
+        "OWNER_RESPONSE_REQUIRED",
+        "RELEASE_LINK_REQUIRED",
+        "INVALID_FEEDBACK_TRANSITION",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert source_of_truth["properties"]["owner_response"]["enum"] == [
+        "agent_store_owner_response"
+    ]
+    assert source_of_truth["properties"]["release_linkage"]["enum"] == [
+        "agent_store_release_linkage"
+    ]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_lifecycle_governance_contract_documents_version_lifecycle() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "lifecycle-governance-baseline.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/agents/lifecycle-governance"]["post"]
+    responses = operation["responses"]
+    lifecycle = contract["components"]["schemas"]["LifecycleGovernance"]
+    issue = contract["components"]["schemas"]["LifecycleGovernanceIssue"]
+    source_of_truth = contract["components"]["schemas"]["LifecycleSourceOfTruth"]
+    impact = contract["components"]["schemas"]["ImpactScope"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+    error_codes = contract["components"]["schemas"]["ErrorResponse"]["properties"][
+        "error_code"
+    ]["enum"]
+
+    assert {"200", "400", "409"}.issubset(responses.keys())
+    assert {
+        "active",
+        "upgrade_available",
+        "rollback_available",
+        "deprecated",
+        "disabled",
+        "security_revoked",
+    }.issubset(set(lifecycle["properties"]["lifecycle_state"]["enum"]))
+    assert {
+        "upgrade",
+        "rollback",
+        "deprecate",
+        "disable",
+        "security_revoke",
+    }.issubset(set(lifecycle["properties"]["transition_action"]["enum"]))
+    assert {
+        "SECURITY_EVIDENCE_REQUIRED",
+        "SECURITY_REVOKED_TERMINAL",
+        "REPLACEMENT_VERSION_REQUIRED",
+        "ROLLBACK_VERSION_REQUIRED",
+        "IMPACT_SCOPE_REQUIRED",
+    }.issubset(set(issue["properties"]["issue_id"]["enum"]))
+    assert "affected_installation_count" in impact["required"]
+    assert source_of_truth["properties"]["replacement"]["enum"] == [
+        "agent_store_replacement_mapping"
+    ]
+    assert source_of_truth["properties"]["impact_scope"]["enum"] == [
+        "agent_store_installation_inventory"
+    ]
+    assert "agentops" in action["properties"]["target_system"]["enum"]
+    assert "IDEMPOTENCY_KEY_CONFLICT" in error_codes
+
+
+def test_contract_registry_traceability_contract_documents_registry_axes() -> None:
+    contract = load_openapi_contract(
+        default_contracts_dir() / "contract-registry-traceability.openapi.yaml"
+    )
+    operation = contract["paths"]["/api/v1/contracts/traceability"]["get"]
+    responses = operation["responses"]
+    registry = contract["components"]["schemas"]["ContractRegistryTraceability"]
+    entry = contract["components"]["schemas"]["ContractTraceabilityEntry"]
+    summary = contract["components"]["schemas"]["ContractCoverageSummary"]
+    source_of_truth = contract["components"]["schemas"]["ContractRegistrySourceOfTruth"]
+    action = contract["components"]["schemas"]["ActionDescriptor"]
+
+    assert {"200"}.issubset(responses.keys())
+    assert registry["properties"]["contract_schema_version"]["enum"] == [
+        "contract_registry_traceability.v1"
+    ]
+    assert {"complete", "incomplete"}.issubset(
+        set(registry["properties"]["registry_status"]["enum"])
+    )
+    assert {
+        "contract_id",
+        "contract_file",
+        "primary_schema",
+        "owner",
+        "producer",
+        "consumers",
+        "cct_ids",
+        "contract_test_files",
+        "appendix_anchor",
+    }.issubset(entry["required"])
+    assert (
+        "contract_registry_traceability.v1"
+        in entry["properties"]["contract_id"]["enum"]
+    )
+    assert {
+        "Agent Store",
+        "AgentOps",
+        "Agent Runtime",
+    }.issubset(set(entry["properties"]["producer"]["enum"]))
+    assert "Ai_AutoSDLC" in entry["properties"]["consumers"]["items"]["enum"]
+    assert {
+        "total_contracts",
+        "contracts_with_cct",
+        "contracts_with_contract_tests",
+        "complete_traceability",
+        "unmapped_contracts",
+    }.issubset(summary["required"])
+    assert source_of_truth["properties"]["appendix"]["enum"] == [
+        "docs/cross-project-contract-appendix.md"
+    ]
+    assert "complete_contract_traceability" in action["properties"]["action_id"]["enum"]
 
 
 def test_skill_registry_contract_documents_lifecycle_and_conflict_errors() -> None:
