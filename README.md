@@ -21,6 +21,34 @@ python -m ai_sdlc adapter status
 python -m ai_sdlc run --dry-run
 ```
 
+## Start The Framework
+
+For AI-SDLC `v0.7.9`, the normal project entry is:
+
+```sh
+ai-sdlc init .
+```
+
+`ai-sdlc init .` automatically runs the safe startup rehearsal, then tells you
+to switch to the AI chat with one next command in Chinese and English.
+
+It is not a beginner-path setup step.
+
+If an older guide mentions `ai-sdlc install`, treat `No such command 'install'`
+as expected drift and use the current update path instead:
+
+```sh
+ai-sdlc self-update check
+ai-sdlc self-update check --upgrade-existing
+```
+
+Current release notes and offline assets:
+
+- `docs/releases/v0.7.9.md`
+- `releases/download/v0.7.9/ai-sdlc-offline-0.7.9-windows-amd64.zip`
+- `releases/download/v0.7.9/ai-sdlc-offline-0.7.9-macos-arm64.tar.gz`
+- `releases/download/v0.7.9/ai-sdlc-offline-0.7.9-linux-amd64.tar.gz`
+
 ## Compatibility
 
 The protected branch gate is `Compatibility Gate Result`. It aggregates:
