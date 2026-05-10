@@ -309,6 +309,19 @@ def _display(
     redacted: bool,
     now: datetime,
 ) -> dict[str, object]:
+    if redacted:
+        return {
+            "evidence_level": "redacted",
+            "confidence": None,
+            "identity_confidence": None,
+            "missing_evidence": [],
+            "score_template_id": "",
+            "calculated_at": "",
+            "valid_until": "",
+            "summary_validity_state": "degraded",
+            "display_label": "待刷新",
+            "redacted": True,
+        }
     if not quality:
         return {
             "evidence_level": "unavailable",
@@ -329,13 +342,9 @@ def _display(
         else _string(quality.get("summary_validity_state")) or "fresh"
     )
     return {
-        "evidence_level": "redacted"
-        if redacted
-        else _string(quality.get("evidence_level")),
-        "confidence": None if redacted else _float_or_none(quality.get("confidence")),
-        "identity_confidence": None
-        if redacted
-        else _float_or_none(quality.get("identity_confidence")),
+        "evidence_level": _string(quality.get("evidence_level")),
+        "confidence": _float_or_none(quality.get("confidence")),
+        "identity_confidence": _float_or_none(quality.get("identity_confidence")),
         "missing_evidence": list(_string_list(quality.get("missing_evidence"))),
         "score_template_id": _string(quality.get("score_template_id")),
         "calculated_at": _string(quality.get("calculated_at")),
@@ -362,6 +371,9 @@ def _issues(
     now: datetime,
 ) -> list[QualityEvidenceAccessIssue]:
     issues: list[QualityEvidenceAccessIssue] = []
+    if not can_view_summary:
+        issues.append(_issue("QUALITY_SUMMARY_REDACTED", "viewer_context"))
+        return issues
     if not quality:
         issues.append(
             _issue(
@@ -370,8 +382,6 @@ def _issues(
             )
         )
         return issues
-    if not can_view_summary:
-        issues.append(_issue("QUALITY_SUMMARY_REDACTED", "viewer_context"))
     if _quality_expired(quality, now=now):
         issues.append(_issue("QUALITY_SUMMARY_EXPIRED", "quality_evidence.valid_until"))
     if _string(quality.get("score_template_id")) not in accepted_score_template_ids:

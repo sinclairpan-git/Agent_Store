@@ -85,6 +85,12 @@ def test_quality_evidence_access_redacts_unauthorized_summary() -> None:
     assert summary["permission_state"] == "summary_redacted"
     assert summary["display"]["evidence_level"] == "redacted"
     assert summary["display"]["confidence"] is None
+    assert summary["display"]["identity_confidence"] is None
+    assert summary["display"]["missing_evidence"] == []
+    assert summary["display"]["score_template_id"] == ""
+    assert summary["display"]["calculated_at"] == ""
+    assert summary["display"]["valid_until"] == ""
+    assert summary["display"]["summary_validity_state"] == "degraded"
     assert summary["access"]["evidence_vault_request_required"] is True
     assert summary["access"]["request_access_url"] == "/evidence-vault/requests/new"
     assert summary["next_action"]["target_system"] == "evidence_vault"
@@ -103,6 +109,8 @@ def test_quality_evidence_access_redacts_when_viewer_permission_is_absent() -> N
 
     assert summary["summary_state"] == "summary_redacted"
     assert summary["display"]["confidence"] is None
+    assert summary["display"]["missing_evidence"] == []
+    assert summary["display"]["score_template_id"] == ""
     assert summary["access"]["evidence_vault_request_required"] is True
     assert summary["next_action"]["action_id"] == "request_evidence_access"
 
@@ -280,4 +288,10 @@ def test_quality_evidence_access_prioritizes_redaction_when_summary_missing() ->
     assert summary["summary_state"] == "summary_redacted"
     assert summary["permission_state"] == "summary_redacted"
     assert summary["display"]["redacted"] is True
+    assert summary["display"]["evidence_level"] == "redacted"
+    assert summary["display"]["missing_evidence"] == []
+    assert summary["display"]["score_template_id"] == ""
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "QUALITY_SUMMARY_REDACTED"
+    }
     assert summary["next_action"]["action_id"] == "request_evidence_access"
