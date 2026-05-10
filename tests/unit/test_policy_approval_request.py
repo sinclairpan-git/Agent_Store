@@ -61,6 +61,23 @@ def test_policy_approval_request_requires_policy_context() -> None:
     assert request["next_action"]["action_id"] == "complete_policy_context"
 
 
+def test_policy_approval_request_requires_data_scopes() -> None:
+    request = _request(
+        policy_context={
+            "policy_ref": "policy://agentops/runtime/default",
+            "risk_level": "medium",
+            "runtime_contract_version": "runtime-contract.v1",
+            "permission_intents": ["read_repo"],
+            "data_scopes": [],
+        }
+    )
+
+    assert request["request_state"] == "policy_context_incomplete"
+    assert request["agentops_request"]["dispatch_allowed"] is False
+    assert request["store_projection"]["dispatch_allowed"] is False
+    assert request["issues"][0]["issue_id"] == "POLICY_CONTEXT_INCOMPLETE"
+
+
 def test_policy_approval_request_requires_justification() -> None:
     request = _request(justification="")
 

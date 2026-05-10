@@ -295,6 +295,8 @@ def _policy_context_issues(
     ]
     if not policy_context.get("permission_intents"):
         missing.append("permission_intents")
+    if not policy_context.get("data_scopes"):
+        missing.append("data_scopes")
     if missing:
         return [
             PolicyApprovalRequestIssue(

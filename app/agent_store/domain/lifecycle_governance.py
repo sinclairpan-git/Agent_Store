@@ -389,11 +389,11 @@ def _impact_count(transition: Mapping[str, object]) -> int:
 
 def _has_impact_count(transition: Mapping[str, object]) -> bool:
     value = transition.get("affected_installation_count")
-    return isinstance(value, int) and value >= 0
+    return type(value) is int and value >= 0
 
 
 def _int_value(value: object) -> int:
-    return value if isinstance(value, int) and value >= 0 else 0
+    return value if type(value) is int and value >= 0 else 0
 
 
 def _evidence_ref(transition: Mapping[str, object]) -> str:

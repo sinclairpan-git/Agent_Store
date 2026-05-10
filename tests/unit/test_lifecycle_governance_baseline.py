@@ -105,6 +105,22 @@ def test_lifecycle_governance_allows_zero_installation_impact_scope() -> None:
     assert lifecycle["next_action"]["action_id"] == "notify_disabled_version"
 
 
+def test_lifecycle_governance_rejects_boolean_installation_impact_scope() -> None:
+    lifecycle = _baseline(
+        transition=_transition(
+            "disable",
+            replacement_version="",
+            affected_installation_count=True,
+        )
+    )
+
+    assert lifecycle["lifecycle_state"] == "active"
+    assert lifecycle["impact_scope"]["affected_installation_count"] == 0
+    assert any(
+        issue["issue_id"] == "IMPACT_SCOPE_REQUIRED" for issue in lifecycle["issues"]
+    )
+
+
 def test_lifecycle_governance_security_revoke_requires_security_actor_and_evidence() -> (
     None
 ):
