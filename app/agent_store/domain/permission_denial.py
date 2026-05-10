@@ -161,7 +161,12 @@ def build_permission_denial_action_summary(
         denial_scenario=response_scenario,
         denial_state=denial_state,
         permission_state=_permission_state(scenario, denial_state),
-        page=_page(scenario, context=context, viewer=viewer, state=denial_state),
+        page=_page(
+            scenario if denial_state != "denial_unavailable" else "",
+            context=context,
+            viewer=viewer,
+            state=denial_state,
+        ),
         permission=_permission_payload(context, viewer, decision),
         raw_trace_exposed=False,
         raw_evidence_exposed=False,

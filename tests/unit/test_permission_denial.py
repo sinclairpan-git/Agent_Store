@@ -139,7 +139,31 @@ def test_permission_denial_rejects_client_supplied_identity_context() -> None:
     ).to_dict()
 
     assert summary["denial_state"] == "denial_unavailable"
+    assert summary["page"]["title"] == "权限状态待刷新"
     assert summary["primary_action"]["action_id"] == "refresh_identity"
     assert {issue["issue_id"] for issue in summary["issues"]} == {
         "TRUSTED_AUTH_CONTEXT_REQUIRED"
     }
+
+
+def test_permission_denial_untrusted_identity_does_not_render_specific_policy_page() -> (
+    None
+):
+    context = {
+        "denial_scenario": "policy_blocked",
+        "agent_id": "framework.ai-autosdlc",
+        "agent_version": "1.0.0",
+        "policy_ref": "policy/high-risk",
+    }
+    summary = build_permission_denial_action_summary(
+        denial_context=context,
+        viewer_context=_viewer(identity_source="client_user_id"),
+        permission_decision=_decision(),
+        trace_id="trace-038",
+        audit_id="audit-038",
+    ).to_dict()
+
+    assert summary["denial_scenario"] == "policy_blocked"
+    assert summary["denial_state"] == "denial_unavailable"
+    assert summary["page"]["title"] == "权限状态待刷新"
+    assert summary["page"]["notification_rule"] == "audit_only"
