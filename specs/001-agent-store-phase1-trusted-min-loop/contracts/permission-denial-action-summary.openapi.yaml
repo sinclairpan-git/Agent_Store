@@ -1,0 +1,387 @@
+openapi: 3.1.0
+info:
+  title: Agent Store Permission Denial Action Summary API
+  version: 0.1.0
+paths:
+  /api/v1/agents/permission-denial-action-summaries:
+    post:
+      operationId: summarizePermissionDenialAction
+      summary: Project permission failure facts into a Store-safe action summary
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PermissionDenialActionRequest"
+      responses:
+        "200":
+          description: Permission denial action summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PermissionDenialActionResponse"
+        "400":
+          description: Malformed permission denial request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Idempotency key conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    PermissionDenialActionRequest:
+      type: object
+      properties:
+        trace_id:
+          type: string
+        audit_id:
+          type: string
+        denial_context:
+          $ref: "#/components/schemas/DenialContext"
+        viewer_context:
+          $ref: "#/components/schemas/ViewerContext"
+        permission_decision:
+          $ref: "#/components/schemas/PermissionDecision"
+    DenialContext:
+      type: object
+      properties:
+        denial_scenario:
+          type: string
+          enum:
+            - not_visible
+            - visible_not_installable
+            - raw_evidence_denied
+            - high_risk_approval_required
+            - policy_blocked
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        agent_display_name:
+          type: string
+        denied_scope:
+          type: string
+        resource_scope:
+          type: string
+        request_id:
+          type: string
+        policy_ref:
+          type: string
+        request_access_url:
+          type: string
+        owner_contact_url:
+          type: string
+        policy_url:
+          type: string
+        replacement_url:
+          type: string
+        raw_trace_url:
+          type: string
+        raw_evidence_url:
+          type: string
+    ViewerContext:
+      type: object
+      properties:
+        auth_context_id:
+          type: string
+        subject_user_id:
+          type: string
+        identity_source:
+          type: string
+        return_path:
+          type: string
+    PermissionDecision:
+      type: object
+      properties:
+        permission_decision_id:
+          type: string
+        decision:
+          type: string
+          enum: [deny, approval_required]
+        denied_scope:
+          type: string
+        request_access_url:
+          type: string
+    PermissionDenialActionResponse:
+      type: object
+      required:
+        - schema_version
+        - trace_id
+        - error_code
+        - audit_id
+        - permission_denial_action_summary
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [OK]
+        audit_id:
+          type: string
+        permission_denial_action_summary:
+          $ref: "#/components/schemas/PermissionDenialActionSummary"
+    PermissionDenialActionSummary:
+      type: object
+      required:
+        - contract_schema_version
+        - agent_id
+        - agent_version
+        - denial_scenario
+        - denial_state
+        - permission_state
+        - page
+        - permission
+        - raw_trace_exposed
+        - raw_evidence_exposed
+        - store_grant_issued
+        - store_policy_override_allowed
+        - primary_action
+        - secondary_action
+        - issues
+        - source_of_truth
+        - next_action
+      properties:
+        contract_schema_version:
+          type: string
+          enum: [permission_denial_action_summary.v1]
+        agent_id:
+          type: string
+        agent_version:
+          type: string
+        denial_scenario:
+          type: string
+          enum:
+            - not_visible
+            - visible_not_installable
+            - raw_evidence_denied
+            - high_risk_approval_required
+            - policy_blocked
+        denial_state:
+          type: string
+          enum:
+            - visibility_denied
+            - install_permission_required
+            - raw_evidence_access_required
+            - agentops_approval_required
+            - agentops_policy_blocked
+            - denial_unavailable
+        permission_state:
+          type: string
+          enum:
+            - visibility_denied
+            - install_denied
+            - evidence_vault_required
+            - approval_required
+            - policy_denied
+            - permission_unknown
+        page:
+          $ref: "#/components/schemas/PermissionDenialPage"
+        permission:
+          $ref: "#/components/schemas/PermissionProjection"
+        raw_trace_exposed:
+          type: boolean
+          const: false
+        raw_evidence_exposed:
+          type: boolean
+          const: false
+        store_grant_issued:
+          type: boolean
+          const: false
+        store_policy_override_allowed:
+          type: boolean
+          const: false
+        primary_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+        secondary_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/PermissionDenialIssue"
+        source_of_truth:
+          $ref: "#/components/schemas/PermissionDenialSourceOfTruth"
+        next_action:
+          $ref: "#/components/schemas/ActionDescriptor"
+    PermissionDenialPage:
+      type: object
+      required:
+        - title
+        - plain_language_explanation
+        - message_key
+        - severity
+        - return_path
+        - visible_roles
+        - notification_rule
+        - audit_required
+      properties:
+        title:
+          type: string
+        plain_language_explanation:
+          type: string
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum: [blocked, warning]
+        return_path:
+          type: string
+        empty_state_copy:
+          type: string
+        error_state_copy:
+          type: string
+        visible_roles:
+          type: array
+          items:
+            type: string
+        notification_rule:
+          type: string
+        audit_required:
+          type: boolean
+        agent_display_name:
+          type: string
+    PermissionProjection:
+      type: object
+      required:
+        - permission_decision_id
+        - decision
+        - denied_scope
+        - resource_scope
+        - request_id
+        - policy_ref
+        - auth_context_id
+        - subject_user_id
+        - request_access_url
+        - raw_trace_url
+        - raw_evidence_url
+      properties:
+        permission_decision_id:
+          type: string
+        decision:
+          type: string
+        denied_scope:
+          type: string
+        resource_scope:
+          type: string
+        request_id:
+          type: string
+        policy_ref:
+          type: string
+        auth_context_id:
+          type: string
+        subject_user_id:
+          type: string
+        request_access_url:
+          type: string
+        raw_trace_url:
+          type: string
+          enum: [""]
+        raw_evidence_url:
+          type: string
+          enum: [""]
+    PermissionDenialIssue:
+      type: object
+      required: [issue_id, field_path, severity, reason, impact, fix_action_id, message_key]
+      properties:
+        issue_id:
+          type: string
+          enum:
+            - DENIAL_SCENARIO_UNSUPPORTED
+            - TRUSTED_AUTH_CONTEXT_REQUIRED
+            - PERMISSION_DECISION_REQUIRED
+            - POLICY_REF_REQUIRED
+            - RAW_PERMISSION_LINK_STRIPPED
+        field_path:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        reason:
+          type: string
+        impact:
+          type: string
+        fix_action_id:
+          type: string
+        message_key:
+          type: string
+    PermissionDenialSourceOfTruth:
+      type: object
+      required:
+        - identity
+        - permission_decision
+        - policy
+        - raw_evidence
+        - projection
+      properties:
+        identity:
+          type: string
+          enum: [trusted_iam_auth_context]
+        permission_decision:
+          type: string
+          enum: [iam_or_agentops_policy_echo]
+        policy:
+          type: string
+          enum: [agentops]
+        raw_evidence:
+          type: string
+          enum: [evidence_vault]
+        projection:
+          type: string
+          enum: [agent_store]
+    ActionDescriptor:
+      type: object
+      required: [action_id, target_system, enabled, requires_permission, audit_required]
+      properties:
+        action_id:
+          type: string
+        target_system:
+          type: string
+          enum: [agent_store, agentops, evidence_vault]
+        enabled:
+          type: boolean
+        requires_permission:
+          type: boolean
+        audit_required:
+          type: boolean
+        href:
+          type: string
+        message_key:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [schema_version, trace_id, error_code, message_key, severity, retryable]
+      properties:
+        schema_version:
+          type: string
+        trace_id:
+          type: string
+        error_code:
+          type: string
+          enum: [VALIDATION_ERROR, IDEMPOTENCY_KEY_CONFLICT]
+        message_key:
+          type: string
+        severity:
+          type: string
+          enum: [info, warning, error, blocked]
+        retryable:
+          type: boolean
+        recommended_action_id:
+          type: string
+        support_ref:
+          type: string
+        audit_id:
+          type: string
+        details:
+          type: object

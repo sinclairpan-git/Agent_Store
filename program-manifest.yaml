@@ -157,40 +157,44 @@ specs:
   path: specs/037-quality-evidence-access-summary
   depends_on:
   - 036-installation-distribution-summary
+- id: 038-permission-denial-action-summary
+  path: specs/038-permission-denial-action-summary
+  depends_on:
+  - 037-quality-evidence-access-summary
 truth_snapshot:
-  generated_at: '2026-05-10T09:52:31Z'
+  generated_at: '2026-05-10T10:49:19Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 92ddb0d
-  authoring_hash: 7fea72ad828c5392b17f3f8cba9557b783cb2597ccdc3c2b8b025597fe1af3f0
+  repo_revision: '8854781'
+  authoring_hash: 928cb4ac89b27b96713026333845f4049b15786847a56ace6fd2ec1ab6c59424
   source_hashes: {}
-  snapshot_hash: cd6f205f0d3c37aa3422db2c090534fa2d6d9023d6df821cefbd3ed4ca9871e1
+  snapshot_hash: 18c78c4c0a19edc6d8529eff2e7d5b5023255a2d6a7c9d7451269fa7f2c1cf3b
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 188
-    mapped_sources: 188
+    total_sources: 193
+    mapped_sources: 193
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
     deferred_signal_count: 161
-    non_goal_signal_count: 26
+    non_goal_signal_count: 27
     layer_totals:
       blueprint: 1
-      spec: 37
-      plan: 37
-      tasks: 37
-      execution: 37
-      close: 37
+      spec: 38
+      plan: 38
+      tasks: 38
+      execution: 38
+      close: 38
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 37
-      plan: 37
-      tasks: 37
-      execution: 37
-      close: 37
+      spec: 38
+      plan: 38
+      tasks: 38
+      execution: 38
+      close: 38
       defect: 1
       release: 1
     entries:
@@ -1868,6 +1872,51 @@ truth_snapshot:
       phase_signal_count: 2
       deferred_signal_count: 2
       non_goal_signal_count: 0
+    - path: specs/038-permission-denial-action-summary/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 038-permission-denial-action-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/038-permission-denial-action-summary/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 038-permission-denial-action-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/038-permission-denial-action-summary/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 038-permission-denial-action-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/038-permission-denial-action-summary/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 038-permission-denial-action-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/038-permission-denial-action-summary/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 038-permission-denial-action-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect
