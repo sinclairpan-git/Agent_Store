@@ -37,6 +37,7 @@ DEFAULT_CHANNELS = {
     "lifecycle_replacement_available": ("notification_center", "owner_dashboard"),
     "security_revoked": ("risk_list", "wecom", "notification_center", "audit_log"),
 }
+TRUSTED_AUDIENCE_SOURCE = "trusted_iam_or_owner_directory"
 
 
 def _string(value: object) -> str:
@@ -237,7 +238,7 @@ def _issues(
         issues.append(_issue("AGENT_ID_REQUIRED", "event_context.agent_id"))
     if not audit_id:
         issues.append(_issue("AUDIT_ID_REQUIRED", "audit_id"))
-    if not _audience_ids(audience_context):
+    if not _trusted_audience(audience_context):
         issues.append(_issue("TRUSTED_AUDIENCE_REQUIRED", "audience_context"))
     requested_value = event.get("requested_channels")
     requested_channels = _string_list(requested_value)
@@ -305,14 +306,19 @@ def _audience(audience_context: Mapping[str, object]) -> dict[str, object]:
     user_ids = _string_list(audience_context.get("user_ids"))
     owner_team_ids = _string_list(audience_context.get("owner_team_ids"))
     security_group_ids = _string_list(audience_context.get("security_group_ids"))
+    audience_source = _audience_source(audience_context)
     return {
-        "trusted_audience": bool(user_ids or owner_team_ids or security_group_ids),
+        "trusted_audience": bool(user_ids or owner_team_ids or security_group_ids)
+        and audience_source == TRUSTED_AUDIENCE_SOURCE,
         "user_ids": list(user_ids),
         "owner_team_ids": list(owner_team_ids),
         "security_group_ids": list(security_group_ids),
-        "audience_source": _string(audience_context.get("audience_source"))
-        or "trusted_iam_or_owner_directory",
+        "audience_source": audience_source,
     }
+
+
+def _audience_source(audience_context: Mapping[str, object]) -> str:
+    return _string(audience_context.get("audience_source")) or TRUSTED_AUDIENCE_SOURCE
 
 
 def _audience_ids(audience_context: Mapping[str, object]) -> tuple[str, ...]:
@@ -320,6 +326,12 @@ def _audience_ids(audience_context: Mapping[str, object]) -> tuple[str, ...]:
         _string_list(audience_context.get("user_ids"))
         + _string_list(audience_context.get("owner_team_ids"))
         + _string_list(audience_context.get("security_group_ids"))
+    )
+
+
+def _trusted_audience(audience_context: Mapping[str, object]) -> bool:
+    return bool(_audience_ids(audience_context)) and (
+        _audience_source(audience_context) == TRUSTED_AUDIENCE_SOURCE
     )
 
 

@@ -125,6 +125,22 @@ def test_notification_routing_blocks_missing_trusted_audience() -> None:
     }
 
 
+def test_notification_routing_blocks_client_supplied_audience_source() -> None:
+    summary = _summary(
+        "approval_required",
+        audience_overrides={
+            "audience_source": "client_user_id",
+        },
+    )
+
+    assert summary["routing_state"] == "routing_blocked"
+    assert summary["audience"]["trusted_audience"] is False
+    assert summary["audience"]["audience_source"] == "client_user_id"
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "TRUSTED_AUDIENCE_REQUIRED"
+    }
+
+
 def test_notification_routing_unsupported_event_uses_contract_safe_event_type() -> None:
     summary = _summary("unknown_event")
 

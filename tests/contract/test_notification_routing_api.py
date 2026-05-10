@@ -183,3 +183,25 @@ def test_notification_routing_api_forces_risk_list_for_empty_revocation_channels
     assert {issue["issue_id"] for issue in summary["issues"]} == {
         "RISK_LIST_CHANNEL_FORCED"
     }
+
+
+def test_notification_routing_api_blocks_client_supplied_audience_source() -> None:
+    payload = _payload()
+    audience_context = dict(payload["audience_context"])
+    audience_context["audience_source"] = "client_user_id"
+    payload["audience_context"] = audience_context
+
+    status, body = NotificationRoutingAPI().summarize_notification_route(
+        payload,
+        headers={"Idempotency-Key": "notification-route-9"},
+    )
+
+    assert status == 200
+    summary = body["notification_routing_summary"]
+    assert summary["routing_state"] == "routing_blocked"
+    assert summary["audience"]["trusted_audience"] is False
+    assert summary["audience"]["audience_source"] == "client_user_id"
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "RISK_LIST_CHANNEL_FORCED",
+        "TRUSTED_AUDIENCE_REQUIRED",
+    }
