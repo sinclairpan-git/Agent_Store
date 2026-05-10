@@ -164,6 +164,35 @@ def test_quality_evidence_access_degrades_unknown_score_template() -> None:
     assert summary["next_action"]["action_id"] == "request_score_template_refresh"
 
 
+def test_quality_evidence_access_normalizes_accepted_template_ids() -> None:
+    summary = build_quality_evidence_access_summary(
+        agentops_summary=_agentops_summary(),
+        viewer_context=_viewer(),
+        trace_id="trace-037",
+        audit_id="audit-037",
+        accepted_score_template_ids=(" agentops-owned ",),
+    ).to_response()["quality_evidence_access_summary"]
+
+    assert summary["summary_state"] == "summary_ready"
+    assert summary["issues"] == []
+
+
+def test_quality_evidence_access_ignores_boolean_source_event_count() -> None:
+    agentops_summary = _agentops_summary(
+        run_evidence={
+            "run_id": "run-037",
+            "session_id": "session-037",
+            "evidence_summary_id": "evidence-037",
+            "source_event_count": True,
+            "source_event_ids": ["event-1", "event-2"],
+        }
+    )
+
+    summary = _summary(agentops_summary)
+
+    assert summary["run_binding"]["source_event_count"] == 2
+
+
 def test_quality_evidence_access_strips_raw_trace_and_evidence_urls() -> None:
     summary = _summary(
         _agentops_summary(

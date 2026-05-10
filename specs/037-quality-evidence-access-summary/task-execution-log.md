@@ -15,3 +15,6 @@
 - Codex Review 修复后专项验证：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：13 passed。
 - Codex Review 修复后全量验证：`uv run pytest -q`：442 passed；`uv run ruff check app tests`：All checks passed；`uv run ruff format --check app tests`：142 files already formatted。
 - Codex Review 修复后 AI-SDLC：truth sync ready，truth audit ready/fresh，`run --dry-run` PASS，`run` PASS。
+- Codex Review 第二轮 P2 修复：`accepted_score_template_ids` 入集合前先 trim；boolean `source_event_count` 不再当作 int 事件数。
+- 第二轮修复后专项验证：`uv run pytest tests/unit/test_quality_evidence_access.py tests/contract/test_quality_evidence_access_api.py -q`：15 passed。
+- 第二轮修复后全量验证：`uv run pytest -q`：444 passed；ruff check / format check、truth sync/audit、AI-SDLC dry-run/run 均通过。

@@ -202,7 +202,9 @@ def build_quality_evidence_access_summary(
         _string(viewer.get("request_access_url")) or DEFAULT_EVIDENCE_VAULT_REQUEST_URL
     )
     accepted_templates = {
-        template for template in accepted_score_template_ids if _string(template)
+        normalized
+        for template in accepted_score_template_ids
+        if (normalized := _string(template))
     }
     issues = tuple(
         _issues(
@@ -336,7 +338,7 @@ def _display(
 
 def _source_event_count(run: Mapping[str, object]) -> int:
     value = run.get("source_event_count")
-    if isinstance(value, int) and value >= 0:
+    if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
         return value
     return len(_string_list(run.get("source_event_ids")))
 

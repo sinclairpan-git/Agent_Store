@@ -158,13 +158,13 @@ specs:
   depends_on:
   - 036-installation-distribution-summary
 truth_snapshot:
-  generated_at: '2026-05-10T09:35:11Z'
+  generated_at: '2026-05-10T09:40:56Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 9fee99f
+  repo_revision: be45ea4
   authoring_hash: 7fea72ad828c5392b17f3f8cba9557b783cb2597ccdc3c2b8b025597fe1af3f0
   source_hashes: {}
-  snapshot_hash: 80314e34def1e5c4d051cdfce10bd0d8f0f3595c33f011ac835273e56c5d9044
+  snapshot_hash: 053bb032ab2d42dc8b47094d930c6711733c80ca102441c49176074b62a98434
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -172,8 +172,8 @@ truth_snapshot:
     mapped_sources: 188
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 60
-    deferred_signal_count: 159
+    phase_signal_count: 62
+    deferred_signal_count: 161
     non_goal_signal_count: 26
     layer_totals:
       blueprint: 1
@@ -1856,8 +1856,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 037-quality-evidence-access-summary
-      phase_signal_count: 1
-      deferred_signal_count: 1
+      phase_signal_count: 2
+      deferred_signal_count: 2
       non_goal_signal_count: 0
     - path: specs/037-quality-evidence-access-summary/development-summary.md
       source_type: development_summary
@@ -1865,8 +1865,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 037-quality-evidence-access-summary
-      phase_signal_count: 1
-      deferred_signal_count: 1
+      phase_signal_count: 2
+      deferred_signal_count: 2
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
