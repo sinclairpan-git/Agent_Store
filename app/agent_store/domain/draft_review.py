@@ -326,9 +326,17 @@ def _validation_summary(validation: Mapping[str, object]) -> dict[str, object]:
     return {
         "validation_status": _string(validation.get("step_state")),
         "draft_status_before_submission": _string(validation.get("draft_status")),
-        "issue_count": int(validation.get("issue_count") or 0),
-        "fix_prompt_count": int(validation.get("fix_prompt_count") or 0),
+        "issue_count": _int_value(validation.get("issue_count")),
+        "fix_prompt_count": _int_value(validation.get("fix_prompt_count")),
     }
+
+
+def _int_value(value: object) -> int:
+    if type(value) is int and value >= 0:
+        return value
+    if isinstance(value, str) and value.isdecimal():
+        return int(value)
+    return 0
 
 
 def _runtime_gate(detail_preview: Mapping[str, object]) -> dict[str, object]:

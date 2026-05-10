@@ -133,6 +133,23 @@ def test_submit_draft_review_rejects_idempotency_conflict() -> None:
     assert body["error_code"] == "IDEMPOTENCY_KEY_CONFLICT"
 
 
+def test_submit_draft_review_coerces_invalid_validation_counts() -> None:
+    payload = _payload()
+    payload["listing_wizard"]["validation_report"]["issue_count"] = "not-a-number"
+    payload["listing_wizard"]["validation_report"]["fix_prompt_count"] = True
+
+    status, body = DraftReviewSubmissionAPI().submit_draft_review(
+        payload,
+        headers={"Idempotency-Key": "draft-review-invalid-counts"},
+    )
+    summary = body["draft_review_submission"]["validation_summary"]
+
+    assert status == 200
+    assert response_envelope_ok(body)
+    assert summary["issue_count"] == 0
+    assert summary["fix_prompt_count"] == 0
+
+
 def test_submit_draft_review_requires_listing_wizard_object() -> None:
     payload = _payload()
     payload["listing_wizard"] = None
