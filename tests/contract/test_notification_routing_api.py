@@ -140,3 +140,23 @@ def test_notification_routing_api_treats_changed_audit_as_idempotency_conflict()
 
     assert status == 409
     assert body["error_code"] == "IDEMPOTENCY_KEY_CONFLICT"
+
+
+def test_notification_routing_api_honors_explicit_empty_requested_channels() -> None:
+    payload = _payload()
+    event_context = dict(payload["event_context"])
+    event_context["requested_channels"] = []
+    payload["event_context"] = event_context
+
+    status, body = NotificationRoutingAPI().summarize_notification_route(
+        payload,
+        headers={"Idempotency-Key": "notification-route-7"},
+    )
+
+    assert status == 200
+    summary = body["notification_routing_summary"]
+    assert summary["routing_state"] == "routing_blocked"
+    assert summary["channels"] == []
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "NOTIFICATION_CHANNEL_REQUIRED"
+    }

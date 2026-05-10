@@ -51,6 +51,12 @@ def _string_list(value: object) -> tuple[str, ...]:
     )
 
 
+def _contains_invalid_string_list_items(value: object) -> bool:
+    if not isinstance(value, Sequence) or isinstance(value, (str, bytes)):
+        return False
+    return any(not isinstance(item, str) or not item.strip() for item in value)
+
+
 @dataclass(frozen=True)
 class NotificationRoutingIssue:
     issue_id: str
@@ -197,13 +203,20 @@ def build_notification_routing_summary(
 
 
 def _channels(event: Mapping[str, object], event_type: str) -> tuple[str, ...]:
+    has_requested_channels = "requested_channels" in event
     requested = _string_list(event.get("requested_channels"))
-    values = requested or DEFAULT_CHANNELS.get(event_type, ())
+    values = (
+        requested if has_requested_channels else DEFAULT_CHANNELS.get(event_type, ())
+    )
     deduped: list[str] = []
     for value in values:
         if value in SUPPORTED_CHANNELS and value not in deduped:
             deduped.append(value)
-    if event_type == "security_revoked" and "risk_list" not in deduped:
+    if (
+        event_type == "security_revoked"
+        and "risk_list" not in deduped
+        and (requested or not has_requested_channels)
+    ):
         deduped.insert(0, "risk_list")
     return tuple(deduped)
 
@@ -230,11 +243,12 @@ def _issues(
         issues.append(_issue("AUDIT_ID_REQUIRED", "audit_id"))
     if not _audience_ids(audience_context):
         issues.append(_issue("TRUSTED_AUDIENCE_REQUIRED", "audience_context"))
-    requested_channels = _string_list(event.get("requested_channels"))
+    requested_value = event.get("requested_channels")
+    requested_channels = _string_list(requested_value)
     unsupported = [
         channel for channel in requested_channels if channel not in SUPPORTED_CHANNELS
     ]
-    if unsupported:
+    if unsupported or _contains_invalid_string_list_items(requested_value):
         issues.append(
             _issue(
                 "NOTIFICATION_CHANNEL_UNSUPPORTED", "event_context.requested_channels"

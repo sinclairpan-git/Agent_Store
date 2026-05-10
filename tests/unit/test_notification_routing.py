@@ -139,6 +139,33 @@ def test_notification_routing_deduplicates_and_ignores_unsupported_channels() ->
     assert summary["issues"][0]["issue_id"] == "NOTIFICATION_CHANNEL_UNSUPPORTED"
 
 
+def test_notification_routing_blocks_explicit_empty_requested_channels() -> None:
+    summary = _summary(
+        "installation_failed",
+        event_overrides={"requested_channels": []},
+    )
+
+    assert summary["routing_state"] == "routing_blocked"
+    assert summary["channels"] == []
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "NOTIFICATION_CHANNEL_REQUIRED"
+    }
+
+
+def test_notification_routing_blocks_invalid_requested_channel_items() -> None:
+    summary = _summary(
+        "installation_failed",
+        event_overrides={"requested_channels": [123]},
+    )
+
+    assert summary["routing_state"] == "routing_blocked"
+    assert summary["channels"] == []
+    assert {issue["issue_id"] for issue in summary["issues"]} == {
+        "NOTIFICATION_CHANNEL_REQUIRED",
+        "NOTIFICATION_CHANNEL_UNSUPPORTED",
+    }
+
+
 def test_notification_routing_blocks_missing_event_identity() -> None:
     summary = _summary(
         "installation_failed",
