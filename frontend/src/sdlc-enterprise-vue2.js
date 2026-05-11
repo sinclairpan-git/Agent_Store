@@ -108,6 +108,10 @@
     prepare_draft_review_submission: "准备草案提交",
     track_review_queue: "跟踪审核队列",
     confirm_owner_submission: "Owner 确认提交",
+    notify_agentops_consumers: "通知 AgentOps 消费方",
+    notify_agentops_deprecation: "通知 AgentOps 废弃",
+    notify_agentops_security_revocation: "通知 AgentOps 安全撤销",
+    return_to_validation: "返回包校验",
     continue_contract_change_review: "继续合同变更复核",
     complete_contract_traceability: "补齐合同追踪",
     resolve_runtime_gate: "处理 Runtime Gate",
@@ -206,6 +210,31 @@
     RUNTIME_GATE_NOT_READY: "Runtime Gate 未就绪",
     OWNER_CONFIRMATION_REQUIRED: "需要 Owner 确认",
     DRAFT_REVIEW_SUBMISSION_MISSING: "缺草案提交 envelope",
+    skill_registry: "Skill Registry",
+    "skill_registry.v1": "Skill Registry v1",
+    "skill_registry_notification.v1": "Skill Registry 通知 v1",
+    "skill_registry_notification_ack.v1": "Skill Registry 通知回执 v1",
+    published: "已发布",
+    deprecated: "已废弃",
+    security_revoked: "安全撤销",
+    registration_blocked: "注册阻断",
+    transition_blocked: "状态转换阻断",
+    skill_published: "Skill 已发布",
+    skill_deprecated: "Skill 已废弃",
+    skill_security_revoked: "Skill 安全撤销",
+    ready_for_consumption: "可通知 AgentOps",
+    notice_required: "需要通知",
+    not_ready: "未就绪",
+    current_record_retained: "保留当前记录",
+    accepted: "已接收",
+    not_sent: "未发送",
+    agentops_consumes_agent_store_registry: "AgentOps 消费 Store Registry",
+    frontend_fallback_no_skill_registry_lifecycle: "前端降级 Skill Registry",
+    SKILL_REGISTRY_ENVELOPE_MISSING: "缺 Skill Registry envelope",
+    SKILL_APPROVAL_REQUIRED: "需要 Owner 审批",
+    SKILL_RISK_REQUIRED: "需要风险说明",
+    SECURITY_EVIDENCE_REQUIRED: "需要安全证据",
+    SKILL_SECURITY_REVOKED_TERMINAL: "安全撤销为终态",
     contract_registry_traceability: "合同注册追踪",
     "contract_registry_traceability.v1": "合同注册追踪 v1",
     complete: "追踪完整",
@@ -2895,6 +2924,122 @@
     }
   });
 
+  Vue.component("sdlc-skill-registry-lifecycle", {
+    props: ["lifecycle"],
+    template: [
+      '<section class="workspace-section skill-registry-lifecycle">',
+      '  <div class="section-heading">',
+      '    <h2>Skill Registry</h2>',
+      '    <sdlc-status-chip :label="lifecycle.registry_status" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ lifecycleCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="lifecycle.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="通知" :value="lifecycle.notification_contract_schema_version" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="回执" :value="lifecycle.ack_schema_version" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Skill" :value="skill.registry_key || skill.skill_id || \'missing\'" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="风险" :value="skill.risk_level || \'missing\'" :tone="riskTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事件" :value="eventLabel" :tone="eventTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="AgentOps" :value="consumptionLabel" :tone="consumptionTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="skill-registry-lifecycle__grid">',
+      '    <div>',
+      '      <span>Registry Record</span>',
+      '      <strong>{{ skill.skill_id || "skill missing" }}</strong>',
+      '      <small>{{ skill.skill_version || "version missing" }} / {{ skill.schema_ref || "schema missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Owner</span>',
+      '      <strong>{{ skill.owner_team || "owner missing" }}</strong>',
+      '      <small>{{ skill.owner_user || "owner_user missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Lifecycle Event</span>',
+      '      <strong>{{ eventLabel }}</strong>',
+      '      <small>{{ event.evidence_ref || event.reason || "event pending" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>AgentOps Receipt</span>',
+      '      <strong>{{ notification.delivery_state || "not_sent" }}</strong>',
+      '      <small>{{ notification.agentops_ack_id || "ack not issued" }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="lifecycle.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      skill: function skill() {
+        return this.lifecycle.skill || {};
+      },
+      event: function event() {
+        return this.lifecycle.event || {};
+      },
+      notification: function notification() {
+        return this.lifecycle.agentops_notification || {};
+      },
+      consumption: function consumption() {
+        return this.lifecycle.agentops_consumption || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.lifecycle.issues) ? this.lifecycle.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.lifecycle.registry_status === "published") {
+          return "success";
+        }
+        if (this.lifecycle.registry_status === "deprecated") {
+          return "warning";
+        }
+        if (this.lifecycle.registry_status === "security_revoked") {
+          return "danger";
+        }
+        return "danger";
+      },
+      riskTone: function riskTone() {
+        return this.skill.risk_level === "high" || this.skill.risk_level === "critical" ? "warning" : "info";
+      },
+      eventTone: function eventTone() {
+        return this.event.event_type ? this.stateTone : "warning";
+      },
+      consumptionTone: function consumptionTone() {
+        return this.consumption.notify_required ? "warning" : "neutral";
+      },
+      eventLabel: function eventLabel() {
+        return this.event.event_type || "event_pending";
+      },
+      consumptionLabel: function consumptionLabel() {
+        return [
+          this.consumption.sync_status || "not_ready",
+          this.consumption.notify_required ? "notify_required" : "notify_not_required"
+        ].join(" / ");
+      },
+      lifecycleCopy: function lifecycleCopy() {
+        if (this.lifecycle.registry_status === "published") {
+          return "Skill 已由 Agent Store 发布为 registry fact；AgentOps 只消费通知与回执，不改写 Skill 记录。";
+        }
+        if (this.lifecycle.registry_status === "security_revoked") {
+          return "Skill 已安全撤销，终态必须随 evidence ref 通知 AgentOps，不能降级回普通废弃。";
+        }
+        if (this.lifecycle.registry_status === "deprecated") {
+          return "Skill 已废弃；Store 保留 registry fact，AgentOps ack 只证明通知已接收。";
+        }
+        return "Skill Registry 注册被阻断；必须回到 Owner approval 或 Package Validation，不能绕过发布门禁。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "Store owns Skill Registry / AgentOps ack is receipt-only / no webhook / no DB / no publish bypass";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -2918,6 +3063,7 @@
       "recommendationDecision",
       "listingWizard",
       "draftReviewSubmission",
+      "skillRegistryLifecycle",
       "contractRegistryTraceability",
       "runtimeAvailability",
       "healthSummaryFreshness",
@@ -2975,6 +3121,7 @@
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-draft-review-submission :submission="draftReviewSubmission" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-draft-review-submission>',
+      '    <sdlc-skill-registry-lifecycle :lifecycle="skillRegistryLifecycle" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-skill-registry-lifecycle>',
       '    <sdlc-contract-registry-traceability :traceability="contractRegistryTraceability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-contract-registry-traceability>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',

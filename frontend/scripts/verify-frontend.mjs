@@ -114,6 +114,7 @@ for (const componentName of [
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
   "sdlc-draft-review-submission",
+  "sdlc-skill-registry-lifecycle",
   "sdlc-contract-registry-traceability",
   "sdlc-remediation-actions",
   "sdlc-shell",
@@ -493,6 +494,42 @@ for (const draftReviewSubmissionTerm of [
 ]) {
   assert(mockData.includes(draftReviewSubmissionTerm), `${draftReviewSubmissionTerm} must be represented`);
 }
+for (const skillRegistryTerm of [
+  "skillRegistryLifecycle",
+  "skill_registry.v1",
+  "skill_registry_notification.v1",
+  "skill_registry_notification_ack.v1",
+  "published",
+  "deprecated",
+  "security_revoked",
+  "registration_blocked",
+  "skill_published",
+  "skill_deprecated",
+  "skill_security_revoked",
+  "ready_for_consumption",
+  "notice_required",
+  "not_ready",
+  "accepted",
+  "not_sent",
+  "notify_agentops_consumers",
+  "notify_agentops_deprecation",
+  "notify_agentops_security_revocation",
+  "return_to_validation",
+  "agent_store_package_validation",
+  "agentops_consumes_agent_store_registry",
+  "request_payload_hash",
+  "response_payload_hash",
+  "PACKAGE_VALIDATION_NOT_PASSED",
+  "SECURITY_EVIDENCE_REQUIRED",
+  "SKILL_REGISTRY_ENVELOPE_MISSING"
+]) {
+  assert(
+    mockData.includes(skillRegistryTerm)
+      || app.includes(skillRegistryTerm)
+      || componentLibrary.includes(skillRegistryTerm),
+    `${skillRegistryTerm} must be represented`
+  );
+}
 for (const contractRegistryTerm of [
   "contractRegistryTraceability",
   "contract_registry_traceability.v1",
@@ -587,6 +624,9 @@ assert(
     && app.includes("selectedListingWizard")
     && app.includes("selectedDraftReviewSubmission")
     && app.includes("draftReviewSubmissions")
+    && app.includes("selectedSkillRegistryLifecycle")
+    && app.includes("skillRegistryLifecycle")
+    && app.includes("frontend_fallback_no_skill_registry_lifecycle")
     && app.includes("selectedContractRegistryTraceability")
     && app.includes("contractRegistryTraceability")
     && app.includes("frontend_fallback_no_contract_registry_traceability")
@@ -653,6 +693,7 @@ assert(
     && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
     && app.includes("frontend_fallback_no_draft_review_submission")
+    && app.includes("skill_registry_notification_ack.v1")
     && app.includes("contract_registry_traceability.v1")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
@@ -660,6 +701,7 @@ assert(
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
     && indexHtml.includes(":draft-review-submission=\"selectedDraftReviewSubmission\"")
+    && indexHtml.includes(":skill-registry-lifecycle=\"selectedSkillRegistryLifecycle\"")
     && indexHtml.includes(":contract-registry-traceability=\"selectedContractRegistryTraceability\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
@@ -705,15 +747,23 @@ assert(
   componentLibrary.includes("sdlc-recommendation-decision")
     && componentLibrary.includes("sdlc-listing-wizard")
     && componentLibrary.includes("sdlc-draft-review-submission")
+    && componentLibrary.includes("sdlc-skill-registry-lifecycle")
     && componentLibrary.includes("sdlc-contract-registry-traceability")
     && componentLibrary.includes("listing-wizard")
     && componentLibrary.includes("wizard-steps")
     && componentLibrary.includes("draft-review-submission__grid")
+    && componentLibrary.includes("skill-registry-lifecycle__grid")
     && componentLibrary.includes("contract-registry-traceability__focus")
     && componentLibrary.includes("contract-registry-traceability__contracts")
     && componentLibrary.includes("草案提交审核")
+    && componentLibrary.includes("Skill Registry")
     && componentLibrary.includes("合同注册追踪")
     && componentLibrary.includes("draft_review_submission.v1")
+    && componentLibrary.includes("skill_registry.v1")
+    && componentLibrary.includes("skill_registry_notification.v1")
+    && componentLibrary.includes("agentops_consumption")
+    && componentLibrary.includes("agentops_notification")
+    && componentLibrary.includes("Store owns Skill Registry / AgentOps ack is receipt-only / no webhook / no DB / no publish bypass")
     && componentLibrary.includes("contract_registry_traceability.v1")
     && componentLibrary.includes("coverage_summary")
     && componentLibrary.includes("focus_contract")

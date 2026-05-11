@@ -213,19 +213,23 @@ specs:
   path: specs/051-contract-registry-traceability-frontend-consumer
   depends_on:
   - 050-draft-review-submission-frontend-consumer
+- id: 052-skill-registry-lifecycle-frontend-consumer
+  path: specs/052-skill-registry-lifecycle-frontend-consumer
+  depends_on:
+  - 051-contract-registry-traceability-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T10:14:45Z'
+  generated_at: '2026-05-11T10:39:43Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: c7ebfe1
-  authoring_hash: f173ad020a4d050c01d4cba902641d589e1c09b0abaff053c203abf8c21e0f21
+  repo_revision: 3b5a4e8
+  authoring_hash: 438255f768483ec7f958b65785f307bcc4ddb5fb55899b5b9b160c4deaccf6a1
   source_hashes: {}
-  snapshot_hash: 777e19cbe6dfa456dcd2ef9de82d58814f78798babe3bd5e8e13f1f9eae1f1c2
+  snapshot_hash: 967fa97a24afe931ad018e3c545d553c34186d7f88a35c6ff77937e52b7c6694
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 258
-    mapped_sources: 258
+    total_sources: 263
+    mapped_sources: 263
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 63
@@ -233,20 +237,20 @@ truth_snapshot:
     non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
-      spec: 51
-      plan: 51
-      tasks: 51
-      execution: 51
-      close: 51
+      spec: 52
+      plan: 52
+      tasks: 52
+      execution: 52
+      close: 52
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 51
-      plan: 51
-      tasks: 51
-      execution: 51
-      close: 51
+      spec: 52
+      plan: 52
+      tasks: 52
+      execution: 52
+      close: 52
       defect: 1
       release: 1
     entries:
@@ -2553,6 +2557,51 @@ truth_snapshot:
       mapping_ref: 051-contract-registry-traceability-frontend-consumer
       phase_signal_count: 1
       deferred_signal_count: 1
+      non_goal_signal_count: 0
+    - path: specs/052-skill-registry-lifecycle-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 052-skill-registry-lifecycle-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/052-skill-registry-lifecycle-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 052-skill-registry-lifecycle-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/052-skill-registry-lifecycle-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 052-skill-registry-lifecycle-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/052-skill-registry-lifecycle-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 052-skill-registry-lifecycle-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/052-skill-registry-lifecycle-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 052-skill-registry-lifecycle-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
