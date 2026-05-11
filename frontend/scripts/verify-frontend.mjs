@@ -107,6 +107,7 @@ for (const componentName of [
   "sdlc-lifecycle-governance",
   "sdlc-quality-evidence-access",
   "sdlc-store-ops-deep-link",
+  "sdlc-policy-approval-echo",
   "sdlc-policy-approval-flow",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
@@ -314,8 +315,21 @@ for (const storeOpsDeepLinkTerm of [
   assert(mockData.includes(storeOpsDeepLinkTerm), `${storeOpsDeepLinkTerm} must be represented`);
 }
 for (const policyApprovalTerm of [
+  "policyApprovalEchoes",
   "policyApprovalRequests",
   "policyApprovalReceipts",
+  "policy_approval_echo.v1",
+  "policy_allowed",
+  "approval_pending",
+  "approval_expired",
+  "policy_denied",
+  "agentops_echo_unavailable",
+  "continue_store_flow",
+  "request_approval_refresh",
+  "view_blocking_policy",
+  "refresh_agentops_policy_echo",
+  "agentops_echo_only",
+  "agent_store_echo_only",
   "policy_approval_request.v1",
   "policy_approval_receipt.v1",
   "approval_request_ready",
@@ -341,6 +355,8 @@ for (const policyApprovalTerm of [
   "agentops_not_decided_by_receipt",
   "agentops_not_issued_by_store",
   "agent_store_receipt_only",
+  "AGENTOPS_POLICY_ECHO_INCOMPLETE",
+  "AGENTOPS_APPROVAL_EXPIRED",
   "POLICY_CONTEXT_INCOMPLETE",
   "JUSTIFICATION_REQUIRED",
   "REQUESTER_ROLE_UNAUTHORIZED",
@@ -451,6 +467,8 @@ assert(
     && app.includes("qualityEvidenceAccess")
     && app.includes("selectedStoreOpsDeepLink")
     && app.includes("storeOpsDeepLinks")
+    && app.includes("selectedPolicyApprovalEcho")
+    && app.includes("policyApprovalEchoes")
     && app.includes("selectedPolicyApprovalRequest")
     && app.includes("selectedPolicyApprovalReceipt")
     && app.includes("policyApprovalRequests")
@@ -515,6 +533,8 @@ assert(
     && app.includes("sanitized run/session binding")
     && app.includes("缺少绑定时 Store 不生成 Run Detail 跳转")
     && app.includes("Store 只组装请求")
+    && app.includes("AgentOps policy echo 允许继续 Store 流程")
+    && app.includes("缺失或未知回显不得被 Store 解释为允许")
     && app.includes("receipt 只表示已接收，不代表最终批准")
     && app.includes("Store 不本地推导审批结果")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
@@ -532,6 +552,7 @@ assert(
     && indexHtml.includes(":lifecycle-governance=\"selectedLifecycleGovernance\"")
     && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
     && indexHtml.includes(":store-ops-deep-link=\"selectedStoreOpsDeepLink\"")
+    && indexHtml.includes(":policy-approval-echo=\"selectedPolicyApprovalEcho\"")
     && indexHtml.includes(":policy-approval-request=\"selectedPolicyApprovalRequest\"")
     && indexHtml.includes(":policy-approval-receipt=\"selectedPolicyApprovalReceipt\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
@@ -714,6 +735,28 @@ assert(
   "Agent detail must expose sanitized Store to AgentOps deep links without raw trace or evidence URLs"
 );
 assert(
+  componentLibrary.includes("sdlc-policy-approval-echo")
+    && componentLibrary.includes("Policy Echo")
+    && componentLibrary.includes("policy_approval_echo.v1")
+    && componentLibrary.includes("echo_state")
+    && componentLibrary.includes("policy_decision")
+    && componentLibrary.includes("approval_summary")
+    && componentLibrary.includes("store_projection")
+    && componentLibrary.includes("policy-approval-echo__grid")
+    && componentLibrary.includes("policy_allowed")
+    && componentLibrary.includes("approval_pending")
+    && componentLibrary.includes("approval_expired")
+    && componentLibrary.includes("policy_denied")
+    && componentLibrary.includes("agentops_echo_unavailable")
+    && componentLibrary.includes("continue_store_flow")
+    && componentLibrary.includes("request_approval_refresh")
+    && componentLibrary.includes("view_blocking_policy")
+    && componentLibrary.includes("refresh_agentops_policy_echo")
+    && componentLibrary.includes("AgentOps policy/approval source-of-truth / Store echo-only / no override / no CapabilityGrant")
+    && componentLibrary.includes("Store 不本地推导 policy allowed"),
+  "Agent detail must expose AgentOps policy approval echo without overriding decisions or issuing grants"
+);
+assert(
   componentLibrary.includes("sdlc-policy-approval-flow")
     && componentLibrary.includes("Policy Approval")
     && componentLibrary.includes("policy_approval_request.v1")
@@ -868,6 +911,7 @@ assert(
   read("src/styles.css").includes(".action-feedback")
     && read("src/styles.css").includes(".quality-evidence__signals")
     && read("src/styles.css").includes(".store-ops-deep-link__target")
+    && read("src/styles.css").includes(".policy-approval-echo__grid")
     && read("src/styles.css").includes(".policy-approval-flow__grid")
     && read("src/styles.css").includes(".notification-routing__channels")
     && read("src/styles.css").includes(".permission-denial__scenarios")

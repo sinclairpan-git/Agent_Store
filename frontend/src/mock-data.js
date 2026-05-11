@@ -1660,6 +1660,206 @@ window.AgentStoreMock = {
       }
     }
   },
+  policyApprovalEchoes: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "policy_approval_echo.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      echo_state: "policy_allowed",
+      policy_decision: {
+        policy_decision_id: "policy-decision-framework",
+        decision: "allow",
+        policy_ref: "policy/high-risk-agent-install",
+        reason_code: "agentops_approval_approved",
+        evaluated_at: "2026-05-11T07:31:00Z",
+        valid_until: "2026-05-11T08:31:00Z",
+        agentops_trace_id: "trace-policy-framework",
+        agentops_audit_id: "agentops-audit-policy-framework"
+      },
+      approval_summary: {
+        approval_id: "approval-framework",
+        status: "approved",
+        decision: "approved",
+        expires_at: "2026-05-11T08:31:00Z",
+        request_access_url: "/agentops/approvals/approval-framework",
+        agentops_audit_id: "agentops-audit-approval-framework"
+      },
+      store_projection: {
+        projection_mode: "agentops_echo_only",
+        store_decision_authority: "none",
+        agentops_decision: "allow",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        store_may_continue: true,
+        store_block_reason: ""
+      },
+      issues: [],
+      source_of_truth: {
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_echo_only"
+      },
+      next_action: {
+        action_id: "continue_store_flow",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "policy_approval_echo.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      echo_state: "approval_pending",
+      policy_decision: {
+        policy_decision_id: "policy-decision-evidence-reporter",
+        decision: "approval_required",
+        policy_ref: "policy/evidence-export-upgrade",
+        reason_code: "approval_required_for_evidence_export",
+        evaluated_at: "2026-05-11T07:32:00Z",
+        valid_until: "2026-05-11T08:32:00Z",
+        agentops_trace_id: "trace-policy-evidence-reporter",
+        agentops_audit_id: "agentops-audit-policy-evidence"
+      },
+      approval_summary: {
+        approval_id: "approval-evidence-reporter",
+        status: "pending",
+        decision: "pending",
+        expires_at: "2026-05-11T08:32:00Z",
+        request_access_url: "/agentops/approvals/approval-evidence-reporter",
+        agentops_audit_id: "agentops-audit-approval-evidence"
+      },
+      store_projection: {
+        projection_mode: "agentops_echo_only",
+        store_decision_authority: "none",
+        agentops_decision: "approval_required",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        store_may_continue: false,
+        store_block_reason: "approval_pending"
+      },
+      issues: [],
+      source_of_truth: {
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_echo_only"
+      },
+      next_action: {
+        action_id: "view_agentops_approval",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/approvals/approval-evidence-reporter"
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "policy_approval_echo.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      echo_state: "policy_denied",
+      policy_decision: {
+        policy_decision_id: "policy-decision-security",
+        decision: "deny",
+        policy_ref: "policy/security-revoked-agent",
+        reason_code: "security_revoked_terminal",
+        evaluated_at: "2026-05-11T07:33:00Z",
+        valid_until: "2026-05-11T08:33:00Z",
+        agentops_trace_id: "trace-policy-security",
+        agentops_audit_id: "agentops-audit-policy-security"
+      },
+      approval_summary: {
+        approval_id: "approval-security",
+        status: "rejected",
+        decision: "rejected",
+        expires_at: "2026-05-11T08:33:00Z",
+        request_access_url: "/agentops/approvals/approval-security",
+        agentops_audit_id: "agentops-audit-approval-security"
+      },
+      store_projection: {
+        projection_mode: "agentops_echo_only",
+        store_decision_authority: "none",
+        agentops_decision: "deny",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        store_may_continue: false,
+        store_block_reason: "policy_denied"
+      },
+      issues: [],
+      source_of_truth: {
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_echo_only"
+      },
+      next_action: {
+        action_id: "view_blocking_policy",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/policies/policy/security-revoked-agent"
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "policy_approval_echo.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      echo_state: "approval_expired",
+      policy_decision: {
+        policy_decision_id: "policy-decision-release-notes",
+        decision: "allow",
+        policy_ref: "policy/publish-agent",
+        reason_code: "approval_echo_expired",
+        evaluated_at: "2026-05-11T06:15:00Z",
+        valid_until: "2026-05-11T07:15:00Z",
+        agentops_trace_id: "trace-policy-release-notes",
+        agentops_audit_id: "agentops-audit-policy-release-notes"
+      },
+      approval_summary: {
+        approval_id: "approval-release-notes",
+        status: "expired",
+        decision: "approved",
+        expires_at: "2026-05-11T07:15:00Z",
+        request_access_url: "/agentops/approvals/approval-release-notes",
+        agentops_audit_id: "agentops-audit-approval-release-notes"
+      },
+      store_projection: {
+        projection_mode: "agentops_echo_only",
+        store_decision_authority: "none",
+        agentops_decision: "allow",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        store_may_continue: false,
+        store_block_reason: "approval_expired"
+      },
+      issues: [
+        {
+          issue_id: "AGENTOPS_APPROVAL_EXPIRED",
+          field_path: "agentops_policy_echo.approval.expires_at",
+          severity: "warning",
+          fix_action_id: "request_approval_refresh"
+        }
+      ],
+      source_of_truth: {
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_echo_only"
+      },
+      next_action: {
+        action_id: "request_approval_refresh",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/approvals/approval-release-notes"
+      }
+    }
+  },
   policyApprovalRequests: {
     "framework.ai-autosdlc": {
       contract_schema_version: "policy_approval_request.v1",

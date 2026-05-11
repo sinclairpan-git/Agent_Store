@@ -383,6 +383,24 @@
     AGENTOPS_RECEIPT_STATUS_UNSUPPORTED: "回执状态不支持",
     AGENTOPS_RECEIPT_INCOMPLETE: "回执不完整",
     APPROVAL_RECEIPT_REQUEST_MISMATCH: "回执与请求不匹配",
+    policy_approval_echo: "Policy Approval Echo",
+    "policy_approval_echo.v1": "Policy Approval Echo v1",
+    policy_allowed: "策略允许",
+    approval_pending: "审批待处理",
+    approval_expired: "审批已过期",
+    policy_denied: "策略拒绝",
+    agentops_echo_unavailable: "AgentOps Echo 不可用",
+    agentops_echo_only: "AgentOps Echo Only",
+    agent_store_echo_only: "Store Echo Only",
+    continue_store_flow: "继续 Store 流程",
+    request_approval_refresh: "刷新审批回显",
+    view_blocking_policy: "查看阻断策略",
+    refresh_agentops_policy_echo: "刷新 Policy Echo",
+    AGENTOPS_POLICY_ECHO_INCOMPLETE: "Policy Echo 不完整",
+    AGENTOPS_POLICY_DECISION_UNSUPPORTED: "PolicyDecision 不支持",
+    AGENTOPS_APPROVAL_STATUS_UNSUPPORTED: "Approval 状态不支持",
+    AGENTOPS_APPROVAL_EXPIRES_AT_INVALID: "Approval 过期时间无效",
+    AGENTOPS_APPROVAL_EXPIRED: "Approval 已过期",
     notification_routing_summary: "通知路由摘要",
     "notification_routing_summary.v1": "通知路由摘要 v1",
     routing_ready: "路由就绪",
@@ -2066,6 +2084,130 @@
     }
   });
 
+  Vue.component("sdlc-policy-approval-echo", {
+    props: ["echo"],
+    template: [
+      '<section class="workspace-section policy-approval-echo">',
+      '  <div class="section-heading">',
+      '    <h2>Policy Echo</h2>',
+      '    <sdlc-status-chip :label="echo.echo_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ echoCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="echo.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Echo" :value="echo.echo_state" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Decision" :value="policyDecision.decision || \'missing\'" :tone="decisionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Policy" :value="policyDecision.policy_ref || \'missing\'" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Approval" :value="approvalLabel" :tone="approvalTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="可继续" :value="projection.store_may_continue ? \'allowed\' : \'blocked\'" :tone="projection.store_may_continue ? \'success\' : \'warning\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Override" :value="projection.store_override_allowed ? \'allowed\' : \'blocked\'" :tone="projection.store_override_allowed ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Grant" :value="projection.capability_grant_issued ? \'issued\' : \'not issued\'" :tone="projection.capability_grant_issued ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="policy-approval-echo__grid">',
+      '    <div>',
+      '      <span>PolicyDecision</span>',
+      '      <strong>{{ policyDecision.policy_decision_id || "decision id missing" }}</strong>',
+      '      <small>{{ policyDecision.reason_code || "reason missing" }} / {{ policyDecision.valid_until || "valid_until missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Approval</span>',
+      '      <strong>{{ approvalSummary.approval_id || "approval missing" }}</strong>',
+      '      <small>{{ displayLabel(approvalSummary.status) }} / {{ approvalSummary.expires_at || "expires_at missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Store Projection</span>',
+      '      <strong>{{ displayLabel(projection.projection_mode) }}</strong>',
+      '      <small>authority: {{ displayLabel(projection.store_decision_authority) }} / block: {{ projection.store_block_reason || "none" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>AgentOps Audit</span>',
+      '      <strong>{{ policyDecision.agentops_trace_id || "trace missing" }}</strong>',
+      '      <small>{{ policyDecision.agentops_audit_id || approvalSummary.agentops_audit_id || "audit missing" }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="echo.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      policyDecision: function policyDecision() {
+        return this.echo.policy_decision || {};
+      },
+      approvalSummary: function approvalSummary() {
+        return this.echo.approval_summary || {};
+      },
+      projection: function projection() {
+        return this.echo.store_projection || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.echo.issues) ? this.echo.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.echo.echo_state === "policy_allowed") {
+          return "success";
+        }
+        if (this.echo.echo_state === "approval_pending" || this.echo.echo_state === "approval_expired") {
+          return "warning";
+        }
+        return "danger";
+      },
+      decisionTone: function decisionTone() {
+        if (this.policyDecision.decision === "allow") {
+          return "success";
+        }
+        if (this.policyDecision.decision === "approval_required") {
+          return "warning";
+        }
+        return this.policyDecision.decision === "deny" ? "danger" : "neutral";
+      },
+      approvalTone: function approvalTone() {
+        if (this.approvalSummary.status === "approved" || this.approvalSummary.status === "not_required") {
+          return "success";
+        }
+        if (this.approvalSummary.status === "pending" || this.approvalSummary.status === "expired") {
+          return "warning";
+        }
+        return "danger";
+      },
+      approvalLabel: function approvalLabel() {
+        return [
+          this.approvalSummary.approval_id || "approval missing",
+          displayLabel(this.approvalSummary.status)
+        ].join(" / ");
+      },
+      echoCopy: function echoCopy() {
+        if (this.echo.echo_state === "policy_allowed") {
+          return "AgentOps policy echo 允许继续 Store 流程；Store 仍只是 echo-only projection，不签发 CapabilityGrant。";
+        }
+        if (this.echo.echo_state === "approval_pending") {
+          return "AgentOps 要求审批且 approval 仍 pending；Store 只提供跳转，不把 pending 解释为允许。";
+        }
+        if (this.echo.echo_state === "approval_expired") {
+          return "AgentOps approval echo 已过期；Store 必须请求刷新，不能继续安装或发布动作。";
+        }
+        if (this.echo.echo_state === "policy_denied") {
+          return "AgentOps policy denied；Store 展示阻断原因和跳转，不覆盖 AgentOps 裁决。";
+        }
+        return "AgentOps policy echo 缺失或不支持；Store 不本地推导 policy allowed。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "AgentOps policy/approval source-of-truth / Store echo-only / no override / no CapabilityGrant";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.echo.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-notification-routing", {
     props: ["summary"],
     template: [
@@ -2331,6 +2473,7 @@
       "lifecycleGovernance",
       "qualityEvidenceAccess",
       "storeOpsDeepLink",
+      "policyApprovalEcho",
       "policyApprovalRequest",
       "policyApprovalReceipt",
       "notificationRouting",
@@ -2384,6 +2527,7 @@
       '    <sdlc-lifecycle-governance :summary="lifecycleGovernance" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-lifecycle-governance>',
       '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
       '    <sdlc-store-ops-deep-link :link="storeOpsDeepLink" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-store-ops-deep-link>',
+      '    <sdlc-policy-approval-echo :echo="policyApprovalEcho" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-policy-approval-echo>',
       '    <sdlc-policy-approval-flow :request="policyApprovalRequest" :receipt="policyApprovalReceipt" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-policy-approval-flow>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',
