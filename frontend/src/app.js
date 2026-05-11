@@ -85,6 +85,42 @@ function actionMessage(action) {
   if (actionId === "continue_quality_evidence_review") {
     return "质量证据摘要可继续复核；推荐依据只采用后端允许字段，Store 前端不本地推导质量。";
   }
+  if (actionId === "request_owner_distribution_permission") {
+    return "安装分布权限申请已进入预览；Store 不向无权限 viewer 暴露聚合计数或安装明细。";
+  }
+  if (actionId === "refresh_installation_inventory") {
+    return "已请求刷新 Store installation inventory；无库存时不会把状态误判为 0 安装。";
+  }
+  if (actionId === "prepare_owner_notification") {
+    return "Owner 通知准备已进入预览；Agent Store 只展示影响范围，不发送真实通知。";
+  }
+  if (actionId === "continue_owner_distribution_review") {
+    return "安装分布可继续复核；当前面板只展示聚合计数，不展示 user、device_id 或 installation_id 明细。";
+  }
+  if (actionId === "triage_feedback") {
+    return "反馈分诊已进入预览；Agent Store 只推进可审计 lifecycle projection，不创建开放评论线程。";
+  }
+  if (actionId === "request_owner_response") {
+    return "已请求 Owner 回复；只有 Owner 角色可以推进 owner_reply、plan、fix、reject 或 release。";
+  }
+  if (actionId === "plan_or_reject_feedback") {
+    return "Owner 回复已记录；下一步只能进入计划或拒绝，不能跳过反馈生命周期。";
+  }
+  if (actionId === "mark_feedback_fixed") {
+    return "修复状态已进入预览；发布前仍必须绑定 release_ref。";
+  }
+  if (actionId === "attach_release") {
+    return "发布关联已进入预览；缺 release_ref 时不能展示为 released。";
+  }
+  if (actionId === "view_feedback_decision") {
+    return "反馈决策可查看；这是 Store-owned 产品闭环，不是 AgentOps PolicyDecision。";
+  }
+  if (actionId === "view_release_notes") {
+    return "已切到发布说明路径；Store 不在本阶段生成 release notes 或修改 AgentVersion。";
+  }
+  if (actionId === "return_to_feedback_queue") {
+    return "已返回反馈队列；缺少反馈闭环摘要时只展示保守降级路径。";
+  }
   if (actionId === "confirm_listing_fields") {
     return "字段确认已进入预览；Owner 确认前不会把候选字段写成治理事实。";
   }
@@ -201,6 +237,8 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
+      installationDistribution: window.AgentStoreMock.installationDistribution,
+      feedbackOwnerResponseLoops: window.AgentStoreMock.feedbackOwnerResponseLoops,
       qualityEvidenceAccess: window.AgentStoreMock.qualityEvidenceAccess,
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
@@ -718,6 +756,224 @@ new window.Vue({
         next_action: {
           action_id: "request_agentops_health_summary",
           target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedInstallationDistribution: function selectedInstallationDistribution() {
+      var agent = this.selectedAgent;
+      var summary;
+      var summaries = this.installationDistribution || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "installation_distribution_summary.v1",
+          agent_id: "",
+          requested_version: "",
+          distribution_state: "distribution_unavailable",
+          permission_state: "permission_required",
+          total_installations: 0,
+          active_installations: 0,
+          revoked_installations: 0,
+          failed_installations: 0,
+          status_counts: {},
+          os_counts: {},
+          version_counts: {},
+          enterprise_state_counts: {},
+          notification: {
+            notification_required: false,
+            affected_installation_count: 0,
+            reason_code: "none",
+            target_version: ""
+          },
+          privacy: {
+            individual_users_exposed: false,
+            device_ids_exposed: false,
+            installation_ids_exposed: false,
+            minimum_role: "owner",
+            aggregation_only: true
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            installation_inventory: "catalog_filter",
+            device_binding: "catalog_filter",
+            permission: "agent_store_viewer_context",
+            quality: "agentops_not_computed_here",
+            projection: "agent_store"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      summary = summaries[agent.agent_id];
+      if (summary) {
+        return summary;
+      }
+      return {
+        contract_schema_version: "installation_distribution_summary.v1",
+        agent_id: agent.agent_id,
+        requested_version: agent.version,
+        distribution_state: "distribution_unavailable",
+        permission_state: "allowed",
+        total_installations: 0,
+        active_installations: 0,
+        revoked_installations: 0,
+        failed_installations: 0,
+        status_counts: {},
+        os_counts: {},
+        version_counts: {},
+        enterprise_state_counts: {},
+        notification: {
+          notification_required: false,
+          affected_installation_count: 0,
+          reason_code: "none",
+          target_version: agent.version
+        },
+        privacy: {
+          individual_users_exposed: false,
+          device_ids_exposed: false,
+          installation_ids_exposed: false,
+          minimum_role: "owner",
+          aggregation_only: true
+        },
+        issues: [
+          {
+            issue_id: "INSTALLATION_DISTRIBUTION_SUMMARY_MISSING",
+            field_path: "installation_distribution_summary",
+            severity: "blocked",
+            fix_action_id: "refresh_installation_inventory"
+          }
+        ],
+        source_of_truth: {
+          installation_inventory: "agent_store",
+          device_binding: "agent_store",
+          permission: "agent_store_viewer_context",
+          quality: "agentops_not_computed_here",
+          projection: "frontend_fallback_no_installation_distribution_summary"
+        },
+        next_action: {
+          action_id: "refresh_installation_inventory",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedFeedbackOwnerResponseLoop: function selectedFeedbackOwnerResponseLoop() {
+      var agent = this.selectedAgent;
+      var loop;
+      var loops = this.feedbackOwnerResponseLoops || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "feedback_owner_response_loop.v1",
+          feedback_id: "",
+          agent_id: "",
+          agent_version: "",
+          feedback_state: "submitted",
+          previous_state: "new",
+          transition_action: "submit",
+          feedback: {
+            feedback_id: "",
+            agent_id: "",
+            agent_version: "",
+            feedback_state: "new",
+            title: "当前没有可评估 Agent",
+            feedback_type: "general",
+            severity: "info",
+            submitted_by: ""
+          },
+          owner_response: {
+            owner_response_required: false,
+            actor_id: "",
+            actor_role: "",
+            message: "调整筛选条件后查看反馈闭环。",
+            commitment: ""
+          },
+          release_linkage: {
+            release_required: false,
+            release_ref: "",
+            release_version: "",
+            released_at: ""
+          },
+          timeline: [],
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            feedback: "catalog_filter",
+            owner_response: "catalog_filter",
+            release_linkage: "catalog_filter",
+            notifications: "agent_store_notification_queue"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      loop = loops[agent.agent_id];
+      if (loop) {
+        return loop;
+      }
+      return {
+        contract_schema_version: "feedback_owner_response_loop.v1",
+        feedback_id: "feedback-missing-" + safeId(agent.agent_id),
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        feedback_state: "submitted",
+        previous_state: "new",
+        transition_action: "submit",
+        feedback: {
+          feedback_id: "feedback-missing-" + safeId(agent.agent_id),
+          agent_id: agent.agent_id,
+          agent_version: agent.version,
+          feedback_state: "new",
+          title: "反馈闭环待刷新",
+          feedback_type: "general",
+          severity: "info",
+          submitted_by: "unknown"
+        },
+        owner_response: {
+          owner_response_required: true,
+          actor_id: "",
+          actor_role: "",
+          message: "缺少后端 feedback_owner_response_loop envelope，前端只展示反馈队列路径。",
+          commitment: ""
+        },
+        release_linkage: {
+          release_required: false,
+          release_ref: "",
+          release_version: "",
+          released_at: ""
+        },
+        timeline: [],
+        issues: [
+          {
+            issue_id: "FEEDBACK_LOOP_SUMMARY_MISSING",
+            field_path: "feedback_owner_response_loop",
+            severity: "warning",
+            fix_action_id: "return_to_feedback_queue"
+          }
+        ],
+        source_of_truth: {
+          feedback: "agent_store_feedback",
+          owner_response: "agent_store_owner_response",
+          release_linkage: "agent_store_release_linkage",
+          notifications: "agent_store_notification_queue"
+        },
+        next_action: {
+          action_id: "return_to_feedback_queue",
+          target_system: "agent_store",
           enabled: true,
           requires_permission: true,
           audit_required: true

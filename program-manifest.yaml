@@ -177,19 +177,27 @@ specs:
   path: specs/042-quality-evidence-frontend-consumer
   depends_on:
   - 041-permission-denial-frontend-consumer
+- id: 043-installation-distribution-frontend-consumer
+  path: specs/043-installation-distribution-frontend-consumer
+  depends_on:
+  - 042-quality-evidence-frontend-consumer
+- id: 044-feedback-owner-response-frontend-consumer
+  path: specs/044-feedback-owner-response-frontend-consumer
+  depends_on:
+  - 043-installation-distribution-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T03:46:43Z'
+  generated_at: '2026-05-11T04:31:02Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: bba4ae5
-  authoring_hash: ab11e60106f7be581aa1b78cbaa32063a04a4f4b0ee29473f86bc7cd063cf762
+  repo_revision: eb33040
+  authoring_hash: 842fba658e24d3f8abf7cccc40c2e176583f2f6e8b38a5602693a4c73f7e42ea
   source_hashes: {}
-  snapshot_hash: 01c17a7901e6bfef1c39eb7435077140dbc3b8f0fcc219f3191586757ea9cb59
+  snapshot_hash: 2bd258f48c1294767a076d4c25cdfad8774a4460d0254f8043e5cb76c364e98a
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 213
-    mapped_sources: 213
+    total_sources: 223
+    mapped_sources: 223
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -197,20 +205,20 @@ truth_snapshot:
     non_goal_signal_count: 28
     layer_totals:
       blueprint: 1
-      spec: 42
-      plan: 42
-      tasks: 42
-      execution: 42
-      close: 42
+      spec: 44
+      plan: 44
+      tasks: 44
+      execution: 44
+      close: 44
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 42
-      plan: 42
-      tasks: 42
-      execution: 42
-      close: 42
+      spec: 44
+      plan: 44
+      tasks: 44
+      execution: 44
+      close: 44
       defect: 1
       release: 1
     entries:
@@ -2110,6 +2118,96 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 042-quality-evidence-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/043-installation-distribution-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 043-installation-distribution-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/043-installation-distribution-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 043-installation-distribution-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/043-installation-distribution-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 043-installation-distribution-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/043-installation-distribution-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 043-installation-distribution-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/043-installation-distribution-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 043-installation-distribution-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/044-feedback-owner-response-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 044-feedback-owner-response-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/044-feedback-owner-response-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 044-feedback-owner-response-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/044-feedback-owner-response-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 044-feedback-owner-response-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/044-feedback-owner-response-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 044-feedback-owner-response-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/044-feedback-owner-response-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 044-feedback-owner-response-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0

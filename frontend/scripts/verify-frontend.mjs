@@ -102,6 +102,8 @@ for (const componentName of [
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
   "sdlc-health-summary-freshness",
+  "sdlc-installation-distribution",
+  "sdlc-feedback-owner-response-loop",
   "sdlc-quality-evidence-access",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
@@ -171,6 +173,60 @@ for (const healthTerm of [
   "refresh_agentops_health_summary"
 ]) {
   assert(mockData.includes(healthTerm), `${healthTerm} must be represented`);
+}
+for (const installationDistributionTerm of [
+  "installationDistribution",
+  "installation_distribution_summary.v1",
+  "distribution_ready",
+  "permission_required",
+  "distribution_unavailable",
+  "empty_distribution",
+  "status_counts",
+  "os_counts",
+  "version_counts",
+  "enterprise_state_counts",
+  "notification_required",
+  "affected_installation_count",
+  "individual_users_exposed: false",
+  "device_ids_exposed: false",
+  "installation_ids_exposed: false",
+  "aggregation_only: true",
+  "agentops_not_computed_here",
+  "request_owner_distribution_permission",
+  "refresh_installation_inventory",
+  "prepare_owner_notification",
+  "continue_owner_distribution_review",
+  "INDIVIDUAL_IDENTIFIERS_STRIPPED",
+  "OWNER_DISTRIBUTION_PERMISSION_REQUIRED",
+  "INSTALLATION_INVENTORY_REQUIRED",
+  "VERSION_INSTALLATION_SCOPE_EMPTY"
+]) {
+  assert(
+    mockData.includes(installationDistributionTerm),
+    `${installationDistributionTerm} must be represented`
+  );
+}
+for (const feedbackLoopTerm of [
+  "feedbackOwnerResponseLoops",
+  "feedback_owner_response_loop.v1",
+  "submitted",
+  "triaged",
+  "owner_replied",
+  "fixed",
+  "released",
+  "owner_reply",
+  "release_ref",
+  "release_version",
+  "agent_store_feedback",
+  "agent_store_owner_response",
+  "agent_store_release_linkage",
+  "agent_store_notification_queue",
+  "request_owner_response",
+  "plan_or_reject_feedback",
+  "view_release_notes",
+  "OWNER_RESPONSE_REQUIRED"
+]) {
+  assert(mockData.includes(feedbackLoopTerm), `${feedbackLoopTerm} must be represented`);
 }
 for (const qualityEvidenceTerm of [
   "qualityEvidenceAccess",
@@ -287,6 +343,10 @@ assert(
     && app.includes("selectedRecommendationDecision")
     && app.includes("selectedRuntimeAvailability")
     && app.includes("selectedHealthSummaryFreshness")
+    && app.includes("selectedInstallationDistribution")
+    && app.includes("installationDistribution")
+    && app.includes("selectedFeedbackOwnerResponseLoop")
+    && app.includes("feedbackOwnerResponseLoops")
     && app.includes("selectedQualityEvidenceAccess")
     && app.includes("qualityEvidenceAccess")
     && app.includes("selectedNotificationRouting")
@@ -337,6 +397,10 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("Runtime 可用性摘要满足当前 Manifest")
     && app.includes("HealthSummary 新鲜度可展示")
+    && app.includes("安装分布可继续复核")
+    && app.includes("不向无权限 viewer 暴露聚合计数")
+    && app.includes("只有 Owner 角色可以推进 owner_reply")
+    && app.includes("不在本阶段生成 release notes")
     && app.includes("Store 前端不计算质量分")
     && app.includes("质量证据摘要可继续复核")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
@@ -349,6 +413,8 @@ assert(
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
+    && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
+    && indexHtml.includes(":feedback-owner-response-loop=\"selectedFeedbackOwnerResponseLoop\"")
     && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
     && indexHtml.includes(":permission-denial-action=\"selectedPermissionDenialAction\"")
@@ -399,6 +465,50 @@ assert(
     && componentLibrary.includes("推荐决策")
     && componentLibrary.includes("为什么选"),
   "Agent detail must expose governed recommendation decision"
+);
+assert(
+  componentLibrary.includes("sdlc-installation-distribution")
+    && componentLibrary.includes("安装分布")
+    && componentLibrary.includes("installation_distribution_summary.v1")
+    && componentLibrary.includes("distribution_state")
+    && componentLibrary.includes("permission_state")
+    && componentLibrary.includes("status_counts")
+    && componentLibrary.includes("os_counts")
+    && componentLibrary.includes("version_counts")
+    && componentLibrary.includes("enterprise_state_counts")
+    && componentLibrary.includes("notification_required")
+    && componentLibrary.includes("affected_installation_count")
+    && componentLibrary.includes("individual_users_exposed")
+    && componentLibrary.includes("device_ids_exposed")
+    && componentLibrary.includes("installation_id 明细")
+    && componentLibrary.includes("request_owner_distribution_permission")
+    && componentLibrary.includes("refresh_installation_inventory")
+    && componentLibrary.includes("prepare_owner_notification")
+    && componentLibrary.includes("continue_owner_distribution_review")
+    && componentLibrary.includes("agentops_not_computed_here"),
+  "Agent detail must expose installation distribution as aggregate-only owner summary"
+);
+assert(
+  componentLibrary.includes("sdlc-feedback-owner-response-loop")
+    && componentLibrary.includes("反馈闭环")
+    && componentLibrary.includes("feedback_owner_response_loop.v1")
+    && componentLibrary.includes("feedback_state")
+    && componentLibrary.includes("previous_state")
+    && componentLibrary.includes("transition_action")
+    && componentLibrary.includes("owner_response")
+    && componentLibrary.includes("release_linkage")
+    && componentLibrary.includes("release_ref")
+    && componentLibrary.includes("feedback-loop__timeline")
+    && componentLibrary.includes("audit_id")
+    && componentLibrary.includes("trace_id")
+    && componentLibrary.includes("OWNER_RESPONSE_REQUIRED")
+    && componentLibrary.includes("RELEASE_LINK_REQUIRED")
+    && componentLibrary.includes("request_owner_response")
+    && componentLibrary.includes("plan_or_reject_feedback")
+    && componentLibrary.includes("view_release_notes")
+    && componentLibrary.includes("agent_store_notification_queue")
+    && componentLibrary.includes("No comments / no ranking / no marketplace / no real notification send"),
+  "Agent detail must expose feedback owner response loop without comments, ranking, marketplace, or real notifications"
 );
 assert(
   componentLibrary.includes("sdlc-runtime-availability")
