@@ -188,6 +188,8 @@
     source_selection: "来源选择",
     field_confirmation: "字段确认",
     validation_report: "校验报告",
+    package_validation_report: "Package Validation Report",
+    "package_validation_report.v1": "Package Validation Report v1",
     detail_preview: "详情预览",
     selected: "已选择",
     confirmed: "已确认",
@@ -207,11 +209,21 @@
     owner_confirmed_before_review: "Owner 审核前确认",
     agent_store_upload_candidate: "Agent Store 上传候选",
     agent_store_package_validation: "Agent Store 包校验",
+    candidate_only_until_user_confirmed: "用户确认前仅候选",
+    agent_store_skill_registry_pending: "Skill Registry 待发布",
+    frontend_fallback_no_package_validation_report: "前端降级包校验",
+    submit_for_review: "提交审核",
+    apply_fix_prompt: "应用修复提示",
+    return_to_draft: "返回草案",
     agent_store_owner_explicit_confirmation: "Owner 显式确认",
     agentops_not_evaluated_until_review: "审核前 AgentOps 未评估",
     frontend_fallback_no_draft_review_submission: "前端降级草案提交",
     PACKAGE_VALIDATION_NOT_PASSED: "包校验未通过",
+    PACKAGE_VALIDATION_REPORT_MISSING: "缺 Package Validation Report",
     PLACEHOLDER_VALUE_BLOCKED: "占位值阻断",
+    AI_FIELD_SOURCE_REQUIRED: "AI 字段缺来源",
+    SCAN_REPORT_REF_MISSING: "缺扫描报告",
+    SKILL_SCHEMA_REQUIRED: "缺 Skill Schema",
     RUNTIME_GATE_NOT_READY: "Runtime Gate 未就绪",
     OWNER_CONFIRMATION_REQUIRED: "需要 Owner 确认",
     DRAFT_REVIEW_SUBMISSION_MISSING: "缺草案提交 envelope",
@@ -2717,6 +2729,131 @@
     }
   });
 
+  Vue.component("sdlc-package-validation-report", {
+    props: ["report"],
+    template: [
+      '<section class="workspace-section package-validation-report">',
+      '  <div class="section-heading">',
+      '    <h2>Package Validation</h2>',
+      '    <sdlc-status-chip :label="report.validation_status" :tone="statusTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ reportCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="report.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Package" :value="report.package_id" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="草案" :value="report.draft_status" :tone="statusTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Issues" :value="issues.length" :tone="issuesTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Fix Prompts" :value="fixPrompts.length" :tone="fixPrompts.length ? \'warning\' : \'neutral\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="AI 字段" :value="evidence.ai_generated_field_count || 0" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Owner 确认" :value="evidence.owner_confirmed_field_count || 0" tone="success"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Evidence" :value="evidenceLabel" :tone="evidenceTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="package-validation-report__grid">',
+      '    <div>',
+      '      <span>Validation Status</span>',
+      '      <strong>{{ report.validation_status }}</strong>',
+      '      <small>{{ report.draft_status }} / {{ report.agent_id || "agent missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Evidence Gaps</span>',
+      '      <strong>{{ evidenceLabel }}</strong>',
+      '      <small>manifest_lock / sbom_ref / scan_report_ref</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Fix Prompt Safety</span>',
+      '      <strong>{{ safePromptCount }} safe / {{ unsafePromptCount }} owner-required</strong>',
+      '      <small>{{ firstPromptLabel }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Source of Truth</span>',
+      '      <strong>{{ displayLabel(sourceOfTruth.validation_report) }}</strong>',
+      '      <small>{{ displayLabel(sourceOfTruth.package_manifest) }} / {{ displayLabel(sourceOfTruth.ai_generated_fields) }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ issue.field_path }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="report.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      issues: function issues() {
+        return Array.isArray(this.report.issues) ? this.report.issues : [];
+      },
+      fixPrompts: function fixPrompts() {
+        return Array.isArray(this.report.fix_prompts) ? this.report.fix_prompts : [];
+      },
+      evidence: function evidence() {
+        return this.report.evidence_summary || {};
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.report.source_of_truth || {};
+      },
+      statusTone: function statusTone() {
+        if (this.report.validation_status === "passed") {
+          return "success";
+        }
+        if (this.report.validation_status === "fixable") {
+          return "warning";
+        }
+        return "danger";
+      },
+      issuesTone: function issuesTone() {
+        return this.issues.some(function hasBlocked(issue) {
+          return issue.severity === "blocked";
+        }) ? "danger" : (this.issues.length ? "warning" : "success");
+      },
+      evidenceLabel: function evidenceLabel() {
+        var missing = [];
+        if (!this.evidence.manifest_lock) {
+          missing.push("manifest_lock");
+        }
+        if (!this.evidence.sbom_ref) {
+          missing.push("sbom_ref");
+        }
+        if (!this.evidence.scan_report_ref) {
+          missing.push("scan_report_ref");
+        }
+        return missing.length ? missing.join(", ") : "complete";
+      },
+      evidenceTone: function evidenceTone() {
+        return this.evidenceLabel === "complete" ? "success" : "warning";
+      },
+      safePromptCount: function safePromptCount() {
+        return this.fixPrompts.filter(function isSafe(prompt) {
+          return prompt.safe_to_apply_in_store;
+        }).length;
+      },
+      unsafePromptCount: function unsafePromptCount() {
+        return this.fixPrompts.length - this.safePromptCount;
+      },
+      firstPromptLabel: function firstPromptLabel() {
+        return this.fixPrompts.length ? this.fixPrompts[0].target_field : "no fix prompt";
+      },
+      reportCopy: function reportCopy() {
+        if (this.report.validation_status === "passed" && !this.issues.length) {
+          return "Package Validation 已通过；这只是 Store 包候选校验，不代表真实 SBOM、静态扫描或 Skill 发布已经完成。";
+        }
+        if (this.report.validation_status === "passed") {
+          return "Package Validation 仅有 warning evidence gaps；审核可继续，但缺口必须保持可见。";
+        }
+        if (this.report.validation_status === "fixable") {
+          return "Package Validation 存在可修复错误；安全修复提示仍必须保留来源和审计。";
+        }
+        return "Package Validation 存在阻断项；Owner 或来源证据补齐前不能进入正式审核。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "package candidate only / no real SBOM claim / no static scan claim / no Skill publish / no owner bypass";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-draft-review-submission", {
     props: ["submission"],
     template: [
@@ -3314,6 +3451,7 @@
       "installRequest",
       "recommendationDecision",
       "listingWizard",
+      "packageValidationReport",
       "draftReviewSubmission",
       "skillRegistryLifecycle",
       "contractRegistryTraceability",
@@ -3374,6 +3512,7 @@
       '  <div class="workspace-grid">',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
+      '    <sdlc-package-validation-report :report="packageValidationReport" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-package-validation-report>',
       '    <sdlc-draft-review-submission :submission="draftReviewSubmission" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-draft-review-submission>',
       '    <sdlc-skill-registry-lifecycle :lifecycle="skillRegistryLifecycle" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-skill-registry-lifecycle>',
       '    <sdlc-contract-registry-traceability :traceability="contractRegistryTraceability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-contract-registry-traceability>',

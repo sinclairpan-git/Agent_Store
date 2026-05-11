@@ -3613,6 +3613,194 @@ window.AgentStoreMock = {
       }
     }
   },
+  packageValidationReports: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "package_validation_report.v1",
+      package_id: "framework.ai-autosdlc@1.0.0",
+      agent_id: "framework.ai-autosdlc",
+      validation_status: "passed",
+      draft_status: "pending_review",
+      issues: [],
+      fix_prompts: [],
+      evidence_summary: {
+        manifest_lock: "lock-framework-ai-autosdlc.json",
+        sbom_ref: "sbom-framework-ai-autosdlc.spdx.json",
+        scan_report_ref: "scan-framework-ai-autosdlc-2026-05-11",
+        ai_generated_field_count: 0,
+        owner_confirmed_field_count: 6
+      },
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        validation_report: "agent_store_package_validation",
+        ai_generated_fields: "candidate_only_until_user_confirmed",
+        skill_registry: "agent_store_skill_registry_pending"
+      },
+      next_action: {
+        action_id: "submit_for_review",
+        target_system: "agent_store",
+        enabled: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "package_validation_report.v1",
+      package_id: "agentops.evidence-reporter@0.4.0",
+      agent_id: "agentops.evidence-reporter",
+      validation_status: "passed",
+      draft_status: "pending_review",
+      issues: [
+        {
+          issue_id: "SCAN_REPORT_REF_MISSING",
+          field_path: "scan_report_ref",
+          severity: "warning",
+          reason: "Static scan report is missing.",
+          impact: "Review can continue, but the validation report must keep this evidence gap visible.",
+          fix_action_id: "attach_scan_report_ref",
+          message_key: "packageValidation.evidenceMissing"
+        }
+      ],
+      fix_prompts: [
+        {
+          prompt_id: "fix-scan-report-ref-missing-scan-report-ref",
+          target_field: "scan_report_ref",
+          title: "Fix scan_report_ref",
+          prompt_text: "Attach the static scan report reference without inventing evidence.",
+          source_issue_id: "SCAN_REPORT_REF_MISSING",
+          safe_to_apply_in_store: true
+        }
+      ],
+      evidence_summary: {
+        manifest_lock: "lock-evidence-reporter.json",
+        sbom_ref: "sbom-evidence-reporter.spdx.json",
+        scan_report_ref: "",
+        ai_generated_field_count: 1,
+        owner_confirmed_field_count: 5
+      },
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        validation_report: "agent_store_package_validation",
+        ai_generated_fields: "candidate_only_until_user_confirmed",
+        skill_registry: "agent_store_skill_registry_pending"
+      },
+      next_action: {
+        action_id: "submit_for_review",
+        target_system: "agent_store",
+        enabled: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "package_validation_report.v1",
+      package_id: "security.policy-guard@0.2.1",
+      agent_id: "security.policy-guard",
+      validation_status: "validation_failed",
+      draft_status: "validation_failed",
+      issues: [
+        {
+          issue_id: "PLACEHOLDER_VALUE_BLOCKED",
+          field_path: "summary",
+          severity: "blocked",
+          reason: "Unknown, TODO, or placeholder values cannot enter formal review.",
+          impact: "Prevents low-confidence AI or placeholder metadata from becoming governance facts.",
+          fix_action_id: "replace_summary_placeholder",
+          message_key: "packageValidation.placeholderValue"
+        },
+        {
+          issue_id: "AI_FIELD_SOURCE_REQUIRED",
+          field_path: "field_sources.summary",
+          severity: "blocked",
+          reason: "AI-generated metadata must declare source before it can be reviewed.",
+          impact: "AI-generated text remains a candidate and cannot become a governance fact.",
+          fix_action_id: "add_ai_field_source",
+          message_key: "packageValidation.aiFieldSourceRequired"
+        }
+      ],
+      fix_prompts: [
+        {
+          prompt_id: "fix-placeholder-value-blocked-summary",
+          target_field: "summary",
+          title: "Fix summary",
+          prompt_text: "Replace the placeholder summary with owner-confirmed package metadata.",
+          source_issue_id: "PLACEHOLDER_VALUE_BLOCKED",
+          safe_to_apply_in_store: false
+        },
+        {
+          prompt_id: "fix-ai-field-source-required-field-sources-summary",
+          target_field: "field_sources.summary",
+          title: "Fix field_sources.summary",
+          prompt_text: "Attach source evidence for the AI-generated summary before review.",
+          source_issue_id: "AI_FIELD_SOURCE_REQUIRED",
+          safe_to_apply_in_store: false
+        }
+      ],
+      evidence_summary: {
+        manifest_lock: "",
+        sbom_ref: "",
+        scan_report_ref: "",
+        ai_generated_field_count: 2,
+        owner_confirmed_field_count: 2
+      },
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        validation_report: "agent_store_package_validation",
+        ai_generated_fields: "candidate_only_until_user_confirmed",
+        skill_registry: "agent_store_skill_registry_pending"
+      },
+      next_action: {
+        action_id: "return_to_draft",
+        target_system: "agent_store",
+        enabled: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "package_validation_report.v1",
+      package_id: "developer.release-notes@0.1.2",
+      agent_id: "developer.release-notes",
+      validation_status: "fixable",
+      draft_status: "fixable",
+      issues: [
+        {
+          issue_id: "SKILL_SCHEMA_REQUIRED",
+          field_path: "skills[0].schema_ref",
+          severity: "error",
+          reason: "Skill schema reference is required for validation and AgentOps consumption.",
+          impact: "AgentOps cannot verify action input/output contracts.",
+          fix_action_id: "add_skill_schema_ref",
+          message_key: "packageValidation.skillSchemaRequired"
+        }
+      ],
+      fix_prompts: [
+        {
+          prompt_id: "fix-skill-schema-required-skills-0-schema-ref",
+          target_field: "skills[0].schema_ref",
+          title: "Fix skills[0].schema_ref",
+          prompt_text: "Attach the Skill input/output schema reference from the package manifest.",
+          source_issue_id: "SKILL_SCHEMA_REQUIRED",
+          safe_to_apply_in_store: true
+        }
+      ],
+      evidence_summary: {
+        manifest_lock: "lock-release-notes.json",
+        sbom_ref: "",
+        scan_report_ref: "",
+        ai_generated_field_count: 1,
+        owner_confirmed_field_count: 4
+      },
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        validation_report: "agent_store_package_validation",
+        ai_generated_fields: "candidate_only_until_user_confirmed",
+        skill_registry: "agent_store_skill_registry_pending"
+      },
+      next_action: {
+        action_id: "apply_fix_prompt",
+        target_system: "agent_store",
+        enabled: true,
+        audit_required: true
+      }
+    }
+  },
   listingWizard: {
     "framework.ai-autosdlc": {
       contract_schema_version: "listing_wizard_shell.v1",

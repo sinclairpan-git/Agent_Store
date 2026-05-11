@@ -113,6 +113,7 @@ for (const componentName of [
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
+  "sdlc-package-validation-report",
   "sdlc-draft-review-submission",
   "sdlc-skill-registry-lifecycle",
   "sdlc-contract-registry-traceability",
@@ -544,6 +545,40 @@ for (const wizardTerm of [
 ]) {
   assert(mockData.includes(wizardTerm), `${wizardTerm} must be represented`);
 }
+for (const packageValidationTerm of [
+  "packageValidationReports",
+  "selectedPackageValidationReport",
+  "package_validation_report.v1",
+  "validation_status",
+  "draft_status",
+  "fix_prompts",
+  "evidence_summary",
+  "manifest_lock",
+  "sbom_ref",
+  "scan_report_ref",
+  "ai_generated_field_count",
+  "owner_confirmed_field_count",
+  "candidate_only_until_user_confirmed",
+  "agent_store_skill_registry_pending",
+  "frontend_fallback_no_package_validation_report",
+  "submit_for_review",
+  "apply_fix_prompt",
+  "return_to_draft",
+  "PLACEHOLDER_VALUE_BLOCKED",
+  "AI_FIELD_SOURCE_REQUIRED",
+  "SCAN_REPORT_REF_MISSING",
+  "SKILL_SCHEMA_REQUIRED",
+  "PACKAGE_VALIDATION_REPORT_MISSING",
+  "safe_to_apply_in_store: false",
+  "safe_to_apply_in_store: true"
+]) {
+  assert(
+    mockData.includes(packageValidationTerm)
+      || app.includes(packageValidationTerm)
+      || componentLibrary.includes(packageValidationTerm),
+    `${packageValidationTerm} must be represented`
+  );
+}
 for (const draftReviewSubmissionTerm of [
   "draftReviewSubmissions",
   "draft_review_submission.v1",
@@ -709,6 +744,9 @@ assert(
     && app.includes("selectedInstallationRuntimeHandoff")
     && app.includes("installationRuntimeHandoffs")
     && app.includes("frontend_fallback_no_installation_runtime_handoff")
+    && app.includes("selectedPackageValidationReport")
+    && app.includes("packageValidationReports")
+    && app.includes("frontend_fallback_no_package_validation_report")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -778,11 +816,14 @@ assert(
     && app.includes("Store 只展示 Runtime 回显")
     && app.includes("installation_runtime_handoff.v1")
     && app.includes("Store 只交接安装事实")
+    && app.includes("package_validation_report.v1")
+    && app.includes("不自动把 AI 文案写成治理事实")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
+    && indexHtml.includes(":package-validation-report=\"selectedPackageValidationReport\"")
     && indexHtml.includes(":draft-review-submission=\"selectedDraftReviewSubmission\"")
     && indexHtml.includes(":skill-registry-lifecycle=\"selectedSkillRegistryLifecycle\"")
     && indexHtml.includes(":contract-registry-traceability=\"selectedContractRegistryTraceability\"")
@@ -831,6 +872,7 @@ assert(
 assert(
   componentLibrary.includes("sdlc-recommendation-decision")
     && componentLibrary.includes("sdlc-listing-wizard")
+    && componentLibrary.includes("sdlc-package-validation-report")
     && componentLibrary.includes("sdlc-draft-review-submission")
     && componentLibrary.includes("sdlc-skill-registry-lifecycle")
     && componentLibrary.includes("sdlc-contract-registry-traceability")
@@ -838,6 +880,7 @@ assert(
     && componentLibrary.includes("sdlc-installation-runtime-handoff")
     && componentLibrary.includes("listing-wizard")
     && componentLibrary.includes("wizard-steps")
+    && componentLibrary.includes("package-validation-report__grid")
     && componentLibrary.includes("draft-review-submission__grid")
     && componentLibrary.includes("skill-registry-lifecycle__grid")
     && componentLibrary.includes("contract-registry-traceability__focus")
@@ -845,6 +888,7 @@ assert(
     && componentLibrary.includes("agent-manifest-runtime__grid")
     && componentLibrary.includes("installation-runtime-handoff__grid")
     && componentLibrary.includes("草案提交审核")
+    && componentLibrary.includes("Package Validation")
     && componentLibrary.includes("Skill Registry")
     && componentLibrary.includes("合同注册追踪")
     && componentLibrary.includes("AgentManifest Runtime")
@@ -867,6 +911,9 @@ assert(
     && componentLibrary.includes("Installation Fact")
     && componentLibrary.includes("Device Binding")
     && componentLibrary.includes("Store owns Installation and DeviceBinding / Runtime echo is read-only / no Runtime process / no CapabilityGrant / no PolicyDecision")
+    && componentLibrary.includes("package candidate only / no real SBOM claim / no static scan claim / no Skill publish / no owner bypass")
+    && componentLibrary.includes("Fix Prompt Safety")
+    && componentLibrary.includes("Evidence Gaps")
     && componentLibrary.includes("OpenAPI 合同、Owner、Producer、Consumer、appendix anchor 与 contract tests")
     && componentLibrary.includes("review_queue_entry")
     && componentLibrary.includes("owner_confirmation")

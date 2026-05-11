@@ -79,6 +79,15 @@ function actionMessage(action) {
   if (actionId === "review_installation_status") {
     return "已进入安装状态复核；安装或设备绑定未就绪前不会允许 Runtime 消费。";
   }
+  if (actionId === "submit_for_review") {
+    return "Package Validation 已允许提交审核；仍需后续 Owner、Runtime 和审核队列门禁确认。";
+  }
+  if (actionId === "apply_fix_prompt") {
+    return "修复提示已进入候选编辑路径；Store 只展示提示，不自动把 AI 文案写成治理事实。";
+  }
+  if (actionId === "return_to_draft") {
+    return "已返回草案修复路径；阻断级 Package Validation issue 解决前不能进入正式审核。";
+  }
   if (actionId === "continue_listing_review") {
     return "Runtime 可用性摘要满足当前 Manifest，可继续上架或安装审核。";
   }
@@ -330,6 +339,7 @@ new window.Vue({
       policyApprovalReceipts: window.AgentStoreMock.policyApprovalReceipts,
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
+      packageValidationReports: window.AgentStoreMock.packageValidationReports,
       listingWizard: window.AgentStoreMock.listingWizard,
       draftReviewSubmissions: window.AgentStoreMock.draftReviewSubmissions,
       skillRegistryLifecycle: window.AgentStoreMock.skillRegistryLifecycle,
@@ -2424,6 +2434,93 @@ new window.Vue({
           target_system: "agent_store",
           enabled: true,
           requires_permission: false,
+          audit_required: true
+        }
+      };
+    },
+    selectedPackageValidationReport: function selectedPackageValidationReport() {
+      var agent = this.selectedAgent;
+      var report;
+      var reports = this.packageValidationReports || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "package_validation_report.v1",
+          package_id: "not-applicable",
+          agent_id: "",
+          validation_status: "validation_failed",
+          draft_status: "not_applicable",
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          fix_prompts: [],
+          evidence_summary: {
+            manifest_lock: "",
+            sbom_ref: "",
+            scan_report_ref: "",
+            ai_generated_field_count: 0,
+            owner_confirmed_field_count: 0
+          },
+          source_of_truth: {
+            package_manifest: "catalog_filter",
+            validation_report: "not_applicable",
+            ai_generated_fields: "not_applicable",
+            skill_registry: "not_applicable"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      report = reports[agent.agent_id];
+      if (report) {
+        return report;
+      }
+      return {
+        contract_schema_version: "package_validation_report.v1",
+        package_id: agent.agent_id + "@" + agent.version,
+        agent_id: agent.agent_id,
+        validation_status: "validation_failed",
+        draft_status: "validation_failed",
+        issues: [
+          {
+            issue_id: "PACKAGE_VALIDATION_REPORT_MISSING",
+            field_path: "package_validation",
+            severity: "blocked",
+            fix_action_id: "return_to_validation_report",
+            message_key: "packageValidation.reportMissing"
+          }
+        ],
+        fix_prompts: [
+          {
+            prompt_id: "fix-package-validation-report-missing",
+            target_field: "package_validation",
+            title: "Return to validation report",
+            prompt_text: "Regenerate the Package Validation report from the uploaded package candidate.",
+            source_issue_id: "PACKAGE_VALIDATION_REPORT_MISSING",
+            safe_to_apply_in_store: false
+          }
+        ],
+        evidence_summary: {
+          manifest_lock: "",
+          sbom_ref: "",
+          scan_report_ref: "",
+          ai_generated_field_count: 0,
+          owner_confirmed_field_count: 0
+        },
+        source_of_truth: {
+          package_manifest: "agent_store_upload_candidate",
+          validation_report: "frontend_fallback_no_package_validation_report",
+          ai_generated_fields: "candidate_only_until_user_confirmed",
+          skill_registry: "agent_store_skill_registry_pending"
+        },
+        next_action: {
+          action_id: "return_to_validation_report",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
           audit_required: true
         }
       };
