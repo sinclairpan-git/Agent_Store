@@ -214,13 +214,13 @@ specs:
   depends_on:
   - 050-draft-review-submission-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T10:02:00Z'
+  generated_at: '2026-05-11T10:14:45Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 0a1f7a5
+  repo_revision: c7ebfe1
   authoring_hash: f173ad020a4d050c01d4cba902641d589e1c09b0abaff053c203abf8c21e0f21
   source_hashes: {}
-  snapshot_hash: d4c4fc93121919a77cc3fcac6a1c2a67c10196240b4cb00b6d85a82adc5a413f
+  snapshot_hash: 777e19cbe6dfa456dcd2ef9de82d58814f78798babe3bd5e8e13f1f9eae1f1c2
   computed_capabilities: []
   source_inventory:
     state: complete
@@ -228,8 +228,8 @@ truth_snapshot:
     mapped_sources: 258
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 62
-    deferred_signal_count: 161
+    phase_signal_count: 63
+    deferred_signal_count: 162
     non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
@@ -2551,8 +2551,8 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 051-contract-registry-traceability-frontend-consumer
-      phase_signal_count: 0
-      deferred_signal_count: 0
+      phase_signal_count: 1
+      deferred_signal_count: 1
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog

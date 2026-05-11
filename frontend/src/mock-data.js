@@ -3958,7 +3958,8 @@ window.AgentStoreMock = {
       target_system: "agent_store",
       enabled: true,
       requires_permission: true,
-      audit_required: true
+      audit_required: true,
+      message_key: "contractRegistry.actions.continueContractChangeReview"
     }
   },
   bootstrap: {

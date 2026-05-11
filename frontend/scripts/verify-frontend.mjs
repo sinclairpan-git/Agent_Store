@@ -517,6 +517,8 @@ for (const contractRegistryTerm of [
   "Risk Center",
   "continue_contract_change_review",
   "complete_contract_traceability",
+  "contractRegistry.actions.continueContractChangeReview",
+  "contractRegistry.actions.completeTraceability",
   "specs/001-agent-store-phase1-trusted-min-loop/contracts",
   "docs/cross-project-contract-appendix.md",
   "registry_projection: \"agent_store\""
