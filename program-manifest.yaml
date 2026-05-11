@@ -185,40 +185,44 @@ specs:
   path: specs/044-feedback-owner-response-frontend-consumer
   depends_on:
   - 043-installation-distribution-frontend-consumer
+- id: 045-lifecycle-governance-frontend-consumer
+  path: specs/045-lifecycle-governance-frontend-consumer
+  depends_on:
+  - 044-feedback-owner-response-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T04:31:02Z'
+  generated_at: '2026-05-11T04:56:13Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: eb33040
-  authoring_hash: 842fba658e24d3f8abf7cccc40c2e176583f2f6e8b38a5602693a4c73f7e42ea
+  repo_revision: 29190f4
+  authoring_hash: cc59b9124205a3a35173380b31bef6b94b310089c20790323a831e27e6f6ca15
   source_hashes: {}
-  snapshot_hash: 2bd258f48c1294767a076d4c25cdfad8774a4460d0254f8043e5cb76c364e98a
+  snapshot_hash: 9f97874d433ecabbf3f82cc8e940de2d90fefa821f83fd53cb7c302ee82a2404
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 223
-    mapped_sources: 223
+    total_sources: 228
+    mapped_sources: 228
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
     deferred_signal_count: 161
-    non_goal_signal_count: 28
+    non_goal_signal_count: 31
     layer_totals:
       blueprint: 1
-      spec: 44
-      plan: 44
-      tasks: 44
-      execution: 44
-      close: 44
+      spec: 45
+      plan: 45
+      tasks: 45
+      execution: 45
+      close: 45
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 44
-      plan: 44
-      tasks: 44
-      execution: 44
-      close: 44
+      spec: 45
+      plan: 45
+      tasks: 45
+      execution: 45
+      close: 45
       defect: 1
       release: 1
     entries:
@@ -2211,6 +2215,51 @@ truth_snapshot:
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
+    - path: specs/045-lifecycle-governance-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 045-lifecycle-governance-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/045-lifecycle-governance-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 045-lifecycle-governance-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/045-lifecycle-governance-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 045-lifecycle-governance-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/045-lifecycle-governance-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 045-lifecycle-governance-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/045-lifecycle-governance-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 045-lifecycle-governance-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect

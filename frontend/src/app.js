@@ -121,6 +121,21 @@ function actionMessage(action) {
   if (actionId === "return_to_feedback_queue") {
     return "已返回反馈队列；缺少反馈闭环摘要时只展示保守降级路径。";
   }
+  if (actionId === "fix_lifecycle_transition") {
+    return "生命周期迁移存在阻断项；需要补齐角色、替代版本、回退版本、影响范围或安全证据。";
+  }
+  if (actionId === "notify_security_revocation") {
+    return "安全撤销通知已进入预览；security_revoked 是终态，Store 不执行 Runtime 操作或降级该状态。";
+  }
+  if (actionId === "notify_disabled_version") {
+    return "停用版本通知已进入预览；Store 只展示影响范围，不修改 AgentVersion 存储。";
+  }
+  if (actionId === "notify_available_replacement") {
+    return "可替代版本通知已进入预览；Store 只展示 replacement/rollback 映射，不执行升级或回退。";
+  }
+  if (actionId === "notify_lifecycle_change") {
+    return "生命周期变更通知已进入预览；Store 不签发 CapabilityGrant，也不覆盖 AgentOps PolicyDecision。";
+  }
   if (actionId === "confirm_listing_fields") {
     return "字段确认已进入预览；Owner 确认前不会把候选字段写成治理事实。";
   }
@@ -239,6 +254,7 @@ new window.Vue({
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
       installationDistribution: window.AgentStoreMock.installationDistribution,
       feedbackOwnerResponseLoops: window.AgentStoreMock.feedbackOwnerResponseLoops,
+      lifecycleGovernance: window.AgentStoreMock.lifecycleGovernance,
       qualityEvidenceAccess: window.AgentStoreMock.qualityEvidenceAccess,
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
@@ -973,6 +989,131 @@ new window.Vue({
         },
         next_action: {
           action_id: "return_to_feedback_queue",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedLifecycleGovernance: function selectedLifecycleGovernance() {
+      var agent = this.selectedAgent;
+      var governance;
+      var summaries = this.lifecycleGovernance || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "lifecycle_governance_baseline.v1",
+          agent_id: "",
+          current_version: "",
+          lifecycle_state: "active",
+          previous_state: "active",
+          transition_action: "upgrade",
+          actor: {
+            actor_id: "",
+            actor_role: "",
+            reason: "当前没有可评估 Agent。",
+            evidence_ref: ""
+          },
+          version_scope: {
+            agent_id: "",
+            version: "",
+            artifact_hash: "",
+            release_status: "",
+            lifecycle_state: "active"
+          },
+          replacement: {
+            required: false,
+            replacement_version: "",
+            replacement_reason: ""
+          },
+          rollback: {
+            required: false,
+            rollback_version: "",
+            rollback_reason: ""
+          },
+          impact_scope: {
+            impact_required: false,
+            affected_installation_count: 0,
+            affected_user_count: 0,
+            replacement_available: false,
+            notification_required: false
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            agent_version: "catalog_filter",
+            lifecycle_decision: "catalog_filter",
+            replacement: "catalog_filter",
+            impact_scope: "catalog_filter",
+            agentops_notification: "agent_store_notification_queue"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      governance = summaries[agent.agent_id];
+      if (governance) {
+        return governance;
+      }
+      return {
+        contract_schema_version: "lifecycle_governance_baseline.v1",
+        agent_id: agent.agent_id,
+        current_version: agent.version,
+        lifecycle_state: "active",
+        previous_state: "active",
+        transition_action: "upgrade",
+        actor: {
+          actor_id: "",
+          actor_role: "",
+          reason: "缺少后端 lifecycle_governance envelope，前端只展示刷新治理投影路径。",
+          evidence_ref: ""
+        },
+        version_scope: {
+          agent_id: agent.agent_id,
+          version: agent.version,
+          artifact_hash: "",
+          release_status: agent.release_status || "",
+          lifecycle_state: "active"
+        },
+        replacement: {
+          required: false,
+          replacement_version: "",
+          replacement_reason: ""
+        },
+        rollback: {
+          required: false,
+          rollback_version: "",
+          rollback_reason: ""
+        },
+        impact_scope: {
+          impact_required: false,
+          affected_installation_count: 0,
+          affected_user_count: 0,
+          replacement_available: false,
+          notification_required: false
+        },
+        issues: [
+          {
+            issue_id: "LIFECYCLE_GOVERNANCE_SUMMARY_MISSING",
+            field_path: "lifecycle_governance",
+            severity: "warning",
+            fix_action_id: "fix_lifecycle_transition"
+          }
+        ],
+        source_of_truth: {
+          agent_version: "agent_store_agent_version",
+          lifecycle_decision: "agent_store_lifecycle_governance",
+          replacement: "agent_store_replacement_mapping",
+          impact_scope: "agent_store_installation_inventory",
+          agentops_notification: "agent_store_notification_queue"
+        },
+        next_action: {
+          action_id: "fix_lifecycle_transition",
           target_system: "agent_store",
           enabled: true,
           requires_permission: true,
