@@ -3654,6 +3654,260 @@ window.AgentStoreMock = {
       }
     }
   },
+  skillRegistryLifecycle: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "skill_registry.v1",
+      notification_contract_schema_version: "skill_registry_notification.v1",
+      ack_schema_version: "skill_registry_notification_ack.v1",
+      registry_status: "published",
+      skill: {
+        skill_id: "ai-sdlc-stage-gate",
+        skill_version: "1.0.0",
+        schema_ref: "schemas/ai-sdlc-stage-gate.v1.json",
+        risk_level: "high",
+        risk_justification: "Controls governed delivery gates and requires Owner-visible audit context.",
+        package_id: "framework.ai-autosdlc@1.0.0",
+        agent_id: "framework.ai-autosdlc",
+        owner_team: "SDLC Platform",
+        owner_user: "owner@sdlc-platform.example",
+        status: "published",
+        status_reason: "Published after approved Package Validation.",
+        registry_key: "ai-sdlc-stage-gate@1.0.0"
+      },
+      issues: [],
+      event: {
+        event_id: "skill_published-ai-sdlc-stage-gate-1.0.0-audit-skill-framework",
+        event_type: "skill_published",
+        skill_id: "ai-sdlc-stage-gate",
+        skill_version: "1.0.0",
+        audit_required: true,
+        reason: "Skill published after approval."
+      },
+      agentops_consumption: {
+        consumer: "agentops",
+        contract: "skill_registry.v1",
+        sync_status: "ready_for_consumption",
+        notify_required: true
+      },
+      agentops_notification: {
+        notification_id: "skill-notice-framework-ai-autosdlc",
+        schema_version: "skill_registry_notification_ack.v1",
+        delivery_state: "accepted",
+        agentops_ack_id: "ack-skill-framework-ai-autosdlc",
+        delivery_attempt_id: "attempt-skill-framework-ai-autosdlc",
+        received_event_id: "skill_published-ai-sdlc-stage-gate-1.0.0-audit-skill-framework",
+        registry_key: "ai-sdlc-stage-gate@1.0.0",
+        request_payload_hash: "sha256:skill-framework-request",
+        response_payload_hash: "sha256:skill-framework-response",
+        source_of_truth: {
+          skill_registry: "agent_store",
+          package_validation: "agent_store_package_validation",
+          agentops_consumption: "agentops_consumes_agent_store_registry"
+        }
+      },
+      source_of_truth: {
+        skill_registry: "agent_store",
+        package_validation: "agent_store_package_validation",
+        agentops_consumption: "agentops_consumes_agent_store_registry"
+      },
+      next_action: {
+        action_id: "notify_agentops_consumers",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "skill_registry.v1",
+      notification_contract_schema_version: "skill_registry_notification.v1",
+      ack_schema_version: "skill_registry_notification_ack.v1",
+      registry_status: "registration_blocked",
+      skill: {
+        skill_id: "evidence-upload-connector",
+        skill_version: "0.4.0",
+        schema_ref: "schemas/evidence-upload-connector.v1.json",
+        risk_level: "medium",
+        package_id: "agentops.evidence-reporter@0.4.0",
+        agent_id: "agentops.evidence-reporter",
+        owner_team: "AgentOps",
+        owner_user: "owner@agentops.example",
+        status: "published",
+        status_reason: "Candidate retained until Package Validation passes.",
+        registry_key: "evidence-upload-connector@0.4.0"
+      },
+      issues: [
+        {
+          issue_id: "PACKAGE_VALIDATION_NOT_PASSED",
+          field_path: "package_validation.validation_status",
+          severity: "blocked",
+          reason: "Package Validation must pass before Skill publication.",
+          impact: "Skill Registry cannot publish a package with unresolved validation issues.",
+          fix_action_id: "rerun_package_validation",
+          message_key: "skillRegistry.packageValidationRequired"
+        }
+      ],
+      event: null,
+      agentops_consumption: {
+        consumer: "agentops",
+        contract: "skill_registry.v1",
+        sync_status: "not_ready",
+        notify_required: false
+      },
+      agentops_notification: {
+        schema_version: "skill_registry_notification_ack.v1",
+        delivery_state: "not_sent",
+        agentops_ack_id: "",
+        delivery_attempt_id: "",
+        registry_key: "evidence-upload-connector@0.4.0",
+        request_payload_hash: "",
+        response_payload_hash: "",
+        source_of_truth: {
+          skill_registry: "agent_store",
+          package_validation: "agent_store_package_validation",
+          agentops_consumption: "agentops_consumes_agent_store_registry"
+        }
+      },
+      source_of_truth: {
+        skill_registry: "agent_store",
+        package_validation: "agent_store_package_validation",
+        agentops_consumption: "agentops_consumes_agent_store_registry"
+      },
+      next_action: {
+        action_id: "return_to_validation",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "skill_registry.v1",
+      notification_contract_schema_version: "skill_registry_notification.v1",
+      ack_schema_version: "skill_registry_notification_ack.v1",
+      registry_status: "security_revoked",
+      skill: {
+        skill_id: "policy-runtime-guard",
+        skill_version: "0.2.1",
+        schema_ref: "schemas/policy-runtime-guard.v1.json",
+        risk_level: "critical",
+        risk_justification: "Runtime policy enforcement can block execution paths.",
+        package_id: "security.policy-guard@0.2.1",
+        agent_id: "security.policy-guard",
+        owner_team: "Security",
+        owner_user: "owner@security.example",
+        status: "security_revoked",
+        status_reason: "Security incident revoked this Skill version.",
+        registry_key: "policy-runtime-guard@0.2.1"
+      },
+      issues: [],
+      event: {
+        event_id: "skill_security_revoked-policy-runtime-guard-0.2.1-audit-skill-security",
+        event_type: "skill_security_revoked",
+        skill_id: "policy-runtime-guard",
+        skill_version: "0.2.1",
+        audit_required: true,
+        reason: "Security incident revoked this Skill version.",
+        evidence_ref: "incident-sec-2026-05-11"
+      },
+      agentops_consumption: {
+        consumer: "agentops",
+        contract: "skill_registry.v1",
+        sync_status: "notice_required",
+        notify_required: true
+      },
+      agentops_notification: {
+        notification_id: "skill-notice-security-policy-guard",
+        schema_version: "skill_registry_notification_ack.v1",
+        delivery_state: "accepted",
+        agentops_ack_id: "ack-skill-security-policy-guard",
+        delivery_attempt_id: "attempt-skill-security-policy-guard",
+        received_event_id: "skill_security_revoked-policy-runtime-guard-0.2.1-audit-skill-security",
+        registry_key: "policy-runtime-guard@0.2.1",
+        request_payload_hash: "sha256:skill-security-request",
+        response_payload_hash: "sha256:skill-security-response",
+        source_of_truth: {
+          skill_registry: "agent_store",
+          package_validation: "agent_store_package_validation",
+          agentops_consumption: "agentops_consumes_agent_store_registry"
+        }
+      },
+      source_of_truth: {
+        skill_registry: "agent_store",
+        package_validation: "agent_store_package_validation",
+        agentops_consumption: "agentops_consumes_agent_store_registry"
+      },
+      next_action: {
+        action_id: "notify_agentops_security_revocation",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "skill_registry.v1",
+      notification_contract_schema_version: "skill_registry_notification.v1",
+      ack_schema_version: "skill_registry_notification_ack.v1",
+      registry_status: "deprecated",
+      skill: {
+        skill_id: "release-note-writer",
+        skill_version: "0.1.2",
+        schema_ref: "schemas/release-note-writer.v1.json",
+        risk_level: "low",
+        package_id: "developer.release-notes@0.1.2",
+        agent_id: "developer.release-notes",
+        owner_team: "Developer Experience",
+        owner_user: "owner@developer.example",
+        status: "deprecated",
+        status_reason: "Replaced by release-note-writer@0.2.0.",
+        registry_key: "release-note-writer@0.1.2"
+      },
+      issues: [],
+      event: {
+        event_id: "skill_deprecated-release-note-writer-0.1.2-audit-skill-release-notes",
+        event_type: "skill_deprecated",
+        skill_id: "release-note-writer",
+        skill_version: "0.1.2",
+        audit_required: true,
+        reason: "Replaced by release-note-writer@0.2.0."
+      },
+      agentops_consumption: {
+        consumer: "agentops",
+        contract: "skill_registry.v1",
+        sync_status: "notice_required",
+        notify_required: true
+      },
+      agentops_notification: {
+        notification_id: "skill-notice-developer-release-notes",
+        schema_version: "skill_registry_notification_ack.v1",
+        delivery_state: "accepted",
+        agentops_ack_id: "ack-skill-developer-release-notes",
+        delivery_attempt_id: "attempt-skill-developer-release-notes",
+        received_event_id: "skill_deprecated-release-note-writer-0.1.2-audit-skill-release-notes",
+        registry_key: "release-note-writer@0.1.2",
+        request_payload_hash: "sha256:skill-release-request",
+        response_payload_hash: "sha256:skill-release-response",
+        source_of_truth: {
+          skill_registry: "agent_store",
+          package_validation: "agent_store_package_validation",
+          agentops_consumption: "agentops_consumes_agent_store_registry"
+        }
+      },
+      source_of_truth: {
+        skill_registry: "agent_store",
+        package_validation: "agent_store_package_validation",
+        agentops_consumption: "agentops_consumes_agent_store_registry"
+      },
+      next_action: {
+        action_id: "notify_agentops_deprecation",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   contractRegistryTraceability: {
     contract_schema_version: "contract_registry_traceability.v1",
     registry_status: "complete",

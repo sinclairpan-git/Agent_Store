@@ -310,6 +310,7 @@ new window.Vue({
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
       draftReviewSubmissions: window.AgentStoreMock.draftReviewSubmissions,
+      skillRegistryLifecycle: window.AgentStoreMock.skillRegistryLifecycle,
       contractRegistryTraceability: window.AgentStoreMock.contractRegistryTraceability,
       recommendationStates: {},
       recommendationStateRequests: {},
@@ -2514,6 +2515,110 @@ new window.Vue({
         focus_contract_id: focusContractId,
         focus_contract: focusContract
       });
+    },
+    selectedSkillRegistryLifecycle: function selectedSkillRegistryLifecycle() {
+      var agent = this.selectedAgent;
+      var lifecycle = this.skillRegistryLifecycle || {};
+      var decision;
+      if (!agent) {
+        return {
+          contract_schema_version: "skill_registry.v1",
+          notification_contract_schema_version: "skill_registry_notification.v1",
+          ack_schema_version: "skill_registry_notification_ack.v1",
+          registry_status: "registration_blocked",
+          skill: null,
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          event: null,
+          agentops_consumption: {
+            consumer: "agentops",
+            contract: "skill_registry.v1",
+            sync_status: "not_ready",
+            notify_required: false
+          },
+          agentops_notification: {
+            schema_version: "skill_registry_notification_ack.v1",
+            delivery_state: "not_sent",
+            agentops_ack_id: "",
+            delivery_attempt_id: "",
+            registry_key: "",
+            request_payload_hash: "",
+            response_payload_hash: ""
+          },
+          source_of_truth: {
+            skill_registry: "agent_store",
+            package_validation: "agent_store_package_validation",
+            agentops_consumption: "agentops_consumes_agent_store_registry"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      decision = lifecycle[agent.agent_id];
+      if (decision) {
+        return decision;
+      }
+      return {
+        contract_schema_version: "skill_registry.v1",
+        notification_contract_schema_version: "skill_registry_notification.v1",
+        ack_schema_version: "skill_registry_notification_ack.v1",
+        registry_status: "registration_blocked",
+        skill: {
+          skill_id: "skill-registry-missing-" + safeId(agent.agent_id),
+          skill_version: agent.version,
+          schema_ref: "missing",
+          risk_level: "medium",
+          package_id: agent.agent_id + "@" + agent.version,
+          agent_id: agent.agent_id,
+          owner_team: agent.owner_team,
+          owner_user: "",
+          status: "published",
+          status_reason: "frontend fallback envelope missing",
+          registry_key: "skill-registry-missing-" + safeId(agent.agent_id) + "@" + agent.version
+        },
+        issues: [
+          {
+            issue_id: "SKILL_REGISTRY_ENVELOPE_MISSING",
+            field_path: "skill_registry",
+            severity: "blocked",
+            fix_action_id: "return_to_validation",
+            message_key: "skillRegistry.envelopeMissing"
+          }
+        ],
+        event: null,
+        agentops_consumption: {
+          consumer: "agentops",
+          contract: "skill_registry.v1",
+          sync_status: "not_ready",
+          notify_required: false
+        },
+        agentops_notification: {
+          schema_version: "skill_registry_notification_ack.v1",
+          delivery_state: "not_sent",
+          agentops_ack_id: "",
+          delivery_attempt_id: "",
+          registry_key: "",
+          request_payload_hash: "",
+          response_payload_hash: ""
+        },
+        source_of_truth: {
+          skill_registry: "frontend_fallback_no_skill_registry_lifecycle",
+          package_validation: "agent_store_package_validation",
+          agentops_consumption: "agentops_consumes_agent_store_registry"
+        },
+        next_action: {
+          action_id: "return_to_validation",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
     },
     selectedRecommendationDecision: function selectedRecommendationDecision() {
       var agent = this.selectedAgent;

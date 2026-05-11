@@ -1254,6 +1254,46 @@ h2 {
   font-size: 13px;
 }
 
+.skill-registry-lifecycle {
+  min-height: 340px;
+}
+
+.skill-registry-lifecycle__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.skill-registry-lifecycle__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.skill-registry-lifecycle__grid span,
+.skill-registry-lifecycle__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.skill-registry-lifecycle__grid strong,
+.skill-registry-lifecycle__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.skill-registry-lifecycle__grid strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
 .command-preview {
   display: grid;
   gap: 8px;
@@ -1705,6 +1745,7 @@ h2 {
   .permission-denial__scenarios,
   .wizard-grid,
   .draft-review-submission__grid,
+  .skill-registry-lifecycle__grid,
   .contract-registry-traceability__focus,
   .contract-registry-traceability__contracts,
   .wizard-steps {
