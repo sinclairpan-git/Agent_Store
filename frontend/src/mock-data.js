@@ -523,6 +523,249 @@ window.AgentStoreMock = {
       }
     }
   },
+  qualityEvidenceAccess: {
+    "framework.ai-autosdlc": {
+      audit_id: "audit-quality-framework.ai-autosdlc",
+      contract_schema_version: "quality_evidence_access_summary.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      summary_state: "summary_expired",
+      permission_state: "allowed",
+      display: {
+        evidence_level: "L5-capable",
+        confidence: 0.91,
+        identity_confidence: 0.97,
+        missing_evidence: [],
+        score_template_id: "agentops-owned",
+        calculated_at: "2026-05-09T07:30:00Z",
+        valid_until: "2026-05-09T08:00:00Z",
+        summary_validity_state: "expired",
+        display_label: "待刷新",
+        redacted: false
+      },
+      run_binding: {
+        run_id: "run-quality-framework",
+        session_id: "session-quality-framework",
+        evidence_summary_id: "evidence-quality-framework",
+        source_event_count: 12
+      },
+      access: {
+        can_view_quality_summary: true,
+        can_view_raw_evidence: false,
+        evidence_vault_request_required: true,
+        request_access_url: "/evidence-vault/access-requests",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      recommendation_basis_allowed: false,
+      issues: [
+        {
+          issue_id: "QUALITY_SUMMARY_EXPIRED",
+          field_path: "quality_evidence.valid_until",
+          severity: "warning",
+          fix_action_id: "refresh_agentops_quality_summary"
+        }
+      ],
+      source_of_truth: {
+        quality_summary: "agentops",
+        run_evidence: "agentops",
+        raw_evidence: "evidence_vault",
+        raw_trace: "evidence_vault",
+        permission: "agent_store_viewer_context",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "refresh_agentops_quality_summary",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      audit_id: "audit-quality-agentops.evidence-reporter",
+      contract_schema_version: "quality_evidence_access_summary.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      summary_state: "summary_ready",
+      permission_state: "allowed",
+      display: {
+        evidence_level: "L4",
+        confidence: 0.84,
+        identity_confidence: 0.9,
+        missing_evidence: [],
+        score_template_id: "agentops-owned",
+        calculated_at: "2026-05-09T08:04:00Z",
+        valid_until: "2026-05-09T09:04:00Z",
+        summary_validity_state: "fresh",
+        display_label: "可展示",
+        redacted: false
+      },
+      run_binding: {
+        run_id: "run-quality-agentops",
+        session_id: "session-quality-agentops",
+        evidence_summary_id: "evidence-quality-agentops",
+        source_event_count: 9
+      },
+      access: {
+        can_view_quality_summary: true,
+        can_view_raw_evidence: true,
+        evidence_vault_request_required: false,
+        request_access_url: "",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      recommendation_basis_allowed: true,
+      issues: [
+        {
+          issue_id: "RAW_EVIDENCE_LINK_STRIPPED",
+          field_path: "agentops_summary.raw_links",
+          severity: "warning",
+          fix_action_id: "strip_raw_evidence_links"
+        }
+      ],
+      source_of_truth: {
+        quality_summary: "agentops",
+        run_evidence: "agentops",
+        raw_evidence: "evidence_vault",
+        raw_trace: "evidence_vault",
+        permission: "agent_store_viewer_context",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "continue_quality_evidence_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      audit_id: "audit-quality-security.policy-guard",
+      contract_schema_version: "quality_evidence_access_summary.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      summary_state: "summary_redacted",
+      permission_state: "summary_redacted",
+      display: {
+        evidence_level: "redacted",
+        confidence: null,
+        identity_confidence: null,
+        missing_evidence: [],
+        score_template_id: "",
+        calculated_at: "",
+        valid_until: "",
+        summary_validity_state: "degraded",
+        display_label: "待刷新",
+        redacted: true
+      },
+      run_binding: {
+        run_id: "run-quality-security",
+        session_id: "session-quality-security",
+        evidence_summary_id: "evidence-quality-security",
+        source_event_count: 5
+      },
+      access: {
+        can_view_quality_summary: false,
+        can_view_raw_evidence: false,
+        evidence_vault_request_required: true,
+        request_access_url: "/evidence-vault/requests/security-policy-guard",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      recommendation_basis_allowed: false,
+      issues: [
+        {
+          issue_id: "QUALITY_SUMMARY_REDACTED",
+          field_path: "viewer_context",
+          severity: "warning",
+          fix_action_id: "request_evidence_access"
+        }
+      ],
+      source_of_truth: {
+        quality_summary: "agentops",
+        run_evidence: "agentops",
+        raw_evidence: "evidence_vault",
+        raw_trace: "evidence_vault",
+        permission: "agent_store_viewer_context",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "request_evidence_access",
+        target_system: "evidence_vault",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/evidence-vault/requests/security-policy-guard"
+      }
+    },
+    "developer.release-notes": {
+      audit_id: "audit-quality-developer.release-notes",
+      contract_schema_version: "quality_evidence_access_summary.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      summary_state: "template_deprecated",
+      permission_state: "allowed",
+      display: {
+        evidence_level: "L2-static",
+        confidence: 0.64,
+        identity_confidence: 0.72,
+        missing_evidence: ["signed_run_evidence"],
+        score_template_id: "agentops-legacy",
+        calculated_at: "2026-05-09T08:01:00Z",
+        valid_until: "2026-05-09T09:01:00Z",
+        summary_validity_state: "fresh",
+        display_label: "可展示",
+        redacted: false
+      },
+      run_binding: {
+        run_id: "run-quality-release-notes",
+        session_id: "session-quality-release-notes",
+        evidence_summary_id: "evidence-quality-release-notes",
+        source_event_count: 3
+      },
+      access: {
+        can_view_quality_summary: true,
+        can_view_raw_evidence: false,
+        evidence_vault_request_required: true,
+        request_access_url: "/evidence-vault/access-requests",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      recommendation_basis_allowed: false,
+      issues: [
+        {
+          issue_id: "SCORE_TEMPLATE_DEPRECATED",
+          field_path: "quality_evidence.score_template_id",
+          severity: "warning",
+          fix_action_id: "request_score_template_refresh"
+        }
+      ],
+      source_of_truth: {
+        quality_summary: "agentops",
+        run_evidence: "agentops",
+        raw_evidence: "evidence_vault",
+        raw_trace: "evidence_vault",
+        permission: "agent_store_viewer_context",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "request_score_template_refresh",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   notificationRouting: {
     "framework.ai-autosdlc": {
       audit_id: "audit-routing-framework.ai-autosdlc",

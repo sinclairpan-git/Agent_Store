@@ -189,6 +189,32 @@
     refresh_agentops_health_summary: "刷新 HealthSummary",
     view_agentops_health_detail: "查看健康详情",
     continue_health_review: "继续健康摘要复核",
+    quality_evidence_access_summary: "质量证据访问摘要",
+    "quality_evidence_access_summary.v1": "质量证据访问摘要 v1",
+    summary_ready: "摘要可展示",
+    summary_redacted: "摘要已遮蔽",
+    summary_expired: "摘要已过期",
+    summary_unavailable: "摘要不可用",
+    template_deprecated: "模板已废弃",
+    can_view_quality_summary: "可看质量摘要",
+    can_view_raw_evidence: "可看证据原文",
+    evidence_vault_request_required: "需 Evidence Vault 申请",
+    agent_store_viewer_context: "Agent Store Viewer Context",
+    quality_summary: "质量摘要",
+    run_evidence: "运行证据",
+    raw_trace: "Raw Trace",
+    raw_evidence: "Raw Evidence",
+    projection: "投影",
+    request_raw_evidence_access: "申请原文证据访问",
+    refresh_agentops_quality_summary: "刷新质量摘要",
+    request_score_template_refresh: "刷新评分模板",
+    continue_quality_evidence_review: "继续质量证据复核",
+    AGENTOPS_QUALITY_SUMMARY_REQUIRED: "缺 AgentOps 质量摘要",
+    QUALITY_SUMMARY_REDACTED: "质量摘要已遮蔽",
+    QUALITY_SUMMARY_EXPIRED: "质量摘要已过期",
+    SCORE_TEMPLATE_DEPRECATED: "评分模板已废弃",
+    RAW_EVIDENCE_LINK_STRIPPED: "原文链接已剥离",
+    frontend_fallback_no_quality_evidence_access_summary: "前端降级质量证据访问",
     notification_routing_summary: "通知路由摘要",
     "notification_routing_summary.v1": "通知路由摘要 v1",
     routing_ready: "路由就绪",
@@ -1064,6 +1090,140 @@
     }
   });
 
+  Vue.component("sdlc-quality-evidence-access", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section quality-evidence">',
+      '  <div class="section-heading">',
+      '    <h2>质量证据访问</h2>',
+      '    <sdlc-status-chip :label="summary.summary_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ displayCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="summary.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="展示" :value="display.display_label || summary.summary_state" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="权限" :value="summary.permission_state" :tone="permissionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="证据等级" :value="display.evidence_level || \'unavailable\'" :tone="display.redacted ? \'warning\' : stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="有效期" :value="display.valid_until || \'missing\'" :tone="validUntilTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="推荐依据" :value="summary.recommendation_basis_allowed ? \'allowed\' : \'blocked\'" :tone="summary.recommendation_basis_allowed ? \'success\' : \'warning\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Raw Trace" :value="summary.raw_trace_exposed ? \'exposed\' : \'stripped\'" :tone="summary.raw_trace_exposed ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Raw Evidence" :value="summary.raw_evidence_exposed ? \'exposed\' : \'stripped\'" :tone="summary.raw_evidence_exposed ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="summary.audit_id || \'missing\'" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="quality-evidence__signals">',
+      '    <div>',
+      '      <span>AgentOps</span>',
+      '      <strong>{{ confidenceLabel }}</strong>',
+      '      <small>{{ display.score_template_id || "score_template_id missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Run Binding</span>',
+      '      <strong>{{ runBinding.evidence_summary_id || "evidence-summary-missing" }}</strong>',
+      '      <small>{{ runBinding.run_id || "run-missing" }} / {{ runBinding.source_event_count || 0 }} events</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Evidence Vault</span>',
+      '      <strong>{{ accessLabel }}</strong>',
+      '      <small>raw_trace_url: {{ access.raw_trace_url === "" ? "stripped" : access.raw_trace_url }} / raw_evidence_url: {{ access.raw_evidence_url === "" ? "stripped" : access.raw_evidence_url }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="tag-list quality-evidence__missing" v-if="missingEvidence.length">',
+      '    <li v-for="item in missingEvidence" :key="item">{{ item }}</li>',
+      '  </ul>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ rawBoundary }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      display: function display() {
+        return this.summary.display || {};
+      },
+      runBinding: function runBinding() {
+        return this.summary.run_binding || {};
+      },
+      access: function access() {
+        return this.summary.access || {};
+      },
+      stateTone: function stateTone() {
+        if (this.summary.summary_state === "summary_ready") {
+          return "success";
+        }
+        if (
+          this.summary.summary_state === "summary_expired"
+          || this.summary.summary_state === "template_deprecated"
+          || this.summary.summary_state === "summary_redacted"
+        ) {
+          return "warning";
+        }
+        return "danger";
+      },
+      permissionTone: function permissionTone() {
+        return this.summary.permission_state === "allowed" ? "success" : "warning";
+      },
+      validUntilTone: function validUntilTone() {
+        if (this.summary.summary_state === "summary_ready") {
+          return "success";
+        }
+        if (this.display.valid_until) {
+          return "warning";
+        }
+        return "danger";
+      },
+      missingEvidence: function missingEvidence() {
+        return Array.isArray(this.display.missing_evidence)
+          ? this.display.missing_evidence
+          : [];
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      confidenceLabel: function confidenceLabel() {
+        if (this.display.confidence === null || this.display.confidence === undefined) {
+          return "redacted";
+        }
+        return Math.round(this.display.confidence * 100) + "% confidence";
+      },
+      accessLabel: function accessLabel() {
+        if (this.access.can_view_raw_evidence) {
+          return "raw evidence permitted";
+        }
+        return this.access.evidence_vault_request_required
+          ? "request required"
+          : "summary only";
+      },
+      rawBoundary: function rawBoundary() {
+        return "Store 不展示 raw Trace 或 raw Evidence URL";
+      },
+      displayCopy: function displayCopy() {
+        if (this.summary.summary_state === "summary_redacted") {
+          return "Viewer 未获准查看质量证据细节，Store 只展示遮蔽摘要并路由到 Evidence Vault。";
+        }
+        if (this.summary.summary_state === "summary_expired") {
+          return "AgentOps 质量摘要已过 valid_until，Store 只能展示待刷新状态。";
+        }
+        if (this.summary.summary_state === "template_deprecated") {
+          return "score_template_id 已废弃，Store 可展示降级上下文但不能把它当作当前质量依据。";
+        }
+        if (this.summary.summary_state === "summary_ready") {
+          return "AgentOps 质量摘要可展示；Store 仍不暴露 raw Trace/raw Evidence，也不本地计算质量。";
+        }
+        return "缺少 AgentOps 质量摘要，Store 只展示刷新路径和保守降级状态。";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-notification-routing", {
     props: ["summary"],
     template: [
@@ -1324,6 +1484,7 @@
       "listingWizard",
       "runtimeAvailability",
       "healthSummaryFreshness",
+      "qualityEvidenceAccess",
       "notificationRouting",
       "permissionDenialAction",
       "installHandoff",
@@ -1370,6 +1531,7 @@
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
+      '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',
       '    <sdlc-section title="应用事实">',
