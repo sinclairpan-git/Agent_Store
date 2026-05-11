@@ -209,40 +209,44 @@ specs:
   path: specs/050-draft-review-submission-frontend-consumer
   depends_on:
   - 049-managed-installer-preview-frontend-consumer
+- id: 051-contract-registry-traceability-frontend-consumer
+  path: specs/051-contract-registry-traceability-frontend-consumer
+  depends_on:
+  - 050-draft-review-submission-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T09:42:13Z'
+  generated_at: '2026-05-11T10:14:45Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 7f17031
-  authoring_hash: b94bbe8044d54484be00fe9e0d2c943f818bd413a06cd05f125c9875516cdc49
+  repo_revision: c7ebfe1
+  authoring_hash: f173ad020a4d050c01d4cba902641d589e1c09b0abaff053c203abf8c21e0f21
   source_hashes: {}
-  snapshot_hash: dd4f02b9cfd1608865ffac6510083d1f40d867fd7f84c03860aea4fa0da60e1b
+  snapshot_hash: 777e19cbe6dfa456dcd2ef9de82d58814f78798babe3bd5e8e13f1f9eae1f1c2
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 253
-    mapped_sources: 253
+    total_sources: 258
+    mapped_sources: 258
     unmapped_sources: 0
     missing_sources: 0
-    phase_signal_count: 62
-    deferred_signal_count: 161
+    phase_signal_count: 63
+    deferred_signal_count: 162
     non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
-      spec: 50
-      plan: 50
-      tasks: 50
-      execution: 50
-      close: 50
+      spec: 51
+      plan: 51
+      tasks: 51
+      execution: 51
+      close: 51
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 50
-      plan: 50
-      tasks: 50
-      execution: 50
-      close: 50
+      spec: 51
+      plan: 51
+      tasks: 51
+      execution: 51
+      close: 51
       defect: 1
       release: 1
     entries:
@@ -2504,6 +2508,51 @@ truth_snapshot:
       mapping_ref: 050-draft-review-submission-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/051-contract-registry-traceability-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 051-contract-registry-traceability-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/051-contract-registry-traceability-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 051-contract-registry-traceability-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/051-contract-registry-traceability-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 051-contract-registry-traceability-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/051-contract-registry-traceability-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 051-contract-registry-traceability-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/051-contract-registry-traceability-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 051-contract-registry-traceability-frontend-consumer
+      phase_signal_count: 1
+      deferred_signal_count: 1
       non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog

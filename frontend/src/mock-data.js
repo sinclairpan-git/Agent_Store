@@ -3654,6 +3654,314 @@ window.AgentStoreMock = {
       }
     }
   },
+  contractRegistryTraceability: {
+    contract_schema_version: "contract_registry_traceability.v1",
+    registry_status: "complete",
+    coverage_summary: {
+      total_contracts: 25,
+      contracts_with_cct: 18,
+      contracts_with_contract_tests: 25,
+      complete_traceability: 25,
+      unmapped_contracts: 0
+    },
+    focus_contract_by_agent: {
+      "framework.ai-autosdlc": "agent_manifest_runtime_contract.v1",
+      "agentops.evidence-reporter": "quality_evidence_access_summary.v1",
+      "security.policy-guard": "permission_denial_action_summary.v1",
+      "developer.release-notes": "feedback_owner_response_loop.v1"
+    },
+    contracts: [
+      {
+        contract_id: "agent_manifest_runtime_contract.v1",
+        contract_file: "agent-manifest-runtime.openapi.yaml",
+        primary_schema: "AgentManifestRuntimeContract",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Runtime", "AgentOps", "Agent Store UI"],
+        cct_ids: ["CCT-008"],
+        contract_test_files: ["tests/contract/test_agent_manifest_runtime_contract_api.py"],
+        appendix_anchor: "AgentManifest Runtime Contract V1"
+      },
+      {
+        contract_id: "agent_registry_draft.v1",
+        contract_file: "agent-registry.openapi.yaml",
+        primary_schema: "AgentDraftResponse",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_agent_registry_api.py"],
+        appendix_anchor: "Agent Registry Draft"
+      },
+      {
+        contract_id: "agentops_summary.v1",
+        contract_file: "agentops-summary.openapi.yaml",
+        primary_schema: "AgentOpsSummaryResponse",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_agentops_summary_api.py"],
+        appendix_anchor: "AgentOps Summary Echo"
+      },
+      {
+        contract_id: "quality_evidence_access_summary.v1",
+        contract_file: "quality-evidence-access-summary.openapi.yaml",
+        primary_schema: "QualityEvidenceAccessSummary",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI", "Evidence Vault"],
+        cct_ids: ["CCT-022"],
+        contract_test_files: ["tests/contract/test_quality_evidence_access_api.py"],
+        appendix_anchor: "Quality Evidence Access Summary V1"
+      },
+      {
+        contract_id: "permission_denial_action_summary.v1",
+        contract_file: "permission-denial-action-summary.openapi.yaml",
+        primary_schema: "PermissionDenialActionSummary",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Store UI", "AgentOps", "Evidence Vault"],
+        cct_ids: ["CCT-023"],
+        contract_test_files: ["tests/contract/test_permission_denial_api.py"],
+        appendix_anchor: "Permission Denial Action Summary V1"
+      },
+      {
+        contract_id: "notification_routing_summary.v1",
+        contract_file: "notification-routing-summary.openapi.yaml",
+        primary_schema: "NotificationRoutingSummary",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Store UI", "AgentOps", "Notification Center", "Risk Center"],
+        cct_ids: ["CCT-024"],
+        contract_test_files: ["tests/contract/test_notification_routing_api.py"],
+        appendix_anchor: "Notification Routing Summary V1"
+      },
+      {
+        contract_id: "contract_registry_traceability.v1",
+        contract_file: "contract-registry-traceability.openapi.yaml",
+        primary_schema: "ContractRegistryTraceability",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Runtime", "Ai_AutoSDLC", "Agent Store UI"],
+        cct_ids: ["CCT-017"],
+        contract_test_files: ["tests/contract/test_contract_registry_traceability_api.py"],
+        appendix_anchor: "Contract Registry Traceability V1"
+      },
+      {
+        contract_id: "draft_review_submission.v1",
+        contract_file: "draft-review-submission.openapi.yaml",
+        primary_schema: "DraftReviewSubmission",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Store UI"],
+        cct_ids: ["CCT-012"],
+        contract_test_files: ["tests/contract/test_draft_review_submission_api.py"],
+        appendix_anchor: "Draft Review Submission V1"
+      },
+      {
+        contract_id: "feedback_owner_response_loop.v1",
+        contract_file: "feedback-owner-response-loop.openapi.yaml",
+        primary_schema: "FeedbackOwnerResponseLoop",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Store UI"],
+        cct_ids: ["CCT-015"],
+        contract_test_files: ["tests/contract/test_feedback_owner_response_loop_api.py"],
+        appendix_anchor: "Feedback Owner Response Loop V1"
+      },
+      {
+        contract_id: "health_summary_freshness.v1",
+        contract_file: "health-summary-freshness.openapi.yaml",
+        primary_schema: "HealthSummaryFreshness",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI"],
+        cct_ids: ["CCT-010"],
+        contract_test_files: ["tests/contract/test_health_summary_freshness_api.py"],
+        appendix_anchor: "HealthSummary Freshness V1"
+      },
+      {
+        contract_id: "store_ops_deep_link.v1",
+        contract_file: "store-ops-deep-link.openapi.yaml",
+        primary_schema: "StoreOpsDeepLink",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI", "Evidence Vault"],
+        cct_ids: ["CCT-020"],
+        contract_test_files: ["tests/contract/test_store_ops_deep_link_api.py"],
+        appendix_anchor: "Store Ops Deep Link V1"
+      },
+      {
+        contract_id: "installation_bootstrap.v1",
+        contract_file: "installation-bootstrap.openapi.yaml",
+        primary_schema: "InstallationResponse",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Ai_AutoSDLC", "Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_installation_bootstrap_api.py"],
+        appendix_anchor: "Installation Bootstrap"
+      },
+      {
+        contract_id: "installation_distribution_summary.v1",
+        contract_file: "installation-distribution-summary.openapi.yaml",
+        primary_schema: "InstallationDistributionSummary",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Store UI", "AgentOps"],
+        cct_ids: ["CCT-021"],
+        contract_test_files: ["tests/contract/test_installation_distribution_api.py"],
+        appendix_anchor: "Installation Distribution Summary V1"
+      },
+      {
+        contract_id: "installation_runtime_handoff.v1",
+        contract_file: "installation-runtime-handoff.openapi.yaml",
+        primary_schema: "InstallationRuntimeHandoff",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Runtime", "AgentOps"],
+        cct_ids: ["CCT-011"],
+        contract_test_files: ["tests/contract/test_installation_runtime_handoff_api.py"],
+        appendix_anchor: "Installation Runtime Handoff V1"
+      },
+      {
+        contract_id: "lifecycle_governance_baseline.v1",
+        contract_file: "lifecycle-governance-baseline.openapi.yaml",
+        primary_schema: "LifecycleGovernance",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Store UI"],
+        cct_ids: ["CCT-016"],
+        contract_test_files: ["tests/contract/test_lifecycle_governance_api.py"],
+        appendix_anchor: "Lifecycle Governance Baseline V1"
+      },
+      {
+        contract_id: "managed_installer_preview.v1",
+        contract_file: "managed-installer-preview.openapi.yaml",
+        primary_schema: "ManagedInstallerPreview",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Runtime", "AgentOps", "Agent Store UI"],
+        cct_ids: ["CCT-014"],
+        contract_test_files: ["tests/contract/test_managed_installer_preview_api.py"],
+        appendix_anchor: "Managed Installer Preview V1"
+      },
+      {
+        contract_id: "package_validation_report.v1",
+        contract_file: "package-validation.openapi.yaml",
+        primary_schema: "PackageValidationReport",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_package_validation_api.py"],
+        appendix_anchor: "Package Validation Report"
+      },
+      {
+        contract_id: "policy_approval_echo.v1",
+        contract_file: "policy-approval-echo.openapi.yaml",
+        primary_schema: "PolicyApprovalEcho",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI"],
+        cct_ids: ["CCT-013"],
+        contract_test_files: ["tests/contract/test_policy_approval_echo_api.py"],
+        appendix_anchor: "Policy Approval Echo V1"
+      },
+      {
+        contract_id: "policy_approval_request.v1",
+        contract_file: "policy-approval-request.openapi.yaml",
+        primary_schema: "PolicyApprovalRequest",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Store UI"],
+        cct_ids: ["CCT-018"],
+        contract_test_files: ["tests/contract/test_policy_approval_request_api.py"],
+        appendix_anchor: "Policy Approval Request V1"
+      },
+      {
+        contract_id: "policy_approval_receipt.v1",
+        contract_file: "policy-approval-receipt.openapi.yaml",
+        primary_schema: "PolicyApprovalReceipt",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI"],
+        cct_ids: ["CCT-019"],
+        contract_test_files: ["tests/contract/test_policy_approval_receipt_api.py"],
+        appendix_anchor: "Policy Approval Receipt V1"
+      },
+      {
+        contract_id: "recommendation_state.v1",
+        contract_file: "recommendation-state.openapi.yaml",
+        primary_schema: "RecommendationStateResponse",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_recommendation_state_api.py"],
+        appendix_anchor: "Recommendation State"
+      },
+      {
+        contract_id: "runtime_availability_summary.v1",
+        contract_file: "runtime-availability.openapi.yaml",
+        primary_schema: "RuntimeAvailabilitySummary",
+        owner: "Agent Runtime",
+        producer: "Agent Runtime",
+        consumers: ["Agent Store", "Agent Store UI"],
+        cct_ids: ["CCT-009"],
+        contract_test_files: ["tests/contract/test_runtime_availability_api.py"],
+        appendix_anchor: "Runtime Availability Summary V1"
+      },
+      {
+        contract_id: "skill_registry_notification.v1",
+        contract_file: "skill-registry-notification.openapi.yaml",
+        primary_schema: "SkillRegistryNotification",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps"],
+        cct_ids: ["CCT-007"],
+        contract_test_files: ["tests/contract/test_skill_registry_api.py"],
+        appendix_anchor: "Skill Registry Notification V1"
+      },
+      {
+        contract_id: "skill_registry.v1",
+        contract_file: "skill-registry.openapi.yaml",
+        primary_schema: "SkillRegistryTransition",
+        owner: "Agent Store",
+        producer: "Agent Store",
+        consumers: ["AgentOps", "Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_skill_registry_api.py"],
+        appendix_anchor: "Skill Registry Lifecycle"
+      },
+      {
+        contract_id: "trusted_evidence_loop.v1",
+        contract_file: "trusted-evidence-loop.openapi.yaml",
+        primary_schema: "TrustedEvidenceLoopResponse",
+        owner: "AgentOps",
+        producer: "AgentOps",
+        consumers: ["Agent Store", "Agent Store UI"],
+        cct_ids: [],
+        contract_test_files: ["tests/contract/test_trusted_evidence_loop.py"],
+        appendix_anchor: "Trusted Evidence Loop"
+      }
+    ],
+    source_of_truth: {
+      contract_files: "specs/001-agent-store-phase1-trusted-min-loop/contracts",
+      appendix: "docs/cross-project-contract-appendix.md",
+      contract_tests: "tests/contract",
+      registry_projection: "agent_store"
+    },
+    next_action: {
+      action_id: "continue_contract_change_review",
+      target_system: "agent_store",
+      enabled: true,
+      requires_permission: true,
+      audit_required: true,
+      message_key: "contractRegistry.actions.continueContractChangeReview"
+    }
+  },
   bootstrap: {
     installation_id: "inst-1",
     bootstrap_status: "credential_issued",

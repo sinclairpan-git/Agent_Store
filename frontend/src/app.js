@@ -310,6 +310,7 @@ new window.Vue({
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
       draftReviewSubmissions: window.AgentStoreMock.draftReviewSubmissions,
+      contractRegistryTraceability: window.AgentStoreMock.contractRegistryTraceability,
       recommendationStates: {},
       recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
@@ -2453,6 +2454,66 @@ new window.Vue({
           audit_required: true
         }
       };
+    },
+    selectedContractRegistryTraceability: function selectedContractRegistryTraceability() {
+      var agent = this.selectedAgent;
+      var registry = this.contractRegistryTraceability || {};
+      var contracts = Array.isArray(registry.contracts) ? registry.contracts : [];
+      var focusByAgent = registry.focus_contract_by_agent || {};
+      var focusContractId = agent ? focusByAgent[agent.agent_id] : "";
+      var focusContract = contracts.find(function findContract(contract) {
+        return contract.contract_id === focusContractId;
+      });
+      if (!focusContract && contracts.length) {
+        focusContract = contracts.find(function findRegistry(contract) {
+          return contract.contract_id === "contract_registry_traceability.v1";
+        }) || contracts[0];
+        focusContractId = focusContract.contract_id;
+      }
+      if (!contracts.length) {
+        return {
+          contract_schema_version: "contract_registry_traceability.v1",
+          registry_status: "incomplete",
+          coverage_summary: {
+            total_contracts: 0,
+            contracts_with_cct: 0,
+            contracts_with_contract_tests: 0,
+            complete_traceability: 0,
+            unmapped_contracts: 0
+          },
+          contracts: [],
+          focus_contract_id: "",
+          focus_contract: {
+            contract_id: "contract_registry_traceability_missing",
+            contract_file: "contract-registry-traceability.openapi.yaml",
+            primary_schema: "ContractRegistryTraceability",
+            owner: "Agent Store",
+            producer: "Agent Store",
+            consumers: ["Agent Store UI"],
+            cct_ids: ["CCT-017"],
+            contract_test_files: ["tests/contract/test_contract_registry_traceability_api.py"],
+            appendix_anchor: "Contract Registry Traceability V1"
+          },
+          source_of_truth: {
+            contract_files: "specs/001-agent-store-phase1-trusted-min-loop/contracts",
+            appendix: "docs/cross-project-contract-appendix.md",
+            contract_tests: "tests/contract",
+            registry_projection: "frontend_fallback_no_contract_registry_traceability"
+          },
+          next_action: {
+            action_id: "complete_contract_traceability",
+            target_system: "agent_store",
+            enabled: true,
+            requires_permission: true,
+            audit_required: true,
+            message_key: "contractRegistry.actions.completeTraceability"
+          }
+        };
+      }
+      return Object.assign({}, registry, {
+        focus_contract_id: focusContractId,
+        focus_contract: focusContract
+      });
     },
     selectedRecommendationDecision: function selectedRecommendationDecision() {
       var agent = this.selectedAgent;

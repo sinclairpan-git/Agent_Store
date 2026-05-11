@@ -823,11 +823,19 @@ def test_contract_registry_traceability_contract_documents_registry_axes() -> No
         in entry["properties"]["contract_id"]["enum"]
     )
     assert {
+        "permission_denial_action_summary.v1",
+        "notification_routing_summary.v1",
+    }.issubset(set(entry["properties"]["contract_id"]["enum"]))
+    assert {
         "Agent Store",
         "AgentOps",
         "Agent Runtime",
     }.issubset(set(entry["properties"]["producer"]["enum"]))
     assert "Ai_AutoSDLC" in entry["properties"]["consumers"]["items"]["enum"]
+    assert {
+        "Notification Center",
+        "Risk Center",
+    }.issubset(set(entry["properties"]["consumers"]["items"]["enum"]))
     assert {
         "total_contracts",
         "contracts_with_cct",

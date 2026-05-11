@@ -97,6 +97,7 @@ components:
             - lifecycle_governance_baseline.v1
             - managed_installer_preview.v1
             - package_validation_report.v1
+            - permission_denial_action_summary.v1
             - policy_approval_echo.v1
             - policy_approval_receipt.v1
             - policy_approval_request.v1
@@ -105,6 +106,7 @@ components:
             - runtime_availability_summary.v1
             - skill_registry_notification.v1
             - skill_registry.v1
+            - notification_routing_summary.v1
             - store_ops_deep_link.v1
             - trusted_evidence_loop.v1
         contract_file:
@@ -135,6 +137,8 @@ components:
               - Agent Runtime
               - Ai_AutoSDLC
               - Evidence Vault
+              - Notification Center
+              - Risk Center
         cct_ids:
           type: array
           items:
