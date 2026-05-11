@@ -523,6 +523,490 @@ window.AgentStoreMock = {
       }
     }
   },
+  installationDistribution: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "installation_distribution_summary.v1",
+      agent_id: "framework.ai-autosdlc",
+      requested_version: "1.0.0",
+      distribution_state: "distribution_ready",
+      permission_state: "allowed",
+      total_installations: 18,
+      active_installations: 14,
+      revoked_installations: 1,
+      failed_installations: 3,
+      status_counts: {
+        activation_required: 6,
+        reporter_pending: 8,
+        failed: 3,
+        revoked: 1
+      },
+      os_counts: {
+        darwin: 9,
+        linux: 6,
+        windows: 3
+      },
+      version_counts: {
+        "1.0.0": 18
+      },
+      enterprise_state_counts: {
+        active: 12,
+        pending: 4,
+        suspended: 2
+      },
+      notification: {
+        notification_required: true,
+        affected_installation_count: 4,
+        reason_code: "attention_required",
+        target_version: "1.0.0"
+      },
+      privacy: {
+        individual_users_exposed: false,
+        device_ids_exposed: false,
+        installation_ids_exposed: false,
+        minimum_role: "owner",
+        aggregation_only: true
+      },
+      issues: [
+        {
+          issue_id: "INDIVIDUAL_IDENTIFIERS_STRIPPED",
+          field_path: "installation_facts[0]",
+          severity: "warning",
+          fix_action_id: "strip_individual_installation_identifiers"
+        }
+      ],
+      source_of_truth: {
+        installation_inventory: "agent_store",
+        device_binding: "agent_store",
+        permission: "agent_store_viewer_context",
+        quality: "agentops_not_computed_here",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "prepare_owner_notification",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "installation_distribution_summary.v1",
+      agent_id: "agentops.evidence-reporter",
+      requested_version: "0.4.0",
+      distribution_state: "permission_required",
+      permission_state: "permission_required",
+      total_installations: 0,
+      active_installations: 0,
+      revoked_installations: 0,
+      failed_installations: 0,
+      status_counts: {},
+      os_counts: {},
+      version_counts: {},
+      enterprise_state_counts: {},
+      notification: {
+        notification_required: false,
+        affected_installation_count: 0,
+        reason_code: "none",
+        target_version: "0.4.0"
+      },
+      privacy: {
+        individual_users_exposed: false,
+        device_ids_exposed: false,
+        installation_ids_exposed: false,
+        minimum_role: "owner",
+        aggregation_only: true
+      },
+      issues: [
+        {
+          issue_id: "OWNER_DISTRIBUTION_PERMISSION_REQUIRED",
+          field_path: "viewer_context",
+          severity: "blocked",
+          fix_action_id: "request_owner_distribution_permission"
+        }
+      ],
+      source_of_truth: {
+        installation_inventory: "agent_store",
+        device_binding: "agent_store",
+        permission: "agent_store_viewer_context",
+        quality: "agentops_not_computed_here",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "request_owner_distribution_permission",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "installation_distribution_summary.v1",
+      agent_id: "security.policy-guard",
+      requested_version: "0.2.1",
+      distribution_state: "distribution_unavailable",
+      permission_state: "allowed",
+      total_installations: 0,
+      active_installations: 0,
+      revoked_installations: 0,
+      failed_installations: 0,
+      status_counts: {},
+      os_counts: {},
+      version_counts: {},
+      enterprise_state_counts: {},
+      notification: {
+        notification_required: false,
+        affected_installation_count: 0,
+        reason_code: "none",
+        target_version: "0.2.1"
+      },
+      privacy: {
+        individual_users_exposed: false,
+        device_ids_exposed: false,
+        installation_ids_exposed: false,
+        minimum_role: "owner",
+        aggregation_only: true
+      },
+      issues: [
+        {
+          issue_id: "INSTALLATION_INVENTORY_REQUIRED",
+          field_path: "installation_facts",
+          severity: "blocked",
+          fix_action_id: "refresh_installation_inventory"
+        }
+      ],
+      source_of_truth: {
+        installation_inventory: "agent_store",
+        device_binding: "agent_store",
+        permission: "agent_store_viewer_context",
+        quality: "agentops_not_computed_here",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "refresh_installation_inventory",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "installation_distribution_summary.v1",
+      agent_id: "developer.release-notes",
+      requested_version: "0.1.2",
+      distribution_state: "empty_distribution",
+      permission_state: "allowed",
+      total_installations: 0,
+      active_installations: 0,
+      revoked_installations: 0,
+      failed_installations: 0,
+      status_counts: {},
+      os_counts: {},
+      version_counts: {},
+      enterprise_state_counts: {},
+      notification: {
+        notification_required: false,
+        affected_installation_count: 0,
+        reason_code: "none",
+        target_version: "0.1.2"
+      },
+      privacy: {
+        individual_users_exposed: false,
+        device_ids_exposed: false,
+        installation_ids_exposed: false,
+        minimum_role: "owner",
+        aggregation_only: true
+      },
+      issues: [
+        {
+          issue_id: "VERSION_INSTALLATION_SCOPE_EMPTY",
+          field_path: "requested_version",
+          severity: "warning",
+          fix_action_id: "select_version_with_installations"
+        }
+      ],
+      source_of_truth: {
+        installation_inventory: "agent_store",
+        device_binding: "agent_store",
+        permission: "agent_store_viewer_context",
+        quality: "agentops_not_computed_here",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "continue_owner_distribution_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
+  feedbackOwnerResponseLoops: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "feedback_owner_response_loop.v1",
+      feedback_id: "fb-framework-runtime-copy",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      feedback_state: "owner_replied",
+      previous_state: "triaged",
+      transition_action: "owner_reply",
+      feedback: {
+        feedback_id: "fb-framework-runtime-copy",
+        agent_id: "framework.ai-autosdlc",
+        agent_version: "1.0.0",
+        feedback_state: "triaged",
+        title: "Runtime gate copy is unclear",
+        feedback_type: "usability",
+        severity: "warning",
+        submitted_by: "requester@example.com"
+      },
+      owner_response: {
+        owner_response_required: true,
+        actor_id: "owner-sdlc-platform",
+        actor_role: "owner",
+        message: "We will clarify the Runtime capability wording before the next patch.",
+        commitment: "next_patch"
+      },
+      release_linkage: {
+        release_required: false,
+        release_ref: "",
+        release_version: "",
+        released_at: ""
+      },
+      timeline: [
+        {
+          event_id: "feedback-event-framework-submit",
+          transition_action: "submit",
+          result_state: "submitted",
+          actor_id: "requester@example.com",
+          actor_role: "requester",
+          message: "Runtime gate copy is unclear.",
+          occurred_at: "2026-05-09T10:00:00Z",
+          audit_id: "audit-feedback-framework-submit",
+          trace_id: "trace-feedback-framework-submit"
+        },
+        {
+          event_id: "feedback-event-framework-owner-reply",
+          transition_action: "owner_reply",
+          result_state: "owner_replied",
+          actor_id: "owner-sdlc-platform",
+          actor_role: "owner",
+          message: "We will clarify the Runtime capability wording before the next patch.",
+          occurred_at: "2026-05-09T12:00:00Z",
+          audit_id: "audit-feedback-framework-reply",
+          trace_id: "trace-feedback-framework-reply"
+        }
+      ],
+      issues: [],
+      source_of_truth: {
+        feedback: "agent_store_feedback",
+        owner_response: "agent_store_owner_response",
+        release_linkage: "agent_store_release_linkage",
+        notifications: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "plan_or_reject_feedback",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "feedback_owner_response_loop.v1",
+      feedback_id: "fb-agentops-evidence-export",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      feedback_state: "triaged",
+      previous_state: "submitted",
+      transition_action: "triage",
+      feedback: {
+        feedback_id: "fb-agentops-evidence-export",
+        agent_id: "agentops.evidence-reporter",
+        agent_version: "0.4.0",
+        feedback_state: "submitted",
+        title: "Evidence export needs Owner response",
+        feedback_type: "feature_request",
+        severity: "info",
+        submitted_by: "analyst@example.com"
+      },
+      owner_response: {
+        owner_response_required: false,
+        actor_id: "triage-agent-store",
+        actor_role: "triage",
+        message: "Routed to Owner for response.",
+        commitment: ""
+      },
+      release_linkage: {
+        release_required: false,
+        release_ref: "",
+        release_version: "",
+        released_at: ""
+      },
+      timeline: [
+        {
+          event_id: "feedback-event-agentops-triage",
+          transition_action: "triage",
+          result_state: "triaged",
+          actor_id: "triage-agent-store",
+          actor_role: "triage",
+          message: "Routed to Owner for response.",
+          occurred_at: "2026-05-09T11:00:00Z",
+          audit_id: "audit-feedback-agentops-triage",
+          trace_id: "trace-feedback-agentops-triage"
+        }
+      ],
+      issues: [],
+      source_of_truth: {
+        feedback: "agent_store_feedback",
+        owner_response: "agent_store_owner_response",
+        release_linkage: "agent_store_release_linkage",
+        notifications: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "request_owner_response",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "feedback_owner_response_loop.v1",
+      feedback_id: "fb-security-policy-release",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      feedback_state: "released",
+      previous_state: "fixed",
+      transition_action: "release",
+      feedback: {
+        feedback_id: "fb-security-policy-release",
+        agent_id: "security.policy-guard",
+        agent_version: "0.2.1",
+        feedback_state: "fixed",
+        title: "Policy reason should link replacement Agent",
+        feedback_type: "bug",
+        severity: "warning",
+        submitted_by: "security-reviewer@example.com"
+      },
+      owner_response: {
+        owner_response_required: true,
+        actor_id: "owner-security",
+        actor_role: "owner",
+        message: "Fixed by linking replacement Agent and policy reason.",
+        commitment: "released"
+      },
+      release_linkage: {
+        release_required: true,
+        release_ref: "release://security.policy-guard/0.2.2",
+        release_version: "0.2.2",
+        released_at: "2026-05-09T13:00:00Z"
+      },
+      timeline: [
+        {
+          event_id: "feedback-event-security-fixed",
+          transition_action: "fix",
+          result_state: "fixed",
+          actor_id: "owner-security",
+          actor_role: "owner",
+          message: "Replacement Agent link fixed.",
+          occurred_at: "2026-05-09T12:30:00Z",
+          audit_id: "audit-feedback-security-fixed",
+          trace_id: "trace-feedback-security-fixed"
+        },
+        {
+          event_id: "feedback-event-security-release",
+          transition_action: "release",
+          result_state: "released",
+          actor_id: "owner-security",
+          actor_role: "owner",
+          message: "Released with replacement link.",
+          occurred_at: "2026-05-09T13:00:00Z",
+          audit_id: "audit-feedback-security-release",
+          trace_id: "trace-feedback-security-release"
+        }
+      ],
+      issues: [],
+      source_of_truth: {
+        feedback: "agent_store_feedback",
+        owner_response: "agent_store_owner_response",
+        release_linkage: "agent_store_release_linkage",
+        notifications: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "view_release_notes",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "feedback_owner_response_loop.v1",
+      feedback_id: "fb-release-notes-owner",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      feedback_state: "triaged",
+      previous_state: "triaged",
+      transition_action: "owner_reply",
+      feedback: {
+        feedback_id: "fb-release-notes-owner",
+        agent_id: "developer.release-notes",
+        agent_version: "0.1.2",
+        feedback_state: "triaged",
+        title: "Non-owner tried to close feedback",
+        feedback_type: "bug",
+        severity: "warning",
+        submitted_by: "writer@example.com"
+      },
+      owner_response: {
+        owner_response_required: true,
+        actor_id: "triage-agent-store",
+        actor_role: "triage",
+        message: "Attempted owner reply was blocked because actor_role is not owner.",
+        commitment: ""
+      },
+      release_linkage: {
+        release_required: false,
+        release_ref: "",
+        release_version: "",
+        released_at: ""
+      },
+      timeline: [
+        {
+          event_id: "feedback-event-release-notes-blocked",
+          transition_action: "owner_reply",
+          result_state: "triaged",
+          actor_id: "triage-agent-store",
+          actor_role: "triage",
+          message: "Attempted owner reply was blocked.",
+          occurred_at: "2026-05-09T12:10:00Z",
+          audit_id: "audit-feedback-release-notes-blocked",
+          trace_id: "trace-feedback-release-notes-blocked"
+        }
+      ],
+      issues: [
+        {
+          issue_id: "OWNER_RESPONSE_REQUIRED",
+          field_path: "transition.actor_role",
+          severity: "blocked",
+          fix_action_id: "request_owner_response"
+        }
+      ],
+      source_of_truth: {
+        feedback: "agent_store_feedback",
+        owner_response: "agent_store_owner_response",
+        release_linkage: "agent_store_release_linkage",
+        notifications: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "request_owner_response",
+        target_system: "agent_store",
+        enabled: false,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   qualityEvidenceAccess: {
     "framework.ai-autosdlc": {
       audit_id: "audit-quality-framework.ai-autosdlc",

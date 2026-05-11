@@ -189,6 +189,82 @@
     refresh_agentops_health_summary: "刷新 HealthSummary",
     view_agentops_health_detail: "查看健康详情",
     continue_health_review: "继续健康摘要复核",
+    installation_distribution_summary: "安装分布摘要",
+    "installation_distribution_summary.v1": "安装分布摘要 v1",
+    distribution_ready: "分布可展示",
+    distribution_unavailable: "分布不可用",
+    empty_distribution: "空版本范围",
+    permission_required: "需要权限",
+    activation_required: "需企业激活",
+    reporter_pending: "Reporter 待验证",
+    failed: "失败",
+    revoked: "已撤销",
+    darwin: "macOS",
+    linux: "Linux",
+    windows: "Windows",
+    suspended: "已暂停",
+    attention_required: "需关注",
+    none: "无",
+    request_owner_distribution_permission: "申请安装分布权限",
+    refresh_installation_inventory: "刷新安装库存",
+    prepare_owner_notification: "准备 Owner 通知",
+    continue_owner_distribution_review: "继续分布复核",
+    strip_individual_installation_identifiers: "剥离个人安装标识",
+    select_agent_with_installations: "选择有安装记录的 Agent",
+    select_version_with_installations: "选择有安装记录的版本",
+    installation_inventory: "安装库存",
+    device_binding: "设备绑定",
+    agentops_not_computed_here: "质量不在 Store 计算",
+    frontend_fallback_no_installation_distribution_summary: "前端降级安装分布",
+    OWNER_DISTRIBUTION_PERMISSION_REQUIRED: "需要 Owner 分布权限",
+    INSTALLATION_INVENTORY_REQUIRED: "需要安装库存",
+    INDIVIDUAL_IDENTIFIERS_STRIPPED: "个人标识已剥离",
+    AGENT_INSTALLATION_SCOPE_EMPTY: "Agent 安装范围为空",
+    VERSION_INSTALLATION_SCOPE_EMPTY: "版本安装范围为空",
+    INSTALLATION_DISTRIBUTION_SUMMARY_MISSING: "缺安装分布摘要",
+    feedback_owner_response_loop: "反馈闭环",
+    "feedback_owner_response_loop.v1": "反馈闭环 v1",
+    submitted: "已提交",
+    triaged: "已分诊",
+    owner_replied: "Owner 已回复",
+    planned: "已计划",
+    fixed: "已修复",
+    released: "已发布",
+    submit: "提交",
+    triage: "分诊",
+    owner_reply: "Owner 回复",
+    plan: "计划",
+    fix: "修复",
+    reject: "拒绝",
+    release: "发布",
+    bug: "缺陷",
+    usability: "易用性",
+    feature_request: "功能请求",
+    general: "通用",
+    requester: "请求者",
+    owner: "Owner",
+    triage_feedback: "分诊反馈",
+    request_owner_response: "请求 Owner 回复",
+    plan_or_reject_feedback: "计划或拒绝反馈",
+    mark_feedback_fixed: "标记已修复",
+    attach_release: "关联发布",
+    view_feedback_decision: "查看反馈决策",
+    view_release_notes: "查看发布说明",
+    return_to_feedback_queue: "返回反馈队列",
+    choose_allowed_transition: "选择允许的状态迁移",
+    attach_release_link: "补充发布链接",
+    agent_store_feedback: "Agent Store 反馈",
+    agent_store_owner_response: "Agent Store Owner 回复",
+    agent_store_release_linkage: "Agent Store 发布关联",
+    agent_store_notification_queue: "Agent Store 通知队列",
+    INVALID_TRANSITION_ACTION: "不支持的迁移动作",
+    INVALID_FEEDBACK_TRANSITION: "不允许的反馈迁移",
+    FEEDBACK_IDENTITY_REQUIRED: "缺反馈身份",
+    ACTOR_REQUIRED: "缺 actor",
+    TRANSITION_MESSAGE_REQUIRED: "缺迁移说明",
+    OWNER_RESPONSE_REQUIRED: "需要 Owner 角色",
+    RELEASE_LINK_REQUIRED: "需要发布链接",
+    FEEDBACK_LOOP_SUMMARY_MISSING: "缺反馈闭环摘要",
     quality_evidence_access_summary: "质量证据访问摘要",
     "quality_evidence_access_summary.v1": "质量证据访问摘要 v1",
     summary_ready: "摘要可展示",
@@ -1090,6 +1166,270 @@
     }
   });
 
+  Vue.component("sdlc-installation-distribution", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section installation-distribution">',
+      '  <div class="section-heading">',
+      '    <h2>安装分布</h2>',
+      '    <sdlc-status-chip :label="summary.distribution_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ distributionCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="summary.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="权限" :value="summary.permission_state" :tone="permissionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="总安装" :value="summary.total_installations" :tone="countTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="活跃中" :value="summary.active_installations" tone="success"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="失败" :value="summary.failed_installations" :tone="summary.failed_installations > 0 ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="撤销" :value="summary.revoked_installations" :tone="summary.revoked_installations > 0 ? \'warning\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="通知影响" :value="notificationLabel" :tone="notificationTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="installation-distribution__groups">',
+      '    <div>',
+      '      <span>状态</span>',
+      '      <ul><li v-for="item in statusEntries" :key="item.key">{{ displayLabel(item.key) }} · {{ item.value }}</li></ul>',
+      '    </div>',
+      '    <div>',
+      '      <span>OS</span>',
+      '      <ul><li v-for="item in osEntries" :key="item.key">{{ displayLabel(item.key) }} · {{ item.value }}</li></ul>',
+      '    </div>',
+      '    <div>',
+      '      <span>版本</span>',
+      '      <ul><li v-for="item in versionEntries" :key="item.key">{{ item.key }} · {{ item.value }}</li></ul>',
+      '    </div>',
+      '    <div>',
+      '      <span>企业状态</span>',
+      '      <ul><li v-for="item in enterpriseEntries" :key="item.key">{{ displayLabel(item.key) }} · {{ item.value }}</li></ul>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ privacyLabel }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.summary.distribution_state === "distribution_ready") {
+          return "success";
+        }
+        if (this.summary.distribution_state === "empty_distribution") {
+          return "warning";
+        }
+        return "danger";
+      },
+      permissionTone: function permissionTone() {
+        return this.summary.permission_state === "allowed" ? "success" : "warning";
+      },
+      countTone: function countTone() {
+        if (this.summary.distribution_state === "distribution_ready") {
+          return "success";
+        }
+        if (this.summary.distribution_state === "empty_distribution") {
+          return "warning";
+        }
+        return "danger";
+      },
+      notification: function notification() {
+        return this.summary.notification || {};
+      },
+      notificationTone: function notificationTone() {
+        return this.notification.notification_required ? "warning" : "success";
+      },
+      notificationLabel: function notificationLabel() {
+        return [
+          displayLabel(this.notification.reason_code),
+          (this.notification.affected_installation_count || 0) + " affected"
+        ].join(" / ");
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      privacy: function privacy() {
+        return this.summary.privacy || {};
+      },
+      privacyLabel: function privacyLabel() {
+        return [
+          "aggregation_only: " + displayLabel(this.privacy.aggregation_only),
+          "individual_users_exposed: " + displayLabel(this.privacy.individual_users_exposed),
+          "device_ids_exposed: " + displayLabel(this.privacy.device_ids_exposed)
+        ].join(" / ");
+      },
+      statusEntries: function statusEntries() {
+        return this.countEntries(this.summary.status_counts);
+      },
+      osEntries: function osEntries() {
+        return this.countEntries(this.summary.os_counts);
+      },
+      versionEntries: function versionEntries() {
+        return this.countEntries(this.summary.version_counts);
+      },
+      enterpriseEntries: function enterpriseEntries() {
+        return this.countEntries(this.summary.enterprise_state_counts);
+      },
+      distributionCopy: function distributionCopy() {
+        if (this.summary.permission_state === "permission_required") {
+          return "Viewer 未获准查看安装分布，Store 不展示聚合计数或任何安装明细。";
+        }
+        if (this.summary.distribution_state === "distribution_unavailable") {
+          return "Store 缺少 installation inventory，当前状态不能被解释为 0 安装。";
+        }
+        if (this.summary.distribution_state === "empty_distribution") {
+          return "当前 Agent 或版本范围没有可匹配的安装聚合，需由 Owner 复核 scope。";
+        }
+        return "安装分布来自 Store-owned inventory 聚合；Store 不展示 user、device_id 或 installation_id 明细。";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      }
+    },
+    methods: {
+      countEntries: function countEntries(counts) {
+        if (!counts || typeof counts !== "object") {
+          return [];
+        }
+        return Object.keys(counts).map(function mapCount(key) {
+          return { key: key, value: counts[key] };
+        });
+      },
+      displayLabel: displayLabel
+    }
+  });
+
+  Vue.component("sdlc-feedback-owner-response-loop", {
+    props: ["loop"],
+    template: [
+      '<section class="workspace-section feedback-loop">',
+      '  <div class="section-heading">',
+      '    <h2>反馈闭环</h2>',
+      '    <sdlc-status-chip :label="loop.feedback_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ loopCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="loop.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="状态" :value="loop.feedback_state" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="上一步" :value="loop.previous_state" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="动作" :value="loop.transition_action" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="反馈" :value="feedbackLabel" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Owner" :value="ownerLabel" :tone="ownerTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="发布" :value="releaseLabel" :tone="releaseTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="feedback-loop__response">',
+      '    <div>',
+      '      <span>Owner Response</span>',
+      '      <strong>{{ ownerResponse.message || "owner response missing" }}</strong>',
+      '      <small>{{ displayLabel(ownerResponse.commitment) }} / {{ displayLabel(ownerResponse.actor_role) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Release Linkage</span>',
+      '      <strong>{{ releaseLinkage.release_ref || "release_ref missing" }}</strong>',
+      '      <small>{{ releaseLinkage.release_version || "version missing" }} / {{ releaseLinkage.released_at || "released_at missing" }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ol class="feedback-loop__timeline" v-if="timeline.length">',
+      '    <li v-for="event in timeline" :key="event.event_id">',
+      '      <strong>{{ displayLabel(event.result_state) }}</strong>',
+      '      <span>{{ displayLabel(event.transition_action) }} · {{ displayLabel(event.actor_role) }}</span>',
+      '      <small>{{ event.audit_id }} / {{ event.trace_id }}</small>',
+      '    </li>',
+      '  </ol>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="loop.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      feedback: function feedback() {
+        return this.loop.feedback || {};
+      },
+      ownerResponse: function ownerResponse() {
+        return this.loop.owner_response || {};
+      },
+      releaseLinkage: function releaseLinkage() {
+        return this.loop.release_linkage || {};
+      },
+      timeline: function timeline() {
+        return Array.isArray(this.loop.timeline) ? this.loop.timeline : [];
+      },
+      issues: function issues() {
+        return Array.isArray(this.loop.issues) ? this.loop.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.issues.length) {
+          return "danger";
+        }
+        if (["released", "fixed"].indexOf(this.loop.feedback_state) >= 0) {
+          return "success";
+        }
+        if (["owner_replied", "planned", "triaged"].indexOf(this.loop.feedback_state) >= 0) {
+          return "warning";
+        }
+        return "neutral";
+      },
+      ownerTone: function ownerTone() {
+        if (this.ownerResponse.owner_response_required && this.ownerResponse.actor_role !== "owner") {
+          return "danger";
+        }
+        return this.ownerResponse.actor_role === "owner" ? "success" : "warning";
+      },
+      releaseTone: function releaseTone() {
+        if (this.releaseLinkage.release_required && this.releaseLinkage.release_ref) {
+          return "success";
+        }
+        return this.releaseLinkage.release_required ? "danger" : "neutral";
+      },
+      feedbackLabel: function feedbackLabel() {
+        return [
+          this.feedback.feedback_id || "feedback-missing",
+          displayLabel(this.feedback.feedback_type),
+          displayLabel(this.feedback.severity)
+        ].join(" / ");
+      },
+      ownerLabel: function ownerLabel() {
+        return [
+          this.ownerResponse.actor_id || "actor-missing",
+          displayLabel(this.ownerResponse.actor_role)
+        ].join(" / ");
+      },
+      releaseLabel: function releaseLabel() {
+        return [
+          this.releaseLinkage.release_ref || "release_ref missing",
+          this.releaseLinkage.release_version || "version missing"
+        ].join(" / ");
+      },
+      loopCopy: function loopCopy() {
+        if (this.issues.length) {
+          return "反馈生命周期存在阻断项；非 Owner 不能代替 Owner 关闭反馈，released 必须绑定 release_ref。";
+        }
+        if (this.loop.feedback_state === "released") {
+          return "反馈已发布并绑定 release linkage；Store 只展示链接，不生成 release notes 或修改 AgentVersion。";
+        }
+        if (this.loop.feedback_state === "owner_replied") {
+          return "Owner 回复已进入可审计 timeline；下一步只能计划或拒绝，不能跳过生命周期。";
+        }
+        return "反馈闭环来自 Agent Store lifecycle projection；本阶段不是评论系统、排行或商业化 marketplace。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "No comments / no ranking / no marketplace / no real notification send";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.loop.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-quality-evidence-access", {
     props: ["summary"],
     template: [
@@ -1484,6 +1824,8 @@
       "listingWizard",
       "runtimeAvailability",
       "healthSummaryFreshness",
+      "installationDistribution",
+      "feedbackOwnerResponseLoop",
       "qualityEvidenceAccess",
       "notificationRouting",
       "permissionDenialAction",
@@ -1531,6 +1873,8 @@
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
+      '    <sdlc-installation-distribution :summary="installationDistribution" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-distribution>',
+      '    <sdlc-feedback-owner-response-loop :loop="feedbackOwnerResponseLoop" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-feedback-owner-response-loop>',
       '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',
