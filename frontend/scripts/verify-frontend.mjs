@@ -102,6 +102,7 @@ for (const componentName of [
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
   "sdlc-health-summary-freshness",
+  "sdlc-notification-routing",
   "sdlc-listing-wizard",
   "sdlc-remediation-actions",
   "sdlc-shell",
@@ -169,6 +170,27 @@ for (const healthTerm of [
 ]) {
   assert(mockData.includes(healthTerm), `${healthTerm} must be represented`);
 }
+for (const notificationRoutingTerm of [
+  "notificationRouting",
+  "notification_routing_summary.v1",
+  "routing_ready",
+  "routing_degraded",
+  "routing_blocked",
+  "not_sent",
+  "notification_center",
+  "task_center",
+  "wecom",
+  "risk_list",
+  "trusted_iam_or_owner_directory",
+  "notification_center_not_sent_by_store",
+  "agentops_not_overridden",
+  "TRUSTED_AUDIENCE_REQUIRED",
+  "RISK_LIST_CHANNEL_FORCED",
+  "enqueue_notification_route",
+  "fix_notification_routing_context"
+]) {
+  assert(mockData.includes(notificationRoutingTerm), `${notificationRoutingTerm} must be represented`);
+}
 for (const wizardTerm of [
   "listingWizard",
   "listing_wizard_shell.v1",
@@ -213,6 +235,8 @@ assert(
     && app.includes("selectedRecommendationDecision")
     && app.includes("selectedRuntimeAvailability")
     && app.includes("selectedHealthSummaryFreshness")
+    && app.includes("selectedNotificationRouting")
+    && app.includes("notificationRouting")
     && app.includes("selectedListingWizard")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
@@ -257,6 +281,7 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("Runtime 可用性摘要满足当前 Manifest")
     && app.includes("HealthSummary 新鲜度可展示")
+    && app.includes("Agent Store 只记录 not_sent 路由摘要")
     && app.includes("上架向导已准备好草案提交材料")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
@@ -265,6 +290,7 @@ assert(
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
+    && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
     && indexHtml.includes(":action-feedback=\"actionFeedback\"")
     && indexHtml.includes("@set-discovery-collection=\"setDiscoveryCollection\"")
@@ -337,6 +363,20 @@ assert(
     && componentLibrary.includes("view_agentops_health_detail")
     && componentLibrary.includes("continue_health_review"),
   "Agent detail must expose HealthSummary freshness without using it as recommendation basis"
+);
+assert(
+  componentLibrary.includes("sdlc-notification-routing")
+    && componentLibrary.includes("通知路由")
+    && componentLibrary.includes("routing_state")
+    && componentLibrary.includes("delivery_status")
+    && componentLibrary.includes("trusted_audience")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("notification-routing__channels")
+    && componentLibrary.includes("enqueue_notification_route")
+    && componentLibrary.includes("review_notification_route")
+    && componentLibrary.includes("fix_notification_routing_context")
+    && componentLibrary.includes("notification_center_not_sent_by_store"),
+  "Agent detail must expose notification routing projection without sending notifications"
 );
 assert(
   componentLibrary.includes("install-panel")
@@ -439,6 +479,7 @@ assert(
 );
 assert(
   read("src/styles.css").includes(".action-feedback")
+    && read("src/styles.css").includes(".notification-routing__channels")
     && read("src/styles.css").includes(".workflow-steps li,")
     && read("src/styles.css").includes(".remediation-actions__list li")
     && read("src/styles.css").includes("grid-template-columns: 1fr;"),

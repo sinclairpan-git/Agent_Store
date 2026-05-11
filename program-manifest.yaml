@@ -165,19 +165,23 @@ specs:
   path: specs/039-notification-routing-summary
   depends_on:
   - 038-permission-denial-action-summary
+- id: 040-notification-routing-frontend-consumer
+  path: specs/040-notification-routing-frontend-consumer
+  depends_on:
+  - 039-notification-routing-summary
 truth_snapshot:
-  generated_at: '2026-05-10T16:27:00Z'
+  generated_at: '2026-05-11T02:34:50Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: b9a4e81
-  authoring_hash: 69aa7caf69d47715892fca76cb80ebcf539d149efa842a285122a934ec005adb
+  repo_revision: 09132e9
+  authoring_hash: 30fa3031bd962107e038859b44f807c37f8deb04dd96538426cb8514901313ad
   source_hashes: {}
-  snapshot_hash: 612dcf23f79119e0e7a85386bb1c2b6914000e7a6424366ed0a341d1135fe612
+  snapshot_hash: cc1418bd12e5509b5e148f2111e6f3a88cebfd1732e49419de453cd7661d4714
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 198
-    mapped_sources: 198
+    total_sources: 203
+    mapped_sources: 203
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -185,20 +189,20 @@ truth_snapshot:
     non_goal_signal_count: 27
     layer_totals:
       blueprint: 1
-      spec: 39
-      plan: 39
-      tasks: 39
-      execution: 39
-      close: 39
+      spec: 40
+      plan: 40
+      tasks: 40
+      execution: 40
+      close: 40
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 39
-      plan: 39
-      tasks: 39
-      execution: 39
-      close: 39
+      spec: 40
+      plan: 40
+      tasks: 40
+      execution: 40
+      close: 40
       defect: 1
       release: 1
     entries:
@@ -1963,6 +1967,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 039-notification-routing-summary
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/040-notification-routing-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 040-notification-routing-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/040-notification-routing-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 040-notification-routing-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/040-notification-routing-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 040-notification-routing-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/040-notification-routing-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 040-notification-routing-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/040-notification-routing-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 040-notification-routing-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0

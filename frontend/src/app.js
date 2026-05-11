@@ -85,6 +85,15 @@ function actionMessage(action) {
   if (actionId === "return_to_field_confirmation") {
     return "已返回字段确认；TODO、unknown 或缺 Owner 不能进入草案审核。";
   }
+  if (actionId === "enqueue_notification_route") {
+    return "通知路由已进入投影队列预览；Agent Store 只记录 not_sent 路由摘要，不发送真实消息。";
+  }
+  if (actionId === "review_notification_route") {
+    return "已进入通知路由复核；降级 channel 需要 Owner 确认后才能交给外部发送系统。";
+  }
+  if (actionId === "fix_notification_routing_context") {
+    return "已定位通知路由上下文缺口；需补齐可信受众、事件身份或审计字段后再路由。";
+  }
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
@@ -162,6 +171,7 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
+      notificationRouting: window.AgentStoreMock.notificationRouting,
       listingWizard: window.AgentStoreMock.listingWizard,
       recommendationStates: {},
       recommendationStateRequests: {},
@@ -676,6 +686,89 @@ new window.Vue({
         next_action: {
           action_id: "request_agentops_health_summary",
           target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedNotificationRouting: function selectedNotificationRouting() {
+      var agent = this.selectedAgent;
+      var routing;
+      var summaries = this.notificationRouting || {};
+      if (!agent) {
+        return {
+          audit_id: "audit-empty-filter",
+          contract_schema_version: "notification_routing_summary.v1",
+          event_type: "not_applicable",
+          event_id: "catalog-empty-filter",
+          routing_state: "routing_blocked",
+          reason: "当前没有可评估 Agent，通知路由摘要不可用。",
+          delivery_status: "not_sent",
+          trusted_audience: {
+            audience_state: "missing",
+            source: "catalog_filter",
+            recipients: []
+          },
+          channels: [],
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            event: "catalog_filter",
+            notification_delivery: "not_applicable",
+            summary_projection: "agent_store"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      routing = summaries[agent.agent_id];
+      if (routing) {
+        return routing;
+      }
+      return {
+        audit_id: "audit-routing-" + agent.agent_id,
+        contract_schema_version: "notification_routing_summary.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        event_type: "installation_failed",
+        event_id: "event-routing-missing-" + safeId(agent.agent_id),
+        routing_state: "routing_blocked",
+        reason: "缺少后端 notification_routing_summary envelope，前端只展示未发送的阻断状态。",
+        delivery_status: "not_sent",
+        trusted_audience: {
+          audience_state: "missing",
+          source: "trusted_iam_or_owner_directory",
+          recipients: []
+        },
+        channels: [
+          {
+            channel_id: "notification_center",
+            target_system: "agent_store",
+            delivery_status: "not_sent",
+            sla_minutes: 30
+          }
+        ],
+        issues: [
+          {
+            issue_id: "NOTIFICATION_ROUTING_SUMMARY_MISSING",
+            field_path: "notification_routing_summary",
+            severity: "blocked",
+            fix_action_id: "fix_notification_routing_context"
+          }
+        ],
+        source_of_truth: {
+          event: "agent_store_event",
+          audience: "trusted_iam_or_owner_directory",
+          notification_delivery: "notification_center_not_sent_by_store",
+          summary_projection: "frontend_fallback_no_notification_routing_summary"
+        },
+        next_action: {
+          action_id: "fix_notification_routing_context",
+          target_system: "agent_store",
           enabled: true,
           requires_permission: true,
           audit_required: true

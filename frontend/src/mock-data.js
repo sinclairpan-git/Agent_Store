@@ -523,6 +523,163 @@ window.AgentStoreMock = {
       }
     }
   },
+  notificationRouting: {
+    "framework.ai-autosdlc": {
+      audit_id: "audit-routing-framework.ai-autosdlc",
+      contract_schema_version: "notification_routing_summary.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      event_type: "approval_required",
+      event_id: "event-approval-framework-1",
+      routing_state: "routing_ready",
+      reason: "审批需要通知 Owner 与 AgentOps，但 Store 只展示 not_sent 路由投影。",
+      delivery_status: "not_sent",
+      trusted_audience: {
+        audience_state: "trusted",
+        source: "trusted_iam_or_owner_directory",
+        recipients: ["owner:SDLC Platform", "team:AgentOps"]
+      },
+      channels: [
+        {
+          channel_id: "notification_center",
+          target_system: "agent_store",
+          delivery_status: "not_sent",
+          sla_minutes: 15
+        },
+        {
+          channel_id: "task_center",
+          target_system: "agent_store",
+          delivery_status: "not_sent",
+          sla_minutes: 30
+        }
+      ],
+      issues: [],
+      source_of_truth: {
+        event: "agent_store_event",
+        audience: "trusted_iam_or_owner_directory",
+        notification_delivery: "notification_center_not_sent_by_store",
+        health_summary: "agentops_not_overridden",
+        summary_projection: "agent_store"
+      },
+      next_action: {
+        action_id: "enqueue_notification_route",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      audit_id: "audit-routing-agentops.evidence-reporter",
+      contract_schema_version: "notification_routing_summary.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      event_type: "feedback_owner_replied",
+      event_id: "event-feedback-agentops-1",
+      routing_state: "routing_degraded",
+      reason: "Owner 回复可进入通知中心，但企微触达仍缺少企业发送器确认。",
+      delivery_status: "not_sent",
+      trusted_audience: {
+        audience_state: "trusted",
+        source: "trusted_iam_or_owner_directory",
+        recipients: ["owner:AgentOps"]
+      },
+      channels: [
+        {
+          channel_id: "notification_center",
+          target_system: "agent_store",
+          delivery_status: "not_sent",
+          sla_minutes: 10
+        },
+        {
+          channel_id: "wecom",
+          target_system: "enterprise_messaging",
+          delivery_status: "not_sent",
+          sla_minutes: 30
+        }
+      ],
+      issues: [
+        {
+          issue_id: "ENTERPRISE_SENDER_NOT_CONFIGURED",
+          field_path: "channels.wecom",
+          severity: "warning",
+          fix_action_id: "review_notification_route"
+        }
+      ],
+      source_of_truth: {
+        event: "agent_store_event",
+        audience: "trusted_iam_or_owner_directory",
+        notification_delivery: "notification_center_not_sent_by_store",
+        health_summary: "agentops_not_overridden",
+        summary_projection: "agent_store"
+      },
+      next_action: {
+        action_id: "review_notification_route",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      audit_id: "audit-routing-security.policy-guard",
+      contract_schema_version: "notification_routing_summary.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      event_type: "security_revoked",
+      event_id: "event-security-revoked-1",
+      routing_state: "routing_blocked",
+      reason: "安全撤销必须包含 risk_list，且缺少可信受众前不得展示为已通知。",
+      delivery_status: "not_sent",
+      trusted_audience: {
+        audience_state: "missing",
+        source: "trusted_iam_or_owner_directory",
+        recipients: []
+      },
+      channels: [
+        {
+          channel_id: "risk_list",
+          target_system: "security",
+          delivery_status: "not_sent",
+          sla_minutes: 5
+        },
+        {
+          channel_id: "notification_center",
+          target_system: "agent_store",
+          delivery_status: "not_sent",
+          sla_minutes: 10
+        }
+      ],
+      issues: [
+        {
+          issue_id: "TRUSTED_AUDIENCE_REQUIRED",
+          field_path: "trusted_audience.recipients",
+          severity: "blocked",
+          fix_action_id: "fix_notification_routing_context"
+        },
+        {
+          issue_id: "RISK_LIST_CHANNEL_FORCED",
+          field_path: "channels.risk_list",
+          severity: "warning",
+          fix_action_id: "review_notification_route"
+        }
+      ],
+      source_of_truth: {
+        event: "agent_store_event",
+        audience: "trusted_iam_or_owner_directory",
+        notification_delivery: "notification_center_not_sent_by_store",
+        health_summary: "agentops_not_overridden",
+        summary_projection: "agent_store"
+      },
+      next_action: {
+        action_id: "fix_notification_routing_context",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   listingWizard: {
     "framework.ai-autosdlc": {
       contract_schema_version: "listing_wizard_shell.v1",

@@ -504,6 +504,53 @@ h2 {
   min-height: 312px;
 }
 
+.notification-routing {
+  min-height: 312px;
+}
+
+.notification-routing__channels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 14px 0 0;
+  list-style: none;
+}
+
+.notification-routing__channels li {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 68px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.notification-routing__channels strong,
+.notification-routing__channels span,
+.notification-routing__channels small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.notification-routing__channels strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.notification-routing__channels span {
+  color: #3d4b56;
+  font-size: 12px;
+}
+
+.notification-routing__channels small {
+  color: #60707d;
+  font-size: 11px;
+  font-weight: 720;
+}
+
 .runtime-panel__capabilities li {
   border-color: #ffc9c3;
   background: #fff6f5;
@@ -1057,6 +1104,7 @@ h2 {
   .discovery-stats,
   .collection-tabs,
   .decision-grid,
+  .notification-routing__channels,
   .wizard-grid,
   .wizard-steps {
     grid-template-columns: 1fr;
@@ -1110,6 +1158,7 @@ h2 {
 
   .install-panel__footer,
   .request-panel__footer,
+  .notification-routing .request-panel__footer,
   .agent-card__footer {
     align-items: flex-start;
     flex-direction: column;
