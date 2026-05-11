@@ -188,7 +188,37 @@
     request_agentops_health_summary: "申请 HealthSummary",
     refresh_agentops_health_summary: "刷新 HealthSummary",
     view_agentops_health_detail: "查看健康详情",
-    continue_health_review: "继续健康摘要复核"
+    continue_health_review: "继续健康摘要复核",
+    notification_routing_summary: "通知路由摘要",
+    "notification_routing_summary.v1": "通知路由摘要 v1",
+    routing_ready: "路由就绪",
+    routing_degraded: "路由降级",
+    routing_blocked: "路由阻断",
+    not_sent: "未发送",
+    notification_center: "通知中心",
+    task_center: "待办中心",
+    wecom: "企微",
+    risk_list: "风险列表",
+    owner_dashboard: "Owner 看板",
+    audit_log: "审计日志",
+    installation_failed: "安装失败",
+    approval_required: "需要审批",
+    feedback_owner_replied: "Owner 已回复",
+    lifecycle_replacement_available: "可替代版本",
+    security_revoked: "安全撤销",
+    enqueue_notification_route: "加入通知路由",
+    review_notification_route: "复核通知路由",
+    fix_notification_routing_context: "补齐路由上下文",
+    agent_store_event: "Agent Store 事件",
+    trusted_iam_or_owner_directory: "可信 IAM/Owner 目录",
+    notification_center_not_sent_by_store: "Store 未发送通知",
+    agentops_not_overridden: "不覆盖 AgentOps",
+    enterprise_messaging: "企业消息",
+    TRUSTED_AUDIENCE_REQUIRED: "需要可信受众",
+    RISK_LIST_CHANNEL_FORCED: "强制风险列表",
+    ENTERPRISE_SENDER_NOT_CONFIGURED: "企业发送器未配置",
+    NOTIFICATION_ROUTING_SUMMARY_MISSING: "缺通知路由摘要",
+    frontend_fallback_no_notification_routing_summary: "前端降级通知路由"
   };
 
   function displayLabel(value) {
@@ -992,6 +1022,82 @@
     }
   });
 
+  Vue.component("sdlc-notification-routing", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section notification-routing">',
+      '  <div class="section-heading">',
+      '    <h2>通知路由</h2>',
+      '    <sdlc-status-chip :label="summary.routing_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ summary.reason }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="summary.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事件" :value="summary.event_type" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="状态" :value="summary.delivery_status" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="受众" :value="audienceLabel" :tone="audienceTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="summary.audit_id || \'missing\'" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <ul class="notification-routing__channels" v-if="channels.length">',
+      '    <li v-for="route in channels" :key="route.channel_id">',
+      '      <strong>{{ displayLabel(route.channel_id) }}</strong>',
+      '      <span>{{ displayLabel(route.delivery_status) }} · {{ displayLabel(route.target_system) }}</span>',
+      '      <small>SLA {{ route.sla_minutes }}m</small>',
+      '    </li>',
+      '  </ul>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ eventLabel }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      stateTone: function stateTone() {
+        if (this.summary.routing_state === "routing_ready") {
+          return "success";
+        }
+        if (this.summary.routing_state === "routing_degraded") {
+          return "warning";
+        }
+        return "danger";
+      },
+      channels: function channels() {
+        return Array.isArray(this.summary.channels) ? this.summary.channels : [];
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      trustedAudience: function trustedAudience() {
+        return this.summary.trusted_audience || {};
+      },
+      audienceTone: function audienceTone() {
+        return this.trustedAudience.audience_state === "trusted" ? "success" : "danger";
+      },
+      audienceLabel: function audienceLabel() {
+        var recipients = Array.isArray(this.trustedAudience.recipients)
+          ? this.trustedAudience.recipients.length
+          : 0;
+        return displayLabel(this.trustedAudience.audience_state) + " / " + recipients + " recipients";
+      },
+      eventLabel: function eventLabel() {
+        return [
+          displayLabel(this.summary.event_type),
+          this.summary.event_id || "event-missing"
+        ].join(" / ");
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-listing-wizard", {
     props: ["wizard"],
     template: [
@@ -1103,6 +1209,7 @@
       "listingWizard",
       "runtimeAvailability",
       "healthSummaryFreshness",
+      "notificationRouting",
       "installHandoff",
       "assertionHandoff",
       "actionFeedback"
@@ -1147,6 +1254,7 @@
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
+      '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-section title="应用事实">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="类型" :value="view.capability_type" tone="info"></sdlc-metric-row>',
