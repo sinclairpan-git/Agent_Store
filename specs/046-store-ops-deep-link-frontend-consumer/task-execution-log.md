@@ -1,0 +1,18 @@
+# Task Execution Log: Store Ops Deep Link Frontend Consumer
+
+## 2026-05-11
+
+- 创建 046 阶段文档，范围限定为 035 Store -> Ops Deep Link 合同的前端消费。
+- 前端 fixture 新增 `storeOpsDeepLinks`，覆盖 deep_link_ready、link_sanitized、permission_required 和 link_unavailable。
+- Vue 根实例新增 `selectedStoreOpsDeepLink`，缺摘要时降级为 `link_unavailable` 并请求 AgentOps run/session binding。
+- 企业 Vue2 adapter 新增“Store -> Ops 深链”面板，展示 health summary、run/session binding、target、sanitization、issue、source-of-truth 和 next action。
+- 更新静态前端验证，覆盖 raw Trace/Evidence URL 剥离、run/session 缺失阻断、Evidence Vault 权限路径和 sanitized Run Detail 边界。
+- `npm run verify`：frontend verification passed。
+- `uv run pytest -q`：489 passed。
+- `uv run ruff check app tests`：All checks passed。
+- `uv run ruff format --check app tests`：150 files already formatted。
+- `uv run ai-sdlc program truth sync --execute --yes`：ready，233/233 mapped。
+- `uv run ai-sdlc program truth audit`：ready / fresh。
+- `uv run ai-sdlc run --dry-run`：Stage close PASS。
+- `uv run ai-sdlc run`：Stage close PASS。
+- `playwright-cli open http://127.0.0.1:4173` / `playwright-cli screenshot --filename .playwright-cli/agent-store-046.png --full-page`：本地页面渲染确认“Store -> Ops 深链”面板，raw_trace_url / raw_evidence_url 显示 stripped。

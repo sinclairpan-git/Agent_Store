@@ -551,6 +551,46 @@ h2 {
   font-weight: 720;
 }
 
+.store-ops-deep-link {
+  min-height: 360px;
+}
+
+.store-ops-deep-link__target {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.store-ops-deep-link__target div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.store-ops-deep-link__target span,
+.store-ops-deep-link__target small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.store-ops-deep-link__target strong,
+.store-ops-deep-link__target small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.store-ops-deep-link__target strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
 .notification-routing {
   min-height: 312px;
 }
@@ -1378,6 +1418,7 @@ h2 {
   .feedback-loop__timeline,
   .lifecycle-governance__mapping,
   .quality-evidence__signals,
+  .store-ops-deep-link__target,
   .notification-routing__channels,
   .permission-denial__scenarios,
   .wizard-grid,

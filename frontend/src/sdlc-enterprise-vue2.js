@@ -331,6 +331,19 @@
     SCORE_TEMPLATE_DEPRECATED: "评分模板已废弃",
     RAW_EVIDENCE_LINK_STRIPPED: "原文链接已剥离",
     frontend_fallback_no_quality_evidence_access_summary: "前端降级质量证据访问",
+    store_ops_deep_link: "Store 到 Ops 深链",
+    "store_ops_deep_link.v1": "Store 到 Ops 深链 v1",
+    deep_link_ready: "深链就绪",
+    link_sanitized: "链接已净化",
+    link_unavailable: "链接不可用",
+    run_detail: "Run Detail",
+    open_agentops_run_detail: "打开 AgentOps Run Detail",
+    open_sanitized_agentops_run_detail: "打开净化 Run Detail",
+    request_agentops_summary_with_run_binding: "申请 Run Binding",
+    strip_raw_trace_links: "剥离原文链接",
+    RUN_ID_REQUIRED: "需要 run_id",
+    SESSION_ID_REQUIRED: "需要 session_id",
+    RAW_TRACE_LINK_STRIPPED: "Raw Trace 链接已剥离",
     notification_routing_summary: "通知路由摘要",
     "notification_routing_summary.v1": "通知路由摘要 v1",
     routing_ready: "路由就绪",
@@ -1738,6 +1751,107 @@
     }
   });
 
+  Vue.component("sdlc-store-ops-deep-link", {
+    props: ["link"],
+    template: [
+      '<section class="workspace-section store-ops-deep-link">',
+      '  <div class="section-heading">',
+      '    <h2>Store -> Ops 深链</h2>',
+      '    <sdlc-status-chip :label="link.link_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ linkCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="link.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="状态" :value="link.link_state" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="权限" :value="link.permission_state" :tone="permissionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Run" :value="runLabel" :tone="bindingTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Health" :value="link.health_summary_id || \'missing\'" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Evidence" :value="link.evidence_summary_id || \'missing\'" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Raw Trace" :value="link.raw_trace_exposed ? \'exposed\' : \'stripped\'" :tone="link.raw_trace_exposed ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Raw Evidence" :value="link.raw_evidence_exposed ? \'exposed\' : \'stripped\'" :tone="link.raw_evidence_exposed ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="store-ops-deep-link__target">',
+      '    <div>',
+      '      <span>Target</span>',
+      '      <strong>{{ target.href || "href disabled" }}</strong>',
+      '      <small>{{ displayLabel(target.system) }} / {{ displayLabel(target.route) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Binding</span>',
+      '      <strong>{{ targetParams.run_id || "run missing" }}</strong>',
+      '      <small>{{ targetParams.session_id || "session missing" }} / {{ targetParams.return_path || link.return_path }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Sanitization</span>',
+      '      <strong>raw_trace_url: {{ target.raw_trace_url === "" ? "stripped" : target.raw_trace_url }}</strong>',
+      '      <small>raw_evidence_url: {{ target.raw_evidence_url === "" ? "stripped" : target.raw_evidence_url }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="link.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      target: function target() {
+        return this.link.target || {};
+      },
+      targetParams: function targetParams() {
+        return this.target.params || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.link.issues) ? this.link.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.link.link_state === "deep_link_ready") {
+          return "success";
+        }
+        if (this.link.link_state === "link_sanitized" || this.link.link_state === "permission_required") {
+          return "warning";
+        }
+        return "danger";
+      },
+      permissionTone: function permissionTone() {
+        return this.link.permission_state === "allowed" ? "success" : "warning";
+      },
+      bindingTone: function bindingTone() {
+        return this.link.run_id && this.link.session_id ? "success" : "danger";
+      },
+      runLabel: function runLabel() {
+        return [
+          this.link.run_id || "run missing",
+          this.link.session_id || "session missing"
+        ].join(" / ");
+      },
+      linkCopy: function linkCopy() {
+        if (this.link.link_state === "deep_link_ready") {
+          return "Run/session binding 完整且 viewer 有权查看；Store 只展示 sanitized AgentOps Run Detail 跳转。";
+        }
+        if (this.link.link_state === "link_sanitized") {
+          return "上游提供了 raw Trace 或 Evidence URL，Store 已剥离原文链接，仅保留 Run Detail 跳转。";
+        }
+        if (this.link.link_state === "permission_required") {
+          return "Viewer 无权查看 AgentOps Run Detail，下一步必须进入 Evidence Vault 访问申请。";
+        }
+        return "缺少 AgentOps run_id 或 session_id，Store 不生成可点击 Run Detail 跳转。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "Store 只展示 sanitized AgentOps Run Detail，不展示 raw Trace/raw Evidence URL";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.link.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-notification-routing", {
     props: ["summary"],
     template: [
@@ -2002,6 +2116,7 @@
       "feedbackOwnerResponseLoop",
       "lifecycleGovernance",
       "qualityEvidenceAccess",
+      "storeOpsDeepLink",
       "notificationRouting",
       "permissionDenialAction",
       "installHandoff",
@@ -2052,6 +2167,7 @@
       '    <sdlc-feedback-owner-response-loop :loop="feedbackOwnerResponseLoop" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-feedback-owner-response-loop>',
       '    <sdlc-lifecycle-governance :summary="lifecycleGovernance" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-lifecycle-governance>',
       '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
+      '    <sdlc-store-ops-deep-link :link="storeOpsDeepLink" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-store-ops-deep-link>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',
       '    <sdlc-section title="应用事实">',

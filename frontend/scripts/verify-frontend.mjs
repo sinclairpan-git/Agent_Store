@@ -106,6 +106,7 @@ for (const componentName of [
   "sdlc-feedback-owner-response-loop",
   "sdlc-lifecycle-governance",
   "sdlc-quality-evidence-access",
+  "sdlc-store-ops-deep-link",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
@@ -284,6 +285,33 @@ for (const qualityEvidenceTerm of [
 ]) {
   assert(mockData.includes(qualityEvidenceTerm), `${qualityEvidenceTerm} must be represented`);
 }
+for (const storeOpsDeepLinkTerm of [
+  "storeOpsDeepLinks",
+  "store_ops_deep_link.v1",
+  "deep_link_ready",
+  "link_sanitized",
+  "permission_required",
+  "link_unavailable",
+  "open_agentops_run_detail",
+  "open_sanitized_agentops_run_detail",
+  "request_agentops_summary_with_run_binding",
+  "run_detail",
+  "health_summary_id",
+  "run_id",
+  "session_id",
+  "evidence_summary_id",
+  "agent_store_viewer_context",
+  "raw_trace: \"evidence_vault\"",
+  "raw_trace_url: \"\"",
+  "raw_evidence_url: \"\"",
+  "raw_trace_exposed: false",
+  "raw_evidence_exposed: false",
+  "RUN_ID_REQUIRED",
+  "SESSION_ID_REQUIRED",
+  "RAW_TRACE_LINK_STRIPPED"
+]) {
+  assert(mockData.includes(storeOpsDeepLinkTerm), `${storeOpsDeepLinkTerm} must be represented`);
+}
 for (const notificationRoutingTerm of [
   "notificationRouting",
   "notification_routing_summary.v1",
@@ -380,6 +408,8 @@ assert(
     && app.includes("lifecycleGovernance")
     && app.includes("selectedQualityEvidenceAccess")
     && app.includes("qualityEvidenceAccess")
+    && app.includes("selectedStoreOpsDeepLink")
+    && app.includes("storeOpsDeepLinks")
     && app.includes("selectedNotificationRouting")
     && app.includes("notificationRouting")
     && app.includes("selectedPermissionDenialAction")
@@ -437,6 +467,8 @@ assert(
     && app.includes("不签发 CapabilityGrant")
     && app.includes("Store 前端不计算质量分")
     && app.includes("质量证据摘要可继续复核")
+    && app.includes("sanitized run/session binding")
+    && app.includes("缺少绑定时 Store 不生成 Run Detail 跳转")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
     && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
@@ -451,6 +483,7 @@ assert(
     && indexHtml.includes(":feedback-owner-response-loop=\"selectedFeedbackOwnerResponseLoop\"")
     && indexHtml.includes(":lifecycle-governance=\"selectedLifecycleGovernance\"")
     && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
+    && indexHtml.includes(":store-ops-deep-link=\"selectedStoreOpsDeepLink\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
     && indexHtml.includes(":permission-denial-action=\"selectedPermissionDenialAction\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
@@ -611,6 +644,26 @@ assert(
   "Agent detail must expose quality evidence access without exposing raw evidence or calculating quality"
 );
 assert(
+  componentLibrary.includes("sdlc-store-ops-deep-link")
+    && componentLibrary.includes("Store -> Ops 深链")
+    && componentLibrary.includes("store_ops_deep_link.v1")
+    && componentLibrary.includes("link_state")
+    && componentLibrary.includes("permission_state")
+    && componentLibrary.includes("health_summary_id")
+    && componentLibrary.includes("run_id")
+    && componentLibrary.includes("session_id")
+    && componentLibrary.includes("evidence_summary_id")
+    && componentLibrary.includes("store-ops-deep-link__target")
+    && componentLibrary.includes("open_agentops_run_detail")
+    && componentLibrary.includes("open_sanitized_agentops_run_detail")
+    && componentLibrary.includes("request_agentops_summary_with_run_binding")
+    && componentLibrary.includes("RUN_ID_REQUIRED")
+    && componentLibrary.includes("SESSION_ID_REQUIRED")
+    && componentLibrary.includes("RAW_TRACE_LINK_STRIPPED")
+    && componentLibrary.includes("Store 只展示 sanitized AgentOps Run Detail，不展示 raw Trace/raw Evidence URL"),
+  "Agent detail must expose sanitized Store to AgentOps deep links without raw trace or evidence URLs"
+);
+assert(
   componentLibrary.includes("sdlc-notification-routing")
     && componentLibrary.includes("通知路由")
     && componentLibrary.includes("routing_state")
@@ -742,6 +795,7 @@ assert(
 assert(
   read("src/styles.css").includes(".action-feedback")
     && read("src/styles.css").includes(".quality-evidence__signals")
+    && read("src/styles.css").includes(".store-ops-deep-link__target")
     && read("src/styles.css").includes(".notification-routing__channels")
     && read("src/styles.css").includes(".permission-denial__scenarios")
     && read("src/styles.css").includes(".workflow-steps li,")

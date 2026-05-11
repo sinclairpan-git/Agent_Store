@@ -189,19 +189,23 @@ specs:
   path: specs/045-lifecycle-governance-frontend-consumer
   depends_on:
   - 044-feedback-owner-response-frontend-consumer
+- id: 046-store-ops-deep-link-frontend-consumer
+  path: specs/046-store-ops-deep-link-frontend-consumer
+  depends_on:
+  - 045-lifecycle-governance-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T04:56:13Z'
+  generated_at: '2026-05-11T07:17:10Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 29190f4
-  authoring_hash: cc59b9124205a3a35173380b31bef6b94b310089c20790323a831e27e6f6ca15
+  repo_revision: 1d6d51b
+  authoring_hash: 9255ca6eb8b24cc9101ee8f4f98305dc5d08ccf058209d3511dac2a80d34a006
   source_hashes: {}
-  snapshot_hash: 9f97874d433ecabbf3f82cc8e940de2d90fefa821f83fd53cb7c302ee82a2404
+  snapshot_hash: 072fabe25f0fd19e05000507876931f077c28174c5dddfbdf8c622c1d1ddb059
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 228
-    mapped_sources: 228
+    total_sources: 233
+    mapped_sources: 233
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -209,20 +213,20 @@ truth_snapshot:
     non_goal_signal_count: 31
     layer_totals:
       blueprint: 1
-      spec: 45
-      plan: 45
-      tasks: 45
-      execution: 45
-      close: 45
+      spec: 46
+      plan: 46
+      tasks: 46
+      execution: 46
+      close: 46
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 45
-      plan: 45
-      tasks: 45
-      execution: 45
-      close: 45
+      spec: 46
+      plan: 46
+      tasks: 46
+      execution: 46
+      close: 46
       defect: 1
       release: 1
     entries:
@@ -2260,6 +2264,51 @@ truth_snapshot:
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 1
+    - path: specs/046-store-ops-deep-link-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 046-store-ops-deep-link-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/046-store-ops-deep-link-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 046-store-ops-deep-link-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/046-store-ops-deep-link-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 046-store-ops-deep-link-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/046-store-ops-deep-link-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 046-store-ops-deep-link-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/046-store-ops-deep-link-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 046-store-ops-deep-link-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect
