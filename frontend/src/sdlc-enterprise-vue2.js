@@ -218,7 +218,48 @@
     RISK_LIST_CHANNEL_FORCED: "强制风险列表",
     ENTERPRISE_SENDER_NOT_CONFIGURED: "企业发送器未配置",
     NOTIFICATION_ROUTING_SUMMARY_MISSING: "缺通知路由摘要",
-    frontend_fallback_no_notification_routing_summary: "前端降级通知路由"
+    frontend_fallback_no_notification_routing_summary: "前端降级通知路由",
+    permission_denial_action_summary: "权限恢复摘要",
+    "permission_denial_action_summary.v1": "权限恢复摘要 v1",
+    not_visible: "不可见",
+    unsupported: "不支持场景",
+    visible_not_installable: "可见不可安装",
+    raw_evidence_denied: "证据原文无权",
+    high_risk_approval_required: "高风险需审批",
+    policy_blocked: "策略阻断",
+    visibility_denied: "可见性被拒绝",
+    install_permission_required: "需安装权限",
+    raw_evidence_access_required: "需证据原文权限",
+    agentops_approval_required: "需 AgentOps 审批",
+    agentops_policy_blocked: "AgentOps 策略阻断",
+    denial_unavailable: "权限状态待刷新",
+    install_denied: "安装被拒绝",
+    evidence_vault_required: "需 Evidence Vault",
+    policy_denied: "策略拒绝",
+    permission_unknown: "权限未知",
+    trusted_iam_auth_context: "可信 IAM 身份上下文",
+    iam_or_agentops_policy_echo: "IAM/AgentOps 权限回显",
+    request_visibility_access: "申请可见性",
+    request_install_permission: "申请安装权限",
+    contact_agent_owner: "联系 Owner",
+    request_evidence_access: "申请证据原文",
+    return_to_evidence_summary: "返回证据摘要",
+    submit_agentops_approval: "提交 AgentOps 审批",
+    view_access_scope: "查看访问范围",
+    view_policy_reason: "查看策略原因",
+    view_replacement_agent: "查看替代 Agent",
+    refresh_identity: "刷新身份",
+    return_to_catalog: "返回目录",
+    notify_owner_on_request: "申请时通知 Owner",
+    notify_evidence_vault_on_request: "申请 Evidence Vault",
+    notify_agentops_approval_center: "通知审批中心",
+    notify_security_iam_and_owner: "通知安全和 Owner",
+    audit_only: "仅审计",
+    DENIAL_SCENARIO_UNSUPPORTED: "不支持的权限场景",
+    PERMISSION_DECISION_REQUIRED: "缺权限裁决",
+    POLICY_REF_REQUIRED: "缺策略引用",
+    RAW_PERMISSION_LINK_STRIPPED: "原文链接已剥离",
+    frontend_fallback_no_permission_denial_action_summary: "前端降级权限恢复"
   };
 
   function displayLabel(value) {
@@ -1098,6 +1139,79 @@
     }
   });
 
+  Vue.component("sdlc-permission-denial-action", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section workspace-section--wide permission-denial">',
+      '  <div class="section-heading">',
+      '    <h2>权限恢复</h2>',
+      '    <sdlc-status-chip :label="summary.denial_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ page.title }}：{{ page.plain_language_explanation }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="summary.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="场景" :value="summary.denial_scenario" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="权限" :value="summary.permission_state" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="通知" :value="page.notification_rule" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Raw Trace" :value="summary.raw_trace_exposed ? \'exposed\' : \'stripped\'" :tone="summary.raw_trace_exposed ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Store Grant" :value="summary.store_grant_issued ? \'issued\' : \'not_issued\'" :tone="summary.store_grant_issued ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审计" :value="page.audit_required ? \'required\' : \'optional\'" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="permission-denial__actions">',
+      '    <sdlc-action-button :action="summary.primary_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '    <sdlc-action-button :action="summary.secondary_action" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '  <ul class="permission-denial__scenarios" v-if="scenarioExamples.length">',
+      '    <li v-for="example in scenarioExamples" :key="example.denial_scenario">',
+      '      <strong>{{ displayLabel(example.denial_scenario) }}</strong>',
+      '      <span>{{ displayLabel(example.denial_state) }} · {{ displayLabel(example.permission_state) }}</span>',
+      '      <small>{{ displayLabel(example.primary_action_id) }} / {{ displayLabel(example.notification_rule) }}</small>',
+      '    </li>',
+      '  </ul>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ permissionLabel }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      page: function page() {
+        return this.summary.page || {};
+      },
+      stateTone: function stateTone() {
+        if (this.summary.denial_state === "denial_unavailable") {
+          return "warning";
+        }
+        return "danger";
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      scenarioExamples: function scenarioExamples() {
+        return Array.isArray(this.summary.scenario_examples)
+          ? this.summary.scenario_examples
+          : [];
+      },
+      permissionLabel: function permissionLabel() {
+        var permission = this.summary.permission || {};
+        return [
+          permission.permission_decision_id || "permission-missing",
+          permission.denied_scope || "scope-missing"
+        ].join(" / ");
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-listing-wizard", {
     props: ["wizard"],
     template: [
@@ -1210,6 +1324,7 @@
       "runtimeAvailability",
       "healthSummaryFreshness",
       "notificationRouting",
+      "permissionDenialAction",
       "installHandoff",
       "assertionHandoff",
       "actionFeedback"
@@ -1255,6 +1370,7 @@
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
+      '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',
       '    <sdlc-section title="应用事实">',
       '      <dl class="facts">',
       '        <sdlc-metric-row label="类型" :value="view.capability_type" tone="info"></sdlc-metric-row>',

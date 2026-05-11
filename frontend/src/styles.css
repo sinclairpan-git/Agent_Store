@@ -551,6 +551,60 @@ h2 {
   font-weight: 720;
 }
 
+.permission-denial {
+  min-height: 360px;
+}
+
+.permission-denial__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.permission-denial__scenarios {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 14px 0 0;
+  list-style: none;
+}
+
+.permission-denial__scenarios li {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 78px;
+  padding: 10px;
+  border: 1px solid #ffc9c3;
+  border-radius: 8px;
+  background: #fff6f5;
+}
+
+.permission-denial__scenarios strong,
+.permission-denial__scenarios span,
+.permission-denial__scenarios small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.permission-denial__scenarios strong {
+  color: #7f271e;
+  font-size: 13px;
+}
+
+.permission-denial__scenarios span {
+  color: #3d4b56;
+  font-size: 12px;
+}
+
+.permission-denial__scenarios small {
+  color: #60707d;
+  font-size: 11px;
+  font-weight: 720;
+}
+
 .runtime-panel__capabilities li {
   border-color: #ffc9c3;
   background: #fff6f5;
@@ -1105,6 +1159,7 @@ h2 {
   .collection-tabs,
   .decision-grid,
   .notification-routing__channels,
+  .permission-denial__scenarios,
   .wizard-grid,
   .wizard-steps {
     grid-template-columns: 1fr;
@@ -1165,6 +1220,7 @@ h2 {
   }
 
   .install-panel__actions,
+  .permission-denial__actions,
   .topbar__actions,
   .action-button {
     width: 100%;

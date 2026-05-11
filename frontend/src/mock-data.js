@@ -680,6 +680,277 @@ window.AgentStoreMock = {
       }
     }
   },
+  permissionDenialActions: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "permission_denial_action_summary.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      denial_scenario: "high_risk_approval_required",
+      denial_state: "agentops_approval_required",
+      permission_state: "approval_required",
+      page: {
+        title: "此安装需要审批",
+        plain_language_explanation: "该 Agent 会访问高风险资源，需先提交 AgentOps 审批。",
+        message_key: "permissionDenial.pages.agentops_approval_required",
+        severity: "blocked",
+        return_path: "/agents/framework.ai-autosdlc",
+        visible_roles: ["requester", "owner", "security_iam"],
+        notification_rule: "notify_agentops_approval_center",
+        audit_required: true,
+        agent_display_name: "Ai_AutoSDLC"
+      },
+      permission: {
+        permission_decision_id: "perm-framework-approval",
+        decision: "approval_required",
+        denied_scope: "agent.install",
+        resource_scope: "repo:governed",
+        request_id: "req-framework-approval",
+        policy_ref: "policy/high-risk-agent",
+        auth_context_id: "auth-framework",
+        subject_user_id: "user-current",
+        request_access_url: "/agentops/approvals",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      store_grant_issued: false,
+      store_policy_override_allowed: false,
+      primary_action: {
+        action_id: "submit_agentops_approval",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "#agentops-approval"
+      },
+      secondary_action: {
+        action_id: "view_access_scope",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true,
+        href: "#access-scope"
+      },
+      issues: [],
+      scenario_examples: [
+        {
+          denial_scenario: "unsupported",
+          denial_state: "denial_unavailable",
+          permission_state: "permission_unknown",
+          title: "权限状态待刷新",
+          primary_action_id: "refresh_identity",
+          secondary_action_id: "return_to_catalog",
+          notification_rule: "audit_only"
+        },
+        {
+          denial_scenario: "not_visible",
+          denial_state: "visibility_denied",
+          permission_state: "visibility_denied",
+          title: "当前无权查看此 Agent",
+          primary_action_id: "return_to_catalog",
+          secondary_action_id: "request_visibility_access",
+          notification_rule: "audit_only"
+        },
+        {
+          denial_scenario: "visible_not_installable",
+          denial_state: "install_permission_required",
+          permission_state: "install_denied",
+          title: "可查看，但暂不能安装",
+          primary_action_id: "request_install_permission",
+          secondary_action_id: "contact_agent_owner",
+          notification_rule: "notify_owner_on_request"
+        },
+        {
+          denial_scenario: "raw_evidence_denied",
+          denial_state: "raw_evidence_access_required",
+          permission_state: "evidence_vault_required",
+          title: "仅可查看脱敏摘要",
+          primary_action_id: "request_evidence_access",
+          secondary_action_id: "return_to_evidence_summary",
+          notification_rule: "notify_evidence_vault_on_request"
+        },
+        {
+          denial_scenario: "high_risk_approval_required",
+          denial_state: "agentops_approval_required",
+          permission_state: "approval_required",
+          title: "此安装需要审批",
+          primary_action_id: "submit_agentops_approval",
+          secondary_action_id: "view_access_scope",
+          notification_rule: "notify_agentops_approval_center"
+        },
+        {
+          denial_scenario: "policy_blocked",
+          denial_state: "agentops_policy_blocked",
+          permission_state: "policy_denied",
+          title: "当前策略阻断运行",
+          primary_action_id: "view_policy_reason",
+          secondary_action_id: "view_replacement_agent",
+          notification_rule: "notify_security_iam_and_owner"
+        }
+      ],
+      source_of_truth: {
+        identity: "trusted_iam_auth_context",
+        permission_decision: "iam_or_agentops_policy_echo",
+        policy: "agentops",
+        raw_evidence: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "submit_agentops_approval",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "#agentops-approval"
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "permission_denial_action_summary.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      denial_scenario: "raw_evidence_denied",
+      denial_state: "raw_evidence_access_required",
+      permission_state: "evidence_vault_required",
+      page: {
+        title: "仅可查看脱敏摘要",
+        plain_language_explanation: "证据原文需走 Evidence Vault 审批，Store 不展示 raw Trace 或 raw Evidence。",
+        message_key: "permissionDenial.pages.raw_evidence_access_required",
+        severity: "blocked",
+        return_path: "/agents/agentops.evidence-reporter",
+        visible_roles: ["requester", "owner", "agentops_admin"],
+        notification_rule: "notify_evidence_vault_on_request",
+        audit_required: true,
+        agent_display_name: "Evidence Reporter"
+      },
+      permission: {
+        permission_decision_id: "perm-agentops-evidence",
+        decision: "deny",
+        denied_scope: "evidence.raw",
+        resource_scope: "agentops:trace",
+        request_id: "req-agentops-evidence",
+        policy_ref: "policy/evidence-vault",
+        auth_context_id: "auth-agentops",
+        subject_user_id: "user-current",
+        request_access_url: "/evidence-vault/access-requests",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      store_grant_issued: false,
+      store_policy_override_allowed: false,
+      primary_action: {
+        action_id: "request_evidence_access",
+        target_system: "evidence_vault",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "#evidence-access"
+      },
+      secondary_action: {
+        action_id: "return_to_evidence_summary",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: false,
+        href: "#evidence-summary"
+      },
+      issues: [
+        {
+          issue_id: "RAW_PERMISSION_LINK_STRIPPED",
+          field_path: "denial_context.raw_links",
+          severity: "info",
+          fix_action_id: "request_evidence_access"
+        }
+      ],
+      scenario_examples: [],
+      source_of_truth: {
+        identity: "trusted_iam_auth_context",
+        permission_decision: "iam_or_agentops_policy_echo",
+        policy: "agentops",
+        raw_evidence: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "request_evidence_access",
+        target_system: "evidence_vault",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "#evidence-access"
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "permission_denial_action_summary.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      denial_scenario: "policy_blocked",
+      denial_state: "agentops_policy_blocked",
+      permission_state: "policy_denied",
+      page: {
+        title: "当前策略阻断运行",
+        plain_language_explanation: "AgentOps Policy Service 返回 block，Store 只能展示原因和替代动作。",
+        message_key: "permissionDenial.pages.agentops_policy_blocked",
+        severity: "blocked",
+        return_path: "/agents/security.policy-guard",
+        visible_roles: ["requester", "owner", "security_iam"],
+        notification_rule: "notify_security_iam_and_owner",
+        audit_required: true,
+        agent_display_name: "Policy Guard"
+      },
+      permission: {
+        permission_decision_id: "perm-security-policy",
+        decision: "deny",
+        denied_scope: "agent.run",
+        resource_scope: "runtime:policy",
+        request_id: "req-security-policy",
+        policy_ref: "policy/risk-block",
+        auth_context_id: "auth-security",
+        subject_user_id: "user-current",
+        request_access_url: "/agentops/policy/policy-risk-block",
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      store_grant_issued: false,
+      store_policy_override_allowed: false,
+      primary_action: {
+        action_id: "view_policy_reason",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "#policy-reason"
+      },
+      secondary_action: {
+        action_id: "view_replacement_agent",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true,
+        href: "#replacement-agent"
+      },
+      issues: [],
+      scenario_examples: [],
+      source_of_truth: {
+        identity: "trusted_iam_auth_context",
+        permission_decision: "iam_or_agentops_policy_echo",
+        policy: "agentops",
+        raw_evidence: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "view_policy_reason",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "#policy-reason"
+      }
+    }
+  },
   listingWizard: {
     "framework.ai-autosdlc": {
       contract_schema_version: "listing_wizard_shell.v1",

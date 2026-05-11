@@ -103,6 +103,7 @@ for (const componentName of [
   "sdlc-source-facts",
   "sdlc-health-summary-freshness",
   "sdlc-notification-routing",
+  "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
   "sdlc-remediation-actions",
   "sdlc-shell",
@@ -191,6 +192,29 @@ for (const notificationRoutingTerm of [
 ]) {
   assert(mockData.includes(notificationRoutingTerm), `${notificationRoutingTerm} must be represented`);
 }
+for (const permissionDenialTerm of [
+  "permissionDenialActions",
+  "permission_denial_action_summary.v1",
+  "not_visible",
+  "visible_not_installable",
+  "raw_evidence_denied",
+  "high_risk_approval_required",
+  "policy_blocked",
+  "denial_unavailable",
+  "trusted_iam_auth_context",
+  "iam_or_agentops_policy_echo",
+  "raw_trace_url: \"\"",
+  "raw_evidence_url: \"\"",
+  "store_grant_issued: false",
+  "store_policy_override_allowed: false",
+  "request_evidence_access",
+  "submit_agentops_approval",
+  "view_policy_reason",
+  "notify_security_iam_and_owner",
+  "RAW_PERMISSION_LINK_STRIPPED"
+]) {
+  assert(mockData.includes(permissionDenialTerm), `${permissionDenialTerm} must be represented`);
+}
 for (const wizardTerm of [
   "listingWizard",
   "listing_wizard_shell.v1",
@@ -237,6 +261,8 @@ assert(
     && app.includes("selectedHealthSummaryFreshness")
     && app.includes("selectedNotificationRouting")
     && app.includes("notificationRouting")
+    && app.includes("selectedPermissionDenialAction")
+    && app.includes("permissionDenialActions")
     && app.includes("selectedListingWizard")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
@@ -282,6 +308,7 @@ assert(
     && app.includes("Runtime 可用性摘要满足当前 Manifest")
     && app.includes("HealthSummary 新鲜度可展示")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
+    && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
@@ -291,6 +318,7 @@ assert(
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
+    && indexHtml.includes(":permission-denial-action=\"selectedPermissionDenialAction\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
     && indexHtml.includes(":action-feedback=\"actionFeedback\"")
     && indexHtml.includes("@set-discovery-collection=\"setDiscoveryCollection\"")
@@ -377,6 +405,22 @@ assert(
     && componentLibrary.includes("fix_notification_routing_context")
     && componentLibrary.includes("notification_center_not_sent_by_store"),
   "Agent detail must expose notification routing projection without sending notifications"
+);
+assert(
+  componentLibrary.includes("sdlc-permission-denial-action")
+    && componentLibrary.includes("权限恢复")
+    && componentLibrary.includes("denial_state")
+    && componentLibrary.includes("permission_state")
+    && componentLibrary.includes("raw_trace_exposed")
+    && componentLibrary.includes("store_grant_issued")
+    && componentLibrary.includes("permission-denial__scenarios")
+    && componentLibrary.includes("request_visibility_access")
+    && componentLibrary.includes("request_install_permission")
+    && componentLibrary.includes("request_evidence_access")
+    && componentLibrary.includes("submit_agentops_approval")
+    && componentLibrary.includes("view_policy_reason")
+    && componentLibrary.includes("trusted_iam_auth_context"),
+  "Agent detail must expose permission denial recovery actions without granting access"
 );
 assert(
   componentLibrary.includes("install-panel")
@@ -480,6 +524,7 @@ assert(
 assert(
   read("src/styles.css").includes(".action-feedback")
     && read("src/styles.css").includes(".notification-routing__channels")
+    && read("src/styles.css").includes(".permission-denial__scenarios")
     && read("src/styles.css").includes(".workflow-steps li,")
     && read("src/styles.css").includes(".remediation-actions__list li")
     && read("src/styles.css").includes("grid-template-columns: 1fr;"),

@@ -94,6 +94,24 @@ function actionMessage(action) {
   if (actionId === "fix_notification_routing_context") {
     return "已定位通知路由上下文缺口；需补齐可信受众、事件身份或审计字段后再路由。";
   }
+  if (actionId === "request_visibility_access") {
+    return "可见性申请已进入预览；Agent Store 不直接授予访问，只记录可审计请求。";
+  }
+  if (actionId === "request_install_permission") {
+    return "安装权限申请已进入预览；权限裁决仍来自 IAM 或 AgentOps policy echo。";
+  }
+  if (actionId === "request_evidence_access") {
+    return "Evidence Vault 访问申请已进入预览；Store 不展示 raw Trace 或 raw Evidence。";
+  }
+  if (actionId === "submit_agentops_approval") {
+    return "AgentOps 审批提交已进入预览；receipt 不等于批准，Store 不签发 CapabilityGrant。";
+  }
+  if (actionId === "view_policy_reason") {
+    return "已切到 Policy 阻断原因；Store 只展示 AgentOps policy echo，不覆盖策略裁决。";
+  }
+  if (actionId === "refresh_identity") {
+    return "已请求刷新身份上下文；缺可信 auth context 时不会展示具体权限恢复动作。";
+  }
   return "操作已记录为可审计的预览动作。真实状态必须来自 Agent Store、Ai_AutoSDLC CLI 或 AgentOps 回显。";
 }
 
@@ -172,6 +190,7 @@ new window.Vue({
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
       notificationRouting: window.AgentStoreMock.notificationRouting,
+      permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
       recommendationStates: {},
       recommendationStateRequests: {},
@@ -771,6 +790,141 @@ new window.Vue({
           target_system: "agent_store",
           enabled: true,
           requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedPermissionDenialAction: function selectedPermissionDenialAction() {
+      var agent = this.selectedAgent;
+      var summary;
+      var summaries = this.permissionDenialActions || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "permission_denial_action_summary.v1",
+          denial_scenario: "not_visible",
+          denial_state: "denial_unavailable",
+          permission_state: "permission_unknown",
+          page: {
+            title: "权限状态待刷新",
+            plain_language_explanation: "当前没有可评估 Agent，权限恢复动作不可用。",
+            severity: "warning",
+            return_path: "/agent-store/agents",
+            visible_roles: ["requester"],
+            notification_rule: "audit_only",
+            audit_required: true
+          },
+          permission: {
+            permission_decision_id: "permission-empty-filter",
+            decision: "deny",
+            denied_scope: "catalog",
+            resource_scope: "catalog_filter",
+            request_id: "catalog-empty-filter",
+            policy_ref: "",
+            auth_context_id: "",
+            subject_user_id: "",
+            request_access_url: "",
+            raw_trace_url: "",
+            raw_evidence_url: ""
+          },
+          raw_trace_exposed: false,
+          raw_evidence_exposed: false,
+          store_grant_issued: false,
+          store_policy_override_allowed: false,
+          primary_action: this.selectedView.primary_action,
+          secondary_action: this.selectedView.primary_action,
+          issues: [
+            {
+              issue_id: "TRUSTED_AUTH_CONTEXT_REQUIRED",
+              field_path: "viewer_context",
+              severity: "warning",
+              fix_action_id: "refresh_identity"
+            }
+          ],
+          scenario_examples: [],
+          source_of_truth: {
+            identity: "trusted_iam_auth_context",
+            permission_decision: "iam_or_agentops_policy_echo",
+            policy: "agentops",
+            raw_evidence: "evidence_vault",
+            projection: "agent_store"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      summary = summaries[agent.agent_id];
+      if (summary) {
+        return summary;
+      }
+      return {
+        contract_schema_version: "permission_denial_action_summary.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        denial_scenario: "visible_not_installable",
+        denial_state: "denial_unavailable",
+        permission_state: "permission_unknown",
+        page: {
+          title: "权限状态待刷新",
+          plain_language_explanation: "缺少后端 permission_denial_action_summary envelope，前端只展示刷新身份路径。",
+          severity: "warning",
+          return_path: "/agents/" + agent.agent_id,
+          visible_roles: ["requester"],
+          notification_rule: "audit_only",
+          audit_required: true,
+          agent_display_name: agent.display_name
+        },
+        permission: {
+          permission_decision_id: "permission-missing-" + safeId(agent.agent_id),
+          decision: "deny",
+          denied_scope: "agent.install",
+          resource_scope: "agent_store",
+          request_id: "req-permission-missing-" + safeId(agent.agent_id),
+          policy_ref: "",
+          auth_context_id: "",
+          subject_user_id: "",
+          request_access_url: "",
+          raw_trace_url: "",
+          raw_evidence_url: ""
+        },
+        raw_trace_exposed: false,
+        raw_evidence_exposed: false,
+        store_grant_issued: false,
+        store_policy_override_allowed: false,
+        primary_action: {
+          action_id: "refresh_identity",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: false,
+          audit_required: true
+        },
+        secondary_action: {
+          action_id: "return_to_catalog",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: false,
+          audit_required: false,
+          href: "/agent-store/agents"
+        },
+        issues: [
+          {
+            issue_id: "TRUSTED_AUTH_CONTEXT_REQUIRED",
+            field_path: "viewer_context",
+            severity: "warning",
+            fix_action_id: "refresh_identity"
+          }
+        ],
+        scenario_examples: [],
+        source_of_truth: {
+          identity: "trusted_iam_auth_context",
+          permission_decision: "iam_or_agentops_policy_echo",
+          policy: "agentops",
+          raw_evidence: "evidence_vault",
+          projection: "frontend_fallback_no_permission_denial_action_summary"
+        },
+        next_action: {
+          action_id: "refresh_identity",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: false,
           audit_required: true
         }
       };

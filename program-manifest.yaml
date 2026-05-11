@@ -169,40 +169,44 @@ specs:
   path: specs/040-notification-routing-frontend-consumer
   depends_on:
   - 039-notification-routing-summary
+- id: 041-permission-denial-frontend-consumer
+  path: specs/041-permission-denial-frontend-consumer
+  depends_on:
+  - 040-notification-routing-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T02:34:50Z'
+  generated_at: '2026-05-11T02:51:46Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 09132e9
-  authoring_hash: 30fa3031bd962107e038859b44f807c37f8deb04dd96538426cb8514901313ad
+  repo_revision: 819b9bd
+  authoring_hash: 45e7381624817973dd35802faf419d24ed955b0395d9fe755b031322cd96dbc3
   source_hashes: {}
-  snapshot_hash: cc1418bd12e5509b5e148f2111e6f3a88cebfd1732e49419de453cd7661d4714
+  snapshot_hash: 0b24057235e13a6271a43049506ff3968919a9db11140c0af2842ccc1ca53a9f
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 203
-    mapped_sources: 203
+    total_sources: 208
+    mapped_sources: 208
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
     deferred_signal_count: 161
-    non_goal_signal_count: 27
+    non_goal_signal_count: 28
     layer_totals:
       blueprint: 1
-      spec: 40
-      plan: 40
-      tasks: 40
-      execution: 40
-      close: 40
+      spec: 41
+      plan: 41
+      tasks: 41
+      execution: 41
+      close: 41
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 40
-      plan: 40
-      tasks: 40
-      execution: 40
-      close: 40
+      spec: 41
+      plan: 41
+      tasks: 41
+      execution: 41
+      close: 41
       defect: 1
       release: 1
     entries:
@@ -2015,6 +2019,51 @@ truth_snapshot:
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
+    - path: specs/041-permission-denial-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 041-permission-denial-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/041-permission-denial-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 041-permission-denial-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/041-permission-denial-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 041-permission-denial-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/041-permission-denial-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 041-permission-denial-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/041-permission-denial-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 041-permission-denial-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect
