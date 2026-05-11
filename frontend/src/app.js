@@ -85,6 +85,15 @@ function actionMessage(action) {
   if (actionId === "continue_quality_evidence_review") {
     return "质量证据摘要可继续复核；推荐依据只采用后端允许字段，Store 前端不本地推导质量。";
   }
+  if (actionId === "open_agentops_run_detail") {
+    return "已进入 AgentOps Run Detail 跳转预览；Store 只传递 sanitized run/session binding，不展示 raw Trace 或 Evidence。";
+  }
+  if (actionId === "open_sanitized_agentops_run_detail") {
+    return "已进入已净化的 AgentOps Run Detail 跳转预览；上游 raw Trace/Evidence URL 已被剥离。";
+  }
+  if (actionId === "request_agentops_summary_with_run_binding") {
+    return "已请求 AgentOps 重新提供 run/session binding；缺少绑定时 Store 不生成 Run Detail 跳转。";
+  }
   if (actionId === "request_owner_distribution_permission") {
     return "安装分布权限申请已进入预览；Store 不向无权限 viewer 暴露聚合计数或安装明细。";
   }
@@ -256,6 +265,7 @@ new window.Vue({
       feedbackOwnerResponseLoops: window.AgentStoreMock.feedbackOwnerResponseLoops,
       lifecycleGovernance: window.AgentStoreMock.lifecycleGovernance,
       qualityEvidenceAccess: window.AgentStoreMock.qualityEvidenceAccess,
+      storeOpsDeepLinks: window.AgentStoreMock.storeOpsDeepLinks,
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
@@ -1239,6 +1249,113 @@ new window.Vue({
         },
         next_action: {
           action_id: "refresh_agentops_quality_summary",
+          target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedStoreOpsDeepLink: function selectedStoreOpsDeepLink() {
+      var agent = this.selectedAgent;
+      var link;
+      var summaries = this.storeOpsDeepLinks || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "store_ops_deep_link.v1",
+          agent_id: "",
+          agent_version: "",
+          health_summary_id: "",
+          run_id: "",
+          session_id: "",
+          evidence_summary_id: "",
+          link_state: "link_unavailable",
+          permission_state: "unavailable",
+          target: {
+            system: "agentops",
+            route: "run_detail",
+            href: "",
+            params: {
+              run_id: "",
+              session_id: "",
+              return_path: "/agent-store/agents"
+            },
+            raw_trace_url: "",
+            raw_evidence_url: ""
+          },
+          return_path: "/agent-store/agents",
+          raw_trace_exposed: false,
+          raw_evidence_exposed: false,
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            health_summary: "agentops",
+            run_detail: "agentops",
+            permission: "agent_store_viewer_context",
+            raw_trace: "evidence_vault",
+            projection: "agent_store"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      link = summaries[agent.agent_id];
+      if (link) {
+        return link;
+      }
+      return {
+        contract_schema_version: "store_ops_deep_link.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        health_summary_id: "",
+        run_id: "",
+        session_id: "",
+        evidence_summary_id: "",
+        link_state: "link_unavailable",
+        permission_state: "unavailable",
+        target: {
+          system: "agentops",
+          route: "run_detail",
+          href: "",
+          params: {
+            run_id: "",
+            session_id: "",
+            return_path: "/agent-store/agents/" + safeId(agent.agent_id)
+          },
+          raw_trace_url: "",
+          raw_evidence_url: ""
+        },
+        return_path: "/agent-store/agents/" + safeId(agent.agent_id),
+        raw_trace_exposed: false,
+        raw_evidence_exposed: false,
+        issues: [
+          {
+            issue_id: "RUN_ID_REQUIRED",
+            field_path: "agentops_health_summary.run_id",
+            severity: "blocked",
+            fix_action_id: "request_agentops_summary_with_run_binding"
+          },
+          {
+            issue_id: "SESSION_ID_REQUIRED",
+            field_path: "agentops_health_summary.session_id",
+            severity: "blocked",
+            fix_action_id: "request_agentops_summary_with_run_binding"
+          }
+        ],
+        source_of_truth: {
+          health_summary: "agentops",
+          run_detail: "agentops",
+          permission: "agent_store_viewer_context",
+          raw_trace: "evidence_vault",
+          projection: "agent_store"
+        },
+        next_action: {
+          action_id: "request_agentops_summary_with_run_binding",
           target_system: "agentops",
           enabled: true,
           requires_permission: true,

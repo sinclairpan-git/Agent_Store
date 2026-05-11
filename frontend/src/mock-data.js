@@ -1471,6 +1471,195 @@ window.AgentStoreMock = {
       }
     }
   },
+  storeOpsDeepLinks: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "store_ops_deep_link.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      health_summary_id: "health-framework-1",
+      run_id: "run-quality-framework",
+      session_id: "session-quality-framework",
+      evidence_summary_id: "evidence-quality-framework",
+      link_state: "deep_link_ready",
+      permission_state: "allowed",
+      target: {
+        system: "agentops",
+        route: "run_detail",
+        href: "/agentops/runs/run-quality-framework",
+        params: {
+          run_id: "run-quality-framework",
+          session_id: "session-quality-framework",
+          return_path: "/agent-store/agents/framework-ai-autosdlc"
+        },
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      return_path: "/agent-store/agents/framework-ai-autosdlc",
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      issues: [],
+      source_of_truth: {
+        health_summary: "agentops",
+        run_detail: "agentops",
+        permission: "agent_store_viewer_context",
+        raw_trace: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "open_agentops_run_detail",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/runs/run-quality-framework"
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "store_ops_deep_link.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      health_summary_id: "health-agentops-1",
+      run_id: "run-quality-agentops",
+      session_id: "session-quality-agentops",
+      evidence_summary_id: "evidence-quality-agentops",
+      link_state: "link_sanitized",
+      permission_state: "allowed",
+      target: {
+        system: "agentops",
+        route: "run_detail",
+        href: "/agentops/runs/run-quality-agentops",
+        params: {
+          run_id: "run-quality-agentops",
+          session_id: "session-quality-agentops",
+          return_path: "/agent-store/agents/agentops-evidence-reporter"
+        },
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      return_path: "/agent-store/agents/agentops-evidence-reporter",
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      issues: [
+        {
+          issue_id: "RAW_TRACE_LINK_STRIPPED",
+          field_path: "agentops_raw_links",
+          severity: "warning",
+          fix_action_id: "strip_raw_trace_links"
+        }
+      ],
+      source_of_truth: {
+        health_summary: "agentops",
+        run_detail: "agentops",
+        permission: "agent_store_viewer_context",
+        raw_trace: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "open_sanitized_agentops_run_detail",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/runs/run-quality-agentops"
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "store_ops_deep_link.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      health_summary_id: "health-security-1",
+      run_id: "run-quality-security",
+      session_id: "session-quality-security",
+      evidence_summary_id: "evidence-quality-security",
+      link_state: "permission_required",
+      permission_state: "evidence_vault_required",
+      target: {
+        system: "agentops",
+        route: "run_detail",
+        href: "",
+        params: {
+          run_id: "run-quality-security",
+          session_id: "session-quality-security",
+          return_path: "/agent-store/agents/security-policy-guard"
+        },
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      return_path: "/agent-store/agents/security-policy-guard",
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      issues: [],
+      source_of_truth: {
+        health_summary: "agentops",
+        run_detail: "agentops",
+        permission: "agent_store_viewer_context",
+        raw_trace: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "request_evidence_access",
+        target_system: "evidence_vault",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/evidence-vault/access-requests"
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "store_ops_deep_link.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      health_summary_id: "health-release-notes-1",
+      run_id: "",
+      session_id: "",
+      evidence_summary_id: "evidence-quality-release-notes",
+      link_state: "link_unavailable",
+      permission_state: "unavailable",
+      target: {
+        system: "agentops",
+        route: "run_detail",
+        href: "",
+        params: {
+          run_id: "",
+          session_id: "",
+          return_path: "/agent-store/agents/developer-release-notes"
+        },
+        raw_trace_url: "",
+        raw_evidence_url: ""
+      },
+      return_path: "/agent-store/agents/developer-release-notes",
+      raw_trace_exposed: false,
+      raw_evidence_exposed: false,
+      issues: [
+        {
+          issue_id: "RUN_ID_REQUIRED",
+          field_path: "agentops_health_summary.run_id",
+          severity: "blocked",
+          fix_action_id: "request_agentops_summary_with_run_binding"
+        },
+        {
+          issue_id: "SESSION_ID_REQUIRED",
+          field_path: "agentops_health_summary.session_id",
+          severity: "blocked",
+          fix_action_id: "request_agentops_summary_with_run_binding"
+        }
+      ],
+      source_of_truth: {
+        health_summary: "agentops",
+        run_detail: "agentops",
+        permission: "agent_store_viewer_context",
+        raw_trace: "evidence_vault",
+        projection: "agent_store"
+      },
+      next_action: {
+        action_id: "request_agentops_summary_with_run_binding",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   notificationRouting: {
     "framework.ai-autosdlc": {
       audit_id: "audit-routing-framework.ai-autosdlc",
