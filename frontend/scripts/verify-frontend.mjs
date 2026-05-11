@@ -332,27 +332,6 @@ for (const policyApprovalTerm of [
   "refresh_agentops_policy_echo",
   "agentops_echo_only",
   "agent_store_echo_only",
-  "managed_installer_preview.v1",
-  "ready_to_install_preview",
-  "preview_passed",
-  "download_blocked",
-  "signature_blocked",
-  "policy_blocked",
-  "runtime_handoff_blocked",
-  "smoke_test_failed",
-  "preview_only",
-  "real_install_started: false",
-  "not_started_preview_only",
-  "download_artifact",
-  "verify_signature",
-  "create_isolated_install",
-  "smoke_test",
-  "failure_diagnostics",
-  "prepare_managed_install",
-  "copy_installer_diagnostic",
-  "agentops_via_policy_approval_echo",
-  "agent_store_installation_runtime_handoff",
-  "MANAGED_INSTALLER_PREVIEW_MISSING",
   "policy_approval_request.v1",
   "policy_approval_receipt.v1",
   "approval_request_ready",
@@ -390,6 +369,47 @@ for (const policyApprovalTerm of [
       || app.includes(policyApprovalTerm)
       || componentLibrary.includes(policyApprovalTerm),
     `${policyApprovalTerm} must be represented`
+  );
+}
+for (const managedInstallerFixtureTerm of [
+  "managedInstallerPreviews",
+  "managed_installer_preview.v1",
+  "ready_to_install_preview",
+  "signature_blocked",
+  "policy_blocked",
+  "smoke_test_failed",
+  "preview_only",
+  "real_install_started: false",
+  "not_started_preview_only",
+  "download_artifact",
+  "verify_signature",
+  "create_isolated_install",
+  "smoke_test",
+  "failure_diagnostics",
+  "prepare_managed_install",
+  "copy_installer_diagnostic",
+  "agentops_via_policy_approval_echo",
+  "agent_store_installation_runtime_handoff",
+  "SIGNATURE_OR_HASH_UNTRUSTED",
+  "POLICY_APPROVAL_NOT_ALLOWED",
+  "SMOKE_TEST_FAILED"
+]) {
+  assert(
+    mockData.includes(managedInstallerFixtureTerm),
+    `${managedInstallerFixtureTerm} must be represented by managed installer fixtures`
+  );
+}
+for (const managedInstallerComponentTerm of [
+  "preview_passed",
+  "download_blocked",
+  "runtime_handoff_blocked",
+  "MANAGED_INSTALLER_PREVIEW_MISSING",
+  "refresh_managed_installer_preview"
+]) {
+  assert(
+    app.includes(managedInstallerComponentTerm)
+      || componentLibrary.includes(managedInstallerComponentTerm),
+    `${managedInstallerComponentTerm} must be represented by managed installer component or fallback logic`
   );
 }
 for (const notificationRoutingTerm of [
