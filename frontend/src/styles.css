@@ -504,6 +504,53 @@ h2 {
   min-height: 312px;
 }
 
+.quality-evidence {
+  min-height: 360px;
+}
+
+.quality-evidence__signals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.quality-evidence__signals div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 82px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.quality-evidence__signals span,
+.quality-evidence__signals small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.quality-evidence__signals strong,
+.quality-evidence__signals small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.quality-evidence__signals strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.quality-evidence__missing li {
+  border-color: #eadba9;
+  background: #fffaf0;
+  color: #6b4b00;
+  font-weight: 720;
+}
+
 .notification-routing {
   min-height: 312px;
 }
@@ -1158,6 +1205,7 @@ h2 {
   .discovery-stats,
   .collection-tabs,
   .decision-grid,
+  .quality-evidence__signals,
   .notification-routing__channels,
   .permission-denial__scenarios,
   .wizard-grid,

@@ -73,6 +73,18 @@ function actionMessage(action) {
   if (actionId === "continue_health_review") {
     return "HealthSummary 新鲜度可展示，但不会作为推荐或 Actual L5 的依据。";
   }
+  if (actionId === "refresh_agentops_quality_summary") {
+    return "已记录 AgentOps 质量摘要刷新动作；Store 前端不计算质量分，只展示后端投影。";
+  }
+  if (actionId === "request_score_template_refresh") {
+    return "已记录 score_template_id 刷新动作；模板废弃时质量摘要只能按降级状态展示。";
+  }
+  if (actionId === "request_raw_evidence_access") {
+    return "Evidence Vault 原文访问申请已进入预览；Store 不展示 raw Trace 或 raw Evidence URL。";
+  }
+  if (actionId === "continue_quality_evidence_review") {
+    return "质量证据摘要可继续复核；推荐依据只采用后端允许字段，Store 前端不本地推导质量。";
+  }
   if (actionId === "confirm_listing_fields") {
     return "字段确认已进入预览；Owner 确认前不会把候选字段写成治理事实。";
   }
@@ -189,6 +201,7 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
+      qualityEvidenceAccess: window.AgentStoreMock.qualityEvidenceAccess,
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
@@ -704,6 +717,131 @@ new window.Vue({
         },
         next_action: {
           action_id: "request_agentops_health_summary",
+          target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedQualityEvidenceAccess: function selectedQualityEvidenceAccess() {
+      var agent = this.selectedAgent;
+      var summary;
+      var summaries = this.qualityEvidenceAccess || {};
+      if (!agent) {
+        return {
+          audit_id: "audit-quality-empty-filter",
+          contract_schema_version: "quality_evidence_access_summary.v1",
+          agent_id: "",
+          agent_version: "",
+          summary_state: "summary_unavailable",
+          permission_state: "unavailable",
+          display: {
+            evidence_level: "unavailable",
+            confidence: null,
+            identity_confidence: null,
+            missing_evidence: ["agentops_quality_summary"],
+            score_template_id: "",
+            calculated_at: "",
+            valid_until: "",
+            summary_validity_state: "degraded",
+            display_label: "待刷新",
+            redacted: false
+          },
+          run_binding: {
+            run_id: "",
+            session_id: "",
+            evidence_summary_id: "",
+            source_event_count: 0
+          },
+          access: {
+            can_view_quality_summary: false,
+            can_view_raw_evidence: false,
+            evidence_vault_request_required: true,
+            request_access_url: "/evidence-vault/access-requests",
+            raw_trace_url: "",
+            raw_evidence_url: ""
+          },
+          raw_trace_exposed: false,
+          raw_evidence_exposed: false,
+          recommendation_basis_allowed: false,
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            quality_summary: "agentops",
+            run_evidence: "agentops",
+            raw_evidence: "evidence_vault",
+            raw_trace: "evidence_vault",
+            permission: "agent_store_viewer_context",
+            projection: "agent_store"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      summary = summaries[agent.agent_id];
+      if (summary) {
+        return summary;
+      }
+      return {
+        audit_id: "audit-quality-missing-" + safeId(agent.agent_id),
+        contract_schema_version: "quality_evidence_access_summary.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        summary_state: "summary_unavailable",
+        permission_state: "unavailable",
+        display: {
+          evidence_level: "unavailable",
+          confidence: null,
+          identity_confidence: null,
+          missing_evidence: ["agentops_quality_summary"],
+          score_template_id: "",
+          calculated_at: "",
+          valid_until: "",
+          summary_validity_state: "degraded",
+          display_label: "待刷新",
+          redacted: false
+        },
+        run_binding: {
+          run_id: "",
+          session_id: "",
+          evidence_summary_id: "",
+          source_event_count: 0
+        },
+        access: {
+          can_view_quality_summary: false,
+          can_view_raw_evidence: false,
+          evidence_vault_request_required: true,
+          request_access_url: "/evidence-vault/access-requests",
+          raw_trace_url: "",
+          raw_evidence_url: ""
+        },
+        raw_trace_exposed: false,
+        raw_evidence_exposed: false,
+        recommendation_basis_allowed: false,
+        issues: [
+          {
+            issue_id: "AGENTOPS_QUALITY_SUMMARY_REQUIRED",
+            field_path: "agentops_summary.quality_evidence",
+            severity: "blocked",
+            fix_action_id: "refresh_agentops_quality_summary"
+          }
+        ],
+        source_of_truth: {
+          quality_summary: "agentops",
+          run_evidence: "agentops",
+          raw_evidence: "evidence_vault",
+          raw_trace: "evidence_vault",
+          permission: "agent_store_viewer_context",
+          projection: "frontend_fallback_no_quality_evidence_access_summary"
+        },
+        next_action: {
+          action_id: "refresh_agentops_quality_summary",
           target_system: "agentops",
           enabled: true,
           requires_permission: true,

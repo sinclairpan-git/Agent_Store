@@ -173,19 +173,23 @@ specs:
   path: specs/041-permission-denial-frontend-consumer
   depends_on:
   - 040-notification-routing-frontend-consumer
+- id: 042-quality-evidence-frontend-consumer
+  path: specs/042-quality-evidence-frontend-consumer
+  depends_on:
+  - 041-permission-denial-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T02:51:46Z'
+  generated_at: '2026-05-11T03:46:43Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 819b9bd
-  authoring_hash: 45e7381624817973dd35802faf419d24ed955b0395d9fe755b031322cd96dbc3
+  repo_revision: bba4ae5
+  authoring_hash: ab11e60106f7be581aa1b78cbaa32063a04a4f4b0ee29473f86bc7cd063cf762
   source_hashes: {}
-  snapshot_hash: 0b24057235e13a6271a43049506ff3968919a9db11140c0af2842ccc1ca53a9f
+  snapshot_hash: 01c17a7901e6bfef1c39eb7435077140dbc3b8f0fcc219f3191586757ea9cb59
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 208
-    mapped_sources: 208
+    total_sources: 213
+    mapped_sources: 213
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -193,20 +197,20 @@ truth_snapshot:
     non_goal_signal_count: 28
     layer_totals:
       blueprint: 1
-      spec: 41
-      plan: 41
-      tasks: 41
-      execution: 41
-      close: 41
+      spec: 42
+      plan: 42
+      tasks: 42
+      execution: 42
+      close: 42
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 41
-      plan: 41
-      tasks: 41
-      execution: 41
-      close: 41
+      spec: 42
+      plan: 42
+      tasks: 42
+      execution: 42
+      close: 42
       defect: 1
       release: 1
     entries:
@@ -2064,6 +2068,51 @@ truth_snapshot:
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 1
+    - path: specs/042-quality-evidence-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 042-quality-evidence-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/042-quality-evidence-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 042-quality-evidence-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/042-quality-evidence-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 042-quality-evidence-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/042-quality-evidence-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 042-quality-evidence-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/042-quality-evidence-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 042-quality-evidence-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
     - path: docs/framework-defect-backlog.zh-CN.md
       source_type: defect_backlog
       truth_layer: defect

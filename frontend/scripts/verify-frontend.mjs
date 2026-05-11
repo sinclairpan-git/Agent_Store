@@ -102,6 +102,7 @@ for (const componentName of [
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
   "sdlc-health-summary-freshness",
+  "sdlc-quality-evidence-access",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
@@ -170,6 +171,33 @@ for (const healthTerm of [
   "refresh_agentops_health_summary"
 ]) {
   assert(mockData.includes(healthTerm), `${healthTerm} must be represented`);
+}
+for (const qualityEvidenceTerm of [
+  "qualityEvidenceAccess",
+  "quality_evidence_access_summary.v1",
+  "summary_ready",
+  "summary_redacted",
+  "summary_expired",
+  "template_deprecated",
+  "agentops-owned",
+  "agentops-legacy",
+  "raw_trace_url: \"\"",
+  "raw_evidence_url: \"\"",
+  "raw_trace_exposed: false",
+  "raw_evidence_exposed: false",
+  "recommendation_basis_allowed: false",
+  "evidence_vault",
+  "agent_store_viewer_context",
+  "request_evidence_access",
+  "refresh_agentops_quality_summary",
+  "request_score_template_refresh",
+  "continue_quality_evidence_review",
+  "RAW_EVIDENCE_LINK_STRIPPED",
+  "QUALITY_SUMMARY_REDACTED",
+  "QUALITY_SUMMARY_EXPIRED",
+  "SCORE_TEMPLATE_DEPRECATED"
+]) {
+  assert(mockData.includes(qualityEvidenceTerm), `${qualityEvidenceTerm} must be represented`);
 }
 for (const notificationRoutingTerm of [
   "notificationRouting",
@@ -259,6 +287,8 @@ assert(
     && app.includes("selectedRecommendationDecision")
     && app.includes("selectedRuntimeAvailability")
     && app.includes("selectedHealthSummaryFreshness")
+    && app.includes("selectedQualityEvidenceAccess")
+    && app.includes("qualityEvidenceAccess")
     && app.includes("selectedNotificationRouting")
     && app.includes("notificationRouting")
     && app.includes("selectedPermissionDenialAction")
@@ -307,6 +337,8 @@ assert(
     && app.includes("buildRequestIdentity(agent.agent_id, \"request_catalog_review\")")
     && app.includes("Runtime 可用性摘要满足当前 Manifest")
     && app.includes("HealthSummary 新鲜度可展示")
+    && app.includes("Store 前端不计算质量分")
+    && app.includes("质量证据摘要可继续复核")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
     && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
@@ -317,6 +349,7 @@ assert(
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
+    && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
     && indexHtml.includes(":permission-denial-action=\"selectedPermissionDenialAction\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
@@ -391,6 +424,26 @@ assert(
     && componentLibrary.includes("view_agentops_health_detail")
     && componentLibrary.includes("continue_health_review"),
   "Agent detail must expose HealthSummary freshness without using it as recommendation basis"
+);
+assert(
+  componentLibrary.includes("sdlc-quality-evidence-access")
+    && componentLibrary.includes("质量证据访问")
+    && componentLibrary.includes("quality_evidence_access_summary.v1")
+    && componentLibrary.includes("summary_state")
+    && componentLibrary.includes("permission_state")
+    && componentLibrary.includes("recommendation_basis_allowed")
+    && componentLibrary.includes("raw_trace_exposed")
+    && componentLibrary.includes("raw_evidence_exposed")
+    && componentLibrary.includes("raw_trace_url")
+    && componentLibrary.includes("raw_evidence_url")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("request_raw_evidence_access")
+    && componentLibrary.includes("refresh_agentops_quality_summary")
+    && componentLibrary.includes("request_score_template_refresh")
+    && componentLibrary.includes("continue_quality_evidence_review")
+    && componentLibrary.includes("Store 不展示 raw Trace 或 raw Evidence URL")
+    && componentLibrary.includes("也不本地计算质量"),
+  "Agent detail must expose quality evidence access without exposing raw evidence or calculating quality"
 );
 assert(
   componentLibrary.includes("sdlc-notification-routing")
@@ -523,6 +576,7 @@ assert(
 );
 assert(
   read("src/styles.css").includes(".action-feedback")
+    && read("src/styles.css").includes(".quality-evidence__signals")
     && read("src/styles.css").includes(".notification-routing__channels")
     && read("src/styles.css").includes(".permission-denial__scenarios")
     && read("src/styles.css").includes(".workflow-steps li,")
