@@ -186,13 +186,13 @@ specs:
   depends_on:
   - 043-installation-distribution-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T04:25:26Z'
+  generated_at: '2026-05-11T04:31:02Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: d728b41
+  repo_revision: eb33040
   authoring_hash: 842fba658e24d3f8abf7cccc40c2e176583f2f6e8b38a5602693a4c73f7e42ea
   source_hashes: {}
-  snapshot_hash: fe9f24c00d443ce7bee6e2f2ac393a7ba4517e83ec343ed2afe2f47c099594be
+  snapshot_hash: 2bd258f48c1294767a076d4c25cdfad8774a4460d0254f8043e5cb76c364e98a
   computed_capabilities: []
   source_inventory:
     state: complete
