@@ -265,6 +265,46 @@
     OWNER_RESPONSE_REQUIRED: "需要 Owner 角色",
     RELEASE_LINK_REQUIRED: "需要发布链接",
     FEEDBACK_LOOP_SUMMARY_MISSING: "缺反馈闭环摘要",
+    lifecycle_governance_baseline: "生命周期治理基线",
+    "lifecycle_governance_baseline.v1": "生命周期治理基线 v1",
+    upgrade_available: "可升级",
+    rollback_available: "可回退",
+    deprecated: "已废弃",
+    security_revoked: "安全撤销",
+    upgrade: "升级",
+    rollback: "回退",
+    deprecate: "废弃",
+    disable: "停用",
+    security_revoke: "安全撤销",
+    security: "安全",
+    stable: "稳定",
+    fix_lifecycle_transition: "修复生命周期迁移",
+    notify_security_revocation: "通知安全撤销",
+    notify_disabled_version: "通知版本停用",
+    notify_available_replacement: "通知替代版本",
+    notify_lifecycle_change: "通知生命周期变更",
+    open_security_review: "打开安全复核",
+    request_owner_approval: "请求 Owner 批准",
+    request_security_review: "请求安全复核",
+    attach_security_evidence: "补充安全证据",
+    attach_replacement_version: "补充替代版本",
+    attach_rollback_version: "补充回退版本",
+    attach_impact_scope: "补充影响范围",
+    agent_store_agent_version: "Agent Store AgentVersion",
+    agent_store_lifecycle_governance: "Agent Store 生命周期治理",
+    agent_store_replacement_mapping: "Agent Store 替代版本映射",
+    agent_store_installation_inventory: "Agent Store 安装库存",
+    LIFECYCLE_ACTION_UNSUPPORTED: "不支持的生命周期动作",
+    AGENT_VERSION_IDENTITY_REQUIRED: "缺 AgentVersion 身份",
+    LIFECYCLE_REASON_REQUIRED: "缺生命周期原因",
+    OWNER_APPROVAL_REQUIRED: "需要 Owner 批准",
+    SECURITY_ACTOR_REQUIRED: "需要安全角色",
+    SECURITY_EVIDENCE_REQUIRED: "需要安全证据",
+    REPLACEMENT_VERSION_REQUIRED: "需要替代版本",
+    ROLLBACK_VERSION_REQUIRED: "需要回退版本",
+    IMPACT_SCOPE_REQUIRED: "需要影响范围",
+    SECURITY_REVOKED_TERMINAL: "安全撤销是终态",
+    LIFECYCLE_GOVERNANCE_SUMMARY_MISSING: "缺生命周期治理摘要",
     quality_evidence_access_summary: "质量证据访问摘要",
     "quality_evidence_access_summary.v1": "质量证据访问摘要 v1",
     summary_ready: "摘要可展示",
@@ -1430,6 +1470,140 @@
     }
   });
 
+  Vue.component("sdlc-lifecycle-governance", {
+    props: ["summary"],
+    template: [
+      '<section class="workspace-section lifecycle-governance">',
+      '  <div class="section-heading">',
+      '    <h2>生命周期治理</h2>',
+      '    <sdlc-status-chip :label="summary.lifecycle_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ governanceCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="summary.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="状态" :value="summary.lifecycle_state" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="上一步" :value="summary.previous_state" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="动作" :value="summary.transition_action" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Actor" :value="actorLabel" :tone="actorTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="版本" :value="versionLabel" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="影响范围" :value="impactLabel" :tone="impactTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="lifecycle-governance__mapping">',
+      '    <div>',
+      '      <span>Replacement</span>',
+      '      <strong>{{ replacement.replacement_version || "replacement missing" }}</strong>',
+      '      <small>{{ displayLabel(replacement.required) }} / {{ replacement.replacement_reason || "reason missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Rollback</span>',
+      '      <strong>{{ rollback.rollback_version || "rollback missing" }}</strong>',
+      '      <small>{{ displayLabel(rollback.required) }} / {{ rollback.rollback_reason || "reason missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Impact</span>',
+      '      <strong>{{ impact.affected_installation_count || 0 }} installations</strong>',
+      '      <small>{{ impact.affected_user_count || 0 }} users / replacement_available: {{ displayLabel(impact.replacement_available) }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="summary.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      actor: function actor() {
+        return this.summary.actor || {};
+      },
+      versionScope: function versionScope() {
+        return this.summary.version_scope || {};
+      },
+      replacement: function replacement() {
+        return this.summary.replacement || {};
+      },
+      rollback: function rollback() {
+        return this.summary.rollback || {};
+      },
+      impact: function impact() {
+        return this.summary.impact_scope || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.summary.issues) ? this.summary.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.issues.length || this.summary.lifecycle_state === "security_revoked") {
+          return "danger";
+        }
+        if (this.summary.lifecycle_state === "disabled" || this.summary.lifecycle_state === "deprecated") {
+          return "warning";
+        }
+        if (this.summary.lifecycle_state === "upgrade_available" || this.summary.lifecycle_state === "rollback_available") {
+          return "info";
+        }
+        return "success";
+      },
+      actorTone: function actorTone() {
+        if (this.summary.transition_action === "security_revoke") {
+          return this.actor.actor_role === "security" ? "success" : "danger";
+        }
+        if (["upgrade", "rollback", "deprecate", "disable"].indexOf(this.summary.transition_action) >= 0) {
+          return this.actor.actor_role === "owner" ? "success" : "danger";
+        }
+        return "warning";
+      },
+      impactTone: function impactTone() {
+        if (this.impact.impact_required && this.impact.affected_installation_count === undefined) {
+          return "danger";
+        }
+        return this.impact.notification_required ? "warning" : "neutral";
+      },
+      actorLabel: function actorLabel() {
+        return [
+          this.actor.actor_id || "actor-missing",
+          displayLabel(this.actor.actor_role)
+        ].join(" / ");
+      },
+      versionLabel: function versionLabel() {
+        return [
+          this.versionScope.agent_id || this.summary.agent_id,
+          this.versionScope.version || this.summary.current_version,
+          displayLabel(this.versionScope.release_status)
+        ].join(" / ");
+      },
+      impactLabel: function impactLabel() {
+        return [
+          (this.impact.affected_installation_count || 0) + " installs",
+          (this.impact.affected_user_count || 0) + " users"
+        ].join(" / ");
+      },
+      governanceCopy: function governanceCopy() {
+        if (this.issues.length) {
+          return "生命周期治理存在阻断项；security_revoked 是终态，不能被普通 Owner 降级为较弱状态。";
+        }
+        if (this.summary.lifecycle_state === "security_revoked") {
+          return "安全撤销是终态；Store 只展示安全证据和影响范围，不执行 Runtime 操作。";
+        }
+        if (this.summary.lifecycle_state === "upgrade_available" || this.summary.lifecycle_state === "rollback_available") {
+          return "替代版本或回退版本已可通知；Store 展示映射，不执行真实升级或回退。";
+        }
+        return "生命周期治理来自 Agent Store projection；本阶段不修改 AgentVersion、不签发 Grant、不覆盖 AgentOps PolicyDecision。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "No AgentVersion mutation / no Runtime execution / no CapabilityGrant / no AgentOps policy override";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.summary.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-quality-evidence-access", {
     props: ["summary"],
     template: [
@@ -1826,6 +2000,7 @@
       "healthSummaryFreshness",
       "installationDistribution",
       "feedbackOwnerResponseLoop",
+      "lifecycleGovernance",
       "qualityEvidenceAccess",
       "notificationRouting",
       "permissionDenialAction",
@@ -1875,6 +2050,7 @@
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-installation-distribution :summary="installationDistribution" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-distribution>',
       '    <sdlc-feedback-owner-response-loop :loop="feedbackOwnerResponseLoop" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-feedback-owner-response-loop>',
+      '    <sdlc-lifecycle-governance :summary="lifecycleGovernance" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-lifecycle-governance>',
       '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',

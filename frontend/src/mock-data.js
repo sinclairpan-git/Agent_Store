@@ -1007,6 +1007,227 @@ window.AgentStoreMock = {
       }
     }
   },
+  lifecycleGovernance: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "lifecycle_governance_baseline.v1",
+      agent_id: "framework.ai-autosdlc",
+      current_version: "1.0.0",
+      lifecycle_state: "upgrade_available",
+      previous_state: "active",
+      transition_action: "upgrade",
+      actor: {
+        actor_id: "owner-sdlc-platform",
+        actor_role: "owner",
+        reason: "Runtime capability copy and owner summary panels are available in the next version.",
+        evidence_ref: ""
+      },
+      version_scope: {
+        agent_id: "framework.ai-autosdlc",
+        version: "1.0.0",
+        artifact_hash: "sha256:autosdlc-100",
+        release_status: "stable",
+        lifecycle_state: "active"
+      },
+      replacement: {
+        required: true,
+        replacement_version: "1.1.0",
+        replacement_reason: "Owner summary frontend consumers are included in the new release."
+      },
+      rollback: {
+        required: false,
+        rollback_version: "",
+        rollback_reason: ""
+      },
+      impact_scope: {
+        impact_required: false,
+        affected_installation_count: 18,
+        affected_user_count: 12,
+        replacement_available: true,
+        notification_required: true
+      },
+      issues: [],
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        lifecycle_decision: "agent_store_lifecycle_governance",
+        replacement: "agent_store_replacement_mapping",
+        impact_scope: "agent_store_installation_inventory",
+        agentops_notification: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "notify_available_replacement",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "lifecycle_governance_baseline.v1",
+      agent_id: "agentops.evidence-reporter",
+      current_version: "0.4.0",
+      lifecycle_state: "rollback_available",
+      previous_state: "active",
+      transition_action: "rollback",
+      actor: {
+        actor_id: "owner-agentops",
+        actor_role: "owner",
+        reason: "Evidence export regression requires rollback path for existing installations.",
+        evidence_ref: ""
+      },
+      version_scope: {
+        agent_id: "agentops.evidence-reporter",
+        version: "0.4.0",
+        artifact_hash: "sha256:evidence-reporter-040",
+        release_status: "stable",
+        lifecycle_state: "active"
+      },
+      replacement: {
+        required: false,
+        replacement_version: "",
+        replacement_reason: ""
+      },
+      rollback: {
+        required: true,
+        rollback_version: "0.3.8",
+        rollback_reason: "Stable evidence export behavior for owner workflows."
+      },
+      impact_scope: {
+        impact_required: false,
+        affected_installation_count: 7,
+        affected_user_count: 5,
+        replacement_available: true,
+        notification_required: true
+      },
+      issues: [],
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        lifecycle_decision: "agent_store_lifecycle_governance",
+        replacement: "agent_store_replacement_mapping",
+        impact_scope: "agent_store_installation_inventory",
+        agentops_notification: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "notify_available_replacement",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "lifecycle_governance_baseline.v1",
+      agent_id: "security.policy-guard",
+      current_version: "0.2.1",
+      lifecycle_state: "security_revoked",
+      previous_state: "active",
+      transition_action: "security_revoke",
+      actor: {
+        actor_id: "security-iam",
+        actor_role: "security",
+        reason: "Policy bypass incident requires terminal security revocation.",
+        evidence_ref: "incident://sec-2026-05-policy-guard"
+      },
+      version_scope: {
+        agent_id: "security.policy-guard",
+        version: "0.2.1",
+        artifact_hash: "sha256:policy-guard-021",
+        release_status: "stable",
+        lifecycle_state: "active"
+      },
+      replacement: {
+        required: false,
+        replacement_version: "",
+        replacement_reason: ""
+      },
+      rollback: {
+        required: false,
+        rollback_version: "",
+        rollback_reason: ""
+      },
+      impact_scope: {
+        impact_required: true,
+        affected_installation_count: 3,
+        affected_user_count: 3,
+        replacement_available: false,
+        notification_required: true
+      },
+      issues: [],
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        lifecycle_decision: "agent_store_lifecycle_governance",
+        replacement: "agent_store_replacement_mapping",
+        impact_scope: "agent_store_installation_inventory",
+        agentops_notification: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "notify_security_revocation",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "lifecycle_governance_baseline.v1",
+      agent_id: "developer.release-notes",
+      current_version: "0.1.2",
+      lifecycle_state: "security_revoked",
+      previous_state: "security_revoked",
+      transition_action: "deprecate",
+      actor: {
+        actor_id: "owner-devtools",
+        actor_role: "owner",
+        reason: "Owner attempted to downgrade a security revoked version to deprecated.",
+        evidence_ref: ""
+      },
+      version_scope: {
+        agent_id: "developer.release-notes",
+        version: "0.1.2",
+        artifact_hash: "sha256:release-notes-012",
+        release_status: "stable",
+        lifecycle_state: "security_revoked"
+      },
+      replacement: {
+        required: true,
+        replacement_version: "0.1.3",
+        replacement_reason: "Blocked downgrade must go through security review first."
+      },
+      rollback: {
+        required: false,
+        rollback_version: "",
+        rollback_reason: ""
+      },
+      impact_scope: {
+        impact_required: false,
+        affected_installation_count: 0,
+        affected_user_count: 0,
+        replacement_available: true,
+        notification_required: true
+      },
+      issues: [
+        {
+          issue_id: "SECURITY_REVOKED_TERMINAL",
+          field_path: "current_version.lifecycle_state",
+          severity: "blocked",
+          fix_action_id: "open_security_review"
+        }
+      ],
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        lifecycle_decision: "agent_store_lifecycle_governance",
+        replacement: "agent_store_replacement_mapping",
+        impact_scope: "agent_store_installation_inventory",
+        agentops_notification: "agent_store_notification_queue"
+      },
+      next_action: {
+        action_id: "fix_lifecycle_transition",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   qualityEvidenceAccess: {
     "framework.ai-autosdlc": {
       audit_id: "audit-quality-framework.ai-autosdlc",

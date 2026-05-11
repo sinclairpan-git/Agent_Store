@@ -787,6 +787,46 @@ h2 {
   font-weight: 720;
 }
 
+.lifecycle-governance {
+  min-height: 360px;
+}
+
+.lifecycle-governance__mapping {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.lifecycle-governance__mapping div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 90px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.lifecycle-governance__mapping span,
+.lifecycle-governance__mapping small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.lifecycle-governance__mapping strong,
+.lifecycle-governance__mapping small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.lifecycle-governance__mapping strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
 .listing-wizard {
   min-height: 360px;
 }
@@ -1336,6 +1376,7 @@ h2 {
   .installation-distribution__groups,
   .feedback-loop__response,
   .feedback-loop__timeline,
+  .lifecycle-governance__mapping,
   .quality-evidence__signals,
   .notification-routing__channels,
   .permission-denial__scenarios,

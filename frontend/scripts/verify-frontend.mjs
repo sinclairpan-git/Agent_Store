@@ -104,6 +104,7 @@ for (const componentName of [
   "sdlc-health-summary-freshness",
   "sdlc-installation-distribution",
   "sdlc-feedback-owner-response-loop",
+  "sdlc-lifecycle-governance",
   "sdlc-quality-evidence-access",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
@@ -228,6 +229,34 @@ for (const feedbackLoopTerm of [
 ]) {
   assert(mockData.includes(feedbackLoopTerm), `${feedbackLoopTerm} must be represented`);
 }
+for (const lifecycleGovernanceTerm of [
+  "lifecycleGovernance",
+  "lifecycle_governance_baseline.v1",
+  "upgrade_available",
+  "rollback_available",
+  "disabled",
+  "security_revoked",
+  "upgrade",
+  "rollback",
+  "deprecate",
+  "security_revoke",
+  "actor_role: \"owner\"",
+  "actor_role: \"security\"",
+  "replacement_version",
+  "rollback_version",
+  "affected_installation_count",
+  "agent_store_agent_version",
+  "agent_store_lifecycle_governance",
+  "agent_store_replacement_mapping",
+  "agent_store_installation_inventory",
+  "agent_store_notification_queue",
+  "notify_available_replacement",
+  "notify_security_revocation",
+  "fix_lifecycle_transition",
+  "SECURITY_REVOKED_TERMINAL"
+]) {
+  assert(mockData.includes(lifecycleGovernanceTerm), `${lifecycleGovernanceTerm} must be represented`);
+}
 for (const qualityEvidenceTerm of [
   "qualityEvidenceAccess",
   "quality_evidence_access_summary.v1",
@@ -347,6 +376,8 @@ assert(
     && app.includes("installationDistribution")
     && app.includes("selectedFeedbackOwnerResponseLoop")
     && app.includes("feedbackOwnerResponseLoops")
+    && app.includes("selectedLifecycleGovernance")
+    && app.includes("lifecycleGovernance")
     && app.includes("selectedQualityEvidenceAccess")
     && app.includes("qualityEvidenceAccess")
     && app.includes("selectedNotificationRouting")
@@ -401,6 +432,9 @@ assert(
     && app.includes("不向无权限 viewer 暴露聚合计数")
     && app.includes("只有 Owner 角色可以推进 owner_reply")
     && app.includes("不在本阶段生成 release notes")
+    && app.includes("security_revoked 是终态")
+    && app.includes("不执行升级或回退")
+    && app.includes("不签发 CapabilityGrant")
     && app.includes("Store 前端不计算质量分")
     && app.includes("质量证据摘要可继续复核")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
@@ -415,6 +449,7 @@ assert(
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
     && indexHtml.includes(":feedback-owner-response-loop=\"selectedFeedbackOwnerResponseLoop\"")
+    && indexHtml.includes(":lifecycle-governance=\"selectedLifecycleGovernance\"")
     && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
     && indexHtml.includes(":permission-denial-action=\"selectedPermissionDenialAction\"")
@@ -509,6 +544,25 @@ assert(
     && componentLibrary.includes("agent_store_notification_queue")
     && componentLibrary.includes("No comments / no ranking / no marketplace / no real notification send"),
   "Agent detail must expose feedback owner response loop without comments, ranking, marketplace, or real notifications"
+);
+assert(
+  componentLibrary.includes("sdlc-lifecycle-governance")
+    && componentLibrary.includes("生命周期治理")
+    && componentLibrary.includes("lifecycle_governance_baseline.v1")
+    && componentLibrary.includes("lifecycle_state")
+    && componentLibrary.includes("previous_state")
+    && componentLibrary.includes("transition_action")
+    && componentLibrary.includes("version_scope")
+    && componentLibrary.includes("replacement_version")
+    && componentLibrary.includes("rollback_version")
+    && componentLibrary.includes("impact_scope")
+    && componentLibrary.includes("affected_installation_count")
+    && componentLibrary.includes("SECURITY_REVOKED_TERMINAL")
+    && componentLibrary.includes("notify_security_revocation")
+    && componentLibrary.includes("notify_available_replacement")
+    && componentLibrary.includes("fix_lifecycle_transition")
+    && componentLibrary.includes("No AgentVersion mutation / no Runtime execution / no CapabilityGrant / no AgentOps policy override"),
+  "Agent detail must expose lifecycle governance without mutating versions, executing Runtime, issuing grants, or overriding AgentOps policy"
 );
 assert(
   componentLibrary.includes("sdlc-runtime-availability")
