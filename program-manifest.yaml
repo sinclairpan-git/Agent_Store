@@ -225,19 +225,23 @@ specs:
   path: specs/054-installation-runtime-handoff-frontend-consumer
   depends_on:
   - 053-agent-manifest-runtime-frontend-consumer
+- id: 055-package-validation-report-frontend-consumer
+  path: specs/055-package-validation-report-frontend-consumer
+  depends_on:
+  - 054-installation-runtime-handoff-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T13:15:24Z'
+  generated_at: '2026-05-11T13:38:52Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: bf8ef39
-  authoring_hash: 70530ba5564da74bde70f05e29001fa97b6256633ad8298e1487626ccffed69b
+  repo_revision: '5265615'
+  authoring_hash: 64a00397590e9ac91f4b640a8ce0c3d5bd324d12886fe50f0753a3fb1aec6661
   source_hashes: {}
-  snapshot_hash: fe7b201c2c0958fa39f01510c29004bb8ea1d9faabcb3b285d3ebb9cc2c3e0ea
+  snapshot_hash: d2410c00612aead31fbd9765bc0a1fce11cbe7fc7d2027d72811fe91327db21f
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 273
-    mapped_sources: 273
+    total_sources: 278
+    mapped_sources: 278
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 63
@@ -245,20 +249,20 @@ truth_snapshot:
     non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
-      spec: 54
-      plan: 54
-      tasks: 54
-      execution: 54
-      close: 54
+      spec: 55
+      plan: 55
+      tasks: 55
+      execution: 55
+      close: 55
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 54
-      plan: 54
-      tasks: 54
-      execution: 54
-      close: 54
+      spec: 55
+      plan: 55
+      tasks: 55
+      execution: 55
+      close: 55
       defect: 1
       release: 1
     entries:
@@ -2698,6 +2702,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 054-installation-runtime-handoff-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/055-package-validation-report-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 055-package-validation-report-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/055-package-validation-report-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 055-package-validation-report-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/055-package-validation-report-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 055-package-validation-report-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/055-package-validation-report-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 055-package-validation-report-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/055-package-validation-report-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 055-package-validation-report-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
