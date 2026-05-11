@@ -113,6 +113,7 @@ for (const componentName of [
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
+  "sdlc-draft-review-submission",
   "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
@@ -468,6 +469,29 @@ for (const wizardTerm of [
 ]) {
   assert(mockData.includes(wizardTerm), `${wizardTerm} must be represented`);
 }
+for (const draftReviewSubmissionTerm of [
+  "draftReviewSubmissions",
+  "draft_review_submission.v1",
+  "pending_review",
+  "validation_blocked",
+  "runtime_gate_blocked",
+  "owner_confirmation_required",
+  "draft_review_blocked",
+  "enqueued",
+  "not_enqueued",
+  "not_submitted",
+  "track_review_queue",
+  "confirm_owner_submission",
+  "return_to_validation_report",
+  "agent_store_owner_explicit_confirmation",
+  "agentops_not_evaluated_until_review",
+  "PACKAGE_VALIDATION_NOT_PASSED",
+  "PLACEHOLDER_VALUE_BLOCKED",
+  "RUNTIME_GATE_NOT_READY",
+  "OWNER_CONFIRMATION_REQUIRED"
+]) {
+  assert(mockData.includes(draftReviewSubmissionTerm), `${draftReviewSubmissionTerm} must be represented`);
+}
 assert(
   !mockData.includes("recommendationStates:")
     && recommendationStates["framework.ai-autosdlc"]
@@ -523,6 +547,8 @@ assert(
     && app.includes("selectedPermissionDenialAction")
     && app.includes("permissionDenialActions")
     && app.includes("selectedListingWizard")
+    && app.includes("selectedDraftReviewSubmission")
+    && app.includes("draftReviewSubmissions")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -585,11 +611,13 @@ assert(
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
     && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
+    && app.includes("frontend_fallback_no_draft_review_submission")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
+    && indexHtml.includes(":draft-review-submission=\"selectedDraftReviewSubmission\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
@@ -633,8 +661,18 @@ assert(
 assert(
   componentLibrary.includes("sdlc-recommendation-decision")
     && componentLibrary.includes("sdlc-listing-wizard")
+    && componentLibrary.includes("sdlc-draft-review-submission")
     && componentLibrary.includes("listing-wizard")
     && componentLibrary.includes("wizard-steps")
+    && componentLibrary.includes("draft-review-submission__grid")
+    && componentLibrary.includes("草案提交审核")
+    && componentLibrary.includes("draft_review_submission.v1")
+    && componentLibrary.includes("review_queue_entry")
+    && componentLibrary.includes("owner_confirmation")
+    && componentLibrary.includes("validation_summary")
+    && componentLibrary.includes("runtime_gate")
+    && componentLibrary.includes("no AgentVersion creation / no publish / no PolicyDecision / no CapabilityGrant")
+    && componentLibrary.includes("Store 不把 Package Validation 的建议状态当作正式入队")
     && componentLibrary.includes("来源选择")
     && componentLibrary.includes("字段确认")
     && componentLibrary.includes("校验报告")

@@ -106,8 +106,11 @@
     continue_listing_review: "继续上架审核",
     confirm_listing_fields: "确认上架字段",
     prepare_draft_review_submission: "准备草案提交",
+    track_review_queue: "跟踪审核队列",
+    confirm_owner_submission: "Owner 确认提交",
     resolve_runtime_gate: "处理 Runtime Gate",
     return_to_field_confirmation: "返回字段确认",
+    return_to_validation_report: "返回校验报告",
     complete_agent_manifest: "补齐 Manifest",
     review_catalog_blocker: "查看阻断原因",
     view_policy: "查看策略说明",
@@ -181,6 +184,26 @@
     validation_failed: "校验失败",
     passed: "已通过",
     not_submitted_until_027: "026 不提交审核",
+    draft_review_submission: "草案提交审核",
+    "draft_review_submission.v1": "草案提交审核 v1",
+    validation_blocked: "校验阻断",
+    owner_confirmation_required: "需 Owner 确认",
+    draft_review_blocked: "草案提交阻断",
+    enqueued: "已入队",
+    not_enqueued: "未入队",
+    not_submitted: "未提交",
+    owner_reviewed_listing_wizard: "Owner 已复核上架向导",
+    owner_confirmed_before_review: "Owner 审核前确认",
+    agent_store_upload_candidate: "Agent Store 上传候选",
+    agent_store_package_validation: "Agent Store 包校验",
+    agent_store_owner_explicit_confirmation: "Owner 显式确认",
+    agentops_not_evaluated_until_review: "审核前 AgentOps 未评估",
+    frontend_fallback_no_draft_review_submission: "前端降级草案提交",
+    PACKAGE_VALIDATION_NOT_PASSED: "包校验未通过",
+    PLACEHOLDER_VALUE_BLOCKED: "占位值阻断",
+    RUNTIME_GATE_NOT_READY: "Runtime Gate 未就绪",
+    OWNER_CONFIRMATION_REQUIRED: "需要 Owner 确认",
+    DRAFT_REVIEW_SUBMISSION_MISSING: "缺草案提交 envelope",
     agent_runtime_echo_or_probe: "Agent Runtime Echo/Probe",
     summary_projection: "摘要投影",
     agent_store_runtime_availability_projection: "Agent Store 可用性投影",
@@ -2621,6 +2644,136 @@
     }
   });
 
+  Vue.component("sdlc-draft-review-submission", {
+    props: ["submission"],
+    template: [
+      '<section class="workspace-section draft-review-submission">',
+      '  <div class="section-heading">',
+      '    <h2>草案提交审核</h2>',
+      '    <sdlc-status-chip :label="submission.submission_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ submissionCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="submission.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="草案" :value="submission.draft_status" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="队列" :value="queueLabel" :tone="queueTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Owner" :value="ownerLabel" :tone="ownerTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Validation" :value="validationLabel" :tone="validationTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime" :value="runtimeLabel" :tone="runtimeTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="draft-review-submission__grid">',
+      '    <div>',
+      '      <span>Submission</span>',
+      '      <strong>{{ submission.submission_id || "submission missing" }}</strong>',
+      '      <small>{{ submission.package_id || "package missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Review Queue</span>',
+      '      <strong>{{ reviewQueue.review_queue_id || displayLabel(reviewQueue.queue_state) }}</strong>',
+      '      <small>{{ displayLabel(reviewQueue.review_status) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Owner Confirmation</span>',
+      '      <strong>{{ ownerConfirmation.confirmed_by || "owner missing" }}</strong>',
+      '      <small>{{ ownerConfirmation.confirmed_at || "confirmed_at missing" }} / {{ displayLabel(ownerConfirmation.confirmation_basis) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Source</span>',
+      '      <strong>{{ sourceTruthSummary }}</strong>',
+      '      <small>pending_review only after owner + validation + runtime gates</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="submission.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      reviewQueue: function reviewQueue() {
+        return this.submission.review_queue_entry || {};
+      },
+      ownerConfirmation: function ownerConfirmation() {
+        return this.submission.owner_confirmation || {};
+      },
+      validationSummary: function validationSummary() {
+        return this.submission.validation_summary || {};
+      },
+      runtimeGate: function runtimeGate() {
+        return this.submission.runtime_gate || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.submission.issues) ? this.submission.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.submission.submission_state === "pending_review") {
+          return "success";
+        }
+        if (this.submission.submission_state === "owner_confirmation_required" || this.submission.submission_state === "runtime_gate_blocked") {
+          return "warning";
+        }
+        return "danger";
+      },
+      queueTone: function queueTone() {
+        return this.reviewQueue.queue_state === "enqueued" ? "success" : "warning";
+      },
+      queueLabel: function queueLabel() {
+        return [
+          this.reviewQueue.queue_state || "not_enqueued",
+          this.reviewQueue.review_status || "not_submitted"
+        ].join(" / ");
+      },
+      ownerTone: function ownerTone() {
+        return this.ownerConfirmation.confirmed ? "success" : "warning";
+      },
+      ownerLabel: function ownerLabel() {
+        return this.ownerConfirmation.confirmed ? "confirmed" : "owner_confirmation_required";
+      },
+      validationTone: function validationTone() {
+        return this.validationSummary.validation_status === "passed" ? "success" : "danger";
+      },
+      validationLabel: function validationLabel() {
+        return [
+          this.validationSummary.validation_status || "missing",
+          this.validationSummary.draft_status_before_submission || "missing"
+        ].join(" / ");
+      },
+      runtimeTone: function runtimeTone() {
+        return this.runtimeGate.runtime_availability_state === "runtime_ready" ? "success" : "warning";
+      },
+      runtimeLabel: function runtimeLabel() {
+        return [
+          this.runtimeGate.runtime_availability_state || "manifest_incomplete",
+          this.runtimeGate.runtime_display_name_zh || "runtime missing"
+        ].join(" / ");
+      },
+      submissionCopy: function submissionCopy() {
+        if (this.submission.submission_state === "pending_review") {
+          return "Owner 已显式确认，Package Validation 与 Runtime Gate 均通过；草案正式进入 Agent Store review queue。";
+        }
+        if (this.submission.submission_state === "owner_confirmation_required") {
+          return "提交审核前仍需要 Owner 明确确认字段；Store 不把 Package Validation 的建议状态当作正式入队。";
+        }
+        if (this.submission.submission_state === "runtime_gate_blocked") {
+          return "Runtime Gate 未 ready，草案不得进入 pending_review；下一步交给 Agent Runtime 事实源修复。";
+        }
+        return "草案提交审核被校验或占位值阻断；Store 不创建 AgentVersion、不发布 Agent、不触发 AgentOps PolicyDecision。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "no AgentVersion creation / no publish / no PolicyDecision / no CapabilityGrant";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.submission.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -2643,6 +2796,7 @@
       "installRequest",
       "recommendationDecision",
       "listingWizard",
+      "draftReviewSubmission",
       "runtimeAvailability",
       "healthSummaryFreshness",
       "installationDistribution",
@@ -2698,6 +2852,7 @@
       '  <div class="workspace-grid">',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
+      '    <sdlc-draft-review-submission :submission="draftReviewSubmission" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-draft-review-submission>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-installation-distribution :summary="installationDistribution" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-distribution>',

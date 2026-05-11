@@ -3436,6 +3436,224 @@ window.AgentStoreMock = {
       }
     }
   },
+  draftReviewSubmissions: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "draft_review_submission.v1",
+      submission_id: "draft-review-framework-ai-autosdlc",
+      package_id: "framework.ai-autosdlc@1.0.0",
+      agent_id: "framework.ai-autosdlc",
+      submission_state: "runtime_gate_blocked",
+      draft_status: "draft_review_blocked",
+      review_queue_entry: {
+        queue_state: "not_enqueued",
+        review_status: "not_submitted"
+      },
+      owner_confirmation: {
+        confirmed: true,
+        confirmed_by: "owner@sdlc-platform.example",
+        confirmed_at: "2026-05-11T09:30:00Z",
+        confirmation_basis: "owner_reviewed_listing_wizard"
+      },
+      validation_summary: {
+        validation_status: "passed",
+        draft_status_before_submission: "pending_review",
+        issue_count: 0,
+        fix_prompt_count: 0
+      },
+      runtime_gate: {
+        runtime_availability_state: "runtime_capability_missing",
+        runtime_display_name_zh: "缺 Runtime 能力"
+      },
+      issues: [
+        {
+          issue_id: "RUNTIME_GATE_NOT_READY",
+          field_path: "detail_preview.runtime_availability_state",
+          severity: "blocked",
+          reason: "Runtime availability must be ready before review submission.",
+          impact: "Prevents review from approving packages that Runtime cannot consume.",
+          fix_action_id: "resolve_runtime_gate",
+          message_key: "draftReview.runtimeGateNotReady"
+        }
+      ],
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        package_validation: "agent_store_package_validation",
+        owner_confirmation: "agent_store_owner_explicit_confirmation",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        draft_review_queue: "agent_store",
+        policy_decision: "agentops_not_evaluated_until_review"
+      },
+      next_action: {
+        action_id: "resolve_runtime_gate",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "draft_review_submission.v1",
+      submission_id: "draft-review-agentops-evidence-reporter",
+      package_id: "agentops.evidence-reporter@0.4.0",
+      agent_id: "agentops.evidence-reporter",
+      submission_state: "pending_review",
+      draft_status: "pending_review",
+      review_queue_entry: {
+        queue_state: "enqueued",
+        review_status: "pending_review",
+        review_queue_id: "review-agentops.evidence-reporter@0.4.0"
+      },
+      owner_confirmation: {
+        confirmed: true,
+        confirmed_by: "owner@agentops.example",
+        confirmed_at: "2026-05-11T09:31:00Z",
+        confirmation_basis: "owner_reviewed_listing_wizard"
+      },
+      validation_summary: {
+        validation_status: "passed",
+        draft_status_before_submission: "pending_review",
+        issue_count: 0,
+        fix_prompt_count: 0
+      },
+      runtime_gate: {
+        runtime_availability_state: "runtime_ready",
+        runtime_display_name_zh: "可运行"
+      },
+      issues: [],
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        package_validation: "agent_store_package_validation",
+        owner_confirmation: "agent_store_owner_explicit_confirmation",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        draft_review_queue: "agent_store",
+        policy_decision: "agentops_not_evaluated_until_review"
+      },
+      next_action: {
+        action_id: "track_review_queue",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "draft_review_submission.v1",
+      submission_id: "draft-review-security-policy-guard",
+      package_id: "security.policy-guard@0.2.1",
+      agent_id: "security.policy-guard",
+      submission_state: "validation_blocked",
+      draft_status: "draft_review_blocked",
+      review_queue_entry: {
+        queue_state: "not_enqueued",
+        review_status: "not_submitted"
+      },
+      owner_confirmation: {
+        confirmed: true,
+        confirmed_by: "owner@security.example",
+        confirmed_at: "2026-05-11T09:32:00Z",
+        confirmation_basis: "owner_reviewed_listing_wizard"
+      },
+      validation_summary: {
+        validation_status: "validation_failed",
+        draft_status_before_submission: "validation_failed",
+        issue_count: 2,
+        fix_prompt_count: 1
+      },
+      runtime_gate: {
+        runtime_availability_state: "runtime_ready",
+        runtime_display_name_zh: "可运行"
+      },
+      issues: [
+        {
+          issue_id: "PACKAGE_VALIDATION_NOT_PASSED",
+          field_path: "validation_report.step_state",
+          severity: "blocked",
+          reason: "Package validation must pass before a draft can enter review.",
+          impact: "Prevents incomplete or unsafe package metadata from becoming review facts.",
+          fix_action_id: "return_to_validation_report",
+          message_key: "draftReview.packageValidationNotPassed"
+        },
+        {
+          issue_id: "PLACEHOLDER_VALUE_BLOCKED",
+          field_path: "detail_preview.summary",
+          severity: "blocked",
+          reason: "Unknown, TODO, TBD, or N/A values cannot enter formal review.",
+          impact: "Prevents placeholder metadata from becoming governance review facts.",
+          fix_action_id: "replace_summary_placeholder",
+          message_key: "draftReview.placeholderValue"
+        }
+      ],
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        package_validation: "agent_store_package_validation",
+        owner_confirmation: "agent_store_owner_explicit_confirmation",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        draft_review_queue: "agent_store",
+        policy_decision: "agentops_not_evaluated_until_review"
+      },
+      next_action: {
+        action_id: "return_to_validation_report",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "draft_review_submission.v1",
+      submission_id: "draft-review-developer-release-notes",
+      package_id: "developer.release-notes@0.1.2",
+      agent_id: "developer.release-notes",
+      submission_state: "owner_confirmation_required",
+      draft_status: "draft_review_blocked",
+      review_queue_entry: {
+        queue_state: "not_enqueued",
+        review_status: "not_submitted"
+      },
+      owner_confirmation: {
+        confirmed: false,
+        confirmed_by: "",
+        confirmed_at: "",
+        confirmation_basis: "owner_confirmed_before_review"
+      },
+      validation_summary: {
+        validation_status: "passed",
+        draft_status_before_submission: "pending_review",
+        issue_count: 0,
+        fix_prompt_count: 0
+      },
+      runtime_gate: {
+        runtime_availability_state: "runtime_ready",
+        runtime_display_name_zh: "可运行"
+      },
+      issues: [
+        {
+          issue_id: "OWNER_CONFIRMATION_REQUIRED",
+          field_path: "owner_confirmation",
+          severity: "blocked",
+          reason: "Owner must explicitly confirm the listing fields before review.",
+          impact: "Prevents candidate or AI-derived fields from becoming review facts without owner accountability.",
+          fix_action_id: "confirm_owner_submission",
+          message_key: "draftReview.ownerConfirmationRequired"
+        }
+      ],
+      source_of_truth: {
+        package_manifest: "agent_store_upload_candidate",
+        package_validation: "agent_store_package_validation",
+        owner_confirmation: "agent_store_owner_explicit_confirmation",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        draft_review_queue: "agent_store",
+        policy_decision: "agentops_not_evaluated_until_review"
+      },
+      next_action: {
+        action_id: "confirm_owner_submission",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   bootstrap: {
     installation_id: "inst-1",
     bootstrap_status: "credential_issued",
