@@ -67,6 +67,18 @@ function actionMessage(action) {
   if (actionId === "complete_agent_manifest") {
     return "已返回 Manifest 补齐路径；缺必填字段前不能展示为 Runtime compatible。";
   }
+  if (actionId === "start_runtime_activation") {
+    return "Runtime activation 已进入 handoff 预览；Store 只交接安装事实，不启动 Runtime 进程。";
+  }
+  if (actionId === "regenerate_activation_command") {
+    return "已返回激活命令重生成路径；Runtime echo 与 Store 安装事实不一致时不能继续消费。";
+  }
+  if (actionId === "restart_activation") {
+    return "已返回重新激活路径；device binding 不一致时 Runtime 不可消费当前 handoff。";
+  }
+  if (actionId === "review_installation_status") {
+    return "已进入安装状态复核；安装或设备绑定未就绪前不会允许 Runtime 消费。";
+  }
   if (actionId === "continue_listing_review") {
     return "Runtime 可用性摘要满足当前 Manifest，可继续上架或安装审核。";
   }
@@ -313,6 +325,7 @@ new window.Vue({
       storeOpsDeepLinks: window.AgentStoreMock.storeOpsDeepLinks,
       policyApprovalEchoes: window.AgentStoreMock.policyApprovalEchoes,
       managedInstallerPreviews: window.AgentStoreMock.managedInstallerPreviews,
+      installationRuntimeHandoffs: window.AgentStoreMock.installationRuntimeHandoffs,
       policyApprovalRequests: window.AgentStoreMock.policyApprovalRequests,
       policyApprovalReceipts: window.AgentStoreMock.policyApprovalReceipts,
       notificationRouting: window.AgentStoreMock.notificationRouting,
@@ -1625,6 +1638,126 @@ new window.Vue({
         next_action: {
           action_id: "refresh_agentops_policy_echo",
           target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedInstallationRuntimeHandoff: function selectedInstallationRuntimeHandoff() {
+      var agent = this.selectedAgent;
+      var handoffs = this.installationRuntimeHandoffs || {};
+      var handoff;
+      if (!agent) {
+        return {
+          contract_schema_version: "installation_runtime_handoff.v1",
+          handoff_id: "",
+          installation_id: "",
+          handoff_state: "installation_not_ready",
+          display_name_zh: "安装未就绪",
+          reason_code: "catalog_filter_empty",
+          reason: "当前没有可交接给 Runtime 的 installation 或 device binding。",
+          runtime_consumption_allowed: false,
+          installation: {
+            installation_id: "",
+            device_id: "",
+            agent_id: "",
+            agent_version: "",
+            artifact_hash: "",
+            status: "not_installed",
+            enterprise_state: "detected_optional"
+          },
+          device_binding: {
+            device_id: "",
+            installation_id: "",
+            user: "",
+            artifact_hash: "",
+            device_public_key_thumbprint: "",
+            status: "revoked"
+          },
+          runtime_echo: {
+            runtime_id: "",
+            installation_id: "",
+            device_id: "",
+            artifact_hash: "",
+            observed_at: "",
+            handoff_ref: ""
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            installation: "catalog_filter",
+            device_binding: "catalog_filter",
+            package: "catalog_filter",
+            runtime_consumption: "not_applicable",
+            policy_decision: "not_applicable"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      handoff = handoffs[agent.agent_id];
+      if (handoff) {
+        return handoff;
+      }
+      return {
+        contract_schema_version: "installation_runtime_handoff.v1",
+        handoff_id: "runtime-handoff-missing-" + safeId(agent.agent_id),
+        installation_id: "",
+        handoff_state: "installation_not_ready",
+        display_name_zh: "安装未就绪",
+        reason_code: "installation_runtime_handoff_missing",
+        reason: "缺少 installation_runtime_handoff envelope，前端只能展示 Runtime 不可消费的保守状态。",
+        runtime_consumption_allowed: false,
+        installation: {
+          installation_id: "",
+          device_id: "",
+          agent_id: agent.agent_id,
+          agent_version: agent.version,
+          artifact_hash: agent.artifact_hash || "",
+          status: "not_installed",
+          enterprise_state: agent.enterprise_state || "detected_optional"
+        },
+        device_binding: {
+          device_id: "",
+          installation_id: "",
+          user: "",
+          artifact_hash: "",
+          device_public_key_thumbprint: "",
+          status: "revoked"
+        },
+        runtime_echo: {
+          runtime_id: "",
+          installation_id: "",
+          device_id: "",
+          artifact_hash: "",
+          observed_at: "",
+          handoff_ref: ""
+        },
+        issues: [
+          {
+            issue_id: "INSTALLATION_RUNTIME_HANDOFF_MISSING",
+            field_path: "installation_runtime_handoff",
+            severity: "blocked",
+            fix_action_id: "review_installation_status",
+            message_key: "installationRuntime.handoffMissing"
+          }
+        ],
+        source_of_truth: {
+          installation: "frontend_fallback_no_installation_runtime_handoff",
+          device_binding: "frontend_fallback_no_installation_runtime_handoff",
+          package: "agent_store",
+          runtime_consumption: "agent_runtime_echo_or_request",
+          policy_decision: "agentops"
+        },
+        next_action: {
+          action_id: "review_installation_status",
+          target_system: "agent_store",
           enabled: true,
           requires_permission: true,
           audit_required: true

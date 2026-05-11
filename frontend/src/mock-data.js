@@ -1847,6 +1847,232 @@ window.AgentStoreMock = {
       }
     }
   },
+  installationRuntimeHandoffs: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "installation_runtime_handoff.v1",
+      handoff_id: "runtime-handoff-inst-framework-001",
+      installation_id: "inst-framework-001",
+      handoff_state: "runtime_handoff_ready",
+      display_name_zh: "Runtime 可消费",
+      reason_code: "runtime_handoff_ready",
+      reason: "Installation and device binding facts are bound and may be consumed by Runtime.",
+      runtime_consumption_allowed: true,
+      installation: {
+        installation_id: "inst-framework-001",
+        device_id: "device-owner-macos",
+        agent_id: "framework.ai-autosdlc",
+        agent_version: "1.0.0",
+        artifact_hash: "sha256:ai-autosdlc-1.0.0",
+        status: "activation_required",
+        enterprise_state: "activating"
+      },
+      device_binding: {
+        device_id: "device-owner-macos",
+        installation_id: "inst-framework-001",
+        user: "owner@framework.example",
+        artifact_hash: "sha256:ai-autosdlc-1.0.0",
+        device_public_key_thumbprint: "thumbprint-framework-owner-macos",
+        status: "active"
+      },
+      runtime_echo: {
+        runtime_id: "runtime.local",
+        installation_id: "inst-framework-001",
+        device_id: "device-owner-macos",
+        artifact_hash: "sha256:ai-autosdlc-1.0.0",
+        observed_at: "2026-05-11T10:52:00Z",
+        handoff_ref: "runtime-handoff-inst-framework-001"
+      },
+      issues: [],
+      source_of_truth: {
+        installation: "agent_store",
+        device_binding: "agent_store",
+        package: "agent_store",
+        runtime_consumption: "agent_runtime_echo_or_request",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "start_runtime_activation",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "installation_runtime_handoff.v1",
+      handoff_id: "runtime-handoff-inst-evidence-001",
+      installation_id: "inst-evidence-001",
+      handoff_state: "artifact_hash_mismatch",
+      display_name_zh: "包哈希不一致",
+      reason_code: "artifact_hash_mismatch",
+      reason: "Runtime echo artifact hash does not match Agent Store installation fact.",
+      runtime_consumption_allowed: false,
+      installation: {
+        installation_id: "inst-evidence-001",
+        device_id: "device-owner-linux",
+        agent_id: "agentops.evidence-reporter",
+        agent_version: "0.4.0",
+        artifact_hash: "sha256:evidence-reporter-0.4.0",
+        status: "activation_required",
+        enterprise_state: "activating"
+      },
+      device_binding: {
+        device_id: "device-owner-linux",
+        installation_id: "inst-evidence-001",
+        user: "owner@agentops.example",
+        artifact_hash: "sha256:evidence-reporter-0.4.0",
+        device_public_key_thumbprint: "thumbprint-evidence-owner-linux",
+        status: "active"
+      },
+      runtime_echo: {
+        runtime_id: "runtime.enterprise",
+        installation_id: "inst-evidence-001",
+        device_id: "device-owner-linux",
+        artifact_hash: "sha256:evidence-reporter-stale",
+        observed_at: "2026-05-11T10:53:00Z",
+        handoff_ref: "runtime-handoff-inst-evidence-001"
+      },
+      issues: [
+        {
+          issue_id: "ARTIFACT_HASH_MISMATCH",
+          field_path: "runtime_echo.artifact_hash",
+          severity: "blocked",
+          fix_action_id: "regenerate_activation_command",
+          message_key: "installationRuntime.artifactHashMismatch"
+        }
+      ],
+      source_of_truth: {
+        installation: "agent_store",
+        device_binding: "agent_store",
+        package: "agent_store",
+        runtime_consumption: "agent_runtime_echo_or_request",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "regenerate_activation_command",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "installation_runtime_handoff.v1",
+      handoff_id: "runtime-handoff-inst-security-001",
+      installation_id: "inst-security-001",
+      handoff_state: "device_binding_mismatch",
+      display_name_zh: "设备绑定不一致",
+      reason_code: "device_binding_mismatch",
+      reason: "Runtime echo references a different device binding.",
+      runtime_consumption_allowed: false,
+      installation: {
+        installation_id: "inst-security-001",
+        device_id: "device-security-windows",
+        agent_id: "security.policy-guard",
+        agent_version: "0.2.1",
+        artifact_hash: "sha256:security-policy-guard-0.2.1",
+        status: "activation_required",
+        enterprise_state: "activating"
+      },
+      device_binding: {
+        device_id: "device-security-windows",
+        installation_id: "inst-security-001",
+        user: "owner@security.example",
+        artifact_hash: "sha256:security-policy-guard-0.2.1",
+        device_public_key_thumbprint: "thumbprint-security-windows",
+        status: "active"
+      },
+      runtime_echo: {
+        runtime_id: "runtime.security-preview",
+        installation_id: "inst-security-001",
+        device_id: "device-security-other",
+        artifact_hash: "sha256:security-policy-guard-0.2.1",
+        observed_at: "2026-05-11T10:54:00Z",
+        handoff_ref: "runtime-handoff-inst-security-001"
+      },
+      issues: [
+        {
+          issue_id: "DEVICE_BINDING_MISMATCH",
+          field_path: "runtime_echo.device_id",
+          severity: "blocked",
+          fix_action_id: "restart_activation",
+          message_key: "installationRuntime.deviceBindingMismatch"
+        }
+      ],
+      source_of_truth: {
+        installation: "agent_store",
+        device_binding: "agent_store",
+        package: "agent_store",
+        runtime_consumption: "agent_runtime_echo_or_request",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "restart_activation",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "installation_runtime_handoff.v1",
+      handoff_id: "runtime-handoff-inst-release-notes-001",
+      installation_id: "inst-release-notes-001",
+      handoff_state: "installation_not_ready",
+      display_name_zh: "安装未就绪",
+      reason_code: "installation_not_ready",
+      reason: "Installation status cannot be consumed by Runtime.",
+      runtime_consumption_allowed: false,
+      installation: {
+        installation_id: "inst-release-notes-001",
+        device_id: "device-dev-macos",
+        agent_id: "developer.release-notes",
+        agent_version: "0.1.2",
+        artifact_hash: "sha256:developer-release-notes-0.1.2",
+        status: "failed",
+        enterprise_state: "degraded"
+      },
+      device_binding: {
+        device_id: "device-dev-macos",
+        installation_id: "inst-release-notes-001",
+        user: "owner@developer.example",
+        artifact_hash: "sha256:developer-release-notes-0.1.2",
+        device_public_key_thumbprint: "thumbprint-release-notes-macos",
+        status: "active"
+      },
+      runtime_echo: {
+        runtime_id: "",
+        installation_id: "",
+        device_id: "",
+        artifact_hash: "",
+        observed_at: "",
+        handoff_ref: ""
+      },
+      issues: [
+        {
+          issue_id: "INSTALLATION_NOT_READY",
+          field_path: "installation.status",
+          severity: "blocked",
+          fix_action_id: "review_installation_status",
+          message_key: "installationRuntime.installationNotReady"
+        }
+      ],
+      source_of_truth: {
+        installation: "agent_store",
+        device_binding: "agent_store",
+        package: "agent_store",
+        runtime_consumption: "agent_runtime_echo_or_request",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "review_installation_status",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   managedInstallerPreviews: {
     "framework.ai-autosdlc": {
       contract_schema_version: "managed_installer_preview.v1",
