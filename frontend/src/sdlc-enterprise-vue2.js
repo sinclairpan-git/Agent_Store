@@ -344,6 +344,45 @@
     RUN_ID_REQUIRED: "需要 run_id",
     SESSION_ID_REQUIRED: "需要 session_id",
     RAW_TRACE_LINK_STRIPPED: "Raw Trace 链接已剥离",
+    policy_approval_request: "审批请求",
+    "policy_approval_request.v1": "审批请求 v1",
+    policy_approval_receipt: "审批回执",
+    "policy_approval_receipt.v1": "审批回执 v1",
+    approval_request_ready: "审批请求就绪",
+    requester_required: "需要 requester",
+    policy_context_incomplete: "策略上下文不完整",
+    justification_required: "需要审批理由",
+    approval_request_blocked: "审批请求阻断",
+    approval_receipt_accepted: "回执已接收",
+    approval_receipt_pending: "回执排队中",
+    approval_receipt_rejected: "回执已拒绝",
+    approval_receipt_unavailable: "回执不可用",
+    install_agent: "安装 Agent",
+    publish_agent: "发布 Agent",
+    upgrade_agent: "升级 Agent",
+    enable_agent: "启用 Agent",
+    submit_agentops_approval_request: "提交 AgentOps 审批请求",
+    complete_policy_context: "补齐策略上下文",
+    add_approval_justification: "补充审批理由",
+    assign_authorized_requester: "指定授权 requester",
+    view_agentops_approval: "查看 AgentOps 审批",
+    poll_agentops_approval_receipt: "轮询审批回执",
+    fix_agentops_approval_request: "修复审批请求",
+    refresh_agentops_approval_receipt: "刷新审批回执",
+    agentops_not_decided_by_receipt: "回执不代表 AgentOps 决策",
+    agent_store_receipt_only: "Store 仅展示回执",
+    agentops_receipt_only: "AgentOps 回执投影",
+    AGENT_VERSION_IDENTITY_REQUIRED: "缺 AgentVersion 身份",
+    REQUESTED_ACTION_UNSUPPORTED: "不支持的审批动作",
+    REQUESTER_REQUIRED: "缺 requester",
+    REQUESTER_ROLE_UNAUTHORIZED: "requester 角色无权",
+    POLICY_CONTEXT_INCOMPLETE: "策略上下文不完整",
+    JUSTIFICATION_REQUIRED: "缺审批理由",
+    APPROVAL_REQUEST_REF_INVALID: "审批请求引用无效",
+    AGENTOPS_RECEIPT_CONTRACT_UNSUPPORTED: "回执合同不支持",
+    AGENTOPS_RECEIPT_STATUS_UNSUPPORTED: "回执状态不支持",
+    AGENTOPS_RECEIPT_INCOMPLETE: "回执不完整",
+    APPROVAL_RECEIPT_REQUEST_MISMATCH: "回执与请求不匹配",
     notification_routing_summary: "通知路由摘要",
     "notification_routing_summary.v1": "通知路由摘要 v1",
     routing_ready: "路由就绪",
@@ -1852,6 +1891,181 @@
     }
   });
 
+  Vue.component("sdlc-policy-approval-flow", {
+    props: ["request", "receipt"],
+    template: [
+      '<section class="workspace-section policy-approval-flow">',
+      '  <div class="section-heading">',
+      '    <h2>Policy Approval</h2>',
+      '    <sdlc-status-chip :label="request.request_state" :tone="requestTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ flowCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="请求合同" :value="request.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="请求状态" :value="request.request_state" :tone="requestTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="请求动作" :value="request.requested_action" :tone="requestTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Requester" :value="requesterLabel" :tone="requesterTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="分发" :value="dispatchLabel" :tone="dispatchTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="回执合同" :value="receipt.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="回执状态" :value="receipt.receipt_state" :tone="receiptTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Grant" :value="grantLabel" :tone="grantTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="policy-approval-flow__grid">',
+      '    <div>',
+      '      <span>Policy Context</span>',
+      '      <strong>{{ policyContext.policy_ref || "policy_ref missing" }}</strong>',
+      '      <small>{{ displayLabel(policyContext.risk_level) }} / {{ policyContext.runtime_contract_version || "runtime contract missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>AgentOps Request</span>',
+      '      <strong>{{ agentopsRequest.store_audit_id || "audit missing" }}</strong>',
+      '      <small>dispatch_allowed: {{ displayLabel(agentopsRequest.dispatch_allowed) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>AgentOps Receipt</span>',
+      '      <strong>{{ agentopsReceipt.approval_id || "approval missing" }}</strong>',
+      '      <small>{{ displayLabel(agentopsReceipt.receipt_status) }} / {{ agentopsReceipt.received_at || "received_at missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Request Ref</span>',
+      '      <strong>{{ approvalRequestRef.store_audit_id || "store audit missing" }}</strong>',
+      '      <small>{{ approvalRequestRef.request_contract || "request contract missing" }} / {{ displayLabel(approvalRequestRef.requested_action) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Receipt Boundary</span>',
+      '      <strong>approval_decision_final: {{ displayLabel(receiptProjection.approval_decision_final) }}</strong>',
+      '      <small>capability_grant_issued: {{ displayLabel(receiptProjection.capability_grant_issued) }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="tag-list policy-approval-flow__scopes" v-if="contextScopes.length">',
+      '    <li v-for="item in contextScopes" :key="item">{{ item }}</li>',
+      '  </ul>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <div class="policy-approval-flow__actions">',
+      '      <sdlc-action-button :action="request.next_action" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '      <sdlc-action-button :action="receipt.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '    </div>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      requester: function requester() {
+        return this.request.requester || {};
+      },
+      policyContext: function policyContext() {
+        return this.request.policy_context || {};
+      },
+      agentopsRequest: function agentopsRequest() {
+        return this.request.agentops_request || {};
+      },
+      requestProjection: function requestProjection() {
+        return this.request.store_projection || {};
+      },
+      agentopsReceipt: function agentopsReceipt() {
+        return this.receipt.agentops_receipt || {};
+      },
+      approvalRequestRef: function approvalRequestRef() {
+        return this.receipt.approval_request_ref || {};
+      },
+      receiptProjection: function receiptProjection() {
+        return this.receipt.store_projection || {};
+      },
+      requestIssues: function requestIssues() {
+        return Array.isArray(this.request.issues) ? this.request.issues : [];
+      },
+      receiptIssues: function receiptIssues() {
+        return Array.isArray(this.receipt.issues) ? this.receipt.issues : [];
+      },
+      issues: function issues() {
+        return this.requestIssues.concat(this.receiptIssues);
+      },
+      contextScopes: function contextScopes() {
+        return []
+          .concat(Array.isArray(this.policyContext.permission_intents) ? this.policyContext.permission_intents : [])
+          .concat(Array.isArray(this.policyContext.data_scopes) ? this.policyContext.data_scopes : []);
+      },
+      requestTone: function requestTone() {
+        if (this.request.request_state === "approval_request_ready") {
+          return "success";
+        }
+        if (this.request.request_state === "approval_request_blocked") {
+          return "danger";
+        }
+        return "warning";
+      },
+      receiptTone: function receiptTone() {
+        if (this.receipt.receipt_state === "approval_receipt_accepted") {
+          return "success";
+        }
+        if (this.receipt.receipt_state === "approval_receipt_pending") {
+          return "warning";
+        }
+        return "danger";
+      },
+      requesterTone: function requesterTone() {
+        return ["owner", "security", "agentops_admin"].indexOf(this.requester.actor_role) >= 0
+          ? "success"
+          : "danger";
+      },
+      dispatchTone: function dispatchTone() {
+        return this.requestProjection.dispatch_allowed && this.agentopsRequest.dispatch_allowed
+          ? "success"
+          : "warning";
+      },
+      grantTone: function grantTone() {
+        return this.receiptProjection.capability_grant_issued ? "danger" : "success";
+      },
+      requesterLabel: function requesterLabel() {
+        return [
+          this.requester.actor_id || "actor missing",
+          displayLabel(this.requester.actor_role),
+          this.requester.tenant_id || "tenant missing"
+        ].join(" / ");
+      },
+      dispatchLabel: function dispatchLabel() {
+        return [
+          "request: " + displayLabel(this.requestProjection.dispatch_allowed),
+          "agentops: " + displayLabel(this.agentopsRequest.dispatch_allowed)
+        ].join(" / ");
+      },
+      grantLabel: function grantLabel() {
+        return [
+          "decision_final: " + displayLabel(this.receiptProjection.approval_decision_final),
+          "grant: " + displayLabel(this.receiptProjection.capability_grant_issued)
+        ].join(" / ");
+      },
+      flowCopy: function flowCopy() {
+        if (this.request.request_state !== "approval_request_ready") {
+          return "审批请求缺少授权 requester、策略上下文或 justification；Store 不会分发到 AgentOps。";
+        }
+        if (this.receipt.receipt_state === "approval_receipt_accepted") {
+          return "AgentOps 已接收审批请求 envelope；这只是回执，不是最终批准，也不会签发 CapabilityGrant。";
+        }
+        if (this.receipt.receipt_state === "approval_receipt_pending") {
+          return "审批请求已进入 AgentOps 队列，pending receipt 仍不代表 PolicyDecision。";
+        }
+        if (this.receipt.receipt_state === "approval_receipt_rejected") {
+          return "AgentOps 拒绝了请求 envelope；需要修复 request binding 或审批上下文后重试。";
+        }
+        return "审批回执不可用，Store 只展示 request/receipt 投影边界，不推导审批结果。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "Store decision authority: none / no override / no CapabilityGrant / receipt is not approval";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.receipt.source_of_truth || this.request.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-notification-routing", {
     props: ["summary"],
     template: [
@@ -2117,6 +2331,8 @@
       "lifecycleGovernance",
       "qualityEvidenceAccess",
       "storeOpsDeepLink",
+      "policyApprovalRequest",
+      "policyApprovalReceipt",
       "notificationRouting",
       "permissionDenialAction",
       "installHandoff",
@@ -2168,6 +2384,7 @@
       '    <sdlc-lifecycle-governance :summary="lifecycleGovernance" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-lifecycle-governance>',
       '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
       '    <sdlc-store-ops-deep-link :link="storeOpsDeepLink" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-store-ops-deep-link>',
+      '    <sdlc-policy-approval-flow :request="policyApprovalRequest" :receipt="policyApprovalReceipt" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-policy-approval-flow>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',
       '    <sdlc-section title="应用事实">',
