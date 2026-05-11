@@ -117,6 +117,7 @@ for (const componentName of [
   "sdlc-skill-registry-lifecycle",
   "sdlc-contract-registry-traceability",
   "sdlc-agent-manifest-runtime",
+  "sdlc-installation-runtime-handoff",
   "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
@@ -210,6 +211,36 @@ for (const agentManifestRuntimeTerm of [
       || app.includes(agentManifestRuntimeTerm)
       || componentLibrary.includes(agentManifestRuntimeTerm),
     `${agentManifestRuntimeTerm} must be represented`
+  );
+}
+for (const installationRuntimeHandoffTerm of [
+  "installationRuntimeHandoffs",
+  "selectedInstallationRuntimeHandoff",
+  "installation_runtime_handoff.v1",
+  "runtime_handoff_ready",
+  "artifact_hash_mismatch",
+  "device_binding_mismatch",
+  "installation_not_ready",
+  "runtime_consumption_allowed",
+  "device_binding",
+  "runtime_echo",
+  "agent_runtime_echo_or_request",
+  "start_runtime_activation",
+  "regenerate_activation_command",
+  "restart_activation",
+  "review_installation_status",
+  "ARTIFACT_HASH_MISMATCH",
+  "DEVICE_BINDING_MISMATCH",
+  "DEVICE_BINDING_NOT_ACTIVE",
+  "INSTALLATION_NOT_READY",
+  "INSTALLATION_RUNTIME_HANDOFF_MISSING",
+  "frontend_fallback_no_installation_runtime_handoff"
+]) {
+  assert(
+    mockData.includes(installationRuntimeHandoffTerm)
+      || app.includes(installationRuntimeHandoffTerm)
+      || componentLibrary.includes(installationRuntimeHandoffTerm),
+    `${installationRuntimeHandoffTerm} must be represented`
   );
 }
 for (const healthTerm of [
@@ -675,6 +706,9 @@ assert(
     && app.includes("selectedAgentManifestRuntimeContract")
     && app.includes("agentManifestRuntimeContracts")
     && app.includes("frontend_fallback_no_agent_manifest_runtime_contract")
+    && app.includes("selectedInstallationRuntimeHandoff")
+    && app.includes("installationRuntimeHandoffs")
+    && app.includes("frontend_fallback_no_installation_runtime_handoff")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -742,6 +776,8 @@ assert(
     && app.includes("contract_registry_traceability.v1")
     && app.includes("agent_manifest_runtime_contract.v1")
     && app.includes("Store 只展示 Runtime 回显")
+    && app.includes("installation_runtime_handoff.v1")
+    && app.includes("Store 只交接安装事实")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
@@ -751,6 +787,7 @@ assert(
     && indexHtml.includes(":skill-registry-lifecycle=\"selectedSkillRegistryLifecycle\"")
     && indexHtml.includes(":contract-registry-traceability=\"selectedContractRegistryTraceability\"")
     && indexHtml.includes(":agent-manifest-runtime-contract=\"selectedAgentManifestRuntimeContract\"")
+    && indexHtml.includes(":installation-runtime-handoff=\"selectedInstallationRuntimeHandoff\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
@@ -798,6 +835,7 @@ assert(
     && componentLibrary.includes("sdlc-skill-registry-lifecycle")
     && componentLibrary.includes("sdlc-contract-registry-traceability")
     && componentLibrary.includes("sdlc-agent-manifest-runtime")
+    && componentLibrary.includes("sdlc-installation-runtime-handoff")
     && componentLibrary.includes("listing-wizard")
     && componentLibrary.includes("wizard-steps")
     && componentLibrary.includes("draft-review-submission__grid")
@@ -805,10 +843,12 @@ assert(
     && componentLibrary.includes("contract-registry-traceability__focus")
     && componentLibrary.includes("contract-registry-traceability__contracts")
     && componentLibrary.includes("agent-manifest-runtime__grid")
+    && componentLibrary.includes("installation-runtime-handoff__grid")
     && componentLibrary.includes("草案提交审核")
     && componentLibrary.includes("Skill Registry")
     && componentLibrary.includes("合同注册追踪")
     && componentLibrary.includes("AgentManifest Runtime")
+    && componentLibrary.includes("Installation Runtime Handoff")
     && componentLibrary.includes("draft_review_submission.v1")
     && componentLibrary.includes("skill_registry.v1")
     && componentLibrary.includes("skill_registry_notification.v1")
@@ -824,6 +864,9 @@ assert(
     && componentLibrary.includes("Store owns AgentManifest / Runtime echo is read-only / no Runtime execution / no Grant / no quality inference")
     && componentLibrary.includes("Runtime Capability Echo")
     && componentLibrary.includes("Missing Runtime Capabilities")
+    && componentLibrary.includes("Installation Fact")
+    && componentLibrary.includes("Device Binding")
+    && componentLibrary.includes("Store owns Installation and DeviceBinding / Runtime echo is read-only / no Runtime process / no CapabilityGrant / no PolicyDecision")
     && componentLibrary.includes("OpenAPI 合同、Owner、Producer、Consumer、appendix anchor 与 contract tests")
     && componentLibrary.includes("review_queue_entry")
     && componentLibrary.includes("owner_confirmation")

@@ -504,6 +504,17 @@
     scoped_write: "受限写入",
     runtime_handoff_ready: "Runtime Handoff 就绪",
     runtime_handoff_missing: "缺 Runtime Handoff",
+    installation_runtime_handoff: "Installation Runtime Handoff",
+    "installation_runtime_handoff.v1": "Installation Runtime Handoff v1",
+    artifact_hash_mismatch: "包哈希不一致",
+    device_binding_mismatch: "设备绑定不一致",
+    installation_not_ready: "安装未就绪",
+    agent_runtime_echo_or_request: "Agent Runtime Echo/Request",
+    frontend_fallback_no_installation_runtime_handoff: "前端降级 Runtime Handoff",
+    start_runtime_activation: "开始 Runtime 激活",
+    regenerate_activation_command: "重生成激活命令",
+    restart_activation: "重新激活",
+    review_installation_status: "复核安装状态",
     prepare_managed_install: "准备托管安装",
     refresh_package_download: "刷新包下载",
     regenerate_package_signature: "重新生成包签名",
@@ -516,6 +527,11 @@
     SIGNATURE_OR_HASH_UNTRUSTED: "签名或 hash 不可信",
     POLICY_APPROVAL_NOT_ALLOWED: "Policy Echo 未允许",
     RUNTIME_HANDOFF_NOT_READY: "Runtime Handoff 未就绪",
+    ARTIFACT_HASH_MISMATCH: "包哈希不一致",
+    DEVICE_BINDING_MISMATCH: "设备绑定不一致",
+    DEVICE_BINDING_NOT_ACTIVE: "设备绑定未激活",
+    INSTALLATION_NOT_READY: "安装未就绪",
+    INSTALLATION_RUNTIME_HANDOFF_MISSING: "缺 Installation Runtime Handoff",
     SMOKE_TEST_FAILED: "Smoke Test 失败",
     MANAGED_INSTALLER_PREVIEW_MISSING: "缺托管安装预览",
     notification_routing_summary: "通知路由摘要",
@@ -3180,6 +3196,102 @@
     }
   });
 
+  Vue.component("sdlc-installation-runtime-handoff", {
+    props: ["handoff"],
+    template: [
+      '<section class="workspace-section installation-runtime-handoff">',
+      '  <div class="section-heading">',
+      '    <h2>Installation Runtime Handoff</h2>',
+      '    <sdlc-status-chip :label="handoff.handoff_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ handoff.reason }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="handoff.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Handoff" :value="handoff.handoff_id || \'missing\'" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="安装" :value="installation.installation_id || \'missing\'" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="设备" :value="deviceBinding.device_id || \'missing\'" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="包 Hash" :value="installation.artifact_hash || \'missing\'" :tone="hashTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime Echo" :value="runtimeEcho.runtime_id || \'missing\'" :tone="runtimeEchoTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime 可消费" :value="handoff.runtime_consumption_allowed ? \'allowed\' : \'blocked\'" :tone="handoff.runtime_consumption_allowed ? \'success\' : \'danger\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="状态" :value="handoff.display_name_zh || handoff.reason_code" :tone="stateTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="installation-runtime-handoff__grid">',
+      '    <div>',
+      '      <span>Installation Fact</span>',
+      '      <strong>{{ installation.installation_id || "missing" }}</strong>',
+      '      <small>{{ installation.status || "missing" }} / {{ installation.enterprise_state || "missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Device Binding</span>',
+      '      <strong>{{ deviceBinding.device_id || "missing" }}</strong>',
+      '      <small>{{ deviceBinding.status || "missing" }} / {{ deviceBinding.device_public_key_thumbprint || "thumbprint missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Runtime Echo</span>',
+      '      <strong>{{ runtimeEcho.installation_id || "echo missing" }}</strong>',
+      '      <small>{{ runtimeEcho.device_id || "device echo missing" }} / {{ runtimeEcho.artifact_hash || "hash echo missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Source of Truth</span>',
+      '      <strong>{{ displayLabel(sourceOfTruth.installation) }} / {{ displayLabel(sourceOfTruth.device_binding) }}</strong>',
+      '      <small>{{ displayLabel(sourceOfTruth.runtime_consumption) }} / {{ displayLabel(sourceOfTruth.policy_decision) }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ issue.field_path }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="handoff.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      installation: function installation() {
+        return this.handoff.installation || {};
+      },
+      deviceBinding: function deviceBinding() {
+        return this.handoff.device_binding || {};
+      },
+      runtimeEcho: function runtimeEcho() {
+        return this.handoff.runtime_echo || {};
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.handoff.source_of_truth || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.handoff.issues) ? this.handoff.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.handoff.handoff_state === "runtime_handoff_ready") {
+          return "success";
+        }
+        if (this.handoff.handoff_state === "installation_not_ready") {
+          return "warning";
+        }
+        return "danger";
+      },
+      hashTone: function hashTone() {
+        if (this.handoff.handoff_state === "artifact_hash_mismatch") {
+          return "danger";
+        }
+        return this.installation.artifact_hash ? "success" : "warning";
+      },
+      runtimeEchoTone: function runtimeEchoTone() {
+        if (!this.runtimeEcho.runtime_id) {
+          return "warning";
+        }
+        return this.handoff.runtime_consumption_allowed ? "success" : "danger";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "Store owns Installation and DeviceBinding / Runtime echo is read-only / no Runtime process / no CapabilityGrant / no PolicyDecision";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -3206,6 +3318,7 @@
       "skillRegistryLifecycle",
       "contractRegistryTraceability",
       "agentManifestRuntimeContract",
+      "installationRuntimeHandoff",
       "runtimeAvailability",
       "healthSummaryFreshness",
       "installationDistribution",
@@ -3265,6 +3378,7 @@
       '    <sdlc-skill-registry-lifecycle :lifecycle="skillRegistryLifecycle" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-skill-registry-lifecycle>',
       '    <sdlc-contract-registry-traceability :traceability="contractRegistryTraceability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-contract-registry-traceability>',
       '    <sdlc-agent-manifest-runtime :contract="agentManifestRuntimeContract" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-agent-manifest-runtime>',
+      '    <sdlc-installation-runtime-handoff :handoff="installationRuntimeHandoff" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-runtime-handoff>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-installation-distribution :summary="installationDistribution" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-distribution>',
