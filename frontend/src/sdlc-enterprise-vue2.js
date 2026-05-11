@@ -256,6 +256,7 @@
     notify_security_iam_and_owner: "通知安全和 Owner",
     audit_only: "仅审计",
     DENIAL_SCENARIO_UNSUPPORTED: "不支持的权限场景",
+    TRUSTED_AUTH_CONTEXT_REQUIRED: "需要可信身份上下文",
     PERMISSION_DECISION_REQUIRED: "缺权限裁决",
     POLICY_REF_REQUIRED: "缺策略引用",
     RAW_PERMISSION_LINK_STRIPPED: "原文链接已剥离",

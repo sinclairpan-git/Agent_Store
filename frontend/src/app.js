@@ -830,8 +830,21 @@ new window.Vue({
           raw_evidence_exposed: false,
           store_grant_issued: false,
           store_policy_override_allowed: false,
-          primary_action: this.selectedView.primary_action,
-          secondary_action: this.selectedView.primary_action,
+          primary_action: {
+            action_id: "refresh_identity",
+            target_system: "agent_store",
+            enabled: true,
+            requires_permission: false,
+            audit_required: true
+          },
+          secondary_action: {
+            action_id: "return_to_catalog",
+            target_system: "agent_store",
+            enabled: true,
+            requires_permission: false,
+            audit_required: false,
+            href: "/agent-store/agents"
+          },
           issues: [
             {
               issue_id: "TRUSTED_AUTH_CONTEXT_REQUIRED",
@@ -848,7 +861,13 @@ new window.Vue({
             raw_evidence: "evidence_vault",
             projection: "agent_store"
           },
-          next_action: this.selectedView.primary_action
+          next_action: {
+            action_id: "refresh_identity",
+            target_system: "agent_store",
+            enabled: true,
+            requires_permission: false,
+            audit_required: true
+          }
         };
       }
       summary = summaries[agent.agent_id];
