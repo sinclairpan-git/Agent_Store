@@ -309,6 +309,7 @@ new window.Vue({
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
+      draftReviewSubmissions: window.AgentStoreMock.draftReviewSubmissions,
       recommendationStates: {},
       recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
@@ -2338,6 +2339,114 @@ new window.Vue({
         },
         next_action: {
           action_id: "return_to_field_confirmation",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedDraftReviewSubmission: function selectedDraftReviewSubmission() {
+      var agent = this.selectedAgent;
+      var submissions = this.draftReviewSubmissions || {};
+      var submission;
+      var wizard = this.selectedListingWizard;
+      if (!agent) {
+        return {
+          contract_schema_version: "draft_review_submission.v1",
+          submission_id: "",
+          package_id: "not-applicable",
+          agent_id: "",
+          submission_state: "validation_blocked",
+          draft_status: "draft_review_blocked",
+          review_queue_entry: {
+            queue_state: "not_enqueued",
+            review_status: "not_submitted"
+          },
+          owner_confirmation: {
+            confirmed: false,
+            confirmed_by: "",
+            confirmed_at: "",
+            confirmation_basis: "catalog_filter"
+          },
+          validation_summary: {
+            validation_status: "empty",
+            draft_status_before_submission: "not_applicable",
+            issue_count: 0,
+            fix_prompt_count: 0
+          },
+          runtime_gate: {
+            runtime_availability_state: "manifest_incomplete",
+            runtime_display_name_zh: "Manifest 待补齐"
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            package_manifest: "agent_store_upload_candidate",
+            package_validation: "agent_store_package_validation",
+            owner_confirmation: "agent_store_owner_explicit_confirmation",
+            runtime_availability: "agent_runtime_echo_or_probe",
+            draft_review_queue: "agent_store",
+            policy_decision: "agentops_not_evaluated_until_review"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      submission = submissions[agent.agent_id];
+      if (submission) {
+        return submission;
+      }
+      return {
+        contract_schema_version: "draft_review_submission.v1",
+        submission_id: "draft-review-missing-" + safeId(agent.agent_id),
+        package_id: (wizard.validation_report && wizard.validation_report.package_id) || agent.agent_id + "@" + agent.version,
+        agent_id: agent.agent_id,
+        submission_state: "validation_blocked",
+        draft_status: "draft_review_blocked",
+        review_queue_entry: {
+          queue_state: "not_enqueued",
+          review_status: "not_submitted"
+        },
+        owner_confirmation: {
+          confirmed: false,
+          confirmed_by: "",
+          confirmed_at: "",
+          confirmation_basis: "frontend_fallback_no_draft_review_submission"
+        },
+        validation_summary: {
+          validation_status: (wizard.validation_report && wizard.validation_report.step_state) || "missing",
+          draft_status_before_submission: (wizard.validation_report && wizard.validation_report.draft_status) || "missing",
+          issue_count: (wizard.validation_report && wizard.validation_report.issue_count) || 0,
+          fix_prompt_count: (wizard.validation_report && wizard.validation_report.fix_prompt_count) || 0
+        },
+        runtime_gate: {
+          runtime_availability_state: (wizard.detail_preview && wizard.detail_preview.runtime_availability_state) || "manifest_incomplete",
+          runtime_display_name_zh: (wizard.detail_preview && wizard.detail_preview.runtime_display_name_zh) || "Manifest 待补齐"
+        },
+        issues: [
+          {
+            issue_id: "DRAFT_REVIEW_SUBMISSION_MISSING",
+            field_path: "draft_review_submission",
+            severity: "blocked",
+            fix_action_id: "prepare_draft_review_submission"
+          }
+        ],
+        source_of_truth: {
+          package_manifest: "agent_store_upload_candidate",
+          package_validation: "agent_store_package_validation",
+          owner_confirmation: "agent_store_owner_explicit_confirmation",
+          runtime_availability: "agent_runtime_echo_or_probe",
+          draft_review_queue: "frontend_fallback_no_draft_review_submission",
+          policy_decision: "agentops_not_evaluated_until_review"
+        },
+        next_action: {
+          action_id: "prepare_draft_review_submission",
           target_system: "agent_store",
           enabled: true,
           requires_permission: true,

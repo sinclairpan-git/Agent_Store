@@ -205,19 +205,23 @@ specs:
   path: specs/049-managed-installer-preview-frontend-consumer
   depends_on:
   - 048-policy-approval-echo-frontend-consumer
+- id: 050-draft-review-submission-frontend-consumer
+  path: specs/050-draft-review-submission-frontend-consumer
+  depends_on:
+  - 049-managed-installer-preview-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T09:02:37Z'
+  generated_at: '2026-05-11T09:42:13Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 0fd2ee1
-  authoring_hash: d8f90c29ba005b9e171840409803eb9561fd75367423e86c5d4c9a8ac465aacd
+  repo_revision: 7f17031
+  authoring_hash: b94bbe8044d54484be00fe9e0d2c943f818bd413a06cd05f125c9875516cdc49
   source_hashes: {}
-  snapshot_hash: 3520f899644a161f8aec9206eb0448984f5fff90c361b9461ee3ac96c6587dd3
+  snapshot_hash: dd4f02b9cfd1608865ffac6510083d1f40d867fd7f84c03860aea4fa0da60e1b
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 248
-    mapped_sources: 248
+    total_sources: 253
+    mapped_sources: 253
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -225,20 +229,20 @@ truth_snapshot:
     non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
-      spec: 49
-      plan: 49
-      tasks: 49
-      execution: 49
-      close: 49
+      spec: 50
+      plan: 50
+      tasks: 50
+      execution: 50
+      close: 50
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 49
-      plan: 49
-      tasks: 49
-      execution: 49
-      close: 49
+      spec: 50
+      plan: 50
+      tasks: 50
+      execution: 50
+      close: 50
       defect: 1
       release: 1
     entries:
@@ -2453,6 +2457,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 049-managed-installer-preview-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/050-draft-review-submission-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 050-draft-review-submission-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/050-draft-review-submission-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 050-draft-review-submission-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/050-draft-review-submission-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 050-draft-review-submission-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/050-draft-review-submission-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 050-draft-review-submission-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/050-draft-review-submission-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 050-draft-review-submission-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
