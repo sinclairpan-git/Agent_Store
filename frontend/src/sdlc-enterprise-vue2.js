@@ -1190,6 +1190,9 @@
         return Math.round(this.display.confidence * 100) + "% confidence";
       },
       accessLabel: function accessLabel() {
+        if (this.access.can_view_raw_evidence) {
+          return "raw evidence permitted";
+        }
         return this.access.evidence_vault_request_required
           ? "request required"
           : "summary only";

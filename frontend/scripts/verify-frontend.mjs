@@ -441,6 +441,7 @@ assert(
     && componentLibrary.includes("refresh_agentops_quality_summary")
     && componentLibrary.includes("request_score_template_refresh")
     && componentLibrary.includes("continue_quality_evidence_review")
+    && componentLibrary.includes("raw evidence permitted")
     && componentLibrary.includes("Store 不展示 raw Trace 或 raw Evidence URL")
     && componentLibrary.includes("也不本地计算质量"),
   "Agent detail must expose quality evidence access without exposing raw evidence or calculating quality"
