@@ -103,6 +103,9 @@
     install_runtime: "安装 Runtime",
     upgrade_runtime: "升级 Runtime",
     view_missing_runtime_capabilities: "查看缺失能力",
+    check_runtime_capabilities: "检查 Runtime 能力",
+    continue_manifest_review: "继续 Manifest 复核",
+    upgrade_runtime_or_select_compatible_version: "升级 Runtime 或换兼容版本",
     continue_listing_review: "继续上架审核",
     confirm_listing_fields: "确认上架字段",
     prepare_draft_review_submission: "准备草案提交",
@@ -162,6 +165,8 @@
     runtime_missing: "缺 Runtime",
     runtime_upgrade_required: "需升级 Runtime",
     runtime_capability_missing: "缺 Runtime 能力",
+    runtime_compatible: "Runtime 兼容",
+    runtime_unknown: "Runtime 未探测",
     runtime_ready: "可运行",
     manifest_incomplete: "Manifest 待补齐",
     health_unavailable: "摘要不可用",
@@ -241,6 +246,14 @@
     incomplete: "追踪缺口",
     frontend_fallback_no_contract_registry_traceability: "前端降级合同追踪",
     agent_manifest_runtime_contract: "AgentManifest Runtime 合同",
+    "agent_manifest_runtime_contract.v1": "AgentManifest Runtime 合同 v1",
+    "agent_manifest.v1": "AgentManifest v1",
+    agent_store: "Agent Store",
+    agent_store_manifest_projection: "Agent Store Manifest 投影",
+    frontend_fallback_no_agent_manifest_runtime_contract: "前端降级 Manifest 合同",
+    RUNTIME_CAPABILITY_MISSING: "缺 Runtime 能力",
+    OBSERVABILITY_CONTRACT_TRACE_SPANS_REQUIRED: "缺 observability trace_spans",
+    AGENT_MANIFEST_RUNTIME_CONTRACT_MISSING: "缺 AgentManifest Runtime 合同",
     AgentOps: "AgentOps",
     "Agent Runtime": "Agent Runtime",
     "Agent Store UI": "Agent Store UI",
@@ -3040,6 +3053,124 @@
     }
   });
 
+  Vue.component("sdlc-agent-manifest-runtime", {
+    props: ["contract"],
+    template: [
+      '<section class="workspace-section agent-manifest-runtime">',
+      '  <div class="section-heading">',
+      '    <h2>AgentManifest Runtime</h2>',
+      '    <sdlc-status-chip :label="contract.runtime_compatibility" :tone="compatibilityTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ manifestCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="contract.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Manifest" :value="summary.manifest_schema_version || \'missing\'" :tone="manifestTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime" :value="summary.runtime_contract_version || \'missing\'" :tone="compatibilityTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Agent" :value="contract.agent_id || \'missing\'" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Artifact" :value="contract.artifact_hash || \'missing\'" :tone="contract.artifact_hash ? \'success\' : \'warning\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Skills" :value="summary.skill_count" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Required Caps" :value="requiredCapabilities.length" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Missing Caps" :value="missingCapabilities.length" :tone="missingCapabilities.length ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="agent-manifest-runtime__grid">',
+      '    <div>',
+      '      <span>Manifest Required Fields</span>',
+      '      <strong>{{ contract.manifest_status }}</strong>',
+      '      <small>{{ manifestFieldSummary }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Runtime Capability Echo</span>',
+      '      <strong>{{ runtimeCapabilitySummary }}</strong>',
+      '      <small>{{ runtimeCapabilities.join(", ") || "probe missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Missing Runtime Capabilities</span>',
+      '      <strong>{{ missingCapabilities.join(", ") || "none" }}</strong>',
+      '      <small>{{ requiredCapabilities.join(", ") || "no requirements" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Source of Truth</span>',
+      '      <strong>{{ displayLabel(sourceOfTruth.agent_manifest) }}</strong>',
+      '      <small>{{ displayLabel(sourceOfTruth.runtime_availability) }} / {{ displayLabel(sourceOfTruth.policy_decision) }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ issue.field_path }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="contract.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      summary: function summary() {
+        return this.contract.manifest_summary || {};
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.contract.source_of_truth || {};
+      },
+      issues: function issues() {
+        return Array.isArray(this.contract.issues) ? this.contract.issues : [];
+      },
+      requiredCapabilities: function requiredCapabilities() {
+        return Array.isArray(this.contract.required_runtime_capabilities)
+          ? this.contract.required_runtime_capabilities
+          : [];
+      },
+      runtimeCapabilities: function runtimeCapabilities() {
+        return Array.isArray(this.contract.runtime_capabilities) ? this.contract.runtime_capabilities : [];
+      },
+      missingCapabilities: function missingCapabilities() {
+        return Array.isArray(this.contract.missing_runtime_capabilities)
+          ? this.contract.missing_runtime_capabilities
+          : [];
+      },
+      compatibilityTone: function compatibilityTone() {
+        if (this.contract.runtime_compatibility === "runtime_compatible") {
+          return "success";
+        }
+        if (this.contract.runtime_compatibility === "runtime_unknown") {
+          return "warning";
+        }
+        return "danger";
+      },
+      manifestTone: function manifestTone() {
+        return this.contract.manifest_status === "complete" ? "success" : "danger";
+      },
+      manifestFieldSummary: function manifestFieldSummary() {
+        return [
+          "permissions " + (this.summary.permission_intent_count || 0),
+          "data " + (this.summary.data_scope_count || 0),
+          "secrets " + (this.summary.secret_ref_count || 0),
+          "network " + (this.summary.network_allowlist_count || 0),
+          "guardrails " + (this.summary.guardrail_ref_count || 0)
+        ].join(" / ");
+      },
+      runtimeCapabilitySummary: function runtimeCapabilitySummary() {
+        return this.runtimeCapabilities.length + " echo / " + this.requiredCapabilities.length + " required";
+      },
+      manifestCopy: function manifestCopy() {
+        if (this.contract.manifest_status !== "complete") {
+          return "AgentManifest Runtime 合同未完整，必须补齐必填字段后才能进入 Runtime availability 判断。";
+        }
+        if (this.contract.runtime_compatibility === "runtime_capability_missing") {
+          return "AgentManifest 完整，但 Runtime echo 缺少必需能力；Store 只能展示阻断和下一步。";
+        }
+        if (this.contract.runtime_compatibility === "runtime_unknown") {
+          return "AgentManifest 完整，但还没有 Runtime echo/probe；Store 不本地推导兼容性。";
+        }
+        return "AgentManifest 完整且 Runtime capability echo 满足要求，可继续 Manifest 复核。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "Store owns AgentManifest / Runtime echo is read-only / no Runtime execution / no Grant / no quality inference";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -3065,6 +3196,7 @@
       "draftReviewSubmission",
       "skillRegistryLifecycle",
       "contractRegistryTraceability",
+      "agentManifestRuntimeContract",
       "runtimeAvailability",
       "healthSummaryFreshness",
       "installationDistribution",
@@ -3123,6 +3255,7 @@
       '    <sdlc-draft-review-submission :submission="draftReviewSubmission" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-draft-review-submission>',
       '    <sdlc-skill-registry-lifecycle :lifecycle="skillRegistryLifecycle" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-skill-registry-lifecycle>',
       '    <sdlc-contract-registry-traceability :traceability="contractRegistryTraceability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-contract-registry-traceability>',
+      '    <sdlc-agent-manifest-runtime :contract="agentManifestRuntimeContract" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-agent-manifest-runtime>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-installation-distribution :summary="installationDistribution" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-distribution>',

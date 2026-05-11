@@ -217,19 +217,23 @@ specs:
   path: specs/052-skill-registry-lifecycle-frontend-consumer
   depends_on:
   - 051-contract-registry-traceability-frontend-consumer
+- id: 053-agent-manifest-runtime-frontend-consumer
+  path: specs/053-agent-manifest-runtime-frontend-consumer
+  depends_on:
+  - 052-skill-registry-lifecycle-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T10:39:43Z'
+  generated_at: '2026-05-11T10:56:34Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 3b5a4e8
-  authoring_hash: 438255f768483ec7f958b65785f307bcc4ddb5fb55899b5b9b160c4deaccf6a1
+  repo_revision: e1d51f5
+  authoring_hash: c1f343ea63b1bcea0e95c5650ec2202e7a720f9af61a5617e22b3fe4eba809c1
   source_hashes: {}
-  snapshot_hash: 967fa97a24afe931ad018e3c545d553c34186d7f88a35c6ff77937e52b7c6694
+  snapshot_hash: a3f3f59eb6b6a1c502b24b46f08ccc7020b86c4e4811cd578bf158d9148a3b6f
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 263
-    mapped_sources: 263
+    total_sources: 268
+    mapped_sources: 268
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 63
@@ -237,20 +241,20 @@ truth_snapshot:
     non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
-      spec: 52
-      plan: 52
-      tasks: 52
-      execution: 52
-      close: 52
+      spec: 53
+      plan: 53
+      tasks: 53
+      execution: 53
+      close: 53
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 52
-      plan: 52
-      tasks: 52
-      execution: 52
-      close: 52
+      spec: 53
+      plan: 53
+      tasks: 53
+      execution: 53
+      close: 53
       defect: 1
       release: 1
     entries:
@@ -2600,6 +2604,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 052-skill-registry-lifecycle-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/053-agent-manifest-runtime-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 053-agent-manifest-runtime-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/053-agent-manifest-runtime-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 053-agent-manifest-runtime-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/053-agent-manifest-runtime-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 053-agent-manifest-runtime-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/053-agent-manifest-runtime-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 053-agent-manifest-runtime-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/053-agent-manifest-runtime-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 053-agent-manifest-runtime-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0
