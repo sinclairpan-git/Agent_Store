@@ -201,40 +201,44 @@ specs:
   path: specs/048-policy-approval-echo-frontend-consumer
   depends_on:
   - 047-policy-approval-frontend-consumer
+- id: 049-managed-installer-preview-frontend-consumer
+  path: specs/049-managed-installer-preview-frontend-consumer
+  depends_on:
+  - 048-policy-approval-echo-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T08:35:16Z'
+  generated_at: '2026-05-11T09:02:37Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: dfc2cf0
-  authoring_hash: 7947c7da551e7f894d6d7153ac34bce3543d4238d73edd729c7329240b514c0d
+  repo_revision: 0fd2ee1
+  authoring_hash: d8f90c29ba005b9e171840409803eb9561fd75367423e86c5d4c9a8ac465aacd
   source_hashes: {}
-  snapshot_hash: 1d144613a80eb4d006d4e2205f66f06cff0064754b70ac02fea3eda96ae59073
+  snapshot_hash: 3520f899644a161f8aec9206eb0448984f5fff90c361b9461ee3ac96c6587dd3
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 243
-    mapped_sources: 243
+    total_sources: 248
+    mapped_sources: 248
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
     deferred_signal_count: 161
-    non_goal_signal_count: 33
+    non_goal_signal_count: 34
     layer_totals:
       blueprint: 1
-      spec: 48
-      plan: 48
-      tasks: 48
-      execution: 48
-      close: 48
+      spec: 49
+      plan: 49
+      tasks: 49
+      execution: 49
+      close: 49
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 48
-      plan: 48
-      tasks: 48
-      execution: 48
-      close: 48
+      spec: 49
+      plan: 49
+      tasks: 49
+      execution: 49
+      close: 49
       defect: 1
       release: 1
     entries:
@@ -2404,6 +2408,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 048-policy-approval-echo-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/049-managed-installer-preview-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 049-managed-installer-preview-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/049-managed-installer-preview-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 049-managed-installer-preview-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/049-managed-installer-preview-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 049-managed-installer-preview-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/049-managed-installer-preview-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 049-managed-installer-preview-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/049-managed-installer-preview-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 049-managed-installer-preview-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0

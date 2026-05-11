@@ -685,6 +685,84 @@ h2 {
   font-size: 13px;
 }
 
+.managed-installer-preview {
+  min-height: 390px;
+}
+
+.managed-installer-preview__steps {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 14px 0 0;
+  list-style: none;
+}
+
+.managed-installer-preview__step {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.managed-installer-preview__step--completed,
+.managed-installer-preview__step--passed,
+.managed-installer-preview__step--ready {
+  border-color: #aacfb5;
+  background: #f3faf4;
+}
+
+.managed-installer-preview__step--blocked,
+.managed-installer-preview__step--failed {
+  border-color: #e8b9ae;
+  background: #fff6f3;
+}
+
+.managed-installer-preview__step span,
+.managed-installer-preview__step small,
+.managed-installer-preview__gates span,
+.managed-installer-preview__gates small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.managed-installer-preview__step strong,
+.managed-installer-preview__step small,
+.managed-installer-preview__gates strong,
+.managed-installer-preview__gates small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.managed-installer-preview__step strong,
+.managed-installer-preview__gates strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.managed-installer-preview__gates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.managed-installer-preview__gates div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
 .notification-routing {
   min-height: 312px;
 }
@@ -1514,6 +1592,8 @@ h2 {
   .quality-evidence__signals,
   .store-ops-deep-link__target,
   .policy-approval-echo__grid,
+  .managed-installer-preview__steps,
+  .managed-installer-preview__gates,
   .policy-approval-flow__grid,
   .notification-routing__channels,
   .permission-denial__scenarios,

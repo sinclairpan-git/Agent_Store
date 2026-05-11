@@ -303,6 +303,7 @@ new window.Vue({
       qualityEvidenceAccess: window.AgentStoreMock.qualityEvidenceAccess,
       storeOpsDeepLinks: window.AgentStoreMock.storeOpsDeepLinks,
       policyApprovalEchoes: window.AgentStoreMock.policyApprovalEchoes,
+      managedInstallerPreviews: window.AgentStoreMock.managedInstallerPreviews,
       policyApprovalRequests: window.AgentStoreMock.policyApprovalRequests,
       policyApprovalReceipts: window.AgentStoreMock.policyApprovalReceipts,
       notificationRouting: window.AgentStoreMock.notificationRouting,
@@ -1509,6 +1510,179 @@ new window.Vue({
         next_action: {
           action_id: "refresh_agentops_policy_echo",
           target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedManagedInstallerPreview: function selectedManagedInstallerPreview() {
+      var agent = this.selectedAgent;
+      var previews = this.managedInstallerPreviews || {};
+      var preview;
+      if (!agent) {
+        return {
+          contract_schema_version: "managed_installer_preview.v1",
+          agent_id: "",
+          agent_version: "",
+          installer_state: "download_blocked",
+          execution_mode: "preview_only",
+          real_install_started: false,
+          package: {
+            package_id: "",
+            artifact_hash: "",
+            artifact_url: "",
+            download_state: "missing",
+            signature_state: "",
+            hash_match_state: ""
+          },
+          policy_gate: {
+            echo_state: "agentops_echo_unavailable",
+            store_may_continue: false,
+            store_override_allowed: false,
+            capability_grant_issued: false
+          },
+          runtime_gate: {
+            handoff_state: "",
+            runtime_consumption_allowed: false,
+            installation_id: "",
+            device_id: ""
+          },
+          isolation: {
+            isolation_profile: "basic_sandbox",
+            network_mode: "policy_bound",
+            filesystem_mode: "scoped_write"
+          },
+          smoke_test: {
+            smoke_test_state: "not_run",
+            smoke_test_ref: ""
+          },
+          steps: [],
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          diagnostics: {
+            diagnostic_ref: "diag-managed-installer-filter-empty",
+            failure_stage: "catalog_filter",
+            reason_code: "CATALOG_FILTER_EMPTY",
+            copyable: true
+          },
+          source_of_truth: {
+            package: "agent_store_package_trust",
+            policy_approval: "agentops_via_policy_approval_echo",
+            runtime_handoff: "agent_store_installation_runtime_handoff",
+            installer_execution: "not_started_preview_only",
+            diagnostics: "agent_store_preview"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      preview = previews[agent.agent_id];
+      if (preview) {
+        return preview;
+      }
+      return {
+        contract_schema_version: "managed_installer_preview.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        installer_state: "runtime_handoff_blocked",
+        execution_mode: "preview_only",
+        real_install_started: false,
+        package: {
+          package_id: "pkg-" + safeId(agent.agent_id),
+          artifact_hash: agent.artifact_hash || "",
+          artifact_url: "",
+          download_state: "missing",
+          signature_state: "unknown",
+          hash_match_state: "unknown"
+        },
+        policy_gate: {
+          echo_state: this.selectedPolicyApprovalEcho.echo_state,
+          store_may_continue: false,
+          store_override_allowed: false,
+          capability_grant_issued: false
+        },
+        runtime_gate: {
+          handoff_state: "runtime_handoff_missing",
+          runtime_consumption_allowed: false,
+          installation_id: "",
+          device_id: ""
+        },
+        isolation: {
+          isolation_profile: "basic_sandbox",
+          network_mode: "policy_bound",
+          filesystem_mode: "scoped_write"
+        },
+        smoke_test: {
+          smoke_test_state: "not_run",
+          smoke_test_ref: ""
+        },
+        steps: [
+          {
+            step_id: "download_artifact",
+            label: "下载安装包",
+            step_state: "blocked",
+            owner_system: "agent_store",
+            diagnostic_ref: "diag-managed-installer-missing-" + safeId(agent.agent_id)
+          },
+          {
+            step_id: "verify_signature",
+            label: "校验签名与 hash",
+            step_state: "blocked",
+            owner_system: "agent_store",
+            diagnostic_ref: "diag-managed-installer-missing-" + safeId(agent.agent_id)
+          },
+          {
+            step_id: "create_isolated_install",
+            label: "创建隔离安装",
+            step_state: "blocked",
+            owner_system: "agent_runtime",
+            diagnostic_ref: "diag-managed-installer-missing-" + safeId(agent.agent_id)
+          },
+          {
+            step_id: "smoke_test",
+            label: "运行 smoke test",
+            step_state: "blocked",
+            owner_system: "agent_runtime",
+            diagnostic_ref: "diag-managed-installer-missing-" + safeId(agent.agent_id)
+          },
+          {
+            step_id: "failure_diagnostics",
+            label: "生成失败诊断",
+            step_state: "ready",
+            owner_system: "agent_store",
+            diagnostic_ref: "diag-managed-installer-missing-" + safeId(agent.agent_id)
+          }
+        ],
+        issues: [
+          {
+            issue_id: "MANAGED_INSTALLER_PREVIEW_MISSING",
+            field_path: "managed_installer_preview",
+            severity: "blocked",
+            fix_action_id: "refresh_managed_installer_preview"
+          }
+        ],
+        diagnostics: {
+          diagnostic_ref: "diag-managed-installer-missing-" + safeId(agent.agent_id),
+          failure_stage: "managed_installer_preview",
+          reason_code: "MANAGED_INSTALLER_PREVIEW_MISSING",
+          copyable: true
+        },
+        source_of_truth: {
+          package: "agent_store_package_trust",
+          policy_approval: "agentops_via_policy_approval_echo",
+          runtime_handoff: "agent_store_installation_runtime_handoff",
+          installer_execution: "not_started_preview_only",
+          diagnostics: "agent_store_preview"
+        },
+        next_action: {
+          action_id: "refresh_managed_installer_preview",
+          target_system: "agent_store",
           enabled: true,
           requires_permission: true,
           audit_required: true

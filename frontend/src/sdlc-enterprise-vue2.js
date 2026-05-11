@@ -401,6 +401,43 @@
     AGENTOPS_APPROVAL_STATUS_UNSUPPORTED: "Approval 状态不支持",
     AGENTOPS_APPROVAL_EXPIRES_AT_INVALID: "Approval 过期时间无效",
     AGENTOPS_APPROVAL_EXPIRED: "Approval 已过期",
+    managed_installer_preview: "托管安装预览",
+    "managed_installer_preview.v1": "托管安装预览 v1",
+    ready_to_install_preview: "预览可安装",
+    preview_passed: "预览已通过",
+    download_blocked: "下载阻断",
+    signature_blocked: "签名阻断",
+    runtime_handoff_blocked: "Runtime Handoff 阻断",
+    smoke_test_failed: "Smoke Test 失败",
+    preview_only: "仅预览",
+    not_started_preview_only: "仅预览未执行",
+    download_artifact: "下载安装包",
+    verify_signature: "校验签名",
+    create_isolated_install: "创建隔离安装",
+    smoke_test: "Smoke Test",
+    failure_diagnostics: "失败诊断",
+    not_run: "未运行",
+    not_required: "不需要",
+    available: "可用",
+    basic_sandbox: "基础沙箱",
+    policy_bound: "策略绑定网络",
+    scoped_write: "受限写入",
+    runtime_handoff_ready: "Runtime Handoff 就绪",
+    runtime_handoff_missing: "缺 Runtime Handoff",
+    prepare_managed_install: "准备托管安装",
+    refresh_package_download: "刷新包下载",
+    regenerate_package_signature: "重新生成包签名",
+    copy_installer_diagnostic: "复制安装诊断",
+    refresh_managed_installer_preview: "刷新安装预览",
+    agentops_via_policy_approval_echo: "AgentOps Policy Echo",
+    agent_store_installation_runtime_handoff: "Store Runtime Handoff",
+    agent_store_preview: "Agent Store 预览诊断",
+    DOWNLOAD_SOURCE_UNAVAILABLE: "下载源不可用",
+    SIGNATURE_OR_HASH_UNTRUSTED: "签名或 hash 不可信",
+    POLICY_APPROVAL_NOT_ALLOWED: "Policy Echo 未允许",
+    RUNTIME_HANDOFF_NOT_READY: "Runtime Handoff 未就绪",
+    SMOKE_TEST_FAILED: "Smoke Test 失败",
+    MANAGED_INSTALLER_PREVIEW_MISSING: "缺托管安装预览",
     notification_routing_summary: "通知路由摘要",
     "notification_routing_summary.v1": "通知路由摘要 v1",
     routing_ready: "路由就绪",
@@ -2208,6 +2245,146 @@
     }
   });
 
+  Vue.component("sdlc-managed-installer-preview", {
+    props: ["preview"],
+    template: [
+      '<section class="workspace-section managed-installer-preview">',
+      '  <div class="section-heading">',
+      '    <h2>托管安装预览</h2>',
+      '    <sdlc-status-chip :label="preview.installer_state" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ previewCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="preview.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="执行" :value="preview.execution_mode" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="真实安装" :value="preview.real_install_started ? \'started\' : \'not_started_preview_only\'" :tone="preview.real_install_started ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="包下载" :value="packageInfo.download_state" :tone="packageInfo.download_state === \'available\' ? \'success\' : \'warning\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="签名" :value="signatureLabel" :tone="signatureTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Policy" :value="policyLabel" :tone="policyTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime" :value="runtimeLabel" :tone="runtimeTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="诊断" :value="diagnostics.diagnostic_ref || \'none\'" :tone="diagnostics.copyable ? \'warning\' : \'neutral\'"></sdlc-metric-row>',
+      '  </dl>',
+      '  <ol class="managed-installer-preview__steps" aria-label="managed installer preview steps">',
+      '    <li v-for="step in steps" :key="step.step_id" :class="\'managed-installer-preview__step managed-installer-preview__step--\' + step.step_state">',
+      '      <span>{{ displayLabel(step.step_id) }}</span>',
+      '      <strong>{{ displayLabel(step.step_state) }}</strong>',
+      '      <small>{{ displayLabel(step.owner_system) }} · {{ step.diagnostic_ref || "no diagnostic" }}</small>',
+      '    </li>',
+      '  </ol>',
+      '  <div class="managed-installer-preview__gates">',
+      '    <div>',
+      '      <span>Isolation</span>',
+      '      <strong>{{ displayLabel(isolation.isolation_profile) }}</strong>',
+      '      <small>{{ displayLabel(isolation.network_mode) }} / {{ displayLabel(isolation.filesystem_mode) }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Smoke</span>',
+      '      <strong>{{ displayLabel(smokeTest.smoke_test_state) }}</strong>',
+      '      <small>{{ smokeTest.smoke_test_ref || "smoke ref missing" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Source</span>',
+      '      <strong>{{ sourceTruthSummary }}</strong>',
+      '      <small>no real download / no install / no CapabilityGrant</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="request-panel__blockers" v-if="issues.length">',
+      '    <li v-for="issue in issues" :key="issue.issue_id">{{ displayLabel(issue.issue_id) }} / {{ displayLabel(issue.fix_action_id) }}</li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="preview.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      packageInfo: function packageInfo() {
+        return this.preview.package || {};
+      },
+      policyGate: function policyGate() {
+        return this.preview.policy_gate || {};
+      },
+      runtimeGate: function runtimeGate() {
+        return this.preview.runtime_gate || {};
+      },
+      isolation: function isolation() {
+        return this.preview.isolation || {};
+      },
+      smokeTest: function smokeTest() {
+        return this.preview.smoke_test || {};
+      },
+      diagnostics: function diagnostics() {
+        return this.preview.diagnostics || {};
+      },
+      steps: function steps() {
+        return Array.isArray(this.preview.steps) ? this.preview.steps : [];
+      },
+      issues: function issues() {
+        return Array.isArray(this.preview.issues) ? this.preview.issues : [];
+      },
+      stateTone: function stateTone() {
+        if (this.preview.installer_state === "ready_to_install_preview" || this.preview.installer_state === "preview_passed") {
+          return "success";
+        }
+        if (this.preview.installer_state === "smoke_test_failed") {
+          return "danger";
+        }
+        return "warning";
+      },
+      signatureTone: function signatureTone() {
+        return this.packageInfo.signature_state === "verified" && this.packageInfo.hash_match_state === "matched" ? "success" : "warning";
+      },
+      signatureLabel: function signatureLabel() {
+        return [this.packageInfo.signature_state || "missing", this.packageInfo.hash_match_state || "missing"].join(" / ");
+      },
+      policyTone: function policyTone() {
+        return this.policyGate.store_may_continue && !this.policyGate.capability_grant_issued ? "success" : "warning";
+      },
+      policyLabel: function policyLabel() {
+        return [
+          this.policyGate.echo_state || "agentops_echo_unavailable",
+          this.policyGate.store_may_continue ? "allowed" : "blocked"
+        ].join(" / ");
+      },
+      runtimeTone: function runtimeTone() {
+        return this.runtimeGate.runtime_consumption_allowed ? "success" : "warning";
+      },
+      runtimeLabel: function runtimeLabel() {
+        return [
+          this.runtimeGate.handoff_state || "runtime_handoff_missing",
+          this.runtimeGate.runtime_consumption_allowed ? "allowed" : "blocked"
+        ].join(" / ");
+      },
+      previewCopy: function previewCopy() {
+        if (this.preview.installer_state === "preview_passed") {
+          return "托管安装预览已通过 smoke test 回显；这仍然是 preview-only，不代表 Store 已执行真实安装。";
+        }
+        if (this.preview.installer_state === "ready_to_install_preview") {
+          return "下载、签名、Policy Echo 和 Runtime Handoff 已允许进入托管安装预览；Store 只展示下一步，不启动真实安装。";
+        }
+        if (this.preview.installer_state === "policy_blocked") {
+          return "AgentOps Policy Echo 未允许继续；Store 不覆盖策略裁决，也不签发 CapabilityGrant。";
+        }
+        if (this.preview.installer_state === "runtime_handoff_blocked") {
+          return "Runtime Handoff 尚不可消费；安装预览停在隔离安装前，等待 Runtime 事实源修复。";
+        }
+        if (this.preview.installer_state === "smoke_test_failed") {
+          return "Smoke test 预览失败；用户可以复制诊断引用，但 Store 不会重试或执行真实安装。";
+        }
+        return "托管安装预览被下载、签名或缺失事实源阻断；Store 仅展示可审计的 preview-only 状态机。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "preview-only / real_install_started=false / no package execution / no CapabilityGrant";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.preview.source_of_truth);
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-notification-routing", {
     props: ["summary"],
     template: [
@@ -2474,6 +2651,7 @@
       "qualityEvidenceAccess",
       "storeOpsDeepLink",
       "policyApprovalEcho",
+      "managedInstallerPreview",
       "policyApprovalRequest",
       "policyApprovalReceipt",
       "notificationRouting",
@@ -2528,6 +2706,7 @@
       '    <sdlc-quality-evidence-access :summary="qualityEvidenceAccess" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-quality-evidence-access>',
       '    <sdlc-store-ops-deep-link :link="storeOpsDeepLink" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-store-ops-deep-link>',
       '    <sdlc-policy-approval-echo :echo="policyApprovalEcho" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-policy-approval-echo>',
+      '    <sdlc-managed-installer-preview :preview="managedInstallerPreview" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-managed-installer-preview>',
       '    <sdlc-policy-approval-flow :request="policyApprovalRequest" :receipt="policyApprovalReceipt" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-policy-approval-flow>',
       '    <sdlc-notification-routing :summary="notificationRouting" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-notification-routing>',
       '    <sdlc-permission-denial-action :summary="permissionDenialAction" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-permission-denial-action>',

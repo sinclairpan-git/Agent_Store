@@ -108,6 +108,7 @@ for (const componentName of [
   "sdlc-quality-evidence-access",
   "sdlc-store-ops-deep-link",
   "sdlc-policy-approval-echo",
+  "sdlc-managed-installer-preview",
   "sdlc-policy-approval-flow",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
@@ -316,6 +317,7 @@ for (const storeOpsDeepLinkTerm of [
 }
 for (const policyApprovalTerm of [
   "policyApprovalEchoes",
+  "managedInstallerPreviews",
   "policyApprovalRequests",
   "policyApprovalReceipts",
   "policy_approval_echo.v1",
@@ -367,6 +369,47 @@ for (const policyApprovalTerm of [
       || app.includes(policyApprovalTerm)
       || componentLibrary.includes(policyApprovalTerm),
     `${policyApprovalTerm} must be represented`
+  );
+}
+for (const managedInstallerFixtureTerm of [
+  "managedInstallerPreviews",
+  "managed_installer_preview.v1",
+  "ready_to_install_preview",
+  "signature_blocked",
+  "policy_blocked",
+  "smoke_test_failed",
+  "preview_only",
+  "real_install_started: false",
+  "not_started_preview_only",
+  "download_artifact",
+  "verify_signature",
+  "create_isolated_install",
+  "smoke_test",
+  "failure_diagnostics",
+  "prepare_managed_install",
+  "copy_installer_diagnostic",
+  "agentops_via_policy_approval_echo",
+  "agent_store_installation_runtime_handoff",
+  "SIGNATURE_OR_HASH_UNTRUSTED",
+  "POLICY_APPROVAL_NOT_ALLOWED",
+  "SMOKE_TEST_FAILED"
+]) {
+  assert(
+    mockData.includes(managedInstallerFixtureTerm),
+    `${managedInstallerFixtureTerm} must be represented by managed installer fixtures`
+  );
+}
+for (const managedInstallerComponentTerm of [
+  "preview_passed",
+  "download_blocked",
+  "runtime_handoff_blocked",
+  "MANAGED_INSTALLER_PREVIEW_MISSING",
+  "refresh_managed_installer_preview"
+]) {
+  assert(
+    app.includes(managedInstallerComponentTerm)
+      || componentLibrary.includes(managedInstallerComponentTerm),
+    `${managedInstallerComponentTerm} must be represented by managed installer component or fallback logic`
   );
 }
 for (const notificationRoutingTerm of [
@@ -469,6 +512,8 @@ assert(
     && app.includes("storeOpsDeepLinks")
     && app.includes("selectedPolicyApprovalEcho")
     && app.includes("policyApprovalEchoes")
+    && app.includes("selectedManagedInstallerPreview")
+    && app.includes("managedInstallerPreviews")
     && app.includes("selectedPolicyApprovalRequest")
     && app.includes("selectedPolicyApprovalReceipt")
     && app.includes("policyApprovalRequests")
@@ -553,6 +598,7 @@ assert(
     && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
     && indexHtml.includes(":store-ops-deep-link=\"selectedStoreOpsDeepLink\"")
     && indexHtml.includes(":policy-approval-echo=\"selectedPolicyApprovalEcho\"")
+    && indexHtml.includes(":managed-installer-preview=\"selectedManagedInstallerPreview\"")
     && indexHtml.includes(":policy-approval-request=\"selectedPolicyApprovalRequest\"")
     && indexHtml.includes(":policy-approval-receipt=\"selectedPolicyApprovalReceipt\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
@@ -755,6 +801,31 @@ assert(
     && componentLibrary.includes("AgentOps policy/approval source-of-truth / Store echo-only / no override / no CapabilityGrant")
     && componentLibrary.includes("Store 不本地推导 policy allowed"),
   "Agent detail must expose AgentOps policy approval echo without overriding decisions or issuing grants"
+);
+assert(
+  componentLibrary.includes("sdlc-managed-installer-preview")
+    && componentLibrary.includes("托管安装预览")
+    && componentLibrary.includes("managed_installer_preview.v1")
+    && componentLibrary.includes("installer_state")
+    && componentLibrary.includes("execution_mode")
+    && componentLibrary.includes("real_install_started")
+    && componentLibrary.includes("packageInfo")
+    && componentLibrary.includes("policyGate")
+    && componentLibrary.includes("runtimeGate")
+    && componentLibrary.includes("managed-installer-preview__steps")
+    && componentLibrary.includes("managed-installer-preview__gates")
+    && componentLibrary.includes("ready_to_install_preview")
+    && componentLibrary.includes("preview_passed")
+    && componentLibrary.includes("download_blocked")
+    && componentLibrary.includes("signature_blocked")
+    && componentLibrary.includes("policy_blocked")
+    && componentLibrary.includes("runtime_handoff_blocked")
+    && componentLibrary.includes("smoke_test_failed")
+    && componentLibrary.includes("prepare_managed_install")
+    && componentLibrary.includes("copy_installer_diagnostic")
+    && componentLibrary.includes("preview-only / real_install_started=false / no package execution / no CapabilityGrant")
+    && componentLibrary.includes("Store 仅展示可审计的 preview-only 状态机"),
+  "Agent detail must expose managed installer preview without starting real installs or issuing grants"
 );
 assert(
   componentLibrary.includes("sdlc-policy-approval-flow")
