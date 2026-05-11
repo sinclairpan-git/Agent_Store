@@ -193,19 +193,23 @@ specs:
   path: specs/046-store-ops-deep-link-frontend-consumer
   depends_on:
   - 045-lifecycle-governance-frontend-consumer
+- id: 047-policy-approval-frontend-consumer
+  path: specs/047-policy-approval-frontend-consumer
+  depends_on:
+  - 046-store-ops-deep-link-frontend-consumer
 truth_snapshot:
-  generated_at: '2026-05-11T07:17:10Z'
+  generated_at: '2026-05-11T07:38:59Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: 1d6d51b
-  authoring_hash: 9255ca6eb8b24cc9101ee8f4f98305dc5d08ccf058209d3511dac2a80d34a006
+  repo_revision: 3b62186
+  authoring_hash: 974c934e0d9364cec84cc3603a75a2c1d0f5c143afaf0b18f5ccb005798460f4
   source_hashes: {}
-  snapshot_hash: 072fabe25f0fd19e05000507876931f077c28174c5dddfbdf8c622c1d1ddb059
+  snapshot_hash: 22ea5dffe89f6e4aa03759e51ba864aedfcbc986ec3de7e0257bd39ccf479ec5
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 233
-    mapped_sources: 233
+    total_sources: 238
+    mapped_sources: 238
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 62
@@ -213,20 +217,20 @@ truth_snapshot:
     non_goal_signal_count: 31
     layer_totals:
       blueprint: 1
-      spec: 46
-      plan: 46
-      tasks: 46
-      execution: 46
-      close: 46
+      spec: 47
+      plan: 47
+      tasks: 47
+      execution: 47
+      close: 47
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 46
-      plan: 46
-      tasks: 46
-      execution: 46
-      close: 46
+      spec: 47
+      plan: 47
+      tasks: 47
+      execution: 47
+      close: 47
       defect: 1
       release: 1
     entries:
@@ -2306,6 +2310,51 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 046-store-ops-deep-link-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/047-policy-approval-frontend-consumer/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 047-policy-approval-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/047-policy-approval-frontend-consumer/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 047-policy-approval-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/047-policy-approval-frontend-consumer/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 047-policy-approval-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/047-policy-approval-frontend-consumer/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 047-policy-approval-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/047-policy-approval-frontend-consumer/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 047-policy-approval-frontend-consumer
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0

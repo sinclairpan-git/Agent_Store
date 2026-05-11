@@ -107,6 +107,7 @@ for (const componentName of [
   "sdlc-lifecycle-governance",
   "sdlc-quality-evidence-access",
   "sdlc-store-ops-deep-link",
+  "sdlc-policy-approval-flow",
   "sdlc-notification-routing",
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
@@ -312,6 +313,46 @@ for (const storeOpsDeepLinkTerm of [
 ]) {
   assert(mockData.includes(storeOpsDeepLinkTerm), `${storeOpsDeepLinkTerm} must be represented`);
 }
+for (const policyApprovalTerm of [
+  "policyApprovalRequests",
+  "policyApprovalReceipts",
+  "policy_approval_request.v1",
+  "policy_approval_receipt.v1",
+  "approval_request_ready",
+  "policy_context_incomplete",
+  "justification_required",
+  "approval_request_blocked",
+  "approval_receipt_accepted",
+  "approval_receipt_pending",
+  "approval_receipt_rejected",
+  "approval_receipt_unavailable",
+  "submit_agentops_approval_request",
+  "complete_policy_context",
+  "add_approval_justification",
+  "assign_authorized_requester",
+  "view_agentops_approval",
+  "poll_agentops_approval_receipt",
+  "fix_agentops_approval_request",
+  "refresh_agentops_approval_receipt",
+  "store_decision_authority: \"none\"",
+  "store_override_allowed: false",
+  "capability_grant_issued: false",
+  "approval_decision_final: false",
+  "agentops_not_decided_by_receipt",
+  "agentops_not_issued_by_store",
+  "agent_store_receipt_only",
+  "POLICY_CONTEXT_INCOMPLETE",
+  "JUSTIFICATION_REQUIRED",
+  "REQUESTER_ROLE_UNAUTHORIZED",
+  "AGENTOPS_RECEIPT_INCOMPLETE"
+]) {
+  assert(
+    mockData.includes(policyApprovalTerm)
+      || app.includes(policyApprovalTerm)
+      || componentLibrary.includes(policyApprovalTerm),
+    `${policyApprovalTerm} must be represented`
+  );
+}
 for (const notificationRoutingTerm of [
   "notificationRouting",
   "notification_routing_summary.v1",
@@ -410,6 +451,10 @@ assert(
     && app.includes("qualityEvidenceAccess")
     && app.includes("selectedStoreOpsDeepLink")
     && app.includes("storeOpsDeepLinks")
+    && app.includes("selectedPolicyApprovalRequest")
+    && app.includes("selectedPolicyApprovalReceipt")
+    && app.includes("policyApprovalRequests")
+    && app.includes("policyApprovalReceipts")
     && app.includes("selectedNotificationRouting")
     && app.includes("notificationRouting")
     && app.includes("selectedPermissionDenialAction")
@@ -469,6 +514,9 @@ assert(
     && app.includes("质量证据摘要可继续复核")
     && app.includes("sanitized run/session binding")
     && app.includes("缺少绑定时 Store 不生成 Run Detail 跳转")
+    && app.includes("Store 只组装请求")
+    && app.includes("receipt 只表示已接收，不代表最终批准")
+    && app.includes("Store 不本地推导审批结果")
     && app.includes("Agent Store 只记录 not_sent 路由摘要")
     && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
@@ -484,6 +532,8 @@ assert(
     && indexHtml.includes(":lifecycle-governance=\"selectedLifecycleGovernance\"")
     && indexHtml.includes(":quality-evidence-access=\"selectedQualityEvidenceAccess\"")
     && indexHtml.includes(":store-ops-deep-link=\"selectedStoreOpsDeepLink\"")
+    && indexHtml.includes(":policy-approval-request=\"selectedPolicyApprovalRequest\"")
+    && indexHtml.includes(":policy-approval-receipt=\"selectedPolicyApprovalReceipt\"")
     && indexHtml.includes(":notification-routing=\"selectedNotificationRouting\"")
     && indexHtml.includes(":permission-denial-action=\"selectedPermissionDenialAction\"")
     && indexHtml.includes(":selected-agent-id=\"activeSelectedAgentId\"")
@@ -664,6 +714,28 @@ assert(
   "Agent detail must expose sanitized Store to AgentOps deep links without raw trace or evidence URLs"
 );
 assert(
+  componentLibrary.includes("sdlc-policy-approval-flow")
+    && componentLibrary.includes("Policy Approval")
+    && componentLibrary.includes("policy_approval_request.v1")
+    && componentLibrary.includes("policy_approval_receipt.v1")
+    && componentLibrary.includes("request_state")
+    && componentLibrary.includes("receipt_state")
+    && componentLibrary.includes("requested_action")
+    && componentLibrary.includes("policy_context")
+    && componentLibrary.includes("agentops_request")
+    && componentLibrary.includes("approval_request_ref")
+    && componentLibrary.includes("agentops_receipt")
+    && componentLibrary.includes("policy-approval-flow__grid")
+    && componentLibrary.includes("policy-approval-flow__actions")
+    && componentLibrary.includes("submit_agentops_approval_request")
+    && componentLibrary.includes("view_agentops_approval")
+    && componentLibrary.includes("poll_agentops_approval_receipt")
+    && componentLibrary.includes("fix_agentops_approval_request")
+    && componentLibrary.includes("Store decision authority: none / no override / no CapabilityGrant / receipt is not approval")
+    && componentLibrary.includes("回执，不是最终批准，也不会签发 CapabilityGrant"),
+  "Agent detail must expose policy approval request and receipt without deciding policy or issuing grants"
+);
+assert(
   componentLibrary.includes("sdlc-notification-routing")
     && componentLibrary.includes("通知路由")
     && componentLibrary.includes("routing_state")
@@ -796,6 +868,7 @@ assert(
   read("src/styles.css").includes(".action-feedback")
     && read("src/styles.css").includes(".quality-evidence__signals")
     && read("src/styles.css").includes(".store-ops-deep-link__target")
+    && read("src/styles.css").includes(".policy-approval-flow__grid")
     && read("src/styles.css").includes(".notification-routing__channels")
     && read("src/styles.css").includes(".permission-denial__scenarios")
     && read("src/styles.css").includes(".workflow-steps li,")

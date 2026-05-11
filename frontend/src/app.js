@@ -178,6 +178,30 @@ function actionMessage(action) {
   if (actionId === "submit_agentops_approval") {
     return "AgentOps 审批提交已进入预览；receipt 不等于批准，Store 不签发 CapabilityGrant。";
   }
+  if (actionId === "submit_agentops_approval_request") {
+    return "AgentOps 审批请求已进入可审计提交预览；Store 只组装请求，不产生 PolicyDecision、Approval 或 CapabilityGrant。";
+  }
+  if (actionId === "complete_policy_context") {
+    return "已定位审批策略上下文缺口；需补齐 policy_ref、risk、runtime contract、permission intents 和 data scopes。";
+  }
+  if (actionId === "add_approval_justification") {
+    return "已要求补充审批理由；缺 justification 时不会向 AgentOps 分发审批请求。";
+  }
+  if (actionId === "assign_authorized_requester") {
+    return "已要求指定授权 requester；只有 owner、security 或 agentops_admin 可发起审批请求。";
+  }
+  if (actionId === "view_agentops_approval") {
+    return "已进入 AgentOps approval flow 链接预览；receipt 只表示已接收，不代表最终批准。";
+  }
+  if (actionId === "poll_agentops_approval_receipt") {
+    return "已记录轮询 AgentOps approval receipt；pending receipt 不等于 approval decision。";
+  }
+  if (actionId === "fix_agentops_approval_request") {
+    return "AgentOps 拒绝了审批请求 envelope；需要修复 request binding 或上下文后重新提交。";
+  }
+  if (actionId === "refresh_agentops_approval_receipt") {
+    return "已请求刷新 AgentOps approval receipt；Store 不本地推导审批结果。";
+  }
   if (actionId === "view_policy_reason") {
     return "已切到 Policy 阻断原因；Store 只展示 AgentOps policy echo，不覆盖策略裁决。";
   }
@@ -266,6 +290,8 @@ new window.Vue({
       lifecycleGovernance: window.AgentStoreMock.lifecycleGovernance,
       qualityEvidenceAccess: window.AgentStoreMock.qualityEvidenceAccess,
       storeOpsDeepLinks: window.AgentStoreMock.storeOpsDeepLinks,
+      policyApprovalRequests: window.AgentStoreMock.policyApprovalRequests,
+      policyApprovalReceipts: window.AgentStoreMock.policyApprovalReceipts,
       notificationRouting: window.AgentStoreMock.notificationRouting,
       permissionDenialActions: window.AgentStoreMock.permissionDenialActions,
       listingWizard: window.AgentStoreMock.listingWizard,
@@ -1356,6 +1382,260 @@ new window.Vue({
         },
         next_action: {
           action_id: "request_agentops_summary_with_run_binding",
+          target_system: "agentops",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedPolicyApprovalRequest: function selectedPolicyApprovalRequest() {
+      var agent = this.selectedAgent;
+      var request;
+      var requests = this.policyApprovalRequests || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "policy_approval_request.v1",
+          agent_id: "",
+          agent_version: "",
+          requested_action: "install_agent",
+          request_state: "approval_request_blocked",
+          requester: {
+            actor_id: "",
+            actor_role: "",
+            tenant_id: ""
+          },
+          policy_context: {
+            policy_ref: "",
+            risk_level: "",
+            runtime_contract_version: "",
+            permission_intents: [],
+            data_scopes: []
+          },
+          justification: "",
+          agentops_request: {
+            target_system: "agentops",
+            request_contract: "policy_approval_request.v1",
+            agent_id: "",
+            agent_version: "",
+            requested_action: "install_agent",
+            requester: {},
+            policy_context: {},
+            justification: "",
+            store_audit_id: "",
+            dispatch_allowed: false
+          },
+          store_projection: {
+            store_decision_authority: "none",
+            store_override_allowed: false,
+            capability_grant_issued: false,
+            agentops_approval_required: true,
+            dispatch_allowed: false
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            approval_request: "agent_store",
+            policy_decision: "agentops",
+            approval: "agentops",
+            capability_grant: "agentops_not_issued_by_store",
+            request_audit: "agent_store"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      request = requests[agent.agent_id];
+      if (request) {
+        return request;
+      }
+      return {
+        contract_schema_version: "policy_approval_request.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        requested_action: "install_agent",
+        request_state: "policy_context_incomplete",
+        requester: {
+          actor_id: agent.owner_user || "",
+          actor_role: "owner",
+          tenant_id: "tenant-default"
+        },
+        policy_context: {
+          policy_ref: "",
+          risk_level: "unknown",
+          runtime_contract_version: "",
+          permission_intents: [],
+          data_scopes: []
+        },
+        justification: "",
+        agentops_request: {
+          target_system: "agentops",
+          request_contract: "policy_approval_request.v1",
+          agent_id: agent.agent_id,
+          agent_version: agent.version,
+          requested_action: "install_agent",
+          requester: {},
+          policy_context: {},
+          justification: "",
+          store_audit_id: "audit-policy-approval-missing-" + safeId(agent.agent_id),
+          dispatch_allowed: false
+        },
+        store_projection: {
+          store_decision_authority: "none",
+          store_override_allowed: false,
+          capability_grant_issued: false,
+          agentops_approval_required: true,
+          dispatch_allowed: false
+        },
+        issues: [
+          {
+            issue_id: "POLICY_CONTEXT_INCOMPLETE",
+            field_path: "policy_context",
+            severity: "blocked",
+            fix_action_id: "complete_policy_context"
+          },
+          {
+            issue_id: "JUSTIFICATION_REQUIRED",
+            field_path: "justification",
+            severity: "blocked",
+            fix_action_id: "add_approval_justification"
+          }
+        ],
+        source_of_truth: {
+          approval_request: "agent_store",
+          policy_decision: "agentops",
+          approval: "agentops",
+          capability_grant: "agentops_not_issued_by_store",
+          request_audit: "agent_store"
+        },
+        next_action: {
+          action_id: "complete_policy_context",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedPolicyApprovalReceipt: function selectedPolicyApprovalReceipt() {
+      var agent = this.selectedAgent;
+      var receipt;
+      var receipts = this.policyApprovalReceipts || {};
+      if (!agent) {
+        return {
+          contract_schema_version: "policy_approval_receipt.v1",
+          agent_id: "",
+          agent_version: "",
+          requested_action: "install_agent",
+          receipt_state: "approval_receipt_unavailable",
+          approval_request_ref: {
+            request_contract: "policy_approval_request.v1",
+            agent_id: "",
+            agent_version: "",
+            requested_action: "install_agent",
+            store_audit_id: ""
+          },
+          agentops_receipt: {
+            receipt_contract: "policy_approval_receipt.v1",
+            approval_request_id: "",
+            approval_id: "",
+            receipt_status: "pending",
+            agent_id: "",
+            agent_version: "",
+            requested_action: "install_agent",
+            request_access_url: "",
+            agentops_audit_id: "",
+            received_at: "",
+            rejection_reason: ""
+          },
+          store_projection: {
+            projection_mode: "agentops_receipt_only",
+            store_decision_authority: "none",
+            store_override_allowed: false,
+            capability_grant_issued: false,
+            approval_decision_final: false,
+            approval_flow_linked: false
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            approval_request: "agent_store",
+            approval_receipt: "agentops",
+            policy_decision: "agentops_not_decided_by_receipt",
+            approval: "agentops",
+            capability_grant: "agentops_not_issued_by_store",
+            store_projection: "agent_store_receipt_only"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      receipt = receipts[agent.agent_id];
+      if (receipt) {
+        return receipt;
+      }
+      return {
+        contract_schema_version: "policy_approval_receipt.v1",
+        agent_id: agent.agent_id,
+        agent_version: agent.version,
+        requested_action: "install_agent",
+        receipt_state: "approval_receipt_unavailable",
+        approval_request_ref: {
+          request_contract: "policy_approval_request.v1",
+          agent_id: agent.agent_id,
+          agent_version: agent.version,
+          requested_action: "install_agent",
+          store_audit_id: "audit-policy-approval-missing-" + safeId(agent.agent_id)
+        },
+        agentops_receipt: {
+          receipt_contract: "policy_approval_receipt.v1",
+          approval_request_id: "",
+          approval_id: "",
+          receipt_status: "pending",
+          agent_id: agent.agent_id,
+          agent_version: agent.version,
+          requested_action: "install_agent",
+          request_access_url: "",
+          agentops_audit_id: "",
+          received_at: "",
+          rejection_reason: ""
+        },
+        store_projection: {
+          projection_mode: "agentops_receipt_only",
+          store_decision_authority: "none",
+          store_override_allowed: false,
+          capability_grant_issued: false,
+          approval_decision_final: false,
+          approval_flow_linked: false
+        },
+        issues: [
+          {
+            issue_id: "AGENTOPS_RECEIPT_INCOMPLETE",
+            field_path: "agentops_receipt",
+            severity: "blocked",
+            fix_action_id: "refresh_agentops_approval_receipt"
+          }
+        ],
+        source_of_truth: {
+          approval_request: "agent_store",
+          approval_receipt: "agentops",
+          policy_decision: "agentops_not_decided_by_receipt",
+          approval: "agentops",
+          capability_grant: "agentops_not_issued_by_store",
+          store_projection: "agent_store_receipt_only"
+        },
+        next_action: {
+          action_id: "refresh_agentops_approval_receipt",
           target_system: "agentops",
           enabled: true,
           requires_permission: true,

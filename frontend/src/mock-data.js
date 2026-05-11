@@ -1660,6 +1660,505 @@ window.AgentStoreMock = {
       }
     }
   },
+  policyApprovalRequests: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "policy_approval_request.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      requested_action: "install_agent",
+      request_state: "approval_request_ready",
+      requester: {
+        actor_id: "owner-sdlc-platform",
+        actor_role: "owner",
+        tenant_id: "tenant-enterprise"
+      },
+      policy_context: {
+        policy_ref: "policy/high-risk-agent-install",
+        risk_level: "high",
+        runtime_contract_version: "agent_runtime.v1",
+        permission_intents: ["install_agent", "read_quality_summary"],
+        data_scopes: ["repo_metadata", "ci_evidence_summary"]
+      },
+      justification: "Install requires AgentOps approval because the agent can read CI evidence summaries.",
+      agentops_request: {
+        target_system: "agentops",
+        request_contract: "policy_approval_request.v1",
+        agent_id: "framework.ai-autosdlc",
+        agent_version: "1.0.0",
+        requested_action: "install_agent",
+        requester: {
+          actor_id: "owner-sdlc-platform",
+          actor_role: "owner",
+          tenant_id: "tenant-enterprise"
+        },
+        policy_context: {
+          policy_ref: "policy/high-risk-agent-install",
+          risk_level: "high",
+          runtime_contract_version: "agent_runtime.v1",
+          permission_intents: ["install_agent", "read_quality_summary"],
+          data_scopes: ["repo_metadata", "ci_evidence_summary"]
+        },
+        justification: "Install requires AgentOps approval because the agent can read CI evidence summaries.",
+        store_audit_id: "audit-policy-request-framework",
+        dispatch_allowed: true
+      },
+      store_projection: {
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        agentops_approval_required: true,
+        dispatch_allowed: true
+      },
+      issues: [],
+      source_of_truth: {
+        approval_request: "agent_store",
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        request_audit: "agent_store"
+      },
+      next_action: {
+        action_id: "submit_agentops_approval_request",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "policy_approval_request.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      requested_action: "upgrade_agent",
+      request_state: "approval_request_ready",
+      requester: {
+        actor_id: "security-agentops",
+        actor_role: "security",
+        tenant_id: "tenant-enterprise"
+      },
+      policy_context: {
+        policy_ref: "policy/evidence-export-upgrade",
+        risk_level: "medium",
+        runtime_contract_version: "agent_runtime.v1",
+        permission_intents: ["upgrade_agent", "read_evidence_summary"],
+        data_scopes: ["evidence_summary"]
+      },
+      justification: "Upgrade approval tracks evidence export behavior after rollback notice.",
+      agentops_request: {
+        target_system: "agentops",
+        request_contract: "policy_approval_request.v1",
+        agent_id: "agentops.evidence-reporter",
+        agent_version: "0.4.0",
+        requested_action: "upgrade_agent",
+        requester: {
+          actor_id: "security-agentops",
+          actor_role: "security",
+          tenant_id: "tenant-enterprise"
+        },
+        policy_context: {
+          policy_ref: "policy/evidence-export-upgrade",
+          risk_level: "medium",
+          runtime_contract_version: "agent_runtime.v1",
+          permission_intents: ["upgrade_agent", "read_evidence_summary"],
+          data_scopes: ["evidence_summary"]
+        },
+        justification: "Upgrade approval tracks evidence export behavior after rollback notice.",
+        store_audit_id: "audit-policy-request-evidence-reporter",
+        dispatch_allowed: true
+      },
+      store_projection: {
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        agentops_approval_required: true,
+        dispatch_allowed: true
+      },
+      issues: [],
+      source_of_truth: {
+        approval_request: "agent_store",
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        request_audit: "agent_store"
+      },
+      next_action: {
+        action_id: "submit_agentops_approval_request",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "policy_approval_request.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      requested_action: "enable_agent",
+      request_state: "approval_request_blocked",
+      requester: {
+        actor_id: "owner-security",
+        actor_role: "owner",
+        tenant_id: "tenant-enterprise"
+      },
+      policy_context: {
+        policy_ref: "policy/security-revoked-agent",
+        risk_level: "critical",
+        runtime_contract_version: "agent_runtime.v1",
+        permission_intents: ["enable_agent"],
+        data_scopes: ["policy_decision"]
+      },
+      justification: "Owner attempted to re-enable a security revoked agent.",
+      agentops_request: {
+        target_system: "agentops",
+        request_contract: "policy_approval_request.v1",
+        agent_id: "security.policy-guard",
+        agent_version: "0.2.1",
+        requested_action: "enable_agent",
+        requester: {
+          actor_id: "owner-security",
+          actor_role: "owner",
+          tenant_id: "tenant-enterprise"
+        },
+        policy_context: {
+          policy_ref: "policy/security-revoked-agent",
+          risk_level: "critical",
+          runtime_contract_version: "agent_runtime.v1",
+          permission_intents: ["enable_agent"],
+          data_scopes: ["policy_decision"]
+        },
+        justification: "Owner attempted to re-enable a security revoked agent.",
+        store_audit_id: "audit-policy-request-security",
+        dispatch_allowed: false
+      },
+      store_projection: {
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        agentops_approval_required: true,
+        dispatch_allowed: false
+      },
+      issues: [
+        {
+          issue_id: "REQUESTER_ROLE_UNAUTHORIZED",
+          field_path: "requester.actor_role",
+          severity: "blocked",
+          fix_action_id: "assign_authorized_requester"
+        },
+        {
+          issue_id: "REQUESTED_ACTION_UNSUPPORTED",
+          field_path: "requested_action",
+          severity: "blocked",
+          fix_action_id: "complete_policy_context"
+        }
+      ],
+      source_of_truth: {
+        approval_request: "agent_store",
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        request_audit: "agent_store"
+      },
+      next_action: {
+        action_id: "assign_authorized_requester",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "policy_approval_request.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      requested_action: "publish_agent",
+      request_state: "policy_context_incomplete",
+      requester: {
+        actor_id: "owner-devtools",
+        actor_role: "owner",
+        tenant_id: "tenant-devtools"
+      },
+      policy_context: {
+        policy_ref: "policy/publish-agent",
+        risk_level: "low",
+        runtime_contract_version: "agent_runtime.v1",
+        permission_intents: ["publish_agent"],
+        data_scopes: ["release_notes"]
+      },
+      justification: "",
+      agentops_request: {
+        target_system: "agentops",
+        request_contract: "policy_approval_request.v1",
+        agent_id: "developer.release-notes",
+        agent_version: "0.1.2",
+        requested_action: "publish_agent",
+        requester: {
+          actor_id: "owner-devtools",
+          actor_role: "owner",
+          tenant_id: "tenant-devtools"
+        },
+        policy_context: {
+          policy_ref: "policy/publish-agent",
+          risk_level: "low",
+          runtime_contract_version: "agent_runtime.v1",
+          permission_intents: ["publish_agent"],
+          data_scopes: ["release_notes"]
+        },
+        justification: "",
+        store_audit_id: "audit-policy-request-release-notes",
+        dispatch_allowed: false
+      },
+      store_projection: {
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        agentops_approval_required: true,
+        dispatch_allowed: false
+      },
+      issues: [
+        {
+          issue_id: "POLICY_CONTEXT_INCOMPLETE",
+          field_path: "policy_context.permission_intents",
+          severity: "blocked",
+          fix_action_id: "complete_policy_context"
+        },
+        {
+          issue_id: "JUSTIFICATION_REQUIRED",
+          field_path: "justification",
+          severity: "blocked",
+          fix_action_id: "add_approval_justification"
+        }
+      ],
+      source_of_truth: {
+        approval_request: "agent_store",
+        policy_decision: "agentops",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        request_audit: "agent_store"
+      },
+      next_action: {
+        action_id: "complete_policy_context",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
+  policyApprovalReceipts: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "policy_approval_receipt.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      requested_action: "install_agent",
+      receipt_state: "approval_receipt_accepted",
+      approval_request_ref: {
+        request_contract: "policy_approval_request.v1",
+        agent_id: "framework.ai-autosdlc",
+        agent_version: "1.0.0",
+        requested_action: "install_agent",
+        store_audit_id: "audit-policy-request-framework"
+      },
+      agentops_receipt: {
+        receipt_contract: "policy_approval_receipt.v1",
+        approval_request_id: "agentops-request-framework",
+        approval_id: "approval-framework",
+        receipt_status: "accepted",
+        agent_id: "framework.ai-autosdlc",
+        agent_version: "1.0.0",
+        requested_action: "install_agent",
+        request_access_url: "/agentops/approvals/approval-framework",
+        agentops_audit_id: "agentops-audit-approval-framework",
+        received_at: "2026-05-11T07:28:00Z",
+        rejection_reason: ""
+      },
+      store_projection: {
+        projection_mode: "agentops_receipt_only",
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        approval_decision_final: false,
+        approval_flow_linked: true
+      },
+      issues: [],
+      source_of_truth: {
+        approval_request: "agent_store",
+        approval_receipt: "agentops",
+        policy_decision: "agentops_not_decided_by_receipt",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_receipt_only"
+      },
+      next_action: {
+        action_id: "view_agentops_approval",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/approvals/approval-framework"
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "policy_approval_receipt.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      requested_action: "upgrade_agent",
+      receipt_state: "approval_receipt_pending",
+      approval_request_ref: {
+        request_contract: "policy_approval_request.v1",
+        agent_id: "agentops.evidence-reporter",
+        agent_version: "0.4.0",
+        requested_action: "upgrade_agent",
+        store_audit_id: "audit-policy-request-evidence-reporter"
+      },
+      agentops_receipt: {
+        receipt_contract: "policy_approval_receipt.v1",
+        approval_request_id: "agentops-request-evidence-reporter",
+        approval_id: "approval-evidence-reporter",
+        receipt_status: "pending",
+        agent_id: "agentops.evidence-reporter",
+        agent_version: "0.4.0",
+        requested_action: "upgrade_agent",
+        request_access_url: "/agentops/approvals/approval-evidence-reporter",
+        agentops_audit_id: "agentops-audit-approval-evidence",
+        received_at: "2026-05-11T07:29:00Z",
+        rejection_reason: ""
+      },
+      store_projection: {
+        projection_mode: "agentops_receipt_only",
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        approval_decision_final: false,
+        approval_flow_linked: true
+      },
+      issues: [],
+      source_of_truth: {
+        approval_request: "agent_store",
+        approval_receipt: "agentops",
+        policy_decision: "agentops_not_decided_by_receipt",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_receipt_only"
+      },
+      next_action: {
+        action_id: "poll_agentops_approval_receipt",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/approvals/approval-evidence-reporter"
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "policy_approval_receipt.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      requested_action: "enable_agent",
+      receipt_state: "approval_receipt_rejected",
+      approval_request_ref: {
+        request_contract: "policy_approval_request.v1",
+        agent_id: "security.policy-guard",
+        agent_version: "0.2.1",
+        requested_action: "enable_agent",
+        store_audit_id: "audit-policy-request-security"
+      },
+      agentops_receipt: {
+        receipt_contract: "policy_approval_receipt.v1",
+        approval_request_id: "agentops-request-security",
+        approval_id: "approval-security",
+        receipt_status: "rejected",
+        agent_id: "security.policy-guard",
+        agent_version: "0.2.1",
+        requested_action: "enable_agent",
+        request_access_url: "/agentops/approvals/approval-security",
+        agentops_audit_id: "agentops-audit-approval-security",
+        received_at: "2026-05-11T07:30:00Z",
+        rejection_reason: "security_revoked cannot be enabled by owner request"
+      },
+      store_projection: {
+        projection_mode: "agentops_receipt_only",
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        approval_decision_final: false,
+        approval_flow_linked: false
+      },
+      issues: [],
+      source_of_truth: {
+        approval_request: "agent_store",
+        approval_receipt: "agentops",
+        policy_decision: "agentops_not_decided_by_receipt",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_receipt_only"
+      },
+      next_action: {
+        action_id: "fix_agentops_approval_request",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "policy_approval_receipt.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      requested_action: "publish_agent",
+      receipt_state: "approval_receipt_unavailable",
+      approval_request_ref: {
+        request_contract: "policy_approval_request.v1",
+        agent_id: "developer.release-notes",
+        agent_version: "0.1.2",
+        requested_action: "publish_agent",
+        store_audit_id: "audit-policy-request-release-notes"
+      },
+      agentops_receipt: {
+        receipt_contract: "policy_approval_receipt.v1",
+        approval_request_id: "",
+        approval_id: "",
+        receipt_status: "pending",
+        agent_id: "developer.release-notes",
+        agent_version: "0.1.2",
+        requested_action: "publish_agent",
+        request_access_url: "",
+        agentops_audit_id: "",
+        received_at: "",
+        rejection_reason: ""
+      },
+      store_projection: {
+        projection_mode: "agentops_receipt_only",
+        store_decision_authority: "none",
+        store_override_allowed: false,
+        capability_grant_issued: false,
+        approval_decision_final: false,
+        approval_flow_linked: false
+      },
+      issues: [
+        {
+          issue_id: "AGENTOPS_RECEIPT_INCOMPLETE",
+          field_path: "agentops_receipt",
+          severity: "blocked",
+          fix_action_id: "refresh_agentops_approval_receipt"
+        }
+      ],
+      source_of_truth: {
+        approval_request: "agent_store",
+        approval_receipt: "agentops",
+        policy_decision: "agentops_not_decided_by_receipt",
+        approval: "agentops",
+        capability_grant: "agentops_not_issued_by_store",
+        store_projection: "agent_store_receipt_only"
+      },
+      next_action: {
+        action_id: "refresh_agentops_approval_receipt",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   notificationRouting: {
     "framework.ai-autosdlc": {
       audit_id: "audit-routing-framework.ai-autosdlc",
