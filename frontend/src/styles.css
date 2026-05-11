@@ -1188,6 +1188,72 @@ h2 {
   font-size: 13px;
 }
 
+.contract-registry-traceability {
+  min-height: 360px;
+}
+
+.contract-registry-traceability__focus {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.contract-registry-traceability__focus div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.contract-registry-traceability__contracts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  margin: 14px 0 0;
+  list-style: none;
+}
+
+.contract-registry-traceability__contracts li {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 86px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.contract-registry-traceability__focus span,
+.contract-registry-traceability__focus small,
+.contract-registry-traceability__contracts span,
+.contract-registry-traceability__contracts small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.contract-registry-traceability__focus strong,
+.contract-registry-traceability__focus small,
+.contract-registry-traceability__contracts strong,
+.contract-registry-traceability__contracts span,
+.contract-registry-traceability__contracts small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.contract-registry-traceability__focus strong,
+.contract-registry-traceability__contracts strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
 .command-preview {
   display: grid;
   gap: 8px;
@@ -1639,6 +1705,8 @@ h2 {
   .permission-denial__scenarios,
   .wizard-grid,
   .draft-review-submission__grid,
+  .contract-registry-traceability__focus,
+  .contract-registry-traceability__contracts,
   .wizard-steps {
     grid-template-columns: 1fr;
   }

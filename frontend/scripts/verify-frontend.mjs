@@ -114,6 +114,7 @@ for (const componentName of [
   "sdlc-permission-denial-action",
   "sdlc-listing-wizard",
   "sdlc-draft-review-submission",
+  "sdlc-contract-registry-traceability",
   "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
@@ -492,6 +493,41 @@ for (const draftReviewSubmissionTerm of [
 ]) {
   assert(mockData.includes(draftReviewSubmissionTerm), `${draftReviewSubmissionTerm} must be represented`);
 }
+for (const contractRegistryTerm of [
+  "contractRegistryTraceability",
+  "contract_registry_traceability.v1",
+  "registry_status: \"complete\"",
+  "coverage_summary",
+  "total_contracts: 25",
+  "contracts_with_cct: 18",
+  "contracts_with_contract_tests: 25",
+  "complete_traceability: 25",
+  "unmapped_contracts: 0",
+  "focus_contract_by_agent",
+  "agent_manifest_runtime_contract.v1",
+  "contract-registry-traceability.openapi.yaml",
+  "ContractRegistryTraceability",
+  "CCT-017",
+  "tests/contract/test_contract_registry_traceability_api.py",
+  "appendix_anchor",
+  "Agent Runtime",
+  "Ai_AutoSDLC",
+  "Evidence Vault",
+  "Notification Center",
+  "Risk Center",
+  "continue_contract_change_review",
+  "complete_contract_traceability",
+  "specs/001-agent-store-phase1-trusted-min-loop/contracts",
+  "docs/cross-project-contract-appendix.md",
+  "registry_projection: \"agent_store\""
+]) {
+  assert(
+    mockData.includes(contractRegistryTerm)
+      || app.includes(contractRegistryTerm)
+      || componentLibrary.includes(contractRegistryTerm),
+    `${contractRegistryTerm} must be represented`
+  );
+}
 assert(
   !mockData.includes("recommendationStates:")
     && recommendationStates["framework.ai-autosdlc"]
@@ -549,6 +585,9 @@ assert(
     && app.includes("selectedListingWizard")
     && app.includes("selectedDraftReviewSubmission")
     && app.includes("draftReviewSubmissions")
+    && app.includes("selectedContractRegistryTraceability")
+    && app.includes("contractRegistryTraceability")
+    && app.includes("frontend_fallback_no_contract_registry_traceability")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -612,12 +651,14 @@ assert(
     && app.includes("Store 不展示 raw Trace 或 raw Evidence")
     && app.includes("上架向导已准备好草案提交材料")
     && app.includes("frontend_fallback_no_draft_review_submission")
+    && app.includes("contract_registry_traceability.v1")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
     && indexHtml.includes(":recommendation-decision=\"selectedRecommendationDecision\"")
     && indexHtml.includes(":listing-wizard=\"selectedListingWizard\"")
     && indexHtml.includes(":draft-review-submission=\"selectedDraftReviewSubmission\"")
+    && indexHtml.includes(":contract-registry-traceability=\"selectedContractRegistryTraceability\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
@@ -662,11 +703,22 @@ assert(
   componentLibrary.includes("sdlc-recommendation-decision")
     && componentLibrary.includes("sdlc-listing-wizard")
     && componentLibrary.includes("sdlc-draft-review-submission")
+    && componentLibrary.includes("sdlc-contract-registry-traceability")
     && componentLibrary.includes("listing-wizard")
     && componentLibrary.includes("wizard-steps")
     && componentLibrary.includes("draft-review-submission__grid")
+    && componentLibrary.includes("contract-registry-traceability__focus")
+    && componentLibrary.includes("contract-registry-traceability__contracts")
     && componentLibrary.includes("草案提交审核")
+    && componentLibrary.includes("合同注册追踪")
     && componentLibrary.includes("draft_review_submission.v1")
+    && componentLibrary.includes("contract_registry_traceability.v1")
+    && componentLibrary.includes("coverage_summary")
+    && componentLibrary.includes("focus_contract")
+    && componentLibrary.includes("appendix_anchor")
+    && componentLibrary.includes("contract_test_files")
+    && componentLibrary.includes("read-only projection / no external registry service / no PR scan / no CI status mutation")
+    && componentLibrary.includes("OpenAPI 合同、Owner、Producer、Consumer、appendix anchor 与 contract tests")
     && componentLibrary.includes("review_queue_entry")
     && componentLibrary.includes("owner_confirmation")
     && componentLibrary.includes("validation_summary")

@@ -108,6 +108,8 @@
     prepare_draft_review_submission: "准备草案提交",
     track_review_queue: "跟踪审核队列",
     confirm_owner_submission: "Owner 确认提交",
+    continue_contract_change_review: "继续合同变更复核",
+    complete_contract_traceability: "补齐合同追踪",
     resolve_runtime_gate: "处理 Runtime Gate",
     return_to_field_confirmation: "返回字段确认",
     return_to_validation_report: "返回校验报告",
@@ -204,6 +206,19 @@
     RUNTIME_GATE_NOT_READY: "Runtime Gate 未就绪",
     OWNER_CONFIRMATION_REQUIRED: "需要 Owner 确认",
     DRAFT_REVIEW_SUBMISSION_MISSING: "缺草案提交 envelope",
+    contract_registry_traceability: "合同注册追踪",
+    "contract_registry_traceability.v1": "合同注册追踪 v1",
+    complete: "追踪完整",
+    incomplete: "追踪缺口",
+    frontend_fallback_no_contract_registry_traceability: "前端降级合同追踪",
+    agent_manifest_runtime_contract: "AgentManifest Runtime 合同",
+    AgentOps: "AgentOps",
+    "Agent Runtime": "Agent Runtime",
+    "Agent Store UI": "Agent Store UI",
+    "Ai_AutoSDLC": "Ai_AutoSDLC",
+    "Evidence Vault": "Evidence Vault",
+    "Notification Center": "通知中心",
+    "Risk Center": "风险列表",
     agent_runtime_echo_or_probe: "Agent Runtime Echo/Probe",
     summary_projection: "摘要投影",
     agent_store_runtime_availability_projection: "Agent Store 可用性投影",
@@ -2774,6 +2789,112 @@
     }
   });
 
+  Vue.component("sdlc-contract-registry-traceability", {
+    props: ["traceability"],
+    template: [
+      '<section class="workspace-section workspace-section--wide contract-registry-traceability">',
+      '  <div class="section-heading">',
+      '    <h2>合同注册追踪</h2>',
+      '    <sdlc-status-chip :label="traceability.registry_status" :tone="stateTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ registryCopy }}</p>',
+      '  <dl class="facts">',
+      '    <sdlc-metric-row label="合同" :value="traceability.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="OpenAPI" :value="coverage.total_contracts" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="CCT" :value="coverage.contracts_with_cct" tone="warning"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Contract Tests" :value="coverage.contracts_with_contract_tests" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="完整追踪" :value="coverage.complete_traceability" :tone="stateTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="未映射" :value="coverage.unmapped_contracts" :tone="unmappedTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="contract-registry-traceability__focus">',
+      '    <div>',
+      '      <span>Focus Contract</span>',
+      '      <strong>{{ focusContract.contract_id }}</strong>',
+      '      <small>{{ focusContract.contract_file }} / {{ focusContract.primary_schema }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Owner / Producer</span>',
+      '      <strong>{{ focusContract.owner }} / {{ focusContract.producer }}</strong>',
+      '      <small>{{ focusContract.appendix_anchor }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Consumers</span>',
+      '      <strong>{{ displayList(focusContract.consumers) }}</strong>',
+      '      <small>{{ cctLabel }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Contract Test</span>',
+      '      <strong>{{ contractTestLabel }}</strong>',
+      '      <small>{{ sourceTruthSummary }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="contract-registry-traceability__contracts">',
+      '    <li v-for="contract in visibleContracts" :key="contract.contract_id">',
+      '      <strong>{{ contract.contract_id }}</strong>',
+      '      <span>{{ contract.owner }} -> {{ displayList(contract.consumers) }}</span>',
+      '      <small>{{ displayList(contract.cct_ids) || "no CCT" }} / {{ contract.contract_file }}</small>',
+      '    </li>',
+      '  </ul>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="traceability.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      coverage: function coverage() {
+        return this.traceability.coverage_summary || {};
+      },
+      contracts: function contracts() {
+        return Array.isArray(this.traceability.contracts) ? this.traceability.contracts : [];
+      },
+      focusContract: function focusContract() {
+        return this.traceability.focus_contract || {};
+      },
+      visibleContracts: function visibleContracts() {
+        var focusId = this.focusContract.contract_id;
+        var focusContract = this.focusContract;
+        var visible = this.contracts.filter(function filterFocus(contract) {
+          return contract.contract_id !== focusId;
+        }).slice(0, 5);
+        if (focusId) {
+          visible.unshift(focusContract);
+        }
+        return visible;
+      },
+      stateTone: function stateTone() {
+        return this.traceability.registry_status === "complete" ? "success" : "danger";
+      },
+      unmappedTone: function unmappedTone() {
+        return this.coverage.unmapped_contracts === 0 ? "success" : "danger";
+      },
+      cctLabel: function cctLabel() {
+        return this.displayList(this.focusContract.cct_ids) || "CCT missing";
+      },
+      contractTestLabel: function contractTestLabel() {
+        var tests = Array.isArray(this.focusContract.contract_test_files) ? this.focusContract.contract_test_files : [];
+        return tests[0] || "contract test missing";
+      },
+      registryCopy: function registryCopy() {
+        if (this.traceability.registry_status === "complete") {
+          return "OpenAPI 合同、Owner、Producer、Consumer、appendix anchor 与 contract tests 已形成只读追踪矩阵。";
+        }
+        return "合同注册追踪存在缺口；Store UI 只展示缺口，不本地扫描 PR、不补写外部 Contract Registry。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "read-only projection / no external registry service / no PR scan / no CI status mutation";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return formatSourceOfTruth(this.traceability.source_of_truth);
+      }
+    },
+    methods: {
+      displayList: function displayList(values) {
+        return Array.isArray(values) ? values.join(", ") : "";
+      }
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -2797,6 +2918,7 @@
       "recommendationDecision",
       "listingWizard",
       "draftReviewSubmission",
+      "contractRegistryTraceability",
       "runtimeAvailability",
       "healthSummaryFreshness",
       "installationDistribution",
@@ -2853,6 +2975,7 @@
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-draft-review-submission :submission="draftReviewSubmission" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-draft-review-submission>',
+      '    <sdlc-contract-registry-traceability :traceability="contractRegistryTraceability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-contract-registry-traceability>',
       '    <sdlc-runtime-availability :summary="runtimeAvailability" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-runtime-availability>',
       '    <sdlc-health-summary-freshness :summary="healthSummaryFreshness" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-health-summary-freshness>',
       '    <sdlc-installation-distribution :summary="installationDistribution" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-distribution>',
