@@ -227,6 +227,193 @@ window.AgentStoreMock = {
       }
     }
   },
+  agentManifestRuntimeContracts: {
+    "framework.ai-autosdlc": {
+      audit_id: "audit-manifest-framework.ai-autosdlc",
+      trace_id: "trace-manifest-framework.ai-autosdlc",
+      contract_schema_version: "agent_manifest_runtime_contract.v1",
+      agent_id: "framework.ai-autosdlc",
+      version: "1.0.0",
+      artifact_hash: "sha256:framework",
+      manifest_status: "complete",
+      runtime_compatibility: "runtime_capability_missing",
+      required_runtime_capabilities: [
+        "tool_call",
+        "policy_check",
+        "outbox",
+        "basic_isolation"
+      ],
+      runtime_capabilities: ["tool_call", "basic_isolation"],
+      missing_runtime_capabilities: ["policy_check", "outbox"],
+      manifest_summary: {
+        manifest_schema_version: "agent_manifest.v1",
+        runtime_contract_version: "runtime-contract.v2",
+        skill_count: 2,
+        permission_intent_count: 3,
+        data_scope_count: 2,
+        secret_ref_count: 1,
+        network_allowlist_count: 2,
+        guardrail_ref_count: 2,
+        observability_contract: "trace_spans+metrics+logs",
+        rollback_policy: "pin_previous_version",
+        provenance_ref: "pkg-framework-ai-autosdlc-1.0.0"
+      },
+      issues: [
+        {
+          issue_id: "RUNTIME_CAPABILITY_MISSING",
+          field_path: "runtime.capabilities",
+          severity: "blocked",
+          fix_action_id: "upgrade_runtime_or_select_compatible_version",
+          message_key: "agentManifest.runtimeCapabilityMissing"
+        }
+      ],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        package: "agent_store",
+        skill_registry: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "view_missing_runtime_capabilities",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      audit_id: "audit-manifest-agentops.evidence-reporter",
+      trace_id: "trace-manifest-agentops.evidence-reporter",
+      contract_schema_version: "agent_manifest_runtime_contract.v1",
+      agent_id: "agentops.evidence-reporter",
+      version: "0.4.0",
+      artifact_hash: "sha256:evidence-reporter",
+      manifest_status: "complete",
+      runtime_compatibility: "runtime_compatible",
+      required_runtime_capabilities: ["tool_call", "outbox", "basic_isolation"],
+      runtime_capabilities: ["tool_call", "outbox", "basic_isolation"],
+      missing_runtime_capabilities: [],
+      manifest_summary: {
+        manifest_schema_version: "agent_manifest.v1",
+        runtime_contract_version: "runtime-contract.v2",
+        skill_count: 1,
+        permission_intent_count: 2,
+        data_scope_count: 3,
+        secret_ref_count: 0,
+        network_allowlist_count: 1,
+        guardrail_ref_count: 1,
+        observability_contract: "trace_spans+metrics",
+        rollback_policy: "disable_and_revert",
+        provenance_ref: "pkg-agentops-evidence-reporter-0.4.0"
+      },
+      issues: [],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        package: "agent_store",
+        skill_registry: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "continue_manifest_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      audit_id: "audit-manifest-security.policy-guard",
+      trace_id: "trace-manifest-security.policy-guard",
+      contract_schema_version: "agent_manifest_runtime_contract.v1",
+      agent_id: "security.policy-guard",
+      version: "0.2.1",
+      artifact_hash: "sha256:policy-guard",
+      manifest_status: "incomplete",
+      runtime_compatibility: "manifest_incomplete",
+      required_runtime_capabilities: ["policy_check", "basic_isolation"],
+      runtime_capabilities: ["policy_check", "basic_isolation"],
+      missing_runtime_capabilities: [],
+      manifest_summary: {
+        manifest_schema_version: "agent_manifest.v1",
+        runtime_contract_version: "runtime-contract.v2",
+        skill_count: 1,
+        permission_intent_count: 1,
+        data_scope_count: 1,
+        secret_ref_count: 1,
+        network_allowlist_count: 0,
+        guardrail_ref_count: 2,
+        observability_contract: "missing_trace_spans",
+        rollback_policy: "disable_on_policy_failure",
+        provenance_ref: "pkg-security-policy-guard-0.2.1"
+      },
+      issues: [
+        {
+          issue_id: "OBSERVABILITY_CONTRACT_TRACE_SPANS_REQUIRED",
+          field_path: "agent_manifest.observability_contract.trace_spans",
+          severity: "blocked",
+          fix_action_id: "add_observability_contract_trace_spans",
+          message_key: "agentManifest.observabilityTraceSpansRequired"
+        }
+      ],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        package: "agent_store",
+        skill_registry: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "complete_agent_manifest",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      audit_id: "audit-manifest-developer.release-notes",
+      trace_id: "trace-manifest-developer.release-notes",
+      contract_schema_version: "agent_manifest_runtime_contract.v1",
+      agent_id: "developer.release-notes",
+      version: "0.1.2",
+      artifact_hash: "sha256:release-notes",
+      manifest_status: "complete",
+      runtime_compatibility: "runtime_unknown",
+      required_runtime_capabilities: ["tool_call"],
+      runtime_capabilities: [],
+      missing_runtime_capabilities: [],
+      manifest_summary: {
+        manifest_schema_version: "agent_manifest.v1",
+        runtime_contract_version: "runtime-contract.v1",
+        skill_count: 1,
+        permission_intent_count: 1,
+        data_scope_count: 1,
+        secret_ref_count: 0,
+        network_allowlist_count: 0,
+        guardrail_ref_count: 1,
+        observability_contract: "trace_spans",
+        rollback_policy: "disable_current_version",
+        provenance_ref: "pkg-developer-release-notes-0.1.2"
+      },
+      issues: [],
+      source_of_truth: {
+        agent_manifest: "agent_store",
+        package: "agent_store",
+        skill_registry: "agent_store",
+        runtime_availability: "agent_runtime_echo_or_probe",
+        policy_decision: "agentops"
+      },
+      next_action: {
+        action_id: "check_runtime_capabilities",
+        target_system: "agent_runtime",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    }
+  },
   runtimeAvailability: {
     "framework.ai-autosdlc": {
       audit_id: "audit-runtime-framework.ai-autosdlc",

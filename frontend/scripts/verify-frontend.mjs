@@ -116,6 +116,7 @@ for (const componentName of [
   "sdlc-draft-review-submission",
   "sdlc-skill-registry-lifecycle",
   "sdlc-contract-registry-traceability",
+  "sdlc-agent-manifest-runtime",
   "sdlc-remediation-actions",
   "sdlc-shell",
   "sdlc-section",
@@ -169,6 +170,47 @@ for (const runtimeTerm of [
   "missing_runtime_capabilities"
 ]) {
   assert(mockData.includes(runtimeTerm), `${runtimeTerm} must be represented`);
+}
+for (const agentManifestRuntimeTerm of [
+  "agentManifestRuntimeContracts",
+  "selectedAgentManifestRuntimeContract",
+  "agent_manifest_runtime_contract.v1",
+  "agent_manifest.v1",
+  "manifest_status",
+  "runtime_compatibility",
+  "runtime_compatible",
+  "runtime_unknown",
+  "runtime_capability_missing",
+  "manifest_incomplete",
+  "required_runtime_capabilities",
+  "runtime_capabilities",
+  "missing_runtime_capabilities",
+  "missingCapabilitiesTone",
+  "manifest_summary",
+  "runtime_contract_version",
+  "permission_intent_count",
+  "data_scope_count",
+  "secret_ref_count",
+  "network_allowlist_count",
+  "guardrail_ref_count",
+  "observability_contract",
+  "rollback_policy",
+  "provenance_ref",
+  "RUNTIME_CAPABILITY_MISSING",
+  "OBSERVABILITY_CONTRACT_TRACE_SPANS_REQUIRED",
+  "AGENT_MANIFEST_RUNTIME_CONTRACT_MISSING",
+  "frontend_fallback_no_agent_manifest_runtime_contract",
+  "agent_runtime_echo_or_probe",
+  "check_runtime_capabilities",
+  "continue_manifest_review",
+  "upgrade_runtime_or_select_compatible_version"
+]) {
+  assert(
+    mockData.includes(agentManifestRuntimeTerm)
+      || app.includes(agentManifestRuntimeTerm)
+      || componentLibrary.includes(agentManifestRuntimeTerm),
+    `${agentManifestRuntimeTerm} must be represented`
+  );
 }
 for (const healthTerm of [
   "healthSummaryFreshness",
@@ -630,6 +672,9 @@ assert(
     && app.includes("selectedContractRegistryTraceability")
     && app.includes("contractRegistryTraceability")
     && app.includes("frontend_fallback_no_contract_registry_traceability")
+    && app.includes("selectedAgentManifestRuntimeContract")
+    && app.includes("agentManifestRuntimeContracts")
+    && app.includes("frontend_fallback_no_agent_manifest_runtime_contract")
     && app.includes("recommendationEnvelopeFor")
     && app.includes("recommendationStateApiUrl")
     && app.includes("normalizeRecommendationDecision")
@@ -695,6 +740,8 @@ assert(
     && app.includes("frontend_fallback_no_draft_review_submission")
     && app.includes("skill_registry_notification_ack.v1")
     && app.includes("contract_registry_traceability.v1")
+    && app.includes("agent_manifest_runtime_contract.v1")
+    && app.includes("Store 只展示 Runtime 回显")
     && app.includes("coordinate = shellQuoteToken")
     && indexHtml.includes(":catalog=\"filteredCatalog\"")
     && indexHtml.includes(":discovery-collections=\"discoveryCollections\"")
@@ -703,6 +750,7 @@ assert(
     && indexHtml.includes(":draft-review-submission=\"selectedDraftReviewSubmission\"")
     && indexHtml.includes(":skill-registry-lifecycle=\"selectedSkillRegistryLifecycle\"")
     && indexHtml.includes(":contract-registry-traceability=\"selectedContractRegistryTraceability\"")
+    && indexHtml.includes(":agent-manifest-runtime-contract=\"selectedAgentManifestRuntimeContract\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
     && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
@@ -749,15 +797,18 @@ assert(
     && componentLibrary.includes("sdlc-draft-review-submission")
     && componentLibrary.includes("sdlc-skill-registry-lifecycle")
     && componentLibrary.includes("sdlc-contract-registry-traceability")
+    && componentLibrary.includes("sdlc-agent-manifest-runtime")
     && componentLibrary.includes("listing-wizard")
     && componentLibrary.includes("wizard-steps")
     && componentLibrary.includes("draft-review-submission__grid")
     && componentLibrary.includes("skill-registry-lifecycle__grid")
     && componentLibrary.includes("contract-registry-traceability__focus")
     && componentLibrary.includes("contract-registry-traceability__contracts")
+    && componentLibrary.includes("agent-manifest-runtime__grid")
     && componentLibrary.includes("草案提交审核")
     && componentLibrary.includes("Skill Registry")
     && componentLibrary.includes("合同注册追踪")
+    && componentLibrary.includes("AgentManifest Runtime")
     && componentLibrary.includes("draft_review_submission.v1")
     && componentLibrary.includes("skill_registry.v1")
     && componentLibrary.includes("skill_registry_notification.v1")
@@ -770,6 +821,9 @@ assert(
     && componentLibrary.includes("appendix_anchor")
     && componentLibrary.includes("contract_test_files")
     && componentLibrary.includes("read-only projection / no external registry service / no PR scan / no CI status mutation")
+    && componentLibrary.includes("Store owns AgentManifest / Runtime echo is read-only / no Runtime execution / no Grant / no quality inference")
+    && componentLibrary.includes("Runtime Capability Echo")
+    && componentLibrary.includes("Missing Runtime Capabilities")
     && componentLibrary.includes("OpenAPI 合同、Owner、Producer、Consumer、appendix anchor 与 contract tests")
     && componentLibrary.includes("review_queue_entry")
     && componentLibrary.includes("owner_confirmation")

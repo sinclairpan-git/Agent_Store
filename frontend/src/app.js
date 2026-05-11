@@ -58,6 +58,15 @@ function actionMessage(action) {
   if (actionId === "view_missing_runtime_capabilities") {
     return "已定位缺失 Runtime 能力；需要 Runtime Owner 补齐或选择兼容版本。";
   }
+  if (actionId === "check_runtime_capabilities") {
+    return "已请求 Runtime capability probe；Store 只展示 Runtime 回显，不本地推导兼容性。";
+  }
+  if (actionId === "continue_manifest_review") {
+    return "AgentManifest Runtime 合同可继续复核；Runtime 仍只消费 Store Manifest，不改写 Manifest 事实。";
+  }
+  if (actionId === "complete_agent_manifest") {
+    return "已返回 Manifest 补齐路径；缺必填字段前不能展示为 Runtime compatible。";
+  }
   if (actionId === "continue_listing_review") {
     return "Runtime 可用性摘要满足当前 Manifest，可继续上架或安装审核。";
   }
@@ -312,6 +321,7 @@ new window.Vue({
       draftReviewSubmissions: window.AgentStoreMock.draftReviewSubmissions,
       skillRegistryLifecycle: window.AgentStoreMock.skillRegistryLifecycle,
       contractRegistryTraceability: window.AgentStoreMock.contractRegistryTraceability,
+      agentManifestRuntimeContracts: window.AgentStoreMock.agentManifestRuntimeContracts,
       recommendationStates: {},
       recommendationStateRequests: {},
       selectedAgentId: "framework.ai-autosdlc",
@@ -687,6 +697,108 @@ new window.Vue({
       return {
         state: this.selectedAgent.installability === "blocked" ? "blocked" : "degraded",
         degraded_reason: "catalog_summary_requires_runtime_verification"
+      };
+    },
+    selectedAgentManifestRuntimeContract: function selectedAgentManifestRuntimeContract() {
+      var agent = this.selectedAgent;
+      var contracts = this.agentManifestRuntimeContracts || {};
+      var contract;
+      if (!agent) {
+        return {
+          audit_id: "audit-empty-filter",
+          trace_id: "trace-empty-filter",
+          contract_schema_version: "agent_manifest_runtime_contract.v1",
+          agent_id: "",
+          version: "",
+          artifact_hash: "",
+          manifest_status: "incomplete",
+          runtime_compatibility: "manifest_incomplete",
+          required_runtime_capabilities: [],
+          runtime_capabilities: [],
+          missing_runtime_capabilities: [],
+          manifest_summary: {
+            manifest_schema_version: "",
+            runtime_contract_version: "",
+            skill_count: 0,
+            permission_intent_count: 0,
+            data_scope_count: 0,
+            secret_ref_count: 0,
+            network_allowlist_count: 0,
+            guardrail_ref_count: 0,
+            observability_contract: "",
+            rollback_policy: "",
+            provenance_ref: ""
+          },
+          issues: [
+            {
+              issue_id: "CATALOG_FILTER_EMPTY",
+              field_path: "catalog_filter",
+              severity: "warning",
+              fix_action_id: "adjust_catalog_filters"
+            }
+          ],
+          source_of_truth: {
+            agent_manifest: "catalog_filter",
+            package: "catalog_filter",
+            skill_registry: "catalog_filter",
+            runtime_availability: "not_applicable",
+            policy_decision: "not_applicable"
+          },
+          next_action: this.selectedView.primary_action
+        };
+      }
+      contract = contracts[agent.agent_id];
+      if (contract) {
+        return contract;
+      }
+      return {
+        audit_id: "audit-manifest-missing-" + safeId(agent.agent_id),
+        trace_id: "trace-manifest-missing-" + safeId(agent.agent_id),
+        contract_schema_version: "agent_manifest_runtime_contract.v1",
+        agent_id: agent.agent_id,
+        version: agent.version,
+        artifact_hash: "",
+        manifest_status: "incomplete",
+        runtime_compatibility: "manifest_incomplete",
+        required_runtime_capabilities: [],
+        runtime_capabilities: [],
+        missing_runtime_capabilities: [],
+        manifest_summary: {
+          manifest_schema_version: "missing",
+          runtime_contract_version: "",
+          skill_count: 0,
+          permission_intent_count: 0,
+          data_scope_count: 0,
+          secret_ref_count: 0,
+          network_allowlist_count: 0,
+          guardrail_ref_count: 0,
+          observability_contract: "missing",
+          rollback_policy: "",
+          provenance_ref: ""
+        },
+        issues: [
+          {
+            issue_id: "AGENT_MANIFEST_RUNTIME_CONTRACT_MISSING",
+            field_path: "agent_manifest_runtime_contract",
+            severity: "blocked",
+            fix_action_id: "complete_agent_manifest",
+            message_key: "agentManifest.runtimeContractMissing"
+          }
+        ],
+        source_of_truth: {
+          agent_manifest: "frontend_fallback_no_agent_manifest_runtime_contract",
+          package: "agent_store",
+          skill_registry: "agent_store",
+          runtime_availability: "agent_runtime_echo_or_probe",
+          policy_decision: "agentops"
+        },
+        next_action: {
+          action_id: "complete_agent_manifest",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
       };
     },
     selectedRuntimeAvailability: function selectedRuntimeAvailability() {
