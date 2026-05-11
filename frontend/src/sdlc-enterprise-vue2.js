@@ -3070,7 +3070,7 @@
       '    <sdlc-metric-row label="Artifact" :value="contract.artifact_hash || \'missing\'" :tone="contract.artifact_hash ? \'success\' : \'warning\'"></sdlc-metric-row>',
       '    <sdlc-metric-row label="Skills" :value="summary.skill_count" tone="neutral"></sdlc-metric-row>',
       '    <sdlc-metric-row label="Required Caps" :value="requiredCapabilities.length" tone="info"></sdlc-metric-row>',
-      '    <sdlc-metric-row label="Missing Caps" :value="missingCapabilities.length" :tone="missingCapabilities.length ? \'danger\' : \'success\'"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Missing Caps" :value="missingCapabilities.length" :tone="missingCapabilitiesTone"></sdlc-metric-row>',
       '  </dl>',
       '  <div class="agent-manifest-runtime__grid">',
       '    <div>',
@@ -3125,6 +3125,15 @@
         return Array.isArray(this.contract.missing_runtime_capabilities)
           ? this.contract.missing_runtime_capabilities
           : [];
+      },
+      missingCapabilitiesTone: function missingCapabilitiesTone() {
+        if (this.missingCapabilities.length) {
+          return "danger";
+        }
+        if (this.contract.runtime_compatibility === "runtime_unknown") {
+          return "warning";
+        }
+        return "success";
       },
       compatibilityTone: function compatibilityTone() {
         if (this.contract.runtime_compatibility === "runtime_compatible") {

@@ -185,6 +185,7 @@ for (const agentManifestRuntimeTerm of [
   "required_runtime_capabilities",
   "runtime_capabilities",
   "missing_runtime_capabilities",
+  "missingCapabilitiesTone",
   "manifest_summary",
   "runtime_contract_version",
   "permission_intent_count",
