@@ -1660,6 +1660,419 @@ window.AgentStoreMock = {
       }
     }
   },
+  managedInstallerPreviews: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "managed_installer_preview.v1",
+      agent_id: "framework.ai-autosdlc",
+      agent_version: "1.0.0",
+      installer_state: "ready_to_install_preview",
+      execution_mode: "preview_only",
+      real_install_started: false,
+      package: {
+        package_id: "pkg-framework-ai-autosdlc",
+        artifact_hash: "sha256:ai-autosdlc-1.0.0",
+        artifact_url: "/packages/framework-ai-autosdlc-1.0.0.tgz",
+        download_state: "available",
+        signature_state: "verified",
+        hash_match_state: "matched"
+      },
+      policy_gate: {
+        echo_state: "policy_allowed",
+        store_may_continue: true,
+        store_override_allowed: false,
+        capability_grant_issued: false
+      },
+      runtime_gate: {
+        handoff_state: "runtime_handoff_ready",
+        runtime_consumption_allowed: true,
+        installation_id: "inst-framework-001",
+        device_id: "device-owner-macos"
+      },
+      isolation: {
+        isolation_profile: "basic_sandbox",
+        network_mode: "policy_bound",
+        filesystem_mode: "scoped_write"
+      },
+      smoke_test: {
+        smoke_test_state: "not_run",
+        smoke_test_ref: "smoke://framework.ai-autosdlc/1.0.0"
+      },
+      steps: [
+        {
+          step_id: "download_artifact",
+          label: "下载安装包",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "verify_signature",
+          label: "校验签名与 hash",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "create_isolated_install",
+          label: "创建隔离安装",
+          step_state: "ready",
+          owner_system: "agent_runtime",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "smoke_test",
+          label: "运行 smoke test",
+          step_state: "pending",
+          owner_system: "agent_runtime",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "failure_diagnostics",
+          label: "生成失败诊断",
+          step_state: "not_required",
+          owner_system: "agent_store",
+          diagnostic_ref: "diag-ready-to-install-preview"
+        }
+      ],
+      issues: [],
+      diagnostics: {
+        diagnostic_ref: "diag-ready-to-install-preview",
+        failure_stage: "",
+        reason_code: "",
+        copyable: false
+      },
+      source_of_truth: {
+        package: "agent_store_package_trust",
+        policy_approval: "agentops_via_policy_approval_echo",
+        runtime_handoff: "agent_store_installation_runtime_handoff",
+        installer_execution: "not_started_preview_only",
+        diagnostics: "agent_store_preview"
+      },
+      next_action: {
+        action_id: "prepare_managed_install",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "managed_installer_preview.v1",
+      agent_id: "agentops.evidence-reporter",
+      agent_version: "0.4.0",
+      installer_state: "policy_blocked",
+      execution_mode: "preview_only",
+      real_install_started: false,
+      package: {
+        package_id: "pkg-agentops-evidence-reporter",
+        artifact_hash: "sha256:evidence-reporter-0.4.0",
+        artifact_url: "/packages/agentops-evidence-reporter-0.4.0.tgz",
+        download_state: "available",
+        signature_state: "verified",
+        hash_match_state: "matched"
+      },
+      policy_gate: {
+        echo_state: "approval_pending",
+        store_may_continue: false,
+        store_override_allowed: false,
+        capability_grant_issued: false
+      },
+      runtime_gate: {
+        handoff_state: "runtime_handoff_ready",
+        runtime_consumption_allowed: true,
+        installation_id: "inst-evidence-001",
+        device_id: "device-owner-linux"
+      },
+      isolation: {
+        isolation_profile: "basic_sandbox",
+        network_mode: "policy_bound",
+        filesystem_mode: "scoped_write"
+      },
+      smoke_test: {
+        smoke_test_state: "not_run",
+        smoke_test_ref: "smoke://agentops.evidence-reporter/0.4.0"
+      },
+      steps: [
+        {
+          step_id: "download_artifact",
+          label: "下载安装包",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "verify_signature",
+          label: "校验签名与 hash",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "create_isolated_install",
+          label: "创建隔离安装",
+          step_state: "blocked",
+          owner_system: "agent_runtime",
+          diagnostic_ref: "diag-policy-blocked"
+        },
+        {
+          step_id: "smoke_test",
+          label: "运行 smoke test",
+          step_state: "blocked",
+          owner_system: "agent_runtime",
+          diagnostic_ref: "diag-policy-blocked"
+        },
+        {
+          step_id: "failure_diagnostics",
+          label: "生成失败诊断",
+          step_state: "ready",
+          owner_system: "agent_store",
+          diagnostic_ref: "diag-policy-blocked"
+        }
+      ],
+      issues: [
+        {
+          issue_id: "POLICY_APPROVAL_NOT_ALLOWED",
+          field_path: "policy_approval_echo.echo_state",
+          severity: "blocked",
+          reason: "AgentOps approval is still pending.",
+          impact: "Managed installer must wait for AgentOps authority.",
+          fix_action_id: "view_agentops_approval",
+          message_key: "managedInstaller.policyApprovalNotAllowed"
+        }
+      ],
+      diagnostics: {
+        diagnostic_ref: "diag-policy-blocked",
+        failure_stage: "policy_approval_echo.echo_state",
+        reason_code: "POLICY_APPROVAL_NOT_ALLOWED",
+        copyable: true
+      },
+      source_of_truth: {
+        package: "agent_store_package_trust",
+        policy_approval: "agentops_via_policy_approval_echo",
+        runtime_handoff: "agent_store_installation_runtime_handoff",
+        installer_execution: "not_started_preview_only",
+        diagnostics: "agent_store_preview"
+      },
+      next_action: {
+        action_id: "view_agentops_approval",
+        target_system: "agentops",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true,
+        href: "/agentops/approvals/approval-evidence-reporter"
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "managed_installer_preview.v1",
+      agent_id: "security.policy-guard",
+      agent_version: "0.2.1",
+      installer_state: "signature_blocked",
+      execution_mode: "preview_only",
+      real_install_started: false,
+      package: {
+        package_id: "pkg-security-policy-guard",
+        artifact_hash: "sha256:security-policy-guard-0.2.1",
+        artifact_url: "/packages/security-policy-guard-0.2.1.tgz",
+        download_state: "available",
+        signature_state: "mismatch",
+        hash_match_state: "mismatch"
+      },
+      policy_gate: {
+        echo_state: "policy_denied",
+        store_may_continue: false,
+        store_override_allowed: false,
+        capability_grant_issued: false
+      },
+      runtime_gate: {
+        handoff_state: "runtime_handoff_ready",
+        runtime_consumption_allowed: true,
+        installation_id: "inst-security-001",
+        device_id: "device-security-windows"
+      },
+      isolation: {
+        isolation_profile: "basic_sandbox",
+        network_mode: "policy_bound",
+        filesystem_mode: "scoped_write"
+      },
+      smoke_test: {
+        smoke_test_state: "not_run",
+        smoke_test_ref: "smoke://security.policy-guard/0.2.1"
+      },
+      steps: [
+        {
+          step_id: "download_artifact",
+          label: "下载安装包",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "verify_signature",
+          label: "校验签名与 hash",
+          step_state: "blocked",
+          owner_system: "agent_store",
+          diagnostic_ref: "diag-signature-blocked"
+        },
+        {
+          step_id: "create_isolated_install",
+          label: "创建隔离安装",
+          step_state: "blocked",
+          owner_system: "agent_runtime",
+          diagnostic_ref: "diag-signature-blocked"
+        },
+        {
+          step_id: "smoke_test",
+          label: "运行 smoke test",
+          step_state: "blocked",
+          owner_system: "agent_runtime",
+          diagnostic_ref: "diag-signature-blocked"
+        },
+        {
+          step_id: "failure_diagnostics",
+          label: "生成失败诊断",
+          step_state: "ready",
+          owner_system: "agent_store",
+          diagnostic_ref: "diag-signature-blocked"
+        }
+      ],
+      issues: [
+        {
+          issue_id: "SIGNATURE_OR_HASH_UNTRUSTED",
+          field_path: "package.signature_state",
+          severity: "blocked",
+          reason: "Package signature or hash does not match.",
+          impact: "Managed installer must not install an unverifiable package.",
+          fix_action_id: "regenerate_package_signature",
+          message_key: "managedInstaller.signatureOrHashUntrusted"
+        }
+      ],
+      diagnostics: {
+        diagnostic_ref: "diag-signature-blocked",
+        failure_stage: "package.signature_state",
+        reason_code: "SIGNATURE_OR_HASH_UNTRUSTED",
+        copyable: true
+      },
+      source_of_truth: {
+        package: "agent_store_package_trust",
+        policy_approval: "agentops_via_policy_approval_echo",
+        runtime_handoff: "agent_store_installation_runtime_handoff",
+        installer_execution: "not_started_preview_only",
+        diagnostics: "agent_store_preview"
+      },
+      next_action: {
+        action_id: "regenerate_package_signature",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "managed_installer_preview.v1",
+      agent_id: "developer.release-notes",
+      agent_version: "0.1.2",
+      installer_state: "smoke_test_failed",
+      execution_mode: "preview_only",
+      real_install_started: false,
+      package: {
+        package_id: "pkg-developer-release-notes",
+        artifact_hash: "sha256:developer-release-notes-0.1.2",
+        artifact_url: "/packages/developer-release-notes-0.1.2.tgz",
+        download_state: "available",
+        signature_state: "verified",
+        hash_match_state: "matched"
+      },
+      policy_gate: {
+        echo_state: "policy_allowed",
+        store_may_continue: true,
+        store_override_allowed: false,
+        capability_grant_issued: false
+      },
+      runtime_gate: {
+        handoff_state: "runtime_handoff_ready",
+        runtime_consumption_allowed: true,
+        installation_id: "inst-release-notes-001",
+        device_id: "device-dev-macos"
+      },
+      isolation: {
+        isolation_profile: "basic_sandbox",
+        network_mode: "policy_bound",
+        filesystem_mode: "scoped_write"
+      },
+      smoke_test: {
+        smoke_test_state: "failed",
+        smoke_test_ref: "smoke://developer.release-notes/0.1.2"
+      },
+      steps: [
+        {
+          step_id: "download_artifact",
+          label: "下载安装包",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "verify_signature",
+          label: "校验签名与 hash",
+          step_state: "completed",
+          owner_system: "agent_store",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "create_isolated_install",
+          label: "创建隔离安装",
+          step_state: "ready",
+          owner_system: "agent_runtime",
+          diagnostic_ref: ""
+        },
+        {
+          step_id: "smoke_test",
+          label: "运行 smoke test",
+          step_state: "failed",
+          owner_system: "agent_runtime",
+          diagnostic_ref: "diag-smoke-failed"
+        },
+        {
+          step_id: "failure_diagnostics",
+          label: "生成失败诊断",
+          step_state: "ready",
+          owner_system: "agent_store",
+          diagnostic_ref: "diag-smoke-failed"
+        }
+      ],
+      issues: [
+        {
+          issue_id: "SMOKE_TEST_FAILED",
+          field_path: "installer_probe.smoke_test_state",
+          severity: "blocked",
+          reason: "Installer smoke test failed in preview diagnostics.",
+          impact: "Managed installer cannot be marked ready until diagnostics are resolved.",
+          fix_action_id: "copy_installer_diagnostic",
+          message_key: "managedInstaller.smokeTestFailed"
+        }
+      ],
+      diagnostics: {
+        diagnostic_ref: "diag-smoke-failed",
+        failure_stage: "installer_probe.smoke_test_state",
+        reason_code: "SMOKE_TEST_FAILED",
+        copyable: true
+      },
+      source_of_truth: {
+        package: "agent_store_package_trust",
+        policy_approval: "agentops_via_policy_approval_echo",
+        runtime_handoff: "agent_store_installation_runtime_handoff",
+        installer_execution: "not_started_preview_only",
+        diagnostics: "agent_store_preview"
+      },
+      next_action: {
+        action_id: "copy_installer_diagnostic",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    }
+  },
   policyApprovalEchoes: {
     "framework.ai-autosdlc": {
       contract_schema_version: "policy_approval_echo.v1",
