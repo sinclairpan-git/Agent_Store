@@ -1573,6 +1573,111 @@ h2 {
   color: #16202a;
 }
 
+.listing-workbench {
+  min-height: 340px;
+}
+
+.listing-workbench__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.listing-workbench__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.listing-workbench__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.listing-workbench__grid span,
+.listing-workbench__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.listing-workbench__grid strong,
+.listing-workbench__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.listing-workbench__grid strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.listing-workbench__issues {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listing-workbench__issues li {
+  display: grid;
+  grid-template-columns: minmax(88px, 0.6fr) minmax(120px, 0.8fr) minmax(0, 1.8fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+}
+
+.listing-workbench__issues strong,
+.listing-workbench__issues span,
+.listing-workbench__issues small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.listing-workbench__issues strong {
+  color: #16202a;
+}
+
+.listing-workbench__issues span,
+.listing-workbench__issues small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.listing-workbench__source {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.listing-workbench__source strong,
+.listing-workbench__source span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.listing-workbench__source strong {
+  color: #16202a;
+}
+
 .draft-review-submission {
   min-height: 340px;
 }
@@ -2261,6 +2366,9 @@ h2 {
   .admin-risk-workbench__gaps li,
   .version-history-workbench__facts,
   .version-history-workbench__grid,
+  .listing-workbench__facts,
+  .listing-workbench__grid,
+  .listing-workbench__issues li,
   .package-validation-report__grid,
   .draft-review-submission__grid,
   .skill-registry-lifecycle__grid,

@@ -175,6 +175,21 @@ function actionMessage(action) {
   if (actionId === "review_version_rollback") {
     return "回退候选已进入版本复核；本阶段不执行回退、不改安装记录、不改 AgentVersion。";
   }
+  if (actionId === "open_listing_workbench") {
+    return "上架工作台已进入预览；这里只聚合草案、校验、审核、发布、反馈和安装趋势，不执行发布或审批。";
+  }
+  if (actionId === "fix_listing_validation") {
+    return "上架校验阻断项已定位；需要回到 Package Validation 或字段确认补齐后再提交审核。";
+  }
+  if (actionId === "return_to_listing_draft") {
+    return "已返回上架草案修复路径；占位字段、AI 来源或风险说明缺口解决前不能进入审核队列。";
+  }
+  if (actionId === "continue_listing_workbench_review") {
+    return "上架工作台摘要可继续复核；前端仍不写 Registry、不生成发布说明、不发送通知。";
+  }
+  if (actionId === "refresh_listing_workbench") {
+    return "已请求刷新上架工作台摘要；缺少 envelope 时不能把未知状态展示为健康或可发布。";
+  }
   if (actionId === "refresh_agentops_quality_summary") {
     return "已记录 AgentOps 质量摘要刷新动作；Store 前端不计算质量分，只展示后端投影。";
   }
@@ -399,6 +414,7 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
+      listingWorkbench: window.AgentStoreMock.listingWorkbench,
       ownerGovernanceWorkbench: window.AgentStoreMock.ownerGovernanceWorkbench,
       installationRecordsWorkbench: window.AgentStoreMock.installationRecordsWorkbench,
       systemSettingsWorkbench: window.AgentStoreMock.systemSettingsWorkbench,
@@ -2511,6 +2527,154 @@ new window.Vue({
           target_system: "agent_store",
           enabled: true,
           requires_permission: false,
+          audit_required: true
+        }
+      };
+    },
+    selectedListingWorkbench: function selectedListingWorkbench() {
+      var agent = this.selectedAgent;
+      var workbenches = this.listingWorkbench || {};
+      var workbench;
+      if (!agent) {
+        return {
+          contract_schema_version: "listing_workbench.v1",
+          agent_id: "",
+          owner_team: "unassigned",
+          listing_state: "listing_workbench_unavailable",
+          draft_summary: {
+            active_drafts: 0,
+            fix_required: 0,
+            ready_to_submit: 0,
+            last_updated_at: ""
+          },
+          review_queue: {
+            queue_state: "not_applicable",
+            pending_review_count: 0,
+            blocked_review_count: 0,
+            sla_state: "not_applicable",
+            receipt_state: "not_approval"
+          },
+          published_versions: {
+            active_version_count: 0,
+            latest_version: "",
+            release_status: "not_applicable",
+            registry_write_allowed: false
+          },
+          quality_feedback: {
+            quality_summary_state: "not_applicable",
+            open_feedback_count: 0,
+            owner_response_due_count: 0,
+            raw_evidence_exposed: false
+          },
+          install_trend: {
+            trend_state: "not_applicable",
+            total_installations: 0,
+            failed_installations: 0,
+            aggregation_only: true,
+            device_details_exposed: false
+          },
+          user_issues: [],
+          source_of_truth: {
+            listing: "catalog_filter",
+            validation: "not_applicable",
+            review: "not_applicable",
+            skill_registry: "not_applicable",
+            quality: "not_applicable",
+            installation: "not_applicable",
+            feedback: "not_applicable"
+          },
+          audit_fields: {
+            audit_id: "",
+            trace_id: "",
+            generated_at: ""
+          },
+          boundary_flags: [
+            "no publish execution",
+            "no local approval",
+            "no registry mutation",
+            "no package validation write",
+            "no notification sending",
+            "no raw Evidence"
+          ],
+          next_action: this.selectedView.primary_action
+        };
+      }
+      workbench = workbenches[agent.agent_id];
+      if (workbench) {
+        return workbench;
+      }
+      return {
+        contract_schema_version: "listing_workbench.v1",
+        agent_id: agent.agent_id,
+        owner_team: agent.owner_team,
+        listing_state: "listing_workbench_unavailable",
+        draft_summary: {
+          active_drafts: 0,
+          fix_required: 0,
+          ready_to_submit: 0,
+          last_updated_at: ""
+        },
+        review_queue: {
+          queue_state: "unknown",
+          pending_review_count: 0,
+          blocked_review_count: 1,
+          sla_state: "source_missing",
+          receipt_state: "not_approval"
+        },
+        published_versions: {
+          active_version_count: 0,
+          latest_version: agent.version,
+          release_status: agent.release_status || "unknown",
+          registry_write_allowed: false
+        },
+        quality_feedback: {
+          quality_summary_state: "unknown",
+          open_feedback_count: 0,
+          owner_response_due_count: 0,
+          raw_evidence_exposed: false
+        },
+        install_trend: {
+          trend_state: "unknown",
+          total_installations: 0,
+          failed_installations: 0,
+          aggregation_only: true,
+          device_details_exposed: false
+        },
+        user_issues: [
+          {
+            issue_id: "LISTING_WORKBENCH_MISSING",
+            issue_state: "blocked",
+            source_contract: "listing_workbench.v1",
+            summary: "Listing workbench envelope is missing; frontend cannot infer draft, review, published, or healthy status."
+          }
+        ],
+        source_of_truth: {
+          listing: "frontend_fallback_no_listing_workbench",
+          validation: "package_validation_report.v1",
+          review: "draft_review_submission.v1",
+          skill_registry: "skill_registry.v1",
+          quality: "quality_evidence_access_summary.v1",
+          installation: "installation_distribution_summary.v1",
+          feedback: "feedback_owner_response_loop.v1"
+        },
+        audit_fields: {
+          audit_id: "audit-listing-workbench-missing-" + safeId(agent.agent_id),
+          trace_id: "trace-listing-workbench-missing-" + safeId(agent.agent_id),
+          generated_at: ""
+        },
+        boundary_flags: [
+          "no publish execution",
+          "no local approval",
+          "no registry mutation",
+          "no package validation write",
+          "no notification sending",
+          "no raw Evidence"
+        ],
+        next_action: {
+          action_id: "refresh_listing_workbench",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
           audit_required: true
         }
       };
