@@ -229,40 +229,60 @@ specs:
   path: specs/055-package-validation-report-frontend-consumer
   depends_on:
   - 054-installation-runtime-handoff-frontend-consumer
+- id: 056-owner-governance-workbench-frontend-shell
+  path: specs/056-owner-governance-workbench-frontend-shell
+  depends_on:
+  - 055-package-validation-report-frontend-consumer
+- id: 057-installation-records-workbench-frontend-shell
+  path: specs/057-installation-records-workbench-frontend-shell
+  depends_on:
+  - 056-owner-governance-workbench-frontend-shell
+- id: 058-system-settings-workbench-frontend-shell
+  path: specs/058-system-settings-workbench-frontend-shell
+  depends_on:
+  - 057-installation-records-workbench-frontend-shell
+- id: 059-admin-risk-workbench-frontend-shell
+  path: specs/059-admin-risk-workbench-frontend-shell
+  depends_on:
+  - 058-system-settings-workbench-frontend-shell
+- id: 060-version-history-workbench-frontend-shell
+  path: specs/060-version-history-workbench-frontend-shell
+  depends_on:
+  - 059-admin-risk-workbench-frontend-shell
 truth_snapshot:
-  generated_at: '2026-05-11T13:38:52Z'
+  generated_at: '2026-05-12T01:28:34Z'
   generated_by: ai-sdlc program truth sync
   generator_version: program_truth_snapshot_v1
-  repo_revision: '5265615'
-  authoring_hash: 64a00397590e9ac91f4b640a8ce0c3d5bd324d12886fe50f0753a3fb1aec6661
+  repo_revision: 72a32c5
+  authoring_hash: 9c27f5948b54ec203b59e8f4bf510e6deee4092b06f6963c135e03c4363ce8c0
   source_hashes: {}
-  snapshot_hash: d2410c00612aead31fbd9765bc0a1fce11cbe7fc7d2027d72811fe91327db21f
+  snapshot_hash: a34515f13c1a494576a1b01371c735d09c0696dbbb5f8523521b3e8a47972fb1
   computed_capabilities: []
   source_inventory:
     state: complete
-    total_sources: 278
-    mapped_sources: 278
+    total_sources: 303
+    mapped_sources: 303
     unmapped_sources: 0
     missing_sources: 0
     phase_signal_count: 63
     deferred_signal_count: 162
-    non_goal_signal_count: 34
+    non_goal_signal_count: 42
     layer_totals:
       blueprint: 1
-      spec: 55
-      plan: 55
-      tasks: 55
-      execution: 55
-      close: 55
+      spec: 60
+      plan: 60
+      tasks: 60
+      execution: 60
+      close: 60
       defect: 1
       release: 1
     layer_materialized:
       blueprint: 1
-      spec: 55
-      plan: 55
-      tasks: 55
-      execution: 55
-      close: 55
+      spec: 60
+      plan: 60
+      tasks: 60
+      execution: 60
+      close: 60
       defect: 1
       release: 1
     entries:
@@ -2747,6 +2767,231 @@ truth_snapshot:
       mapped: true
       exists: true
       mapping_ref: 055-package-validation-report-frontend-consumer
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/056-owner-governance-workbench-frontend-shell/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 056-owner-governance-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/056-owner-governance-workbench-frontend-shell/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 056-owner-governance-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/056-owner-governance-workbench-frontend-shell/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 056-owner-governance-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/056-owner-governance-workbench-frontend-shell/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 056-owner-governance-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/056-owner-governance-workbench-frontend-shell/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 056-owner-governance-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/057-installation-records-workbench-frontend-shell/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 057-installation-records-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/057-installation-records-workbench-frontend-shell/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 057-installation-records-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/057-installation-records-workbench-frontend-shell/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 057-installation-records-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/057-installation-records-workbench-frontend-shell/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 057-installation-records-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/057-installation-records-workbench-frontend-shell/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 057-installation-records-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/058-system-settings-workbench-frontend-shell/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 058-system-settings-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/058-system-settings-workbench-frontend-shell/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 058-system-settings-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/058-system-settings-workbench-frontend-shell/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 058-system-settings-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/058-system-settings-workbench-frontend-shell/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 058-system-settings-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/058-system-settings-workbench-frontend-shell/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 058-system-settings-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/059-admin-risk-workbench-frontend-shell/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 059-admin-risk-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 2
+    - path: specs/059-admin-risk-workbench-frontend-shell/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 059-admin-risk-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/059-admin-risk-workbench-frontend-shell/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 059-admin-risk-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/059-admin-risk-workbench-frontend-shell/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 059-admin-risk-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/059-admin-risk-workbench-frontend-shell/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 059-admin-risk-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/060-version-history-workbench-frontend-shell/spec.md
+      source_type: spec_doc
+      truth_layer: spec
+      mapped: true
+      exists: true
+      mapping_ref: 060-version-history-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 1
+    - path: specs/060-version-history-workbench-frontend-shell/plan.md
+      source_type: plan_doc
+      truth_layer: plan
+      mapped: true
+      exists: true
+      mapping_ref: 060-version-history-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/060-version-history-workbench-frontend-shell/tasks.md
+      source_type: tasks_doc
+      truth_layer: tasks
+      mapped: true
+      exists: true
+      mapping_ref: 060-version-history-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/060-version-history-workbench-frontend-shell/task-execution-log.md
+      source_type: execution_log
+      truth_layer: execution
+      mapped: true
+      exists: true
+      mapping_ref: 060-version-history-workbench-frontend-shell
+      phase_signal_count: 0
+      deferred_signal_count: 0
+      non_goal_signal_count: 0
+    - path: specs/060-version-history-workbench-frontend-shell/development-summary.md
+      source_type: development_summary
+      truth_layer: close
+      mapped: true
+      exists: true
+      mapping_ref: 060-version-history-workbench-frontend-shell
       phase_signal_count: 0
       deferred_signal_count: 0
       non_goal_signal_count: 0

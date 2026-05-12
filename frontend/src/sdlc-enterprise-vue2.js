@@ -2854,6 +2854,749 @@
     }
   });
 
+  Vue.component("sdlc-owner-governance-workbench", {
+    props: ["workbench"],
+    template: [
+      '<section class="workspace-section workspace-section--wide owner-governance-workbench">',
+      '  <div class="section-heading">',
+      '    <h2>Owner 治理工作台</h2>',
+      '    <sdlc-status-chip :label="workbench.queue_state" :tone="queueTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ workbenchCopy }}</p>',
+      '  <dl class="facts owner-governance-workbench__facts">',
+      '    <sdlc-metric-row label="合同" :value="workbench.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Owner" :value="workbench.owner_team" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="待办" :value="totalPending" :tone="pendingTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="阻断" :value="risk.blocked_count || 0" :tone="blockedTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="最高风险" :value="risk.highest_risk" :tone="blockedTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="SLA" :value="risk.sla_state" :tone="slaTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Audit" :value="audit.audit_id || \'unavailable\'" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="事实源" :value="sourceTruthSummary" tone="info"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="owner-governance-workbench__grid">',
+      '    <div v-for="count in pendingCountRows" :key="count.key">',
+      '      <span>{{ count.label }}</span>',
+      '      <strong>{{ count.value }}</strong>',
+      '      <small>{{ count.source }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ol class="owner-governance-workbench__focus" v-if="focusItems.length">',
+      '    <li v-for="item in focusItems" :key="item.item_id">',
+      '      <strong>{{ displayLabel(item.item_state) }}</strong>',
+      '      <span>{{ item.summary }}</span>',
+      '      <small>{{ item.source_contract }} / {{ displayLabel(item.next_action_id) }}</small>',
+      '    </li>',
+      '  </ol>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ boundaryLabel }}</span>',
+      '    <sdlc-action-button :action="workbench.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      pendingCounts: function pendingCounts() {
+        return this.workbench.pending_counts || {};
+      },
+      risk: function risk() {
+        return this.workbench.risk_summary || {};
+      },
+      audit: function audit() {
+        return this.workbench.audit_fields || {};
+      },
+      focusItems: function focusItems() {
+        return Array.isArray(this.workbench.focus_items) ? this.workbench.focus_items : [];
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.workbench.source_of_truth || {};
+      },
+      totalPending: function totalPending() {
+        return Object.keys(this.pendingCounts).reduce(function sum(total, key) {
+          return total + (Number(this.pendingCounts[key]) || 0);
+        }.bind(this), 0);
+      },
+      pendingCountRows: function pendingCountRows() {
+        var sources = {
+          draft_review: "draft_review_submission.v1",
+          policy_approval: "policy_approval_request.v1",
+          feedback: "feedback_owner_response_loop.v1",
+          lifecycle: "lifecycle_governance_baseline.v1",
+          installation_distribution: "installation_distribution_summary.v1",
+          package_validation: "package_validation_report.v1",
+          quality_evidence: "quality_evidence_access_summary.v1"
+        };
+        return Object.keys(sources).map(function mapCount(key) {
+          return {
+            key: key,
+            label: displayLabel(key),
+            value: Number(this.pendingCounts[key]) || 0,
+            source: sources[key]
+          };
+        }, this);
+      },
+      queueTone: function queueTone() {
+        if (this.workbench.queue_state === "healthy") {
+          return "success";
+        }
+        if (this.workbench.queue_state === "blocked") {
+          return "danger";
+        }
+        return "warning";
+      },
+      pendingTone: function pendingTone() {
+        return this.totalPending ? "warning" : "success";
+      },
+      blockedTone: function blockedTone() {
+        return (Number(this.risk.blocked_count) || 0) ? "danger" : "success";
+      },
+      slaTone: function slaTone() {
+        return this.risk.sla_state === "within_sla" || this.risk.sla_state === "no_pending_owner_action"
+          ? "success"
+          : "warning";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return [
+          this.sourceOfTruth.owner_queue,
+          this.sourceOfTruth.approval,
+          this.sourceOfTruth.feedback,
+          this.sourceOfTruth.lifecycle,
+          this.sourceOfTruth.quality
+        ].filter(Boolean).join(" / ");
+      },
+      workbenchCopy: function workbenchCopy() {
+        if (this.workbench.queue_state === "healthy") {
+          return "Owner 工作台当前没有阻断待办；这只是聚合摘要，最终状态仍以单项事实源和审计字段为准。";
+        }
+        if (this.workbench.queue_state === "blocked") {
+          return "Owner 工作台发现阻断项；需要回到对应事实源修复，不能在工作台直接批准、发布或禁用。";
+        }
+        return "Owner 工作台聚合待处理事项，帮助 Owner 扫描下一步，但不产生审批结果或生命周期变更。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "owner_governance_workbench.v1 / aggregate only / no real approval / no notification sending / no AgentVersion mutation / no AgentOps override";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
+  Vue.component("sdlc-installation-records-workbench", {
+    props: ["records"],
+    template: [
+      '<section class="workspace-section workspace-section--wide installation-records-workbench">',
+      '  <div class="section-heading">',
+      '    <h2>安装与运行记录</h2>',
+      '    <sdlc-status-chip :label="records.installation_state" :tone="installationTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ recordsCopy }}</p>',
+      '  <dl class="facts installation-records-workbench__facts">',
+      '    <sdlc-metric-row label="合同" :value="records.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Installation" :value="records.installation_id || \'unavailable\'" :tone="installationTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Device" :value="records.device_binding_state" :tone="deviceTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime" :value="records.runtime_state" :tone="runtimeTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="版本" :value="versionLabel" :tone="upgradeTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="健康" :value="healthLabel" :tone="healthTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="吊销" :value="revocation.notice_state" :tone="revocationTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Audit" :value="audit.audit_id || \'unavailable\'" tone="neutral"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="installation-records-workbench__grid">',
+      '    <div>',
+      '      <span>Device Binding</span>',
+      '      <strong>{{ records.device_binding_state }}</strong>',
+      '      <small>{{ records.device_label || "device hidden" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Version Cue</span>',
+      '      <strong>{{ versionCue.upgrade_state }}</strong>',
+      '      <small>{{ versionLabel }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Health Cue</span>',
+      '      <strong>{{ healthCue.freshness_state }}</strong>',
+      '      <small>{{ healthCue.basis_guard }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Revocation Notice</span>',
+      '      <strong>{{ revocation.notice_state }}</strong>',
+      '      <small>{{ revocation.replacement_agent_id || revocation.reason || "none" }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <div class="installation-records-workbench__source">',
+      '    <strong>{{ sourceTruthSummary }}</strong>',
+      '    <span>{{ boundaryLabel }}</span>',
+      '  </div>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ audit.trace_id || "trace unavailable" }}</span>',
+      '    <sdlc-action-button :action="records.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      versionCue: function versionCue() {
+        return this.records.version_cue || {};
+      },
+      healthCue: function healthCue() {
+        return this.records.health_cue || {};
+      },
+      revocation: function revocation() {
+        return this.records.revocation_notice || {};
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.records.source_of_truth || {};
+      },
+      audit: function audit() {
+        return this.records.audit_fields || {};
+      },
+      installationTone: function installationTone() {
+        if (this.records.installation_state === "installed") {
+          return "success";
+        }
+        if (this.records.installation_state === "revoked" || this.records.installation_state === "records_unavailable") {
+          return "danger";
+        }
+        return "warning";
+      },
+      deviceTone: function deviceTone() {
+        if (this.records.device_binding_state === "active") {
+          return "success";
+        }
+        if (this.records.device_binding_state === "revoked") {
+          return "danger";
+        }
+        return "warning";
+      },
+      runtimeTone: function runtimeTone() {
+        if (this.records.runtime_state === "runtime_ready") {
+          return "success";
+        }
+        if (this.records.runtime_state === "runtime_blocked_by_lifecycle") {
+          return "danger";
+        }
+        return "warning";
+      },
+      upgradeTone: function upgradeTone() {
+        if (this.versionCue.upgrade_state === "current") {
+          return "success";
+        }
+        if (this.versionCue.upgrade_state === "blocked") {
+          return "danger";
+        }
+        return this.versionCue.upgrade_state === "upgrade_available" ? "warning" : "neutral";
+      },
+      healthTone: function healthTone() {
+        if (this.healthCue.summary_state === "healthy") {
+          return "success";
+        }
+        if (this.healthCue.summary_state === "blocked_by_revocation") {
+          return "danger";
+        }
+        return "warning";
+      },
+      revocationTone: function revocationTone() {
+        return this.revocation.notice_state === "none" ? "success" : "danger";
+      },
+      versionLabel: function versionLabel() {
+        return [
+          this.versionCue.installed_version || "not installed",
+          this.versionCue.latest_version || "latest unknown"
+        ].join(" -> ");
+      },
+      healthLabel: function healthLabel() {
+        return [
+          this.healthCue.freshness_state || "unknown",
+          this.healthCue.summary_state || "unknown"
+        ].join(" / ");
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return [
+          this.sourceOfTruth.installation,
+          this.sourceOfTruth.device_binding,
+          this.sourceOfTruth.runtime,
+          this.sourceOfTruth.health,
+          this.sourceOfTruth.lifecycle,
+          this.sourceOfTruth.notification
+        ].filter(Boolean).join(" / ");
+      },
+      recordsCopy: function recordsCopy() {
+        if (this.records.installation_state === "installed" && this.versionCue.upgrade_state === "upgrade_available") {
+          return "当前安装可用但存在升级候选；工作台只展示候选，不下载包、不执行升级、不修改 AgentVersion。";
+        }
+        if (this.records.installation_state === "installed") {
+          return "当前安装记录可用；健康摘要来自 AgentOps 回显，不能作为推荐依据或实际 L5 判定。";
+        }
+        if (this.records.installation_state === "revoked") {
+          return "当前安装已吊销或被生命周期阻断；工作台不能把 revoked 降级为可运行、可升级或可忽略。";
+        }
+        if (this.records.installation_state === "records_unavailable") {
+          return "安装记录 envelope 缺失；前端必须保守降级，不能推断 installed、runtime_ready 或 upgrade_available。";
+        }
+        return "当前安装需要继续激活或绑定设备；工作台只展示下一步，不执行真实安装或 Runtime 启动。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "installation_records_workbench.v1 / aggregate only / no real install / no Runtime launch / no raw Trace / no policy bypass / health_summary_not_recommendation_basis";
+      }
+    }
+  });
+
+  Vue.component("sdlc-system-settings-workbench", {
+    props: ["settings"],
+    template: [
+      '<section class="workspace-section workspace-section--wide system-settings-workbench">',
+      '  <div class="section-heading">',
+      '    <h2>系统设置</h2>',
+      '    <sdlc-status-chip :label="settings.settings_state" :tone="settingsTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ settingsCopy }}</p>',
+      '  <dl class="facts system-settings-workbench__facts">',
+      '    <sdlc-metric-row label="合同" :value="settings.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="分类" :value="taxonomy.category_state" :tone="taxonomyTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="标签" :value="taxonomy.tags_state" :tone="taxonomyTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="推荐位" :value="recommendation.slot_state" :tone="recommendationTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="镜像源" :value="mirror.mirror_state" :tone="mirrorTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="安装器" :value="installer.config_state" :tone="installerTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="AgentOps" :value="endpoint.endpoint_state" :tone="endpointTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Audit" :value="audit.audit_id || \'unavailable\'" tone="neutral"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="system-settings-workbench__grid">',
+      '    <div>',
+      '      <span>Taxonomy</span>',
+      '      <strong>{{ taxonomy.category_count || 0 }} categories / {{ taxonomy.tag_count || 0 }} tags</strong>',
+      '      <small>{{ blockedTermsLabel }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Recommendation Slot</span>',
+      '      <strong>{{ recommendation.collection || "unassigned" }}</strong>',
+      '      <small>{{ recommendation.rank_source }} / override={{ recommendation.override_allowed }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Mirror Source</span>',
+      '      <strong>{{ mirror.active_mirror || "unavailable" }}</strong>',
+      '      <small>{{ mirror.signature_policy }} / fallback {{ mirror.fallback_mirror || "none" }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Installer Config</span>',
+      '      <strong>{{ installer.managed_installer_enabled ? "enabled" : "disabled" }}</strong>',
+      '      <small>{{ installer.isolation_policy }} / smoke={{ installer.smoke_test_required }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>AgentOps Endpoint</span>',
+      '      <strong>{{ endpoint.endpoint_ref_redacted || "redacted" }}</strong>',
+      '      <small>{{ endpoint.credential_state }} / secret_exposed={{ endpoint.secret_exposed }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <div class="system-settings-workbench__source">',
+      '    <strong>{{ sourceTruthSummary }}</strong>',
+      '    <span>{{ boundaryLabel }}</span>',
+      '  </div>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ audit.trace_id || "trace unavailable" }}</span>',
+      '    <sdlc-action-button :action="settings.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      taxonomy: function taxonomy() {
+        return this.settings.taxonomy_summary || {};
+      },
+      recommendation: function recommendation() {
+        return this.settings.recommendation_slot || {};
+      },
+      mirror: function mirror() {
+        return this.settings.mirror_source || {};
+      },
+      installer: function installer() {
+        return this.settings.installer_config || {};
+      },
+      endpoint: function endpoint() {
+        return this.settings.agentops_endpoint || {};
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.settings.source_of_truth || {};
+      },
+      audit: function audit() {
+        return this.settings.audit_fields || {};
+      },
+      settingsTone: function settingsTone() {
+        if (this.settings.settings_state === "ready") {
+          return "success";
+        }
+        if (this.settings.settings_state === "blocked" || this.settings.settings_state === "settings_unavailable") {
+          return "danger";
+        }
+        return "warning";
+      },
+      taxonomyTone: function taxonomyTone() {
+        return this.taxonomy.category_state === "blocked_term_review" ? "danger" : (this.taxonomy.tags_state === "complete" ? "success" : "warning");
+      },
+      recommendationTone: function recommendationTone() {
+        if (this.recommendation.slot_state === "ready") {
+          return "success";
+        }
+        return this.recommendation.slot_state === "blocked" ? "danger" : "warning";
+      },
+      mirrorTone: function mirrorTone() {
+        if (this.mirror.mirror_state === "ready") {
+          return "success";
+        }
+        return this.mirror.mirror_state === "signature_policy_blocked" ? "danger" : "warning";
+      },
+      installerTone: function installerTone() {
+        if (this.installer.config_state === "preview_ready") {
+          return "success";
+        }
+        return this.installer.config_state === "blocked_by_policy" ? "danger" : "warning";
+      },
+      endpointTone: function endpointTone() {
+        if (this.endpoint.endpoint_state === "healthy") {
+          return "success";
+        }
+        return this.endpoint.endpoint_state === "policy_blocked" ? "danger" : "warning";
+      },
+      blockedTermsLabel: function blockedTermsLabel() {
+        var terms = Array.isArray(this.taxonomy.blocked_terms) ? this.taxonomy.blocked_terms : [];
+        return terms.length ? terms.join(", ") : "no blocked terms";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return [
+          this.sourceOfTruth.taxonomy,
+          this.sourceOfTruth.recommendation,
+          this.sourceOfTruth.mirror,
+          this.sourceOfTruth.installer,
+          this.sourceOfTruth.endpoint,
+          this.sourceOfTruth.credential
+        ].filter(Boolean).join(" / ");
+      },
+      settingsCopy: function settingsCopy() {
+        if (this.settings.settings_state === "ready") {
+          return "系统设置摘要可查看；这不是配置写入入口，推荐、镜像、安装器和 endpoint 仍以事实源为准。";
+        }
+        if (this.settings.settings_state === "blocked") {
+          return "系统设置存在阻断项；需要管理员在真实控制面修复，工作台不直接写配置或改 endpoint。";
+        }
+        if (this.settings.settings_state === "settings_unavailable") {
+          return "系统设置 envelope 缺失；前端必须保守降级，不能展示为 settings ready。";
+        }
+        return "系统设置需要复核；工作台只展示摘要，不暴露 secret、不覆盖推荐、不启动安装器。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "system_settings_workbench.v1 / aggregate only / no settings mutation / no credential exposure / no recommendation override / no installer execution / no endpoint rewrite";
+      }
+    }
+  });
+
+  Vue.component("sdlc-admin-risk-workbench", {
+    props: ["risk"],
+    template: [
+      '<section class="workspace-section workspace-section--wide admin-risk-workbench">',
+      '  <div class="section-heading">',
+      '    <h2>管理员风险</h2>',
+      '    <sdlc-status-chip :label="risk.risk_state" :tone="riskTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ riskCopy }}</p>',
+      '  <dl class="facts admin-risk-workbench__facts">',
+      '    <sdlc-metric-row label="合同" :value="risk.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="风险等级" :value="risk.risk_level" :tone="riskTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Runtime 风险" :value="risk.runtime_risk_level" :tone="runtimeTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="证据缺口" :value="evidenceGaps.length" :tone="gapTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Policy" :value="policy.policy_state" :tone="policyTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Permission" :value="permission.permission_state" :tone="permissionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="安全动作" :value="securityActions.length" :tone="actionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Audit" :value="audit.audit_id || \'unavailable\'" tone="neutral"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="admin-risk-workbench__grid">',
+      '    <div>',
+      '      <span>Policy Signal</span>',
+      '      <strong>{{ policy.policy_state }}</strong>',
+      '      <small>{{ policy.policy_ref || "policy ref unavailable" }} / approval={{ policy.approval_status }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Permission Signal</span>',
+      '      <strong>{{ permission.permission_state }}</strong>',
+      '      <small>{{ permission.denied_scope || "summary only" }} / grant={{ permission.capability_grant_issued }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Security Actions</span>',
+      '      <strong>{{ firstActionLabel }}</strong>',
+      '      <small>{{ actionModeLabel }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Source of Truth</span>',
+      '      <strong>{{ displayLabel(sourceOfTruth.risk) }}</strong>',
+      '      <small>{{ displayLabel(sourceOfTruth.policy) }} / {{ displayLabel(sourceOfTruth.evidence) }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <ul class="admin-risk-workbench__gaps" v-if="evidenceGaps.length">',
+      '    <li v-for="gap in evidenceGaps" :key="gap.gap_id">',
+      '      <strong>{{ displayLabel(gap.severity) }}</strong>',
+      '      <span>{{ gap.summary }}</span>',
+      '      <small>{{ gap.source_contract }} / {{ gap.gap_id }}</small>',
+      '    </li>',
+      '  </ul>',
+      '  <div class="admin-risk-workbench__source">',
+      '    <strong>{{ sourceTruthSummary }}</strong>',
+      '    <span>{{ boundaryLabel }}</span>',
+      '  </div>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ audit.trace_id || "trace unavailable" }}</span>',
+      '    <sdlc-action-button :action="risk.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      evidenceGaps: function evidenceGaps() {
+        return Array.isArray(this.risk.evidence_gaps) ? this.risk.evidence_gaps : [];
+      },
+      policy: function policy() {
+        return this.risk.policy_signal || {};
+      },
+      permission: function permission() {
+        return this.risk.permission_signal || {};
+      },
+      securityActions: function securityActions() {
+        return Array.isArray(this.risk.security_actions) ? this.risk.security_actions : [];
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.risk.source_of_truth || {};
+      },
+      audit: function audit() {
+        return this.risk.audit_fields || {};
+      },
+      riskTone: function riskTone() {
+        if (this.risk.risk_state === "low_risk") {
+          return "success";
+        }
+        if (this.risk.risk_state === "security_revoked" || this.risk.risk_state === "risk_unknown") {
+          return "danger";
+        }
+        return "warning";
+      },
+      runtimeTone: function runtimeTone() {
+        if (this.risk.runtime_risk_level === "normal") {
+          return "success";
+        }
+        return this.risk.runtime_risk_level === "blocked" ? "danger" : "warning";
+      },
+      gapTone: function gapTone() {
+        return this.evidenceGaps.some(function blocked(gap) {
+          return gap.severity === "blocked";
+        }) ? "danger" : (this.evidenceGaps.length ? "warning" : "success");
+      },
+      policyTone: function policyTone() {
+        if (this.policy.policy_state === "allowed") {
+          return "success";
+        }
+        if (this.policy.policy_state === "policy_denied") {
+          return "danger";
+        }
+        return "warning";
+      },
+      permissionTone: function permissionTone() {
+        if (this.permission.permission_state === "allowed_summary_only") {
+          return "success";
+        }
+        if (this.permission.permission_state === "blocked") {
+          return "danger";
+        }
+        return "warning";
+      },
+      actionTone: function actionTone() {
+        return this.securityActions.some(function required(action) {
+          return action.action_state === "required";
+        }) ? "danger" : (this.securityActions.length ? "warning" : "neutral");
+      },
+      firstActionLabel: function firstActionLabel() {
+        return this.securityActions.length ? displayLabel(this.securityActions[0].action_id) : "no action";
+      },
+      actionModeLabel: function actionModeLabel() {
+        return this.securityActions.length ? this.securityActions[0].execution_mode : "preview_only";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return [
+          this.sourceOfTruth.risk,
+          this.sourceOfTruth.policy,
+          this.sourceOfTruth.permission,
+          this.sourceOfTruth.evidence,
+          this.sourceOfTruth.lifecycle,
+          this.sourceOfTruth.notification
+        ].filter(Boolean).join(" / ");
+      },
+      riskCopy: function riskCopy() {
+        if (this.risk.risk_state === "low_risk") {
+          return "管理员风险摘要为低风险；这仍只是只读投影，不代表前端拥有处置权或 Grant 签发权。";
+        }
+        if (this.risk.risk_state === "security_revoked") {
+          return "当前风险已进入安全吊销状态；工作台不能执行禁用、下架、吊销传播或降级该状态。";
+        }
+        if (this.risk.risk_state === "risk_unknown") {
+          return "管理员风险 envelope 缺失；前端必须保守降级，不能推断为低风险或安全可通过。";
+        }
+        return "管理员风险需要复核；Store 只展示摘要和跳转，不展示 raw Trace、raw Evidence 或用户设备明细。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "admin_risk_workbench.v1 / aggregate only / no disable execution / no lifecycle mutation / no AgentOps policy override / no CapabilityGrant / no raw Trace / no raw Evidence / no user-device details";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
+  Vue.component("sdlc-version-history-workbench", {
+    props: ["history"],
+    template: [
+      '<section class="workspace-section workspace-section--wide version-history-workbench">',
+      '  <div class="section-heading">',
+      '    <h2>版本历史</h2>',
+      '    <sdlc-status-chip :label="history.version_state" :tone="versionTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ historyCopy }}</p>',
+      '  <dl class="facts version-history-workbench__facts">',
+      '    <sdlc-metric-row label="合同" :value="history.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="当前版本" :value="history.current_version || \'unknown\'" :tone="versionTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="最新版本" :value="history.latest_version || \'unknown\'" :tone="latestTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="发布状态" :value="history.release_status" :tone="releaseTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="升级" :value="upgrade.upgrade_state" :tone="upgradeTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="回退" :value="rollback.rollback_state" :tone="rollbackTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="替代版本" :value="replacement.replacement_state" :tone="replacementTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="影响安装" :value="affected.affected_install_count || 0" :tone="affectedTone"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="version-history-workbench__grid">',
+      '    <div>',
+      '      <span>Artifact Trust</span>',
+      '      <strong>{{ trust.signature_state }}</strong>',
+      '      <small>{{ trust.artifact_hash || "hash unavailable" }} / {{ trust.package_validation_state }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Upgrade Cue</span>',
+      '      <strong>{{ upgrade.candidate_version || upgrade.upgrade_state }}</strong>',
+      '      <small>{{ upgrade.action_mode }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Rollback Cue</span>',
+      '      <strong>{{ rollback.rollback_version || rollback.rollback_state }}</strong>',
+      '      <small>{{ rollback.action_mode }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Replacement Mapping</span>',
+      '      <strong>{{ replacement.replacement_agent_id || replacement.replacement_state }}</strong>',
+      '      <small>{{ replacement.mapping_source }} / explicit={{ replacement.explicit_mapping_only }}</small>',
+      '    </div>',
+      '    <div>',
+      '      <span>Affected Scope</span>',
+      '      <strong>{{ affected.affected_install_count || 0 }} installs</strong>',
+      '      <small>{{ affected.notification_state }} / devices_exposed={{ affected.affected_device_details_exposed }}</small>',
+      '    </div>',
+      '  </div>',
+      '  <div class="version-history-workbench__source">',
+      '    <strong>{{ sourceTruthSummary }}</strong>',
+      '    <span>{{ boundaryLabel }}</span>',
+      '  </div>',
+      '  <div class="request-panel__footer">',
+      '    <span>{{ audit.trace_id || "trace unavailable" }}</span>',
+      '    <sdlc-action-button :action="history.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '  </div>',
+      '</section>'
+    ].join(""),
+    computed: {
+      trust: function trust() {
+        return this.history.artifact_trust || {};
+      },
+      upgrade: function upgrade() {
+        return this.history.upgrade_cue || {};
+      },
+      rollback: function rollback() {
+        return this.history.rollback_cue || {};
+      },
+      replacement: function replacement() {
+        return this.history.replacement_cue || {};
+      },
+      affected: function affected() {
+        return this.history.affected_scope || {};
+      },
+      sourceOfTruth: function sourceOfTruth() {
+        return this.history.source_of_truth || {};
+      },
+      audit: function audit() {
+        return this.history.audit_fields || {};
+      },
+      versionTone: function versionTone() {
+        if (this.history.version_state === "current_stable") {
+          return "success";
+        }
+        if (this.history.version_state === "security_revoked" || this.history.version_state === "version_history_unavailable") {
+          return "danger";
+        }
+        return "warning";
+      },
+      latestTone: function latestTone() {
+        return this.history.latest_version === this.history.current_version ? "success" : "warning";
+      },
+      releaseTone: function releaseTone() {
+        if (this.history.release_status === "published" || this.history.release_status === "manual_installable-preview") {
+          return "success";
+        }
+        return this.history.release_status === "security_revoked" ? "danger" : "warning";
+      },
+      upgradeTone: function upgradeTone() {
+        if (this.upgrade.upgrade_state === "upgrade_available") {
+          return "warning";
+        }
+        if (this.upgrade.upgrade_state === "blocked_by_security_revocation") {
+          return "danger";
+        }
+        return "neutral";
+      },
+      rollbackTone: function rollbackTone() {
+        if (this.rollback.rollback_state === "rollback_available") {
+          return "warning";
+        }
+        if (this.rollback.rollback_state === "not_allowed") {
+          return "danger";
+        }
+        return "neutral";
+      },
+      replacementTone: function replacementTone() {
+        if (this.replacement.replacement_state === "replacement_available" || this.replacement.replacement_state === "deprecated_replacement") {
+          return "warning";
+        }
+        return this.replacement.replacement_state === "unknown" ? "danger" : "neutral";
+      },
+      affectedTone: function affectedTone() {
+        return Number(this.affected.affected_install_count || 0) > 0 ? "warning" : "neutral";
+      },
+      sourceTruthSummary: function sourceTruthSummary() {
+        return [
+          this.sourceOfTruth.agent_version,
+          this.sourceOfTruth.package_trust,
+          this.sourceOfTruth.lifecycle,
+          this.sourceOfTruth.installation,
+          this.sourceOfTruth.notification
+        ].filter(Boolean).join(" / ");
+      },
+      historyCopy: function historyCopy() {
+        if (this.history.version_state === "current_stable") {
+          return "版本历史显示当前版本稳定；工作台只读展示 AgentVersion 事实，没有前端变更权。";
+        }
+        if (this.history.version_state === "upgrade_available") {
+          return "存在升级候选；工作台只展示候选版本和影响范围，不自动升级、不执行安装器。";
+        }
+        if (this.history.version_state === "rollback_available") {
+          return "存在回退候选；工作台只展示显式回退映射，不执行回退或修改安装记录。";
+        }
+        if (this.history.version_state === "security_revoked") {
+          return "当前版本已安全吊销；工作台不能把 revoked 降级为可升级、可回退或可运行。";
+        }
+        if (this.history.version_state === "version_history_unavailable") {
+          return "版本历史 envelope 缺失；前端必须保守降级，不能推断可升级或可运行。";
+        }
+        return "版本历史需要复核；替代版本必须来自显式映射，不能由前端本地推荐。";
+      },
+      boundaryLabel: function boundaryLabel() {
+        return "version_history_workbench.v1 / aggregate only / no auto upgrade / no rollback execution / no AgentVersion mutation / no replacement algorithm / no installer execution / no raw Evidence";
+      }
+    }
+  });
+
   Vue.component("sdlc-draft-review-submission", {
     props: ["submission"],
     template: [
@@ -3459,6 +4202,11 @@
       "installationRuntimeHandoff",
       "runtimeAvailability",
       "healthSummaryFreshness",
+      "ownerGovernanceWorkbench",
+      "installationRecordsWorkbench",
+      "systemSettingsWorkbench",
+      "adminRiskWorkbench",
+      "versionHistoryWorkbench",
       "installationDistribution",
       "feedbackOwnerResponseLoop",
       "lifecycleGovernance",
@@ -3510,6 +4258,11 @@
       '  </header>',
       '  <sdlc-action-feedback :feedback="actionFeedback"></sdlc-action-feedback>',
       '  <div class="workspace-grid">',
+      '    <sdlc-owner-governance-workbench :workbench="ownerGovernanceWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-owner-governance-workbench>',
+      '    <sdlc-installation-records-workbench :records="installationRecordsWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-installation-records-workbench>',
+      '    <sdlc-system-settings-workbench :settings="systemSettingsWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-system-settings-workbench>',
+      '    <sdlc-admin-risk-workbench :risk="adminRiskWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-admin-risk-workbench>',
+      '    <sdlc-version-history-workbench :history="versionHistoryWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-version-history-workbench>',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-package-validation-report :report="packageValidationReport" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-package-validation-report>',

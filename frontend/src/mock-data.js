@@ -227,6 +227,1256 @@ window.AgentStoreMock = {
       }
     }
   },
+  ownerGovernanceWorkbench: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "owner_governance_workbench.v1",
+      agent_id: "framework.ai-autosdlc",
+      version: "1.0.0",
+      owner_team: "SDLC Platform",
+      queue_state: "attention_required",
+      pending_counts: {
+        draft_review: 1,
+        policy_approval: 1,
+        feedback: 0,
+        lifecycle: 0,
+        installation_distribution: 1,
+        package_validation: 0,
+        quality_evidence: 1
+      },
+      risk_summary: {
+        highest_risk: "runtime_capability_missing",
+        blocked_count: 1,
+        attention_count: 3,
+        sla_state: "review_due_today"
+      },
+      focus_items: [
+        {
+          item_id: "runtime-capability-gap",
+          source_contract: "agent_manifest_runtime_contract.v1",
+          item_state: "blocked",
+          summary: "Runtime 缺少 policy_check 与 outbox，不能展示为 Runtime compatible。",
+          next_action_id: "view_owner_runtime_gap"
+        },
+        {
+          item_id: "approval-context",
+          source_contract: "policy_approval_request.v1",
+          item_state: "attention_required",
+          summary: "高风险权限申请需要补齐 justification 与 policy context。",
+          next_action_id: "open_owner_approval_queue"
+        },
+        {
+          item_id: "quality-summary",
+          source_contract: "quality_evidence_access_summary.v1",
+          item_state: "attention_required",
+          summary: "AgentOps 质量摘要仍为脱敏回显，不能展示 raw evidence。",
+          next_action_id: "review_owner_quality_gap"
+        }
+      ],
+      source_of_truth: {
+        owner_queue: "agent_store_projection",
+        approval: "agentops_approval_echo",
+        feedback: "agent_store_feedback_loop",
+        lifecycle: "agent_store_lifecycle_governance",
+        quality: "agentops_summary_echo",
+        raw_evidence: "evidence_vault"
+      },
+      audit_fields: {
+        audit_id: "audit-owner-workbench-framework.ai-autosdlc",
+        trace_id: "trace-owner-workbench-framework.ai-autosdlc",
+        generated_at: "2026-05-11T13:48:00Z"
+      },
+      boundary_flags: [
+        "no real approval",
+        "no notification sending",
+        "no AgentVersion mutation",
+        "no AgentOps override"
+      ],
+      next_action: {
+        action_id: "open_owner_governance_workbench",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "owner_governance_workbench.v1",
+      agent_id: "agentops.evidence-reporter",
+      version: "0.4.0",
+      owner_team: "AgentOps",
+      queue_state: "ready_for_owner_review",
+      pending_counts: {
+        draft_review: 1,
+        policy_approval: 0,
+        feedback: 1,
+        lifecycle: 0,
+        installation_distribution: 0,
+        package_validation: 1,
+        quality_evidence: 0
+      },
+      risk_summary: {
+        highest_risk: "warning_evidence_gap",
+        blocked_count: 0,
+        attention_count: 2,
+        sla_state: "within_sla"
+      },
+      focus_items: [
+        {
+          item_id: "package-warning-gap",
+          source_contract: "package_validation_report.v1",
+          item_state: "attention_required",
+          summary: "缺少 scan_report_ref；审核可继续但缺口必须保持可见。",
+          next_action_id: "review_owner_package_gap"
+        },
+        {
+          item_id: "feedback-triage",
+          source_contract: "feedback_owner_response_loop.v1",
+          item_state: "ready",
+          summary: "一条反馈等待 Owner 分诊或回复。",
+          next_action_id: "open_owner_feedback_queue"
+        }
+      ],
+      source_of_truth: {
+        owner_queue: "agent_store_projection",
+        approval: "agentops_approval_echo",
+        feedback: "agent_store_feedback_loop",
+        lifecycle: "agent_store_lifecycle_governance",
+        quality: "agentops_summary_echo",
+        raw_evidence: "evidence_vault"
+      },
+      audit_fields: {
+        audit_id: "audit-owner-workbench-agentops.evidence-reporter",
+        trace_id: "trace-owner-workbench-agentops.evidence-reporter",
+        generated_at: "2026-05-11T13:49:00Z"
+      },
+      boundary_flags: [
+        "no real approval",
+        "no notification sending",
+        "no AgentVersion mutation",
+        "no AgentOps override"
+      ],
+      next_action: {
+        action_id: "open_owner_governance_workbench",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "owner_governance_workbench.v1",
+      agent_id: "security.policy-guard",
+      version: "0.2.1",
+      owner_team: "Security",
+      queue_state: "blocked",
+      pending_counts: {
+        draft_review: 0,
+        policy_approval: 2,
+        feedback: 0,
+        lifecycle: 1,
+        installation_distribution: 1,
+        package_validation: 2,
+        quality_evidence: 1
+      },
+      risk_summary: {
+        highest_risk: "security_revoked_candidate",
+        blocked_count: 4,
+        attention_count: 3,
+        sla_state: "blocked_until_security_review"
+      },
+      focus_items: [
+        {
+          item_id: "package-blockers",
+          source_contract: "package_validation_report.v1",
+          item_state: "blocked",
+          summary: "Package Validation 存在 placeholder 与 AI source 阻断。",
+          next_action_id: "return_to_draft"
+        },
+        {
+          item_id: "lifecycle-security",
+          source_contract: "lifecycle_governance_baseline.v1",
+          item_state: "blocked",
+          summary: "安全禁用候选必须补齐影响范围和替代版本。",
+          next_action_id: "fix_lifecycle_transition"
+        }
+      ],
+      source_of_truth: {
+        owner_queue: "agent_store_projection",
+        approval: "agentops_approval_echo",
+        feedback: "agent_store_feedback_loop",
+        lifecycle: "agent_store_lifecycle_governance",
+        quality: "agentops_summary_echo",
+        raw_evidence: "evidence_vault"
+      },
+      audit_fields: {
+        audit_id: "audit-owner-workbench-security.policy-guard",
+        trace_id: "trace-owner-workbench-security.policy-guard",
+        generated_at: "2026-05-11T13:50:00Z"
+      },
+      boundary_flags: [
+        "no real approval",
+        "no notification sending",
+        "no AgentVersion mutation",
+        "no AgentOps override"
+      ],
+      next_action: {
+        action_id: "open_owner_governance_workbench",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "owner_governance_workbench.v1",
+      agent_id: "developer.release-notes",
+      version: "0.1.2",
+      owner_team: "Developer Experience",
+      queue_state: "healthy",
+      pending_counts: {
+        draft_review: 0,
+        policy_approval: 0,
+        feedback: 0,
+        lifecycle: 0,
+        installation_distribution: 0,
+        package_validation: 0,
+        quality_evidence: 0
+      },
+      risk_summary: {
+        highest_risk: "none",
+        blocked_count: 0,
+        attention_count: 0,
+        sla_state: "no_pending_owner_action"
+      },
+      focus_items: [
+        {
+          item_id: "healthy-owner-scan",
+          source_contract: "owner_governance_workbench.v1",
+          item_state: "ready",
+          summary: "当前没有 Owner 阻断待办；仍需通过单项面板查看事实源。",
+          next_action_id: "continue_owner_governance_review"
+        }
+      ],
+      source_of_truth: {
+        owner_queue: "agent_store_projection",
+        approval: "agentops_approval_echo",
+        feedback: "agent_store_feedback_loop",
+        lifecycle: "agent_store_lifecycle_governance",
+        quality: "agentops_summary_echo",
+        raw_evidence: "evidence_vault"
+      },
+      audit_fields: {
+        audit_id: "audit-owner-workbench-developer.release-notes",
+        trace_id: "trace-owner-workbench-developer.release-notes",
+        generated_at: "2026-05-11T13:51:00Z"
+      },
+      boundary_flags: [
+        "no real approval",
+        "no notification sending",
+        "no AgentVersion mutation",
+        "no AgentOps override"
+      ],
+      next_action: {
+        action_id: "continue_owner_governance_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
+  installationRecordsWorkbench: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "installation_records_workbench.v1",
+      agent_id: "framework.ai-autosdlc",
+      version: "1.0.0",
+      installation_state: "activation_required",
+      installation_id: "inst-framework-ai-autosdlc",
+      device_binding_state: "pending_signature_test",
+      device_label: "developer-macbook",
+      runtime_state: "runtime_capability_missing",
+      version_cue: {
+        installed_version: "1.0.0",
+        latest_version: "1.0.0",
+        upgrade_state: "not_available",
+        candidate_version: ""
+      },
+      health_cue: {
+        freshness_state: "health_refresh_required",
+        summary_state: "pending_agentops_echo",
+        valid_until: "",
+        recommendation_basis_allowed: false,
+        basis_guard: "health_summary_not_recommendation_basis"
+      },
+      revocation_notice: {
+        notice_state: "none",
+        reason: "",
+        effective_at: "",
+        replacement_agent_id: ""
+      },
+      source_of_truth: {
+        installation: "agent_store_installation_record",
+        device_binding: "installation_runtime_handoff.v1",
+        runtime: "runtime_availability_summary.v1",
+        health: "health_summary_freshness.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-install-records-framework.ai-autosdlc",
+        trace_id: "trace-install-records-framework.ai-autosdlc",
+        generated_at: "2026-05-11T15:06:00Z"
+      },
+      boundary_flags: [
+        "no real install",
+        "no Runtime launch",
+        "no raw Trace",
+        "no policy bypass"
+      ],
+      next_action: {
+        action_id: "open_installation_records",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "installation_records_workbench.v1",
+      agent_id: "agentops.evidence-reporter",
+      version: "0.4.0",
+      installation_state: "installed",
+      installation_id: "inst-agentops-evidence-reporter",
+      device_binding_state: "active",
+      device_label: "platform-runner-02",
+      runtime_state: "runtime_ready",
+      version_cue: {
+        installed_version: "0.4.0",
+        latest_version: "0.4.0",
+        upgrade_state: "current",
+        candidate_version: ""
+      },
+      health_cue: {
+        freshness_state: "health_fresh",
+        summary_state: "healthy",
+        valid_until: "2026-05-12T00:00:00Z",
+        recommendation_basis_allowed: false,
+        basis_guard: "health_summary_not_recommendation_basis"
+      },
+      revocation_notice: {
+        notice_state: "none",
+        reason: "",
+        effective_at: "",
+        replacement_agent_id: ""
+      },
+      source_of_truth: {
+        installation: "agent_store_installation_record",
+        device_binding: "installation_runtime_handoff.v1",
+        runtime: "runtime_availability_summary.v1",
+        health: "health_summary_freshness.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-install-records-agentops.evidence-reporter",
+        trace_id: "trace-install-records-agentops.evidence-reporter",
+        generated_at: "2026-05-11T15:07:00Z"
+      },
+      boundary_flags: [
+        "no real install",
+        "no Runtime launch",
+        "no raw Trace",
+        "no policy bypass"
+      ],
+      next_action: {
+        action_id: "view_installation_health",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "installation_records_workbench.v1",
+      agent_id: "security.policy-guard",
+      version: "0.2.1",
+      installation_state: "revoked",
+      installation_id: "inst-security-policy-guard",
+      device_binding_state: "revoked",
+      device_label: "security-lab",
+      runtime_state: "runtime_blocked_by_lifecycle",
+      version_cue: {
+        installed_version: "0.2.1",
+        latest_version: "0.2.1",
+        upgrade_state: "blocked",
+        candidate_version: ""
+      },
+      health_cue: {
+        freshness_state: "health_summary_unavailable",
+        summary_state: "blocked_by_revocation",
+        valid_until: "",
+        recommendation_basis_allowed: false,
+        basis_guard: "health_summary_not_recommendation_basis"
+      },
+      revocation_notice: {
+        notice_state: "security_revoked",
+        reason: "Policy Guard is blocked until Security completes revocation review.",
+        effective_at: "2026-05-11T12:00:00Z",
+        replacement_agent_id: "security.policy-guard.safe"
+      },
+      source_of_truth: {
+        installation: "agent_store_installation_record",
+        device_binding: "installation_runtime_handoff.v1",
+        runtime: "runtime_availability_summary.v1",
+        health: "health_summary_freshness.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-install-records-security.policy-guard",
+        trace_id: "trace-install-records-security.policy-guard",
+        generated_at: "2026-05-11T15:08:00Z"
+      },
+      boundary_flags: [
+        "no real install",
+        "no Runtime launch",
+        "no raw Trace",
+        "no policy bypass"
+      ],
+      next_action: {
+        action_id: "view_revocation_notice",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "installation_records_workbench.v1",
+      agent_id: "developer.release-notes",
+      version: "0.1.2",
+      installation_state: "installed",
+      installation_id: "inst-developer-release-notes",
+      device_binding_state: "active",
+      device_label: "local-workspace",
+      runtime_state: "runtime_ready",
+      version_cue: {
+        installed_version: "0.1.1",
+        latest_version: "0.1.2",
+        upgrade_state: "upgrade_available",
+        candidate_version: "0.1.2"
+      },
+      health_cue: {
+        freshness_state: "health_attention_required",
+        summary_state: "degraded",
+        valid_until: "2026-05-11T20:00:00Z",
+        recommendation_basis_allowed: false,
+        basis_guard: "health_summary_not_recommendation_basis"
+      },
+      revocation_notice: {
+        notice_state: "none",
+        reason: "",
+        effective_at: "",
+        replacement_agent_id: ""
+      },
+      source_of_truth: {
+        installation: "agent_store_installation_record",
+        device_binding: "installation_runtime_handoff.v1",
+        runtime: "runtime_availability_summary.v1",
+        health: "health_summary_freshness.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-install-records-developer.release-notes",
+        trace_id: "trace-install-records-developer.release-notes",
+        generated_at: "2026-05-11T15:09:00Z"
+      },
+      boundary_flags: [
+        "no real install",
+        "no Runtime launch",
+        "no raw Trace",
+        "no policy bypass"
+      ],
+      next_action: {
+        action_id: "review_upgrade_candidate",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    }
+  },
+  systemSettingsWorkbench: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "system_settings_workbench.v1",
+      agent_id: "framework.ai-autosdlc",
+      settings_state: "attention_required",
+      taxonomy_summary: {
+        category_state: "mapped",
+        tags_state: "complete",
+        category_count: 3,
+        tag_count: 8,
+        blocked_terms: []
+      },
+      recommendation_slot: {
+        slot_state: "guarded",
+        collection: "recommended",
+        rank_source: "agent_store_curated_projection",
+        override_allowed: false
+      },
+      mirror_source: {
+        mirror_state: "ready",
+        active_mirror: "internal-sdlc-tools",
+        signature_policy: "signature_required",
+        fallback_mirror: "readonly-public-docs"
+      },
+      installer_config: {
+        config_state: "runtime_capability_gap",
+        managed_installer_enabled: false,
+        isolation_policy: "basic_isolation_required",
+        smoke_test_required: true
+      },
+      agentops_endpoint: {
+        endpoint_state: "credential_pending_signature_test",
+        endpoint_ref_redacted: "agentops://tenant/sdlc-platform/***",
+        credential_state: "issued_pending_test",
+        secret_exposed: false
+      },
+      source_of_truth: {
+        taxonomy: "agent_store_settings_projection",
+        recommendation: "agent_store_curated_projection",
+        mirror: "agent_store_mirror_registry",
+        installer: "managed_installer_preview.v1",
+        endpoint: "agentops_endpoint_registry",
+        credential: "agentops_credential_echo"
+      },
+      audit_fields: {
+        audit_id: "audit-system-settings-framework.ai-autosdlc",
+        trace_id: "trace-system-settings-framework.ai-autosdlc",
+        generated_at: "2026-05-11T15:12:00Z"
+      },
+      boundary_flags: [
+        "no settings mutation",
+        "no credential exposure",
+        "no recommendation override",
+        "no installer execution",
+        "no endpoint rewrite"
+      ],
+      next_action: {
+        action_id: "open_system_settings_workbench",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "system_settings_workbench.v1",
+      agent_id: "agentops.evidence-reporter",
+      settings_state: "ready",
+      taxonomy_summary: {
+        category_state: "mapped",
+        tags_state: "complete",
+        category_count: 2,
+        tag_count: 6,
+        blocked_terms: []
+      },
+      recommendation_slot: {
+        slot_state: "ready",
+        collection: "ready",
+        rank_source: "agent_store_curated_projection",
+        override_allowed: false
+      },
+      mirror_source: {
+        mirror_state: "ready",
+        active_mirror: "internal-agentops-connectors",
+        signature_policy: "signature_required",
+        fallback_mirror: "none"
+      },
+      installer_config: {
+        config_state: "preview_ready",
+        managed_installer_enabled: true,
+        isolation_policy: "basic_isolation_required",
+        smoke_test_required: true
+      },
+      agentops_endpoint: {
+        endpoint_state: "healthy",
+        endpoint_ref_redacted: "agentops://tenant/evidence/***",
+        credential_state: "active",
+        secret_exposed: false
+      },
+      source_of_truth: {
+        taxonomy: "agent_store_settings_projection",
+        recommendation: "agent_store_curated_projection",
+        mirror: "agent_store_mirror_registry",
+        installer: "managed_installer_preview.v1",
+        endpoint: "agentops_endpoint_registry",
+        credential: "agentops_credential_echo"
+      },
+      audit_fields: {
+        audit_id: "audit-system-settings-agentops.evidence-reporter",
+        trace_id: "trace-system-settings-agentops.evidence-reporter",
+        generated_at: "2026-05-11T15:13:00Z"
+      },
+      boundary_flags: [
+        "no settings mutation",
+        "no credential exposure",
+        "no recommendation override",
+        "no installer execution",
+        "no endpoint rewrite"
+      ],
+      next_action: {
+        action_id: "review_system_settings_summary",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "system_settings_workbench.v1",
+      agent_id: "security.policy-guard",
+      settings_state: "blocked",
+      taxonomy_summary: {
+        category_state: "blocked_term_review",
+        tags_state: "incomplete",
+        category_count: 1,
+        tag_count: 3,
+        blocked_terms: ["unreviewed_high_risk_runtime"]
+      },
+      recommendation_slot: {
+        slot_state: "blocked",
+        collection: "guarded",
+        rank_source: "agent_store_curated_projection",
+        override_allowed: false
+      },
+      mirror_source: {
+        mirror_state: "signature_policy_blocked",
+        active_mirror: "security-lab-staging",
+        signature_policy: "signature_required",
+        fallback_mirror: "none"
+      },
+      installer_config: {
+        config_state: "blocked_by_policy",
+        managed_installer_enabled: false,
+        isolation_policy: "security_review_required",
+        smoke_test_required: true
+      },
+      agentops_endpoint: {
+        endpoint_state: "policy_blocked",
+        endpoint_ref_redacted: "agentops://tenant/security/***",
+        credential_state: "revoked",
+        secret_exposed: false
+      },
+      source_of_truth: {
+        taxonomy: "agent_store_settings_projection",
+        recommendation: "agent_store_curated_projection",
+        mirror: "agent_store_mirror_registry",
+        installer: "managed_installer_preview.v1",
+        endpoint: "agentops_endpoint_registry",
+        credential: "agentops_credential_echo"
+      },
+      audit_fields: {
+        audit_id: "audit-system-settings-security.policy-guard",
+        trace_id: "trace-system-settings-security.policy-guard",
+        generated_at: "2026-05-11T15:14:00Z"
+      },
+      boundary_flags: [
+        "no settings mutation",
+        "no credential exposure",
+        "no recommendation override",
+        "no installer execution",
+        "no endpoint rewrite"
+      ],
+      next_action: {
+        action_id: "fix_system_settings_blockers",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "system_settings_workbench.v1",
+      agent_id: "developer.release-notes",
+      settings_state: "attention_required",
+      taxonomy_summary: {
+        category_state: "mapped",
+        tags_state: "needs_review",
+        category_count: 2,
+        tag_count: 5,
+        blocked_terms: []
+      },
+      recommendation_slot: {
+        slot_state: "draft_slot",
+        collection: "local",
+        rank_source: "agent_store_curated_projection",
+        override_allowed: false
+      },
+      mirror_source: {
+        mirror_state: "fallback_only",
+        active_mirror: "readonly-local-tools",
+        signature_policy: "signature_required",
+        fallback_mirror: "internal-sdlc-tools"
+      },
+      installer_config: {
+        config_state: "preview_only",
+        managed_installer_enabled: false,
+        isolation_policy: "basic_isolation_required",
+        smoke_test_required: true
+      },
+      agentops_endpoint: {
+        endpoint_state: "optional",
+        endpoint_ref_redacted: "agentops://tenant/devex/***",
+        credential_state: "not_required",
+        secret_exposed: false
+      },
+      source_of_truth: {
+        taxonomy: "agent_store_settings_projection",
+        recommendation: "agent_store_curated_projection",
+        mirror: "agent_store_mirror_registry",
+        installer: "managed_installer_preview.v1",
+        endpoint: "agentops_endpoint_registry",
+        credential: "agentops_credential_echo"
+      },
+      audit_fields: {
+        audit_id: "audit-system-settings-developer.release-notes",
+        trace_id: "trace-system-settings-developer.release-notes",
+        generated_at: "2026-05-11T15:15:00Z"
+      },
+      boundary_flags: [
+        "no settings mutation",
+        "no credential exposure",
+        "no recommendation override",
+        "no installer execution",
+        "no endpoint rewrite"
+      ],
+      next_action: {
+        action_id: "review_system_settings_summary",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
+  adminRiskWorkbench: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "admin_risk_workbench.v1",
+      agent_id: "framework.ai-autosdlc",
+      risk_state: "evidence_gap",
+      risk_level: "medium",
+      runtime_risk_level: "guarded",
+      evidence_gaps: [
+        {
+          gap_id: "signature_test_pending",
+          source_contract: "agentops_summary.v1",
+          severity: "warning",
+          summary: "Reporter signature test is pending; actual L5 display remains blocked."
+        },
+        {
+          gap_id: "runtime_capability_missing",
+          source_contract: "runtime_availability_summary.v1",
+          severity: "blocked",
+          summary: "Runtime is missing policy_check and outbox capabilities."
+        }
+      ],
+      policy_signal: {
+        policy_state: "approval_required",
+        policy_ref: "security-baseline/2026.05",
+        approval_status: "pending",
+        policy_override_allowed: false
+      },
+      permission_signal: {
+        permission_state: "visible_but_guarded",
+        denied_scope: "actual_l5_display",
+        capability_grant_issued: false,
+        user_device_details_exposed: false
+      },
+      security_actions: [
+        {
+          action_id: "review_admin_risk_gap",
+          action_state: "available",
+          target_system: "agent_store",
+          requires_security_role: true,
+          execution_mode: "preview_only"
+        }
+      ],
+      source_of_truth: {
+        risk: "agentops_risk_summary_echo",
+        policy: "agentops_policy_echo",
+        permission: "permission_denial_action_summary.v1",
+        evidence: "quality_evidence_access_summary.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-admin-risk-framework.ai-autosdlc",
+        trace_id: "trace-admin-risk-framework.ai-autosdlc",
+        generated_at: "2026-05-11T16:00:00Z"
+      },
+      boundary_flags: [
+        "no disable execution",
+        "no lifecycle mutation",
+        "no AgentOps policy override",
+        "no CapabilityGrant",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "open_admin_risk_workbench",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "admin_risk_workbench.v1",
+      agent_id: "agentops.evidence-reporter",
+      risk_state: "low_risk",
+      risk_level: "low",
+      runtime_risk_level: "normal",
+      evidence_gaps: [],
+      policy_signal: {
+        policy_state: "allowed",
+        policy_ref: "agentops-connector-policy/2026.05",
+        approval_status: "not_required",
+        policy_override_allowed: false
+      },
+      permission_signal: {
+        permission_state: "allowed_summary_only",
+        denied_scope: "",
+        capability_grant_issued: false,
+        user_device_details_exposed: false
+      },
+      security_actions: [
+        {
+          action_id: "review_admin_risk_summary",
+          action_state: "available",
+          target_system: "agent_store",
+          requires_security_role: true,
+          execution_mode: "preview_only"
+        }
+      ],
+      source_of_truth: {
+        risk: "agentops_risk_summary_echo",
+        policy: "agentops_policy_echo",
+        permission: "permission_denial_action_summary.v1",
+        evidence: "quality_evidence_access_summary.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-admin-risk-agentops.evidence-reporter",
+        trace_id: "trace-admin-risk-agentops.evidence-reporter",
+        generated_at: "2026-05-11T16:01:00Z"
+      },
+      boundary_flags: [
+        "no disable execution",
+        "no lifecycle mutation",
+        "no AgentOps policy override",
+        "no CapabilityGrant",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "review_admin_risk_summary",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "admin_risk_workbench.v1",
+      agent_id: "security.policy-guard",
+      risk_state: "security_revoked",
+      risk_level: "critical",
+      runtime_risk_level: "blocked",
+      evidence_gaps: [
+        {
+          gap_id: "raw_evidence_permission_required",
+          source_contract: "quality_evidence_access_summary.v1",
+          severity: "blocked",
+          summary: "Raw evidence requires Evidence Vault approval and is not exposed in Store."
+        },
+        {
+          gap_id: "package_validation_blocked",
+          source_contract: "package_validation_report.v1",
+          severity: "blocked",
+          summary: "Package Validation still contains placeholder and AI source blockers."
+        }
+      ],
+      policy_signal: {
+        policy_state: "policy_denied",
+        policy_ref: "security-policy-guard/revocation",
+        approval_status: "rejected",
+        policy_override_allowed: false
+      },
+      permission_signal: {
+        permission_state: "blocked",
+        denied_scope: "agent.install,agent.run",
+        capability_grant_issued: false,
+        user_device_details_exposed: false
+      },
+      security_actions: [
+        {
+          action_id: "review_security_revocation",
+          action_state: "required",
+          target_system: "agentops_risk_center",
+          requires_security_role: true,
+          execution_mode: "preview_only"
+        },
+        {
+          action_id: "prepare_security_notification",
+          action_state: "available",
+          target_system: "agent_store",
+          requires_security_role: true,
+          execution_mode: "preview_only"
+        }
+      ],
+      source_of_truth: {
+        risk: "agentops_risk_summary_echo",
+        policy: "agentops_policy_echo",
+        permission: "permission_denial_action_summary.v1",
+        evidence: "quality_evidence_access_summary.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-admin-risk-security.policy-guard",
+        trace_id: "trace-admin-risk-security.policy-guard",
+        generated_at: "2026-05-11T16:02:00Z"
+      },
+      boundary_flags: [
+        "no disable execution",
+        "no lifecycle mutation",
+        "no AgentOps policy override",
+        "no CapabilityGrant",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "review_security_revocation",
+        target_system: "agentops_risk_center",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "admin_risk_workbench.v1",
+      agent_id: "developer.release-notes",
+      risk_state: "policy_blocked",
+      risk_level: "medium",
+      runtime_risk_level: "guarded",
+      evidence_gaps: [
+        {
+          gap_id: "skill_schema_gap",
+          source_contract: "skill_registry.v1",
+          severity: "warning",
+          summary: "Skill schema reference must be confirmed before recommendation expansion."
+        }
+      ],
+      policy_signal: {
+        policy_state: "context_incomplete",
+        policy_ref: "devex-low-risk-policy/2026.05",
+        approval_status: "context_required",
+        policy_override_allowed: false
+      },
+      permission_signal: {
+        permission_state: "installable_with_review",
+        denied_scope: "",
+        capability_grant_issued: false,
+        user_device_details_exposed: false
+      },
+      security_actions: [
+        {
+          action_id: "complete_admin_policy_context",
+          action_state: "available",
+          target_system: "agent_store",
+          requires_security_role: true,
+          execution_mode: "preview_only"
+        }
+      ],
+      source_of_truth: {
+        risk: "agentops_risk_summary_echo",
+        policy: "agentops_policy_echo",
+        permission: "permission_denial_action_summary.v1",
+        evidence: "quality_evidence_access_summary.v1",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-admin-risk-developer.release-notes",
+        trace_id: "trace-admin-risk-developer.release-notes",
+        generated_at: "2026-05-11T16:03:00Z"
+      },
+      boundary_flags: [
+        "no disable execution",
+        "no lifecycle mutation",
+        "no AgentOps policy override",
+        "no CapabilityGrant",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "complete_admin_policy_context",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
+  versionHistoryWorkbench: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "version_history_workbench.v1",
+      agent_id: "framework.ai-autosdlc",
+      version_state: "current_stable",
+      current_version: "1.0.0",
+      latest_version: "1.0.0",
+      release_status: "manual_installable-preview",
+      artifact_trust: {
+        artifact_hash: "sha256:framework",
+        signature_state: "verified",
+        issuer: "Agent Store",
+        package_validation_state: "passed"
+      },
+      upgrade_cue: {
+        upgrade_state: "not_available",
+        candidate_version: "",
+        action_mode: "view_only"
+      },
+      rollback_cue: {
+        rollback_state: "not_available",
+        rollback_version: "",
+        action_mode: "view_only"
+      },
+      replacement_cue: {
+        replacement_state: "not_required",
+        replacement_agent_id: "",
+        mapping_source: "none",
+        explicit_mapping_only: true
+      },
+      affected_scope: {
+        affected_install_count: 24,
+        affected_user_count_redacted: true,
+        affected_device_details_exposed: false,
+        notification_state: "not_required"
+      },
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        package_trust: "agent_store_package_trust",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        installation: "installation_records_workbench.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-version-history-framework.ai-autosdlc",
+        trace_id: "trace-version-history-framework.ai-autosdlc",
+        generated_at: "2026-05-11T16:18:00Z"
+      },
+      boundary_flags: [
+        "no auto upgrade",
+        "no rollback execution",
+        "no AgentVersion mutation",
+        "no replacement algorithm",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "open_version_history",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "version_history_workbench.v1",
+      agent_id: "agentops.evidence-reporter",
+      version_state: "upgrade_available",
+      current_version: "0.4.0",
+      latest_version: "0.5.0",
+      release_status: "published",
+      artifact_trust: {
+        artifact_hash: "sha256:evidence-reporter-040",
+        signature_state: "verified",
+        issuer: "Agent Store",
+        package_validation_state: "passed_with_warning"
+      },
+      upgrade_cue: {
+        upgrade_state: "upgrade_available",
+        candidate_version: "0.5.0",
+        action_mode: "review_only"
+      },
+      rollback_cue: {
+        rollback_state: "not_available",
+        rollback_version: "",
+        action_mode: "view_only"
+      },
+      replacement_cue: {
+        replacement_state: "not_required",
+        replacement_agent_id: "",
+        mapping_source: "none",
+        explicit_mapping_only: true
+      },
+      affected_scope: {
+        affected_install_count: 8,
+        affected_user_count_redacted: true,
+        affected_device_details_exposed: false,
+        notification_state: "owner_notification_preview"
+      },
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        package_trust: "agent_store_package_trust",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        installation: "installation_records_workbench.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-version-history-agentops.evidence-reporter",
+        trace_id: "trace-version-history-agentops.evidence-reporter",
+        generated_at: "2026-05-11T16:19:00Z"
+      },
+      boundary_flags: [
+        "no auto upgrade",
+        "no rollback execution",
+        "no AgentVersion mutation",
+        "no replacement algorithm",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "review_version_upgrade",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: false,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "version_history_workbench.v1",
+      agent_id: "security.policy-guard",
+      version_state: "security_revoked",
+      current_version: "0.2.1",
+      latest_version: "0.2.1",
+      release_status: "security_revoked",
+      artifact_trust: {
+        artifact_hash: "sha256:policy-guard-021",
+        signature_state: "revoked",
+        issuer: "Agent Store",
+        package_validation_state: "validation_failed"
+      },
+      upgrade_cue: {
+        upgrade_state: "blocked_by_security_revocation",
+        candidate_version: "",
+        action_mode: "disabled"
+      },
+      rollback_cue: {
+        rollback_state: "not_allowed",
+        rollback_version: "",
+        action_mode: "disabled"
+      },
+      replacement_cue: {
+        replacement_state: "replacement_available",
+        replacement_agent_id: "security.policy-guard.safe",
+        mapping_source: "agent_store_replacement_mapping",
+        explicit_mapping_only: true
+      },
+      affected_scope: {
+        affected_install_count: 3,
+        affected_user_count_redacted: true,
+        affected_device_details_exposed: false,
+        notification_state: "security_notification_required"
+      },
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        package_trust: "agent_store_package_trust",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        installation: "installation_records_workbench.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-version-history-security.policy-guard",
+        trace_id: "trace-version-history-security.policy-guard",
+        generated_at: "2026-05-11T16:20:00Z"
+      },
+      boundary_flags: [
+        "no auto upgrade",
+        "no rollback execution",
+        "no AgentVersion mutation",
+        "no replacement algorithm",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "view_version_revocation",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "version_history_workbench.v1",
+      agent_id: "developer.release-notes",
+      version_state: "rollback_available",
+      current_version: "0.1.2",
+      latest_version: "0.1.2",
+      release_status: "published",
+      artifact_trust: {
+        artifact_hash: "sha256:release-notes-012",
+        signature_state: "verified",
+        issuer: "Agent Store",
+        package_validation_state: "fixable"
+      },
+      upgrade_cue: {
+        upgrade_state: "not_available",
+        candidate_version: "",
+        action_mode: "view_only"
+      },
+      rollback_cue: {
+        rollback_state: "rollback_available",
+        rollback_version: "0.1.1",
+        action_mode: "review_only"
+      },
+      replacement_cue: {
+        replacement_state: "deprecated_replacement",
+        replacement_agent_id: "developer.release-notes.v2",
+        mapping_source: "agent_store_replacement_mapping",
+        explicit_mapping_only: true
+      },
+      affected_scope: {
+        affected_install_count: 5,
+        affected_user_count_redacted: true,
+        affected_device_details_exposed: false,
+        notification_state: "owner_notification_preview"
+      },
+      source_of_truth: {
+        agent_version: "agent_store_agent_version",
+        package_trust: "agent_store_package_trust",
+        lifecycle: "lifecycle_governance_baseline.v1",
+        installation: "installation_records_workbench.v1",
+        notification: "notification_routing_summary.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-version-history-developer.release-notes",
+        trace_id: "trace-version-history-developer.release-notes",
+        generated_at: "2026-05-11T16:21:00Z"
+      },
+      boundary_flags: [
+        "no auto upgrade",
+        "no rollback execution",
+        "no AgentVersion mutation",
+        "no replacement algorithm",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "review_version_rollback",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   agentManifestRuntimeContracts: {
     "framework.ai-autosdlc": {
       audit_id: "audit-manifest-framework.ai-autosdlc",

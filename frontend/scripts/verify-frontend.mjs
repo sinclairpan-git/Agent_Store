@@ -579,6 +579,200 @@ for (const packageValidationTerm of [
     `${packageValidationTerm} must be represented`
   );
 }
+for (const ownerGovernanceTerm of [
+  "ownerGovernanceWorkbench",
+  "selectedOwnerGovernanceWorkbench",
+  "owner_governance_workbench.v1",
+  "queue_state",
+  "pending_counts",
+  "risk_summary",
+  "focus_items",
+  "audit_fields",
+  "boundary_flags",
+  "ready_for_owner_review",
+  "attention_required",
+  "blocked",
+  "healthy",
+  "agent_store_projection",
+  "agentops_approval_echo",
+  "agent_store_feedback_loop",
+  "agent_store_lifecycle_governance",
+  "agentops_summary_echo",
+  "frontend_fallback_no_owner_governance_workbench",
+  "open_owner_governance_workbench",
+  "continue_owner_governance_review",
+  "view_owner_runtime_gap",
+  "open_owner_approval_queue",
+  "review_owner_quality_gap",
+  "review_owner_package_gap",
+  "open_owner_feedback_queue",
+  "no real approval",
+  "no notification sending",
+  "no AgentVersion mutation",
+  "no AgentOps override"
+]) {
+  assert(
+    mockData.includes(ownerGovernanceTerm)
+      || app.includes(ownerGovernanceTerm)
+      || componentLibrary.includes(ownerGovernanceTerm),
+    `${ownerGovernanceTerm} must be represented`
+  );
+}
+for (const installationRecordsTerm of [
+  "installationRecordsWorkbench",
+  "selectedInstallationRecordsWorkbench",
+  "installation_records_workbench.v1",
+  "installation_state",
+  "device_binding_state",
+  "version_cue",
+  "health_cue",
+  "revocation_notice",
+  "records_unavailable",
+  "activation_required",
+  "upgrade_available",
+  "security_revoked",
+  "agent_store_installation_record",
+  "installation_runtime_handoff.v1",
+  "runtime_availability_summary.v1",
+  "health_summary_freshness.v1",
+  "lifecycle_governance_baseline.v1",
+  "notification_routing_summary.v1",
+  "health_summary_not_recommendation_basis",
+  "frontend_fallback_no_installation_records_workbench",
+  "open_installation_records",
+  "view_installation_health",
+  "view_revocation_notice",
+  "review_upgrade_candidate",
+  "no real install",
+  "no Runtime launch",
+  "no raw Trace",
+  "no policy bypass"
+]) {
+  assert(
+    mockData.includes(installationRecordsTerm)
+      || app.includes(installationRecordsTerm)
+      || componentLibrary.includes(installationRecordsTerm),
+    `${installationRecordsTerm} must be represented`
+  );
+}
+for (const systemSettingsTerm of [
+  "systemSettingsWorkbench",
+  "selectedSystemSettingsWorkbench",
+  "system_settings_workbench.v1",
+  "settings_state",
+  "taxonomy_summary",
+  "recommendation_slot",
+  "mirror_source",
+  "installer_config",
+  "agentops_endpoint",
+  "settings_unavailable",
+  "agent_store_settings_projection",
+  "agent_store_curated_projection",
+  "agent_store_mirror_registry",
+  "agentops_endpoint_registry",
+  "endpoint_ref_redacted",
+  "secret_exposed: false",
+  "frontend_fallback_no_system_settings_workbench",
+  "open_system_settings_workbench",
+  "review_system_settings_summary",
+  "fix_system_settings_blockers",
+  "no settings mutation",
+  "no credential exposure",
+  "no recommendation override",
+  "no installer execution",
+  "no endpoint rewrite"
+]) {
+  assert(
+    mockData.includes(systemSettingsTerm)
+      || app.includes(systemSettingsTerm)
+      || componentLibrary.includes(systemSettingsTerm),
+    `${systemSettingsTerm} must be represented`
+  );
+}
+for (const adminRiskTerm of [
+  "adminRiskWorkbench",
+  "selectedAdminRiskWorkbench",
+  "admin_risk_workbench.v1",
+  "risk_state",
+  "risk_level",
+  "runtime_risk_level",
+  "evidence_gaps",
+  "policy_signal",
+  "permission_signal",
+  "security_actions",
+  "risk_unknown",
+  "low_risk",
+  "evidence_gap",
+  "policy_blocked",
+  "security_revoked",
+  "agentops_risk_summary_echo",
+  "agentops_policy_echo",
+  "permission_denial_action_summary.v1",
+  "quality_evidence_access_summary.v1",
+  "frontend_fallback_no_admin_risk_workbench",
+  "open_admin_risk_workbench",
+  "review_admin_risk_summary",
+  "review_admin_risk_gap",
+  "review_security_revocation",
+  "prepare_security_notification",
+  "complete_admin_policy_context",
+  "capability_grant_issued: false",
+  "user_device_details_exposed: false",
+  "no disable execution",
+  "no lifecycle mutation",
+  "no AgentOps policy override",
+  "no CapabilityGrant",
+  "no raw Evidence"
+]) {
+  assert(
+    mockData.includes(adminRiskTerm)
+      || app.includes(adminRiskTerm)
+      || componentLibrary.includes(adminRiskTerm),
+    `${adminRiskTerm} must be represented`
+  );
+}
+for (const versionHistoryTerm of [
+  "versionHistoryWorkbench",
+  "selectedVersionHistoryWorkbench",
+  "version_history_workbench.v1",
+  "version_state",
+  "current_version",
+  "latest_version",
+  "release_status",
+  "artifact_trust",
+  "upgrade_cue",
+  "rollback_cue",
+  "replacement_cue",
+  "affected_scope",
+  "version_history_unavailable",
+  "current_stable",
+  "upgrade_available",
+  "rollback_available",
+  "deprecated_replacement",
+  "security_revoked",
+  "agent_store_agent_version",
+  "agent_store_package_trust",
+  "agent_store_replacement_mapping",
+  "explicit_mapping_only: true",
+  "affected_device_details_exposed: false",
+  "frontend_fallback_no_version_history_workbench",
+  "open_version_history",
+  "review_version_upgrade",
+  "view_version_revocation",
+  "review_version_rollback",
+  "no auto upgrade",
+  "no rollback execution",
+  "no AgentVersion mutation",
+  "no replacement algorithm",
+  "no raw Evidence"
+]) {
+  assert(
+    mockData.includes(versionHistoryTerm)
+      || app.includes(versionHistoryTerm)
+      || componentLibrary.includes(versionHistoryTerm),
+    `${versionHistoryTerm} must be represented`
+  );
+}
 for (const draftReviewSubmissionTerm of [
   "draftReviewSubmissions",
   "draft_review_submission.v1",
@@ -707,6 +901,21 @@ assert(
     && app.includes("selectedRecommendationDecision")
     && app.includes("selectedRuntimeAvailability")
     && app.includes("selectedHealthSummaryFreshness")
+    && app.includes("selectedOwnerGovernanceWorkbench")
+    && app.includes("ownerGovernanceWorkbench")
+    && app.includes("frontend_fallback_no_owner_governance_workbench")
+    && app.includes("selectedInstallationRecordsWorkbench")
+    && app.includes("installationRecordsWorkbench")
+    && app.includes("frontend_fallback_no_installation_records_workbench")
+    && app.includes("selectedSystemSettingsWorkbench")
+    && app.includes("systemSettingsWorkbench")
+    && app.includes("frontend_fallback_no_system_settings_workbench")
+    && app.includes("selectedAdminRiskWorkbench")
+    && app.includes("adminRiskWorkbench")
+    && app.includes("frontend_fallback_no_admin_risk_workbench")
+    && app.includes("selectedVersionHistoryWorkbench")
+    && app.includes("versionHistoryWorkbench")
+    && app.includes("frontend_fallback_no_version_history_workbench")
     && app.includes("selectedInstallationDistribution")
     && app.includes("installationDistribution")
     && app.includes("selectedFeedbackOwnerResponseLoop")
@@ -1045,6 +1254,82 @@ assert(
     && componentLibrary.includes("Store 不展示 raw Trace 或 raw Evidence URL")
     && componentLibrary.includes("也不本地计算质量"),
   "Agent detail must expose quality evidence access without exposing raw evidence or calculating quality"
+);
+assert(
+  componentLibrary.includes("sdlc-owner-governance-workbench")
+    && componentLibrary.includes("Owner 治理工作台")
+    && componentLibrary.includes("owner_governance_workbench.v1")
+    && componentLibrary.includes("queue_state")
+    && componentLibrary.includes("pending_counts")
+    && componentLibrary.includes("risk_summary")
+    && componentLibrary.includes("focus_items")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("aggregate only / no real approval / no notification sending / no AgentVersion mutation / no AgentOps override")
+    && componentLibrary.includes("不产生审批结果或生命周期变更"),
+  "Agent detail must expose Owner governance workbench without approving, notifying, mutating versions, or overriding AgentOps"
+);
+assert(
+  componentLibrary.includes("sdlc-installation-records-workbench")
+    && componentLibrary.includes("安装与运行记录")
+    && componentLibrary.includes("installation_records_workbench.v1")
+    && componentLibrary.includes("installation_state")
+    && componentLibrary.includes("device_binding_state")
+    && componentLibrary.includes("version_cue")
+    && componentLibrary.includes("health_cue")
+    && componentLibrary.includes("revocation_notice")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("aggregate only / no real install / no Runtime launch / no raw Trace / no policy bypass / health_summary_not_recommendation_basis")
+    && componentLibrary.includes("不能作为推荐依据或实际 L5 判定"),
+  "Agent detail must expose Installation Records workbench without installing, launching Runtime, exposing raw evidence, or using health as recommendation basis"
+);
+assert(
+  componentLibrary.includes("sdlc-system-settings-workbench")
+    && componentLibrary.includes("系统设置")
+    && componentLibrary.includes("system_settings_workbench.v1")
+    && componentLibrary.includes("settings_state")
+    && componentLibrary.includes("taxonomy_summary")
+    && componentLibrary.includes("recommendation_slot")
+    && componentLibrary.includes("mirror_source")
+    && componentLibrary.includes("installer_config")
+    && componentLibrary.includes("agentops_endpoint")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("aggregate only / no settings mutation / no credential exposure / no recommendation override / no installer execution / no endpoint rewrite")
+    && componentLibrary.includes("不暴露 secret、不覆盖推荐、不启动安装器"),
+  "Agent detail must expose System Settings workbench without writing settings, exposing credentials, overriding recommendation, executing installer, or rewriting endpoint"
+);
+assert(
+  componentLibrary.includes("sdlc-admin-risk-workbench")
+    && componentLibrary.includes("管理员风险")
+    && componentLibrary.includes("admin_risk_workbench.v1")
+    && componentLibrary.includes("risk_state")
+    && componentLibrary.includes("risk_level")
+    && componentLibrary.includes("runtime_risk_level")
+    && componentLibrary.includes("evidence_gaps")
+    && componentLibrary.includes("policy_signal")
+    && componentLibrary.includes("permission_signal")
+    && componentLibrary.includes("security_actions")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("aggregate only / no disable execution / no lifecycle mutation / no AgentOps policy override / no CapabilityGrant / no raw Trace / no raw Evidence / no user-device details")
+    && componentLibrary.includes("不展示 raw Trace、raw Evidence 或用户设备明细"),
+  "Agent detail must expose Admin Risk workbench without disabling, mutating lifecycle, overriding policy, issuing grants, exposing raw evidence, or exposing user/device details"
+);
+assert(
+  componentLibrary.includes("sdlc-version-history-workbench")
+    && componentLibrary.includes("版本历史")
+    && componentLibrary.includes("version_history_workbench.v1")
+    && componentLibrary.includes("version_state")
+    && componentLibrary.includes("current_version")
+    && componentLibrary.includes("latest_version")
+    && componentLibrary.includes("release_status")
+    && componentLibrary.includes("artifact_trust")
+    && componentLibrary.includes("upgrade_cue")
+    && componentLibrary.includes("rollback_cue")
+    && componentLibrary.includes("replacement_cue")
+    && componentLibrary.includes("affected_scope")
+    && componentLibrary.includes("sourceTruthSummary")
+    && componentLibrary.includes("aggregate only / no auto upgrade / no rollback execution / no AgentVersion mutation / no replacement algorithm / no installer execution / no raw Evidence")
+    && componentLibrary.includes("不能由前端本地推荐"),
+  "Agent detail must expose Version History workbench without auto-upgrading, rolling back, mutating AgentVersion, recommending replacements, executing installer, or exposing raw evidence"
 );
 assert(
   componentLibrary.includes("sdlc-store-ops-deep-link")

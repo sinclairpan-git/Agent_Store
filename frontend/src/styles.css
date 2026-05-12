@@ -1188,6 +1188,391 @@ h2 {
   font-size: 13px;
 }
 
+.owner-governance-workbench {
+  min-height: 360px;
+}
+
+.owner-governance-workbench__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.owner-governance-workbench__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.owner-governance-workbench__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 86px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f7faf8;
+}
+
+.owner-governance-workbench__grid span,
+.owner-governance-workbench__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.owner-governance-workbench__grid strong {
+  color: #16202a;
+  font-size: 18px;
+}
+
+.owner-governance-workbench__grid strong,
+.owner-governance-workbench__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.owner-governance-workbench__focus {
+  display: grid;
+  gap: 8px;
+  padding-left: 0;
+  margin: 14px 0 0;
+  list-style: none;
+}
+
+.owner-governance-workbench__focus li {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.35fr) minmax(0, 1fr) minmax(160px, 0.65fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: #3d4b56;
+  font-size: 12px;
+}
+
+.owner-governance-workbench__focus strong {
+  color: #16202a;
+}
+
+.owner-governance-workbench__focus span,
+.owner-governance-workbench__focus small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.owner-governance-workbench__focus small {
+  color: #60707d;
+  font-weight: 720;
+}
+
+.installation-records-workbench {
+  min-height: 320px;
+}
+
+.installation-records-workbench__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.installation-records-workbench__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.installation-records-workbench__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 92px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.installation-records-workbench__grid span,
+.installation-records-workbench__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.installation-records-workbench__grid strong,
+.installation-records-workbench__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.installation-records-workbench__grid strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.installation-records-workbench__source {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.installation-records-workbench__source strong,
+.installation-records-workbench__source span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.installation-records-workbench__source strong {
+  color: #16202a;
+}
+
+.system-settings-workbench {
+  min-height: 340px;
+}
+
+.system-settings-workbench__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.system-settings-workbench__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.system-settings-workbench__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.system-settings-workbench__grid span,
+.system-settings-workbench__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.system-settings-workbench__grid strong,
+.system-settings-workbench__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.system-settings-workbench__grid strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.system-settings-workbench__source {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.system-settings-workbench__source strong,
+.system-settings-workbench__source span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.system-settings-workbench__source strong {
+  color: #16202a;
+}
+
+.admin-risk-workbench {
+  min-height: 360px;
+}
+
+.admin-risk-workbench__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-risk-workbench__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.admin-risk-workbench__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.admin-risk-workbench__grid span,
+.admin-risk-workbench__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.admin-risk-workbench__grid strong,
+.admin-risk-workbench__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-risk-workbench__grid strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.admin-risk-workbench__gaps {
+  display: grid;
+  gap: 8px;
+  padding-left: 0;
+  margin: 14px 0 0;
+  list-style: none;
+}
+
+.admin-risk-workbench__gaps li {
+  display: grid;
+  grid-template-columns: minmax(72px, 0.25fr) minmax(0, 1fr) minmax(160px, 0.55fr);
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #ffd6cf;
+  border-radius: 8px;
+  background: #fff8f6;
+  color: #3d4b56;
+  font-size: 12px;
+}
+
+.admin-risk-workbench__gaps strong {
+  color: #7f271e;
+}
+
+.admin-risk-workbench__gaps span,
+.admin-risk-workbench__gaps small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-risk-workbench__gaps small {
+  color: #60707d;
+  font-weight: 720;
+}
+
+.admin-risk-workbench__source {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.admin-risk-workbench__source strong,
+.admin-risk-workbench__source span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-risk-workbench__source strong {
+  color: #16202a;
+}
+
+.version-history-workbench {
+  min-height: 340px;
+}
+
+.version-history-workbench__facts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.version-history-workbench__grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.version-history-workbench__grid div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #f8fafb;
+}
+
+.version-history-workbench__grid span,
+.version-history-workbench__grid small {
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.version-history-workbench__grid strong,
+.version-history-workbench__grid small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.version-history-workbench__grid strong {
+  color: #16202a;
+  font-size: 13px;
+}
+
+.version-history-workbench__source {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px;
+  border: 1px solid #d7e0e7;
+  border-radius: 8px;
+  background: #fbfcfd;
+  color: #60707d;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.version-history-workbench__source strong,
+.version-history-workbench__source span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.version-history-workbench__source strong {
+  color: #16202a;
+}
+
 .draft-review-submission {
   min-height: 340px;
 }
@@ -1864,6 +2249,18 @@ h2 {
   .notification-routing__channels,
   .permission-denial__scenarios,
   .wizard-grid,
+  .owner-governance-workbench__facts,
+  .owner-governance-workbench__grid,
+  .owner-governance-workbench__focus li,
+  .installation-records-workbench__facts,
+  .installation-records-workbench__grid,
+  .system-settings-workbench__facts,
+  .system-settings-workbench__grid,
+  .admin-risk-workbench__facts,
+  .admin-risk-workbench__grid,
+  .admin-risk-workbench__gaps li,
+  .version-history-workbench__facts,
+  .version-history-workbench__grid,
   .package-validation-report__grid,
   .draft-review-submission__grid,
   .skill-registry-lifecycle__grid,
