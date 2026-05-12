@@ -102,6 +102,7 @@ for (const componentName of [
   "sdlc-bootstrap-timeline",
   "sdlc-source-facts",
   "sdlc-health-summary-freshness",
+  "sdlc-listing-workbench",
   "sdlc-installation-distribution",
   "sdlc-feedback-owner-response-loop",
   "sdlc-lifecycle-governance",
@@ -773,6 +774,49 @@ for (const versionHistoryTerm of [
     `${versionHistoryTerm} must be represented`
   );
 }
+for (const listingWorkbenchTerm of [
+  "listingWorkbench",
+  "selectedListingWorkbench",
+  "listing_workbench.v1",
+  "listing_state",
+  "draft_summary",
+  "review_queue",
+  "published_versions",
+  "quality_feedback",
+  "install_trend",
+  "user_issues",
+  "listing_workbench_unavailable",
+  "draft_active",
+  "fix_required",
+  "pending_approval",
+  "published_active",
+  "pending_owner_review",
+  "receipt_state",
+  "not_approval",
+  "registry_write_allowed: false",
+  "raw_evidence_exposed: false",
+  "aggregation_only: true",
+  "device_details_exposed: false",
+  "frontend_fallback_no_listing_workbench",
+  "open_listing_workbench",
+  "fix_listing_validation",
+  "return_to_listing_draft",
+  "continue_listing_workbench_review",
+  "refresh_listing_workbench",
+  "no publish execution",
+  "no local approval",
+  "no registry mutation",
+  "no package validation write",
+  "no notification sending",
+  "no raw Evidence"
+]) {
+  assert(
+    mockData.includes(listingWorkbenchTerm)
+      || app.includes(listingWorkbenchTerm)
+      || componentLibrary.includes(listingWorkbenchTerm),
+    `${listingWorkbenchTerm} must be represented`
+  );
+}
 for (const draftReviewSubmissionTerm of [
   "draftReviewSubmissions",
   "draft_review_submission.v1",
@@ -916,6 +960,9 @@ assert(
     && app.includes("selectedVersionHistoryWorkbench")
     && app.includes("versionHistoryWorkbench")
     && app.includes("frontend_fallback_no_version_history_workbench")
+    && app.includes("selectedListingWorkbench")
+    && app.includes("listingWorkbench")
+    && app.includes("frontend_fallback_no_listing_workbench")
     && app.includes("selectedInstallationDistribution")
     && app.includes("installationDistribution")
     && app.includes("selectedFeedbackOwnerResponseLoop")
@@ -1005,6 +1052,8 @@ assert(
     && app.includes("不在本阶段生成 release notes")
     && app.includes("security_revoked 是终态")
     && app.includes("不执行升级或回退")
+    && app.includes("不执行发布或审批")
+    && app.includes("前端仍不写 Registry")
     && app.includes("不签发 CapabilityGrant")
     && app.includes("Store 前端不计算质量分")
     && app.includes("质量证据摘要可继续复核")
@@ -1040,6 +1089,7 @@ assert(
     && indexHtml.includes(":installation-runtime-handoff=\"selectedInstallationRuntimeHandoff\"")
     && indexHtml.includes(":runtime-availability=\"selectedRuntimeAvailability\"")
     && indexHtml.includes(":health-summary-freshness=\"selectedHealthSummaryFreshness\"")
+    && indexHtml.includes(":listing-workbench=\"selectedListingWorkbench\"")
     && indexHtml.includes(":installation-distribution=\"selectedInstallationDistribution\"")
     && indexHtml.includes(":feedback-owner-response-loop=\"selectedFeedbackOwnerResponseLoop\"")
     && indexHtml.includes(":lifecycle-governance=\"selectedLifecycleGovernance\"")

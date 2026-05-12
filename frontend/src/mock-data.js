@@ -227,6 +227,308 @@ window.AgentStoreMock = {
       }
     }
   },
+  listingWorkbench: {
+    "framework.ai-autosdlc": {
+      contract_schema_version: "listing_workbench.v1",
+      agent_id: "framework.ai-autosdlc",
+      owner_team: "SDLC Platform",
+      listing_state: "pending_approval",
+      draft_summary: {
+        active_drafts: 1,
+        fix_required: 0,
+        ready_to_submit: 1,
+        last_updated_at: "2026-05-12T00:32:00Z"
+      },
+      review_queue: {
+        queue_state: "pending_owner_review",
+        pending_review_count: 1,
+        blocked_review_count: 0,
+        sla_state: "due_today",
+        receipt_state: "not_approval"
+      },
+      published_versions: {
+        active_version_count: 1,
+        latest_version: "1.0.0",
+        release_status: "manual_installable-preview",
+        registry_write_allowed: false
+      },
+      quality_feedback: {
+        quality_summary_state: "summary_redacted",
+        open_feedback_count: 1,
+        owner_response_due_count: 0,
+        raw_evidence_exposed: false
+      },
+      install_trend: {
+        trend_state: "attention_required",
+        total_installations: 18,
+        failed_installations: 3,
+        aggregation_only: true,
+        device_details_exposed: false
+      },
+      user_issues: [
+        {
+          issue_id: "runtime-copy-feedback",
+          issue_state: "owner_replied",
+          source_contract: "feedback_owner_response_loop.v1",
+          summary: "Runtime gate copy 已收到 Owner 回复，等待计划或拒绝。"
+        }
+      ],
+      source_of_truth: {
+        listing: "listing_wizard_shell.v1",
+        validation: "package_validation_report.v1",
+        review: "draft_review_submission.v1",
+        skill_registry: "skill_registry.v1",
+        quality: "quality_evidence_access_summary.v1",
+        installation: "installation_distribution_summary.v1",
+        feedback: "feedback_owner_response_loop.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-listing-workbench-framework.ai-autosdlc",
+        trace_id: "trace-listing-workbench-framework.ai-autosdlc",
+        generated_at: "2026-05-12T00:34:00Z"
+      },
+      boundary_flags: [
+        "no publish execution",
+        "no local approval",
+        "no registry mutation",
+        "no package validation write",
+        "no notification sending",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "open_listing_workbench",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "agentops.evidence-reporter": {
+      contract_schema_version: "listing_workbench.v1",
+      agent_id: "agentops.evidence-reporter",
+      owner_team: "AgentOps",
+      listing_state: "fix_required",
+      draft_summary: {
+        active_drafts: 1,
+        fix_required: 1,
+        ready_to_submit: 0,
+        last_updated_at: "2026-05-12T00:35:00Z"
+      },
+      review_queue: {
+        queue_state: "not_enqueued",
+        pending_review_count: 0,
+        blocked_review_count: 1,
+        sla_state: "blocked_until_validation",
+        receipt_state: "not_approval"
+      },
+      published_versions: {
+        active_version_count: 1,
+        latest_version: "0.4.0",
+        release_status: "draft",
+        registry_write_allowed: false
+      },
+      quality_feedback: {
+        quality_summary_state: "summary_ready",
+        open_feedback_count: 1,
+        owner_response_due_count: 1,
+        raw_evidence_exposed: false
+      },
+      install_trend: {
+        trend_state: "permission_required",
+        total_installations: 0,
+        failed_installations: 0,
+        aggregation_only: true,
+        device_details_exposed: false
+      },
+      user_issues: [
+        {
+          issue_id: "scan-report-ref",
+          issue_state: "blocked",
+          source_contract: "package_validation_report.v1",
+          summary: "缺少 scan_report_ref，必须回到校验报告补齐。"
+        }
+      ],
+      source_of_truth: {
+        listing: "listing_wizard_shell.v1",
+        validation: "package_validation_report.v1",
+        review: "draft_review_submission.v1",
+        skill_registry: "skill_registry.v1",
+        quality: "quality_evidence_access_summary.v1",
+        installation: "installation_distribution_summary.v1",
+        feedback: "feedback_owner_response_loop.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-listing-workbench-agentops.evidence-reporter",
+        trace_id: "trace-listing-workbench-agentops.evidence-reporter",
+        generated_at: "2026-05-12T00:36:00Z"
+      },
+      boundary_flags: [
+        "no publish execution",
+        "no local approval",
+        "no registry mutation",
+        "no package validation write",
+        "no notification sending",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "fix_listing_validation",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "security.policy-guard": {
+      contract_schema_version: "listing_workbench.v1",
+      agent_id: "security.policy-guard",
+      owner_team: "Security",
+      listing_state: "draft_active",
+      draft_summary: {
+        active_drafts: 2,
+        fix_required: 2,
+        ready_to_submit: 0,
+        last_updated_at: "2026-05-12T00:37:00Z"
+      },
+      review_queue: {
+        queue_state: "draft_blocked",
+        pending_review_count: 0,
+        blocked_review_count: 2,
+        sla_state: "blocked_until_security_review",
+        receipt_state: "not_approval"
+      },
+      published_versions: {
+        active_version_count: 0,
+        latest_version: "0.2.1",
+        release_status: "design",
+        registry_write_allowed: false
+      },
+      quality_feedback: {
+        quality_summary_state: "summary_redacted",
+        open_feedback_count: 0,
+        owner_response_due_count: 0,
+        raw_evidence_exposed: false
+      },
+      install_trend: {
+        trend_state: "distribution_unavailable",
+        total_installations: 0,
+        failed_installations: 0,
+        aggregation_only: true,
+        device_details_exposed: false
+      },
+      user_issues: [
+        {
+          issue_id: "placeholder-and-risk",
+          issue_state: "blocked",
+          source_contract: "package_validation_report.v1",
+          summary: "存在 placeholder、AI 字段来源和高风险权限说明缺口。"
+        }
+      ],
+      source_of_truth: {
+        listing: "listing_wizard_shell.v1",
+        validation: "package_validation_report.v1",
+        review: "draft_review_submission.v1",
+        skill_registry: "skill_registry.v1",
+        quality: "quality_evidence_access_summary.v1",
+        installation: "installation_distribution_summary.v1",
+        feedback: "feedback_owner_response_loop.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-listing-workbench-security.policy-guard",
+        trace_id: "trace-listing-workbench-security.policy-guard",
+        generated_at: "2026-05-12T00:38:00Z"
+      },
+      boundary_flags: [
+        "no publish execution",
+        "no local approval",
+        "no registry mutation",
+        "no package validation write",
+        "no notification sending",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "return_to_listing_draft",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    },
+    "developer.release-notes": {
+      contract_schema_version: "listing_workbench.v1",
+      agent_id: "developer.release-notes",
+      owner_team: "Developer Experience",
+      listing_state: "published_active",
+      draft_summary: {
+        active_drafts: 0,
+        fix_required: 0,
+        ready_to_submit: 0,
+        last_updated_at: "2026-05-12T00:39:00Z"
+      },
+      review_queue: {
+        queue_state: "empty",
+        pending_review_count: 0,
+        blocked_review_count: 0,
+        sla_state: "no_pending_review",
+        receipt_state: "not_approval"
+      },
+      published_versions: {
+        active_version_count: 2,
+        latest_version: "0.1.2",
+        release_status: "published",
+        registry_write_allowed: false
+      },
+      quality_feedback: {
+        quality_summary_state: "summary_ready",
+        open_feedback_count: 0,
+        owner_response_due_count: 0,
+        raw_evidence_exposed: false
+      },
+      install_trend: {
+        trend_state: "empty_distribution",
+        total_installations: 0,
+        failed_installations: 0,
+        aggregation_only: true,
+        device_details_exposed: false
+      },
+      user_issues: [
+        {
+          issue_id: "listing-published-scan",
+          issue_state: "ready",
+          source_contract: "listing_workbench.v1",
+          summary: "当前发布摘要健康；仍需通过单项事实源查看详情。"
+        }
+      ],
+      source_of_truth: {
+        listing: "listing_wizard_shell.v1",
+        validation: "package_validation_report.v1",
+        review: "draft_review_submission.v1",
+        skill_registry: "skill_registry.v1",
+        quality: "quality_evidence_access_summary.v1",
+        installation: "installation_distribution_summary.v1",
+        feedback: "feedback_owner_response_loop.v1"
+      },
+      audit_fields: {
+        audit_id: "audit-listing-workbench-developer.release-notes",
+        trace_id: "trace-listing-workbench-developer.release-notes",
+        generated_at: "2026-05-12T00:40:00Z"
+      },
+      boundary_flags: [
+        "no publish execution",
+        "no local approval",
+        "no registry mutation",
+        "no package validation write",
+        "no notification sending",
+        "no raw Evidence"
+      ],
+      next_action: {
+        action_id: "continue_listing_workbench_review",
+        target_system: "agent_store",
+        enabled: true,
+        requires_permission: true,
+        audit_required: true
+      }
+    }
+  },
   ownerGovernanceWorkbench: {
     "framework.ai-autosdlc": {
       contract_schema_version: "owner_governance_workbench.v1",

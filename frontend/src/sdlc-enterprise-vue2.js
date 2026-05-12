@@ -227,6 +227,26 @@
     RUNTIME_GATE_NOT_READY: "Runtime Gate 未就绪",
     OWNER_CONFIRMATION_REQUIRED: "需要 Owner 确认",
     DRAFT_REVIEW_SUBMISSION_MISSING: "缺草案提交 envelope",
+    listing_workbench: "上架工作台",
+    "listing_workbench.v1": "上架工作台 v1",
+    listing_workbench_unavailable: "上架工作台不可用",
+    draft_active: "草案进行中",
+    fix_required: "需修复",
+    pending_approval: "待审批",
+    published_active: "已发布",
+    pending_owner_review: "等待 Owner 审核",
+    draft_blocked: "草案阻断",
+    blocked_until_validation: "校验前阻断",
+    blocked_until_security_review: "安全复核前阻断",
+    due_today: "今日到期",
+    no_pending_review: "无待审",
+    not_approval: "回执不是批准",
+    open_listing_workbench: "打开上架工作台",
+    fix_listing_validation: "修复上架校验",
+    return_to_listing_draft: "返回上架草案",
+    continue_listing_workbench_review: "继续上架复核",
+    refresh_listing_workbench: "刷新上架工作台",
+    frontend_fallback_no_listing_workbench: "前端降级上架工作台",
     skill_registry: "Skill Registry",
     "skill_registry.v1": "Skill Registry v1",
     "skill_registry_notification.v1": "Skill Registry 通知 v1",
@@ -4172,6 +4192,115 @@
     }
   });
 
+  Vue.component("sdlc-listing-workbench", {
+    props: ["workbench"],
+    template: [
+      '<section class="workspace-section workspace-section--wide listing-workbench">',
+      '  <div class="section-heading">',
+      '    <div><span class="eyebrow">上架工作台</span><h2>草案、审核与发布摘要</h2></div>',
+      '    <sdlc-status-chip :label="workbench.listing_state" :tone="listingTone"></sdlc-status-chip>',
+      '  </div>',
+      '  <p class="summary">{{ workbenchCopy }}</p>',
+      '  <dl class="facts listing-workbench__facts">',
+      '    <sdlc-metric-row label="合同" :value="workbench.contract_schema_version" tone="info"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="Owner" :value="workbench.owner_team" tone="neutral"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="审核队列" :value="reviewQueue.queue_state" :tone="reviewTone"></sdlc-metric-row>',
+      '    <sdlc-metric-row label="回执" :value="reviewQueue.receipt_state" tone="warning"></sdlc-metric-row>',
+      '  </dl>',
+      '  <div class="listing-workbench__grid">',
+      '    <div><span>草案</span><strong>{{ draftSummary.active_drafts }} / {{ draftSummary.fix_required }} 修复</strong><small>{{ draftSummary.ready_to_submit }} ready_to_submit</small></div>',
+      '    <div><span>审核</span><strong>{{ reviewQueue.pending_review_count }} pending</strong><small>{{ reviewQueue.blocked_review_count }} blocked / {{ displayLabel(reviewQueue.sla_state) }}</small></div>',
+      '    <div><span>发布</span><strong>{{ publishedVersions.latest_version || "unavailable" }}</strong><small>{{ displayLabel(publishedVersions.release_status) }} / registry write {{ displayLabel(publishedVersions.registry_write_allowed) }}</small></div>',
+      '    <div><span>质量反馈</span><strong>{{ displayLabel(qualityFeedback.quality_summary_state) }}</strong><small>{{ qualityFeedback.open_feedback_count }} open / raw {{ displayLabel(qualityFeedback.raw_evidence_exposed) }}</small></div>',
+      '    <div><span>安装趋势</span><strong>{{ installTrend.total_installations }} installs</strong><small>{{ installTrend.failed_installations }} failed / devices {{ displayLabel(installTrend.device_details_exposed) }}</small></div>',
+      '  </div>',
+      '  <ol class="listing-workbench__issues" v-if="userIssues.length">',
+      '    <li v-for="issue in userIssues" :key="issue.issue_id">',
+      '      <strong>{{ displayLabel(issue.issue_state) }}</strong>',
+      '      <span>{{ issue.issue_id }}</span>',
+      '      <small>{{ issue.source_contract }} / {{ issue.summary }}</small>',
+      '    </li>',
+      '  </ol>',
+      '  <div class="listing-workbench__source">',
+      '    <strong>事实源</strong>',
+      '    <span>{{ sourceFacts }}</span>',
+      '    <strong>审计</strong>',
+      '    <span>{{ audit.audit_id || "unavailable" }} / {{ audit.trace_id || "unavailable" }}</span>',
+      '    <strong>边界</strong>',
+      '    <span>{{ boundaryText }}</span>',
+      '  </div>',
+      '  <sdlc-action-button :action="workbench.next_action" kind="primary" @invoke="$emit(\'invoke-action\', $event)"></sdlc-action-button>',
+      '</section>'
+    ].join(""),
+    computed: {
+      draftSummary: function draftSummary() {
+        return this.workbench.draft_summary || {};
+      },
+      reviewQueue: function reviewQueue() {
+        return this.workbench.review_queue || {};
+      },
+      publishedVersions: function publishedVersions() {
+        return this.workbench.published_versions || {};
+      },
+      qualityFeedback: function qualityFeedback() {
+        return this.workbench.quality_feedback || {};
+      },
+      installTrend: function installTrend() {
+        return this.workbench.install_trend || {};
+      },
+      userIssues: function userIssues() {
+        return Array.isArray(this.workbench.user_issues) ? this.workbench.user_issues : [];
+      },
+      audit: function audit() {
+        return this.workbench.audit_fields || {};
+      },
+      sourceFacts: function sourceFacts() {
+        return formatSourceOfTruth(this.workbench.source_of_truth);
+      },
+      boundaryText: function boundaryText() {
+        return Array.isArray(this.workbench.boundary_flags)
+          ? this.workbench.boundary_flags.join(" / ")
+          : "";
+      },
+      listingTone: function listingTone() {
+        if (this.workbench.listing_state === "published_active") {
+          return "success";
+        }
+        if (
+          this.workbench.listing_state === "fix_required"
+          || this.workbench.listing_state === "listing_workbench_unavailable"
+        ) {
+          return "danger";
+        }
+        return "warning";
+      },
+      reviewTone: function reviewTone() {
+        if (this.reviewQueue.queue_state === "pending_owner_review") {
+          return "warning";
+        }
+        if (this.reviewQueue.queue_state === "empty") {
+          return "success";
+        }
+        return "danger";
+      },
+      workbenchCopy: function workbenchCopy() {
+        if (this.workbench.listing_state === "published_active") {
+          return "listing_workbench.v1 / aggregate only / published summary / no publish execution / no registry mutation / no notification sending";
+        }
+        if (this.workbench.listing_state === "fix_required") {
+          return "listing_workbench.v1 / validation blockers visible / no local approval / no package validation write / no raw Evidence";
+        }
+        if (this.workbench.listing_state === "listing_workbench_unavailable") {
+          return "listing_workbench.v1 / fallback unavailable / cannot infer draft, review, published, or healthy state";
+        }
+        return "listing_workbench.v1 / aggregate only / no publish execution / no local approval / no registry mutation / no package validation write / no notification sending / no raw Evidence";
+      }
+    },
+    methods: {
+      displayLabel: displayLabel
+    }
+  });
+
   Vue.component("sdlc-shell", {
     props: [
       "catalog",
@@ -4207,6 +4336,7 @@
       "systemSettingsWorkbench",
       "adminRiskWorkbench",
       "versionHistoryWorkbench",
+      "listingWorkbench",
       "installationDistribution",
       "feedbackOwnerResponseLoop",
       "lifecycleGovernance",
@@ -4263,6 +4393,7 @@
       '    <sdlc-system-settings-workbench :settings="systemSettingsWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-system-settings-workbench>',
       '    <sdlc-admin-risk-workbench :risk="adminRiskWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-admin-risk-workbench>',
       '    <sdlc-version-history-workbench :history="versionHistoryWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-version-history-workbench>',
+      '    <sdlc-listing-workbench :workbench="listingWorkbench" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-workbench>',
       '    <sdlc-recommendation-decision class="workspace-section--wide" :decision="recommendationDecision" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-recommendation-decision>',
       '    <sdlc-listing-wizard :wizard="listingWizard" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-listing-wizard>',
       '    <sdlc-package-validation-report :report="packageValidationReport" @invoke-action="$emit(\'invoke-action\', $event)"></sdlc-package-validation-report>',
