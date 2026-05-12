@@ -103,6 +103,78 @@ function actionMessage(action) {
   if (actionId === "continue_health_review") {
     return "HealthSummary 新鲜度可展示，但不会作为推荐或 Actual L5 的依据。";
   }
+  if (actionId === "open_owner_governance_workbench") {
+    return "Owner 工作台已进入预览；这里聚合待办摘要，但不执行审批、不发送通知、不修改 AgentVersion。";
+  }
+  if (actionId === "continue_owner_governance_review") {
+    return "Owner 工作台当前无阻断待办；仍以单项事实源和审计字段为准。";
+  }
+  if (actionId === "view_owner_runtime_gap") {
+    return "已定位 Runtime 能力缺口；Owner 工作台只聚合阻断原因，不启动 Runtime 或改写 Manifest。";
+  }
+  if (actionId === "open_owner_approval_queue") {
+    return "Owner 审批队列已进入预览；真实审批结果仍来自 AgentOps，不由 Store 本地裁决。";
+  }
+  if (actionId === "review_owner_quality_gap") {
+    return "质量缺口已进入 Owner 复核；Store 不展示 raw Trace 或 raw Evidence，也不计算质量分。";
+  }
+  if (actionId === "review_owner_package_gap") {
+    return "Package Validation 缺口已进入 Owner 复核；warning 可继续审核但必须保持可见。";
+  }
+  if (actionId === "open_owner_feedback_queue") {
+    return "反馈队列已进入 Owner 复核预览；本阶段不创建真实工单或发送外部通知。";
+  }
+  if (actionId === "open_installation_records") {
+    return "安装记录工作台已进入预览；这里只聚合安装、设备、Runtime 和健康摘要，不执行真实安装。";
+  }
+  if (actionId === "view_installation_health") {
+    return "已打开安装健康摘要预览；健康事实来自 AgentOps 回显，不能作为推荐依据或 Actual L5 判定。";
+  }
+  if (actionId === "view_revocation_notice") {
+    return "吊销通知已进入预览；revoked 状态不能被工作台降级为可运行或可升级。";
+  }
+  if (actionId === "review_upgrade_candidate") {
+    return "升级候选已进入复核预览；本阶段不下载包、不执行升级、不修改 AgentVersion。";
+  }
+  if (actionId === "open_system_settings_workbench") {
+    return "系统设置工作台已进入预览；这里只展示配置摘要，不写入设置、不暴露凭证、不改 endpoint。";
+  }
+  if (actionId === "review_system_settings_summary") {
+    return "系统设置摘要可复核；推荐位、镜像源、安装器和 AgentOps endpoint 仍以各自事实源为准。";
+  }
+  if (actionId === "fix_system_settings_blockers") {
+    return "系统设置阻断项已定位；需要管理员在真实控制面修复，前端工作台不直接写配置。";
+  }
+  if (actionId === "open_admin_risk_workbench") {
+    return "管理员风险工作台已进入预览；这里只聚合风险摘要，不执行禁用、不覆盖 AgentOps policy。";
+  }
+  if (actionId === "review_admin_risk_summary") {
+    return "风险摘要可复核；低风险不代表前端拥有处置权，仍以 AgentOps 和审计事实源为准。";
+  }
+  if (actionId === "review_admin_risk_gap") {
+    return "风险缺口已定位；Store 不展示 raw Trace 或 raw Evidence，也不暴露用户/设备明细。";
+  }
+  if (actionId === "review_security_revocation") {
+    return "安全吊销已进入风险中心跳转预览；工作台不执行禁用、下架或吊销传播。";
+  }
+  if (actionId === "prepare_security_notification") {
+    return "安全通知准备已进入预览；本阶段不发送真实通知，只展示可审计摘要。";
+  }
+  if (actionId === "complete_admin_policy_context") {
+    return "策略上下文缺口已定位；补齐上下文不等于 Store 本地允许或签发 Grant。";
+  }
+  if (actionId === "open_version_history") {
+    return "版本历史工作台已进入预览；这里只展示版本事实，不执行升级、回退或 AgentVersion 写入。";
+  }
+  if (actionId === "review_version_upgrade") {
+    return "升级候选已进入版本复核；本阶段不自动升级、不下载包、不执行安装器。";
+  }
+  if (actionId === "view_version_revocation") {
+    return "版本吊销摘要已进入预览；security_revoked 不能被降级为可升级或可运行。";
+  }
+  if (actionId === "review_version_rollback") {
+    return "回退候选已进入版本复核；本阶段不执行回退、不改安装记录、不改 AgentVersion。";
+  }
   if (actionId === "refresh_agentops_quality_summary") {
     return "已记录 AgentOps 质量摘要刷新动作；Store 前端不计算质量分，只展示后端投影。";
   }
@@ -327,6 +399,11 @@ new window.Vue({
       catalog: window.AgentStoreMock.agentCatalog,
       runtimeAvailability: window.AgentStoreMock.runtimeAvailability,
       healthSummaryFreshness: window.AgentStoreMock.healthSummaryFreshness,
+      ownerGovernanceWorkbench: window.AgentStoreMock.ownerGovernanceWorkbench,
+      installationRecordsWorkbench: window.AgentStoreMock.installationRecordsWorkbench,
+      systemSettingsWorkbench: window.AgentStoreMock.systemSettingsWorkbench,
+      adminRiskWorkbench: window.AgentStoreMock.adminRiskWorkbench,
+      versionHistoryWorkbench: window.AgentStoreMock.versionHistoryWorkbench,
       installationDistribution: window.AgentStoreMock.installationDistribution,
       feedbackOwnerResponseLoops: window.AgentStoreMock.feedbackOwnerResponseLoops,
       lifecycleGovernance: window.AgentStoreMock.lifecycleGovernance,
@@ -2434,6 +2511,608 @@ new window.Vue({
           target_system: "agent_store",
           enabled: true,
           requires_permission: false,
+          audit_required: true
+        }
+      };
+    },
+    selectedVersionHistoryWorkbench: function selectedVersionHistoryWorkbench() {
+      var agent = this.selectedAgent;
+      var histories = this.versionHistoryWorkbench || {};
+      var history;
+      if (!agent) {
+        return {
+          contract_schema_version: "version_history_workbench.v1",
+          agent_id: "",
+          version_state: "version_history_unavailable",
+          current_version: "",
+          latest_version: "",
+          release_status: "unknown",
+          artifact_trust: {
+            artifact_hash: "",
+            signature_state: "unknown",
+            issuer: "",
+            package_validation_state: "unknown"
+          },
+          upgrade_cue: {
+            upgrade_state: "not_applicable",
+            candidate_version: "",
+            action_mode: "disabled"
+          },
+          rollback_cue: {
+            rollback_state: "not_applicable",
+            rollback_version: "",
+            action_mode: "disabled"
+          },
+          replacement_cue: {
+            replacement_state: "not_applicable",
+            replacement_agent_id: "",
+            mapping_source: "not_applicable",
+            explicit_mapping_only: true
+          },
+          affected_scope: {
+            affected_install_count: 0,
+            affected_user_count_redacted: true,
+            affected_device_details_exposed: false,
+            notification_state: "not_applicable"
+          },
+          source_of_truth: {
+            agent_version: "catalog_filter",
+            package_trust: "not_applicable",
+            lifecycle: "not_applicable",
+            installation: "not_applicable",
+            notification: "not_applicable"
+          },
+          audit_fields: {
+            audit_id: "",
+            trace_id: "",
+            generated_at: ""
+          },
+          boundary_flags: [
+            "no auto upgrade",
+            "no rollback execution",
+            "no AgentVersion mutation",
+            "no replacement algorithm",
+            "no raw Evidence"
+          ],
+          next_action: this.selectedView.primary_action
+        };
+      }
+      history = histories[agent.agent_id];
+      if (history) {
+        return history;
+      }
+      return {
+        contract_schema_version: "version_history_workbench.v1",
+        agent_id: agent.agent_id,
+        version_state: "version_history_unavailable",
+        current_version: agent.version,
+        latest_version: "",
+        release_status: agent.release_status || "unknown",
+        artifact_trust: {
+          artifact_hash: "",
+          signature_state: "unknown",
+          issuer: "",
+          package_validation_state: "unknown"
+        },
+        upgrade_cue: {
+          upgrade_state: "unknown",
+          candidate_version: "",
+          action_mode: "disabled"
+        },
+        rollback_cue: {
+          rollback_state: "unknown",
+          rollback_version: "",
+          action_mode: "disabled"
+        },
+        replacement_cue: {
+          replacement_state: "unknown",
+          replacement_agent_id: "",
+          mapping_source: "frontend_fallback_no_version_history_workbench",
+          explicit_mapping_only: true
+        },
+        affected_scope: {
+          affected_install_count: 0,
+          affected_user_count_redacted: true,
+          affected_device_details_exposed: false,
+          notification_state: "unknown"
+        },
+        source_of_truth: {
+          agent_version: "frontend_fallback_no_version_history_workbench",
+          package_trust: "agent_store_package_trust",
+          lifecycle: "lifecycle_governance_baseline.v1",
+          installation: "installation_records_workbench.v1",
+          notification: "notification_routing_summary.v1"
+        },
+        audit_fields: {
+          audit_id: "audit-version-history-missing-" + safeId(agent.agent_id),
+          trace_id: "trace-version-history-missing-" + safeId(agent.agent_id),
+          generated_at: ""
+        },
+        boundary_flags: [
+          "no auto upgrade",
+          "no rollback execution",
+          "no AgentVersion mutation",
+          "no replacement algorithm",
+          "no raw Evidence"
+        ],
+        next_action: {
+          action_id: "refresh_version_history",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: false,
+          audit_required: true
+        }
+      };
+    },
+    selectedAdminRiskWorkbench: function selectedAdminRiskWorkbench() {
+      var agent = this.selectedAgent;
+      var risks = this.adminRiskWorkbench || {};
+      var workbench;
+      if (!agent) {
+        return {
+          contract_schema_version: "admin_risk_workbench.v1",
+          agent_id: "",
+          risk_state: "risk_unknown",
+          risk_level: "unknown",
+          runtime_risk_level: "unknown",
+          evidence_gaps: [],
+          policy_signal: {
+            policy_state: "not_applicable",
+            policy_ref: "",
+            approval_status: "not_applicable",
+            policy_override_allowed: false
+          },
+          permission_signal: {
+            permission_state: "not_applicable",
+            denied_scope: "",
+            capability_grant_issued: false,
+            user_device_details_exposed: false
+          },
+          security_actions: [],
+          source_of_truth: {
+            risk: "catalog_filter",
+            policy: "not_applicable",
+            permission: "not_applicable",
+            evidence: "not_applicable",
+            lifecycle: "not_applicable",
+            notification: "not_applicable"
+          },
+          audit_fields: {
+            audit_id: "",
+            trace_id: "",
+            generated_at: ""
+          },
+          boundary_flags: [
+            "no disable execution",
+            "no lifecycle mutation",
+            "no AgentOps policy override",
+            "no CapabilityGrant",
+            "no raw Evidence"
+          ],
+          next_action: this.selectedView.primary_action
+        };
+      }
+      workbench = risks[agent.agent_id];
+      if (workbench) {
+        return workbench;
+      }
+      return {
+        contract_schema_version: "admin_risk_workbench.v1",
+        agent_id: agent.agent_id,
+        risk_state: "risk_unknown",
+        risk_level: "unknown",
+        runtime_risk_level: "unknown",
+        evidence_gaps: [
+          {
+            gap_id: "ADMIN_RISK_WORKBENCH_MISSING",
+            source_contract: "admin_risk_workbench.v1",
+            severity: "blocked",
+            summary: "Admin risk envelope is missing; frontend cannot infer low risk or safety pass."
+          }
+        ],
+        policy_signal: {
+          policy_state: "unknown",
+          policy_ref: "",
+          approval_status: "unknown",
+          policy_override_allowed: false
+        },
+        permission_signal: {
+          permission_state: "unknown",
+          denied_scope: "",
+          capability_grant_issued: false,
+          user_device_details_exposed: false
+        },
+        security_actions: [
+          {
+            action_id: "refresh_admin_risk_summary",
+            action_state: "required",
+            target_system: "agent_store",
+            requires_security_role: true,
+            execution_mode: "preview_only"
+          }
+        ],
+        source_of_truth: {
+          risk: "frontend_fallback_no_admin_risk_workbench",
+          policy: "agentops_policy_echo",
+          permission: "permission_denial_action_summary.v1",
+          evidence: "quality_evidence_access_summary.v1",
+          lifecycle: "lifecycle_governance_baseline.v1",
+          notification: "notification_routing_summary.v1"
+        },
+        audit_fields: {
+          audit_id: "audit-admin-risk-missing-" + safeId(agent.agent_id),
+          trace_id: "trace-admin-risk-missing-" + safeId(agent.agent_id),
+          generated_at: ""
+        },
+        boundary_flags: [
+          "no disable execution",
+          "no lifecycle mutation",
+          "no AgentOps policy override",
+          "no CapabilityGrant",
+          "no raw Evidence"
+        ],
+        next_action: {
+          action_id: "refresh_admin_risk_summary",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedSystemSettingsWorkbench: function selectedSystemSettingsWorkbench() {
+      var agent = this.selectedAgent;
+      var settings = this.systemSettingsWorkbench || {};
+      var workbench;
+      if (!agent) {
+        return {
+          contract_schema_version: "system_settings_workbench.v1",
+          agent_id: "",
+          settings_state: "settings_unavailable",
+          taxonomy_summary: {
+            category_state: "not_applicable",
+            tags_state: "not_applicable",
+            category_count: 0,
+            tag_count: 0,
+            blocked_terms: []
+          },
+          recommendation_slot: {
+            slot_state: "not_applicable",
+            collection: "",
+            rank_source: "not_applicable",
+            override_allowed: false
+          },
+          mirror_source: {
+            mirror_state: "not_applicable",
+            active_mirror: "",
+            signature_policy: "",
+            fallback_mirror: ""
+          },
+          installer_config: {
+            config_state: "not_applicable",
+            managed_installer_enabled: false,
+            isolation_policy: "",
+            smoke_test_required: false
+          },
+          agentops_endpoint: {
+            endpoint_state: "not_applicable",
+            endpoint_ref_redacted: "",
+            credential_state: "not_applicable",
+            secret_exposed: false
+          },
+          source_of_truth: {
+            taxonomy: "catalog_filter",
+            recommendation: "not_applicable",
+            mirror: "not_applicable",
+            installer: "not_applicable",
+            endpoint: "not_applicable",
+            credential: "not_applicable"
+          },
+          audit_fields: {
+            audit_id: "",
+            trace_id: "",
+            generated_at: ""
+          },
+          boundary_flags: [
+            "no settings mutation",
+            "no credential exposure",
+            "no recommendation override",
+            "no installer execution",
+            "no endpoint rewrite"
+          ],
+          next_action: this.selectedView.primary_action
+        };
+      }
+      workbench = settings[agent.agent_id];
+      if (workbench) {
+        return workbench;
+      }
+      return {
+        contract_schema_version: "system_settings_workbench.v1",
+        agent_id: agent.agent_id,
+        settings_state: "settings_unavailable",
+        taxonomy_summary: {
+          category_state: "unknown",
+          tags_state: "unknown",
+          category_count: 0,
+          tag_count: 0,
+          blocked_terms: []
+        },
+        recommendation_slot: {
+          slot_state: "unknown",
+          collection: "",
+          rank_source: "frontend_fallback_no_system_settings_workbench",
+          override_allowed: false
+        },
+        mirror_source: {
+          mirror_state: "unknown",
+          active_mirror: "",
+          signature_policy: "unknown",
+          fallback_mirror: ""
+        },
+        installer_config: {
+          config_state: "unknown",
+          managed_installer_enabled: false,
+          isolation_policy: "unknown",
+          smoke_test_required: false
+        },
+        agentops_endpoint: {
+          endpoint_state: "unknown",
+          endpoint_ref_redacted: "",
+          credential_state: "unknown",
+          secret_exposed: false
+        },
+        source_of_truth: {
+          taxonomy: "frontend_fallback_no_system_settings_workbench",
+          recommendation: "agent_store_curated_projection",
+          mirror: "agent_store_mirror_registry",
+          installer: "managed_installer_preview.v1",
+          endpoint: "agentops_endpoint_registry",
+          credential: "agentops_credential_echo"
+        },
+        audit_fields: {
+          audit_id: "audit-system-settings-missing-" + safeId(agent.agent_id),
+          trace_id: "trace-system-settings-missing-" + safeId(agent.agent_id),
+          generated_at: ""
+        },
+        boundary_flags: [
+          "no settings mutation",
+          "no credential exposure",
+          "no recommendation override",
+          "no installer execution",
+          "no endpoint rewrite"
+        ],
+        next_action: {
+          action_id: "refresh_system_settings_summary",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
+          audit_required: true
+        }
+      };
+    },
+    selectedInstallationRecordsWorkbench: function selectedInstallationRecordsWorkbench() {
+      var agent = this.selectedAgent;
+      var records = this.installationRecordsWorkbench || {};
+      var workbench;
+      if (!agent) {
+        return {
+          contract_schema_version: "installation_records_workbench.v1",
+          agent_id: "",
+          version: "",
+          installation_state: "records_unavailable",
+          installation_id: "",
+          device_binding_state: "not_applicable",
+          device_label: "",
+          runtime_state: "runtime_unknown",
+          version_cue: {
+            installed_version: "",
+            latest_version: "",
+            upgrade_state: "not_applicable",
+            candidate_version: ""
+          },
+          health_cue: {
+            freshness_state: "not_applicable",
+            summary_state: "not_applicable",
+            valid_until: "",
+            recommendation_basis_allowed: false,
+            basis_guard: "health_summary_not_recommendation_basis"
+          },
+          revocation_notice: {
+            notice_state: "none",
+            reason: "",
+            effective_at: "",
+            replacement_agent_id: ""
+          },
+          source_of_truth: {
+            installation: "catalog_filter",
+            device_binding: "not_applicable",
+            runtime: "not_applicable",
+            health: "not_applicable",
+            lifecycle: "not_applicable",
+            notification: "not_applicable"
+          },
+          audit_fields: {
+            audit_id: "",
+            trace_id: "",
+            generated_at: ""
+          },
+          boundary_flags: [
+            "no real install",
+            "no Runtime launch",
+            "no raw Trace",
+            "no policy bypass"
+          ],
+          next_action: this.selectedView.primary_action
+        };
+      }
+      workbench = records[agent.agent_id];
+      if (workbench) {
+        return workbench;
+      }
+      return {
+        contract_schema_version: "installation_records_workbench.v1",
+        agent_id: agent.agent_id,
+        version: agent.version,
+        installation_state: "records_unavailable",
+        installation_id: "",
+        device_binding_state: "unknown",
+        device_label: "",
+        runtime_state: "runtime_unknown",
+        version_cue: {
+          installed_version: "",
+          latest_version: agent.version,
+          upgrade_state: "unknown",
+          candidate_version: ""
+        },
+        health_cue: {
+          freshness_state: "health_summary_unavailable",
+          summary_state: "unknown",
+          valid_until: "",
+          recommendation_basis_allowed: false,
+          basis_guard: "health_summary_not_recommendation_basis"
+        },
+        revocation_notice: {
+          notice_state: "unknown",
+          reason: "Installation records envelope is missing; the frontend must not infer installed, runnable, or upgrade-ready state.",
+          effective_at: "",
+          replacement_agent_id: ""
+        },
+        source_of_truth: {
+          installation: "frontend_fallback_no_installation_records_workbench",
+          device_binding: "installation_runtime_handoff.v1",
+          runtime: "runtime_availability_summary.v1",
+          health: "health_summary_freshness.v1",
+          lifecycle: "lifecycle_governance_baseline.v1",
+          notification: "notification_routing_summary.v1"
+        },
+        audit_fields: {
+          audit_id: "audit-install-records-missing-" + safeId(agent.agent_id),
+          trace_id: "trace-install-records-missing-" + safeId(agent.agent_id),
+          generated_at: ""
+        },
+        boundary_flags: [
+          "no real install",
+          "no Runtime launch",
+          "no raw Trace",
+          "no policy bypass"
+        ],
+        next_action: {
+          action_id: "refresh_installation_records",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: false,
+          audit_required: true
+        }
+      };
+    },
+    selectedOwnerGovernanceWorkbench: function selectedOwnerGovernanceWorkbench() {
+      var agent = this.selectedAgent;
+      var workbenches = this.ownerGovernanceWorkbench || {};
+      var workbench;
+      if (!agent) {
+        return {
+          contract_schema_version: "owner_governance_workbench.v1",
+          agent_id: "",
+          version: "",
+          owner_team: "unassigned",
+          queue_state: "attention_required",
+          pending_counts: {
+            draft_review: 0,
+            policy_approval: 0,
+            feedback: 0,
+            lifecycle: 0,
+            installation_distribution: 0,
+            package_validation: 0,
+            quality_evidence: 0
+          },
+          risk_summary: {
+            highest_risk: "catalog_filter_empty",
+            blocked_count: 0,
+            attention_count: 1,
+            sla_state: "not_applicable"
+          },
+          focus_items: [],
+          source_of_truth: {
+            owner_queue: "catalog_filter",
+            approval: "not_applicable",
+            feedback: "not_applicable",
+            lifecycle: "not_applicable",
+            quality: "not_applicable",
+            raw_evidence: "not_applicable"
+          },
+          audit_fields: {
+            audit_id: "",
+            trace_id: "",
+            generated_at: ""
+          },
+          boundary_flags: [
+            "no real approval",
+            "no notification sending",
+            "no AgentVersion mutation",
+            "no AgentOps override"
+          ],
+          next_action: this.selectedView.primary_action
+        };
+      }
+      workbench = workbenches[agent.agent_id];
+      if (workbench) {
+        return workbench;
+      }
+      return {
+        contract_schema_version: "owner_governance_workbench.v1",
+        agent_id: agent.agent_id,
+        version: agent.version,
+        owner_team: agent.owner_team,
+        queue_state: "attention_required",
+        pending_counts: {
+          draft_review: 0,
+          policy_approval: 0,
+          feedback: 0,
+          lifecycle: 0,
+          installation_distribution: 0,
+          package_validation: 0,
+          quality_evidence: 0
+        },
+        risk_summary: {
+          highest_risk: "owner_workbench_envelope_missing",
+          blocked_count: 1,
+          attention_count: 1,
+          sla_state: "source_missing"
+        },
+        focus_items: [
+          {
+            item_id: "OWNER_GOVERNANCE_WORKBENCH_MISSING",
+            source_contract: "owner_governance_workbench.v1",
+            item_state: "blocked",
+            summary: "Owner 工作台 envelope 缺失，不能把未知队列展示为健康。",
+            next_action_id: "refresh_owner_governance_workbench"
+          }
+        ],
+        source_of_truth: {
+          owner_queue: "frontend_fallback_no_owner_governance_workbench",
+          approval: "agentops_approval_echo",
+          feedback: "agent_store_feedback_loop",
+          lifecycle: "agent_store_lifecycle_governance",
+          quality: "agentops_summary_echo",
+          raw_evidence: "evidence_vault"
+        },
+        audit_fields: {
+          audit_id: "audit-owner-workbench-missing-" + safeId(agent.agent_id),
+          trace_id: "trace-owner-workbench-missing-" + safeId(agent.agent_id),
+          generated_at: ""
+        },
+        boundary_flags: [
+          "no real approval",
+          "no notification sending",
+          "no AgentVersion mutation",
+          "no AgentOps override"
+        ],
+        next_action: {
+          action_id: "refresh_owner_governance_workbench",
+          target_system: "agent_store",
+          enabled: true,
+          requires_permission: true,
           audit_required: true
         }
       };
